@@ -1,10 +1,15 @@
 {
-  // Static-only Workers deploy. No "main" entry script: the site is plain HTML,
-  // so Cloudflare serves the assets directly with no Worker code in the path.
+  // Static assets plus one small Worker for the two lookups a browser cannot do.
+  // Every page is still served as a static asset, with no Worker in the path.
   "name": "rastu-tech",
+  // A Worker sits in front only for /api/*; see worker/index.js. Static assets
+  // are still matched first, so every page is served straight from the edge
+  // without the Worker running at all.
+  "main": "./worker/index.js",
   "compatibility_date": "2026-09-15",
   "assets": {
     "directory": "./site/",
+    "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
   }

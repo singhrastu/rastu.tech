@@ -212,13 +212,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 /* ---- bento ------------------------------------------------------------- */
 .bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0}
 @media(min-width:56rem){
-  .bento{grid-template-columns:repeat(6,1fr)}
-  .bento .card:nth-child(1){grid-column:span 4}
-  .bento .card:nth-child(2){grid-column:span 2}
-  .bento .card:nth-child(3){grid-column:span 3}
-  .bento .card:nth-child(4){grid-column:span 3}
+  .bento{grid-template-columns:repeat(8,1fr)}
+  .bento .card:nth-child(1){grid-column:span 5}
+  .bento .card:nth-child(2){grid-column:span 3}
+  .bento .card:nth-child(n+3){grid-column:span 2}
   .bento .card:nth-child(1) h3{font-size:1.2rem}
   .bento .card:nth-child(1) p{font-size:.93rem}
+  .bento .card:nth-child(n+3) p{font-size:.845rem}
 }
 .bento .card{position:relative;overflow:hidden;background:var(--surface);
      border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
@@ -354,6 +354,74 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .a-suppress,.a-pause{color:var(--bad)}
 .a-throttle,.a-review,.a-fix_config{color:var(--warn)}
 .a-retry{color:var(--info)}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ---- domain checker ----------------------------------------------------- */
+.checkbox{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:1.25rem 1.3rem;margin:1.3rem 0 0;position:relative;overflow:hidden}
+.checkbox::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.checkbox form{display:flex;gap:.5rem;flex-wrap:wrap}
+.checkbox input{flex:1 1 16rem;min-width:0;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;
+  transition:border-color .2s,box-shadow .2s}
+.checkbox input:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.checkbox button{font-family:inherit;font-size:.9rem;font-weight:650;cursor:pointer;
+  padding:.72rem 1.4rem;border-radius:10px;border:1px solid var(--accent);
+  background:var(--accent);color:#08140d;transition:opacity .2s,transform .2s}
+.checkbox button:hover{transform:translateY(-1px)}
+.checkbox button:disabled{opacity:.55;cursor:progress;transform:none}
+.checkbox .examples{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0 0;
+  font-size:.8rem;color:var(--ink-3);align-items:center}
+.checkbox .examples a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
+  border-radius:7px;padding:.2rem .55rem;transition:border-color .2s,color .2s}
+.checkbox .examples a:hover{border-color:var(--accent);color:var(--accent)}
+
+.report{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;margin-top:1.6rem}
+.report.on{opacity:1;transform:none}
+.report .head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.report h2{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.15rem;
+  border:0;padding:0;margin:0}
+.report .ghost{font-family:inherit;font-size:.78rem;cursor:pointer;padding:.3rem .7rem;
+  border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink-2);
+  transition:border-color .2s,color .2s}
+.report .ghost:hover{border-color:var(--accent);color:var(--accent)}
+.report .verdict-line{margin:.7rem 0 0;font-size:.97rem;font-weight:600}
+.report .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0 1.6rem}
+.report .t{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:.7rem .8rem;text-align:center}
+.report .t b{display:block;font-size:1.5rem;font-weight:680;font-variant-numeric:tabular-nums;line-height:1.1}
+.report .t span{display:block;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:.2rem}
+.report .grp{margin:0 0 1.5rem}
+.report .grp h3{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 .5rem;font-weight:650}
+.report .grp ul{list-style:none;padding:0;margin:0}
+.report .grp li{border-left:2px solid var(--line);padding:.5rem 0 .6rem .85rem;margin:0 0 .45rem}
+.report .pill{display:inline-block;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .5rem;border-radius:100px;border:1px solid currentColor;
+  margin-right:.5rem;vertical-align:1px}
+.report .f{font-size:.95rem;color:var(--ink)}
+.report .rem{display:block;font-size:.875rem;color:var(--ink-3);margin-top:.3rem;line-height:1.55}
+.report .det{display:block;font-size:.76rem;color:var(--ink-3);margin-top:.35rem;
+  background:var(--code);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;
+  overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.report .note{font-size:.855rem;color:var(--ink-3);line-height:1.6;margin:1.4rem 0 0;
+  border-top:1px solid var(--line);padding-top:1rem}
+/* Severity is a reserved status palette, never reused for anything decorative,
+   and every one of them ships with its word so it is never colour alone. */
+.s-fail{color:var(--bad)} .s-warn{color:var(--warn)}
+.s-info{color:var(--info)} .s-ok{color:var(--ok)}
+.report .grp li.s-fail{border-left-color:var(--bad)}
+.report .grp li.s-warn{border-left-color:var(--warn)}
+.report .grp li.s-ok{border-left-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.report .t.s-fail b{color:var(--bad)} .report .t.s-warn b{color:var(--warn)}
+.report .t.s-info b{color:var(--info)} .report .t.s-ok b{color:var(--ok)}
+@media(max-width:34rem){.report .tiles{grid-template-columns:repeat(2,1fr)}}
 
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
@@ -629,7 +697,8 @@ def person_ld():
     }
 
 
-def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False, scripts=()):
+def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
+         scripts=(), modules=()):
     lds = [person_ld()] if is_home else []
     if extra_ld:
         lds.append(extra_ld)
@@ -669,6 +738,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False, scri
 <nav class="top">
   <a href="{up or '/'}">Rastu Singh</a>
   <a href="{up}about/">About</a>
+  <a href="{up}check/">Domain check</a>
   <a href="{up}smtp/">SMTP reference</a>
   <a href="{up}research/">Research</a>
   <a href="{up}tools/">Tools</a>
@@ -684,6 +754,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False, scri
 </div>
 <script>{JS}</script>
 {chr(10).join(f'<script src="{x if x.startswith("/") else up+x}" defer></script>' for x in scripts)}
+{chr(10).join(f'<script type="module" src="{x}"></script>' for x in modules)}
 </body>
 </html>
 """
@@ -915,6 +986,122 @@ run();
     open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
 
 
+def build_check():
+    """The domain auditor.
+
+    This is dmarcsight, running in the visitor's browser rather than on a server.
+    That is a deliberate choice and worth stating on the page: the lookups go from
+    their browser to a public DNS-over-HTTPS resolver, so no domain anyone checks
+    is ever sent here. There is nothing to log and nothing to leak, which matters
+    when the thing being audited is someone's production sending domain.
+
+    The logic is a port of the Python package, and build/parity.mjs replays the
+    Python test scenarios against it on every build. If they ever disagree, the
+    build fails rather than the page quietly telling someone something the tool
+    would not.
+    """
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Email authentication checker",
+        "url": f"{SITE}/check/",
+        "applicationCategory": "SecurityApplication",
+        "operatingSystem": "Any",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+        "description": (
+            "Audits a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI "
+            "configuration in the browser, including the RFC 7208 ten-lookup "
+            "limit and MTA-STS policy and MX consistency."
+        ),
+        "author": {"@id": f"{SITE}/#person"},
+        "isBasedOn": "https://github.com/singhrastu/dmarcsight",
+    }
+
+    body = """
+<p class="kicker">Tool</p>
+<h1>Check a domain's email authentication</h1>
+<p class="lede">SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI, with the things generic
+checkers miss: the RFC 7208 ten-lookup limit, whether an MTA-STS policy actually
+exists behind the DNS record that promises it, and whether the policy covers the MX
+hosts that are live right now.</p>
+
+<div class="checkbox">
+  <form id="check-form" autocomplete="off">
+    <label class="sr" for="check-domain">Domain</label>
+    <input id="check-domain" name="d" type="text" spellcheck="false"
+           placeholder="example.com" aria-label="Domain to check">
+    <button type="submit" id="check-run">Check</button>
+  </form>
+  <p class="examples">Try:
+    <a href="?d=gov.uk">gov.uk</a>
+    <a href="?d=paypal.com">paypal.com</a>
+    <a href="?d=github.com">github.com</a>
+    <a href="?d=rastu.tech">rastu.tech</a>
+  </p>
+  <div class="report" id="check-out" aria-live="polite"></div>
+</div>
+
+<h2>What it checks, and why each one is here</h2>
+
+<h3>SPF, and the limit that breaks it silently</h3>
+<p>Beyond whether a record exists: the qualifier it ends on, whether more than one
+record is published (which is a permerror, not a merge), and the DNS lookup count.
+RFC 7208 caps that count at ten. Over the cap the evaluation is a permerror and most
+receivers treat a permerror as no SPF at all. The record still resolves. It still
+looks correct in a lookup. It has simply stopped working, usually because somebody
+added one more vendor to a record that was already at nine. In the
+<a href="/research/">100,000-domain survey</a> this had happened to 3.4% of every SPF
+record published.</p>
+
+<h3>DMARC, and whether the policy does anything</h3>
+<p>Policy strength, subdomain policy, pct, and whether an aggregate reporting address
+is set. The common failures are a policy left at p=none where it blocks nothing,
+enforcement with no rua so there is no way to see what is being enforced, and sp=none
+under an enforcing p, which leaves every subdomain spoofable while the main domain
+looks protected.</p>
+
+<h3>DKIM, reported honestly</h3>
+<p>Selectors are arbitrary strings chosen by the sender. Probing a list of common ones
+and finding nothing proves nothing, so a miss is reported as inconclusive rather than
+as absent. Where a key is found, the approximate key length is reported, because keys
+under 1024 bits are rejected outright by several receivers.</p>
+
+<h3>MTA-STS, including the policy file</h3>
+<p>The DNS record is a promise that a policy exists at
+<code>https://mta-sts.&lt;domain&gt;/.well-known/mta-sts.txt</code>. If that URL 404s
+the entire mechanism is inert while appearing configured, and a DNS-only checker will
+call it enabled. This one fetches the policy, parses it as the
+<code>key: value</code> format RFC 8461 actually specifies, and compares the MX hosts
+it lists against the MX records that are live. Under enforce, mail to an uncovered MX
+host is refused.</p>
+
+<h3>Bulk sender readiness</h3>
+<p>A composite verdict against the Gmail, Yahoo and Microsoft requirements for senders
+over 5,000 messages a day. Two of those requirements, one-click List-Unsubscribe and a
+complaint rate under 0.3%, are not visible from DNS, so the report says so rather than
+guessing.</p>
+
+<h2>Where it runs</h2>
+<p>In your browser. The DNS lookups go from your machine to a public DNS-over-HTTPS
+resolver, not through this site, so the domain you type is never sent here and there
+is nothing to log. The one exception is the MTA-STS policy file: a page cannot fetch
+a URL on another origin, so that single request is proxied, and the endpoint takes a
+domain rather than a URL so it cannot be used to fetch anything else.</p>
+
+<p>It is the same logic as
+<a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, which is the
+command-line version and the source of truth. The two are tested against each other
+on every build, so this page cannot tell you something the tool would not.</p>
+"""
+    return page(
+        "Email authentication checker: SPF, DKIM, DMARC, MTA-STS and BIMI",
+        "Free in-browser audit of a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI "
+        "configuration, including the SPF ten-lookup limit and MTA-STS policy and MX "
+        "consistency. Nothing is sent to the server.",
+        body, "check/index.html", extra_ld=ld,
+        modules=("/js/check.js",))
+
+
 def build_home():
     """The homepage has two readers at once.
 
@@ -991,7 +1178,7 @@ def build_home():
   fix the sender. Nothing is sent anywhere. It runs in your browser.</p>
 </div>
 
-<div class="sift">
+<div class="sift" id="sift">
   <label for="sift-in">SMTP response</label>
   <textarea id="sift-in" spellcheck="false" autocomplete="off"
     placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
@@ -1002,9 +1189,10 @@ def build_home():
 <div class="sechead r">
   <p class="kicker">Everything else here</p>
   <h2>Reference, research and tools</h2>
-  <p>Four things, all of them built from running this infrastructure rather than
-  reading about it: one page per SMTP response, a 100,000-domain survey published
-  with its raw dataset, two open-source tools, and the background behind all of it.</p>
+  <p>All of it built from running this infrastructure rather than reading about it:
+  one page per SMTP response, a live authentication check for any domain, a
+  100,000-domain survey published with its raw dataset, two open-source tools, and
+  the background behind all of it.</p>
 </div>
 
 <div class="bento">
@@ -1016,6 +1204,15 @@ def build_home():
     rather than the specification.</p>
     <div class="codes">{codes_html}</div>
     <span class="go">Browse all {n_codes} &rarr;</span>
+  </a>
+  <a class="card" href="/check/">
+    <span class="tag">Tool</span>
+    <h3>Check a domain</h3>
+    <p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the
+    SPF ten-lookup limit and whether an MTA-STS policy actually exists behind the
+    record that promises one. Runs in your browser; the domain never reaches this
+    site.</p>
+    <span class="go">Run a check &rarr;</span>
   </a>
   <a class="card" href="/research/">
     <span class="tag">Research</span>
@@ -1448,13 +1645,24 @@ def check_js():
     home = open(os.path.join(OUT, "index.html"), encoding="utf8").read()
     m = re.search(r"<script>(.*?)</script>", home, re.S)
     blobs = {"inline": m.group(1) if m else ""}
-    for name in os.listdir(OUT):
-        if name.endswith(".js"):
-            blobs[name] = open(os.path.join(OUT, name), encoding="utf8").read()
+    for root, _, files in os.walk(OUT):
+        for name in files:
+            if name.endswith(".js"):
+                full = os.path.join(root, name)
+                blobs[os.path.relpath(full, OUT)] = open(full, encoding="utf8").read()
+    parity = os.path.join(HERE, "parity.mjs")
+    if os.path.exists(parity):
+        rc = subprocess.run(["node", parity], capture_output=True, text=True,
+                            cwd=os.path.dirname(HERE))
+        if rc.returncode:
+            sys.exit("the in-browser auditor has drifted from dmarcsight:\n"
+                     + rc.stdout + rc.stderr)
+        print(rc.stdout.rstrip())
+
     for name, src in blobs.items():
         if not src.strip():
             continue
-        tmp = os.path.join(OUT, "._check.js")
+        tmp = os.path.join(OUT, "._check.mjs")
         open(tmp, "w", encoding="utf8").write(src)
         rc = subprocess.run(["node", "--check", tmp],
                             capture_output=True, text=True)
@@ -1470,7 +1678,7 @@ def main():
     os.makedirs(OUT, exist_ok=True)
 
     build_sift()
-    urls = [build_home(), build_about(), build_smtp_index()]
+    urls = [build_home(), build_about(), build_check(), build_smtp_index()]
     for c in CODES:
         urls.append(build_code_page(c))
 
@@ -1484,14 +1692,27 @@ def main():
 <p>Classifies SMTP rejections and deferrals into a category and an action. Hard and soft
 bounce is too coarse to act on: a full mailbox, a rate limit and a reputation block all
 arrive as soft bounces and need opposite responses.</p>
-<p><a href="https://github.com/singhrastu/smtpsift">github.com/singhrastu/smtpsift</a></p>
+<p><a href="https://github.com/singhrastu/smtpsift">github.com/singhrastu/smtpsift</a>
+&middot; <a href="/#sift">paste a bounce into it</a></p>
+
+<p>Run it here without installing anything:
+<a href="/check/">the hosted domain check</a> is the same logic compiled to
+JavaScript, and the two are tested against each other on every build.</p>
 
 <h2>dmarcsight</h2>
 <p>Audits a domain's email authentication posture: SPF including the 10-lookup limit, DKIM,
 DMARC policy strength, MTA-STS policy and MX consistency, TLS-RPT and BIMI, with a composite
 verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
-<p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a></p>
+<p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a>
+&middot; <a href="/check/">run it in your browser</a></p>
 """))
+
+    # the auditor's modules, copied rather than inlined so the browser can cache
+    # them and so build/parity.mjs can import exactly what ships
+    jsdir = os.path.join(OUT, "js")
+    os.makedirs(jsdir, exist_ok=True)
+    for name in ("audit.js", "doh.js", "check.js"):
+        shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # images
     for name in ("rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg",
