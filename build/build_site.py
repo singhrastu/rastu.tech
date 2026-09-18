@@ -137,8 +137,8 @@ def person_ld():
         "image": {
             "@type": "ImageObject",
             "url": f"{SITE}/rastu-singh.jpg",
-            "width": 1200,
-            "height": 1200,
+            "width": 1024,
+            "height": 1024,
         },
     }
 
@@ -167,8 +167,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 <meta property="og:type" content="{'profile' if is_home else 'article'}">
 <meta property="og:url" content="{e(canonical)}">
 <meta property="og:image" content="{SITE}/rastu-singh.jpg">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="1200">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
 <meta property="og:site_name" content="Rastu Singh">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{SITE}/rastu-singh.jpg">
@@ -460,7 +460,7 @@ verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
 """))
 
     # images
-    for name in ("rastu-singh.jpg", "rastu-singh-400.jpg"):
+    for name in ("rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg"):
         src = os.path.join(ROOT, "assets", name)
         if os.path.exists(src):
             shutil.copy2(src, os.path.join(OUT, name))

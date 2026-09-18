@@ -195,3 +195,8 @@ scanning 100000 domains with 80 workers
   97000 scanned, 0 errors
   97500 scanned, 0 errors
   98000 scanned, 0 errors
+  98500 scanned, 0 errors
+  99000 scanned, 0 errors
+  99500 scanned, 0 errors
+  100000 scanned, 0 errors
+done in 14.7 min -> /Users/rastu/Documents/Projects/rastu.tech/research/data/scan-100000.jsonl
