@@ -284,15 +284,16 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 /* ---- SPF include tree ---------------------------------------------------- */
 .tree{margin:var(--s4) 0 0}
 .tree ul{list-style:none;padding:0;margin:0}
-.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+.tree li{position:relative;padding:.3rem 0 .3rem calc(2.6rem + var(--d) * 1.15rem);
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
   line-height:1.5;border-left:1px solid var(--line-2)}
-.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
-  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at{position:absolute;left:0;top:.28rem;width:1.7rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem;
+  border-right:1px solid var(--line);padding-right:.4rem}
 .tree li .at.over{color:var(--bad);font-weight:700}
 .tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
 .tree li.s-fail code{color:var(--bad)}
-.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li.free code{color:var(--ink-3);opacity:.55;font-size:.74rem}
 .tree li .n{display:block;color:var(--warn);font-size:.72rem;
   font-family:inherit;margin-top:.1rem}
 .tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
@@ -562,7 +563,7 @@ JS = """
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
   onScroll();
 
-  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.sift,.tl,.sechead');
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
   if(!('IntersectionObserver' in window) || reduce){
     targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
   } else {
@@ -934,7 +935,11 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
     # forcing the page to scroll sideways
     doc = doc.replace("<table>", '<div class="scroll-x r"><table>').replace(
         "</table>", "</table></div>")
-    doc = doc.replace("<h2>", '<h2 class="r">')
+    # Scroll-reveal only inside <main>. The footer's column headings are <h2> too,
+    # and the observer never reaches them, so a blanket replace hid them for good.
+    head, sep, rest = doc.partition('<main id="main">')
+    body_part, sep2, tail = rest.partition("</main>")
+    doc = head + sep + body_part.replace("<h2>", '<h2 class="r">') + sep2 + tail
 
     full = os.path.join(OUT, path)
     os.makedirs(os.path.dirname(full), exist_ok=True)
@@ -1261,9 +1266,9 @@ include tree and shows you exactly where the count goes.</p>
     <button class="btn" type="submit" id="spf-run">Count lookups</button>
   </form>
   <p class="hint">Try:
-    <a href="?d=salesforce.com">salesforce.com</a>
-    <a href="?d=shopify.com">shopify.com</a>
+    <a href="?d=box.com">box.com</a>
     <a href="?d=hubspot.com">hubspot.com</a>
+    <a href="?d=salesforce.com">salesforce.com</a>
     <a href="?d=rastu.tech">rastu.tech</a>
   </p>
   <div class="report" id="spf-out" aria-live="polite"></div>
@@ -1499,7 +1504,7 @@ def build_home():
         f'<h3>{e(t["name"])}</h3>'
         f'<p class="q">{e(t["q"])}</p>'
         f'<p>{e(t["blurb"])}</p>'
-        f'<span class="go">Open {e(t["name"].lower())} &rarr;</span></a>'
+        f'<span class="go">Open &rarr;</span></a>'
         for t in TOOLS)
 
     # The responses people actually arrive on, as a way in to the reference.

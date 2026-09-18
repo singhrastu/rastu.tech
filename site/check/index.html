@@ -236,15 +236,16 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 /* ---- SPF include tree ---------------------------------------------------- */
 .tree{margin:var(--s4) 0 0}
 .tree ul{list-style:none;padding:0;margin:0}
-.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+.tree li{position:relative;padding:.3rem 0 .3rem calc(2.6rem + var(--d) * 1.15rem);
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
   line-height:1.5;border-left:1px solid var(--line-2)}
-.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
-  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at{position:absolute;left:0;top:.28rem;width:1.7rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem;
+  border-right:1px solid var(--line);padding-right:.4rem}
 .tree li .at.over{color:var(--bad);font-weight:700}
 .tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
 .tree li.s-fail code{color:var(--bad)}
-.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li.free code{color:var(--ink-3);opacity:.55;font-size:.74rem}
 .tree li .n{display:block;color:var(--warn);font-size:.72rem;
   font-family:inherit;margin-top:.1rem}
 .tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
@@ -588,24 +589,24 @@ the command-line version, checked against it on every build.</p>
 <footer>
   <div class="cols">
     <div>
-      <h2 class="r">Tools</h2>
+      <h2>Tools</h2>
             <a href="../check/">Domain check</a>
       <a href="../bounce/">Bounce classifier</a>
       <a href="../spf/">SPF lookup counter</a>
       <a href="../tools/">All tools</a>
     </div>
     <div>
-      <h2 class="r">Reference</h2>
+      <h2>Reference</h2>
       <a href="../smtp/">SMTP responses</a>
       <a href="../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
-      <h2 class="r">Research</h2>
+      <h2>Research</h2>
       <a href="../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
-      <h2 class="r">Elsewhere</h2>
+      <h2>Elsewhere</h2>
       <a href="https://github.com/singhrastu">GitHub</a>
       <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>
       <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
@@ -628,7 +629,7 @@ the command-line version, checked against it on every build.</p>
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
   onScroll();
 
-  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.sift,.tl,.sechead');
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
   if(!('IntersectionObserver' in window) || reduce){
     targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
   } else {

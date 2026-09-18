@@ -52,13 +52,31 @@ const ALL_NOTE = {
 };
 
 /* Walk the tree once, assigning each counted mechanism its running position. The
-   mechanism that takes the count past ten is the one worth naming. */
+   mechanism that takes the count past ten is the one worth naming.
+
+   Runs of ip4/ip6/all collapse into a single summary row. Google's include alone
+   carries eight address ranges; listing them costs the reader the thing they came
+   for, which is which include to remove. */
 function flatten(nodes, depth, acc) {
+  let free = [];
+  const flushFree = () => {
+    if (!free.length) return;
+    acc.rows.push({
+      kind: 'free', depth, at: null, children: [], record: null, note: '',
+      target: free.length === 1 ? free[0]
+        : `${free.length} address ranges and qualifiers, no lookup cost`,
+      collapsed: free.length > 1, list: free,
+    });
+    free = [];
+  };
   for (const n of nodes) {
+    if (n.kind === 'free') { free.push(n.target); continue; }
+    flushFree();
     if (n.cost) acc.running += n.cost;
     acc.rows.push({ ...n, depth, at: n.cost ? acc.running : null });
     if (n.children.length) flatten(n.children, depth + 1, acc);
   }
+  flushFree();
   return acc;
 }
 
@@ -95,7 +113,8 @@ function render(res) {
     const at = r.at === null ? '' : `<span class="at${over ? ' over' : ''}">${r.at}</span>`;
     const label = r.kind === 'include' ? `include:${r.target}`
       : r.kind === 'redirect' ? `redirect=${r.target}` : r.target;
-    return `<li class="${cls}" style="--d:${r.depth}">${at}
+    const title = r.collapsed ? ` title="${esc(r.list.join(' '))}"` : '';
+    return `<li class="${cls}" style="--d:${r.depth}"${title}>${at}
       <code>${esc(label)}</code>
       ${r.note ? `<span class="n">${esc(r.note)}</span>` : ''}
       ${r.record ? `<span class="rec">${esc(r.record)}</span>` : ''}</li>`;
