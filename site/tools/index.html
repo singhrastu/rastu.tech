@@ -238,6 +238,52 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- findings: the shared result shape every tool emits -------------------- */
+.findings{display:grid;gap:var(--s2);margin:var(--s3) 0 0}
+.fnd{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem}
+.fnd.s-critical{border-left-color:var(--bad)}
+.fnd.s-warn{border-left-color:var(--warn)}
+.fnd.s-info{border-left-color:var(--info)}
+.fnd.s-ok{border-left-color:var(--ok)}
+.fnd header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.4rem}
+.fnd .pill{font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.14rem .5rem;border-radius:100px;border:1px solid currentColor}
+.fnd.s-critical .pill{color:var(--bad)}
+.fnd.s-warn .pill{color:var(--warn)}
+.fnd.s-info .pill{color:var(--info)}
+.fnd.s-ok .pill{color:var(--ok)}
+.fnd .scope{font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);color:var(--ink-3)}
+/* Ownership is the thing no other tool in this category tells you, so it gets
+   its own visual slot rather than being buried in the prose. */
+.fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
+  font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
+  background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
+.fnd.o-you .owner{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.fnd h4{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;color:var(--ink);line-height:1.45}
+.fnd .d{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6;max-width:44rem}
+.fnd .fix{margin:.55rem 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:44rem}
+.fnd .fix b{color:var(--accent);font-weight:650;margin-right:.35rem;
+  font-size:.66rem;letter-spacing:.09em;text-transform:uppercase}
+.fnd .ev{display:block;margin:.55rem 0 0;font-size:.72rem;color:var(--ink-3);
+  background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.4rem .55rem;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.fnd .ref{margin:.5rem 0 0;font-size:var(--t1)}
+
+/* ---- fix these first ------------------------------------------------------ */
+.shortlist{counter-reset:fx;list-style:none;padding:0;margin:var(--s2) 0 var(--s4);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%);
+  padding:var(--s3) var(--s4)}
+.shortlist li{counter-increment:fx;position:relative;padding-left:1.9rem;margin:.55rem 0;
+  font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.shortlist li::before{content:counter(fx);position:absolute;left:0;top:.05rem;
+  width:1.35rem;height:1.35rem;border-radius:50%;background:var(--accent);color:#08140d;
+  font-size:.72rem;font-weight:700;display:grid;place-items:center}
+.shortlist li strong{color:var(--ink);display:block;margin-bottom:.1rem}
+
 /* ---- drop zone ----------------------------------------------------------- */
 .drop{display:block;border:1.5px dashed var(--line);border-radius:12px;
   padding:var(--s5) var(--s4);text-align:center;cursor:pointer;background:var(--bg);
