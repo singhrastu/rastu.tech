@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About Rastu Singh, Email Infrastructure and Deliverability Engineer</title>
+<meta name="description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
+<link rel="canonical" href="https://rastu.tech/about/">
+<meta property="og:title" content="About Rastu Singh, Email Infrastructure and Deliverability Engineer">
+<meta property="og:description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/about/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="../">Rastu Singh</a>
+  <a href="../about/">About</a>
+  <a href="../smtp/">SMTP reference</a>
+  <a href="../research/">Research</a>
+  <a href="../tools/">Tools</a>
+</nav>
+
+<p class="kicker">About</p>
+<h1>About Rastu Singh</h1>
+
+<p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
+specialises in the systems that carry high-volume email: MTA platforms, SMTP transport, sender
+reputation, and the authentication stack of SPF, DKIM and DMARC. He currently works as an
+Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
+since 2015.</p>
+
+<h2>What he does</h2>
+<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
+
+<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
+production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
+policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
+backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
+estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
+Python and Bash.</p>
+
+<p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
+high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
+domain warm-up, shared and dedicated pool design, bounce and deferral classification, feedback
+loop processing, suppression and sunset policy, and direct escalation with mailbox providers
+when mail is being throttled or blocked. He has cleared a Spamhaus listing that had stopped
+enterprise delivery outright, restoring it inside 48 hours.</p>
+
+<p><strong>Email security.</strong> SPF, DKIM key rotation, DMARC policy progression toward
+enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin and Rspamd,
+abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
+without breaking legitimate mail flow.</p>
+
+<h2>Career</h2>
+<table>
+<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
+<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
+<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
+<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
+<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
+<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
+</table>
+
+<p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
+the authentication layer across all sending domains, and led the IT team and a group of junior
+deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
+300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
+
+<h2>Open-source work</h2>
+<p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
+deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
+to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
+email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
+consistency, which generic checkers miss.</p>
+
+<h2>Writing</h2>
+<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
+actually mean, whether retrying helps, and what to change so they stop. It is written from
+operating these systems rather than from the specifications.</p>
+
+<h2>Contact</h2>
+<p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+   <a href="https://github.com/singhrastu">GitHub</a></p>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

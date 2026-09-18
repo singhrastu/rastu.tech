@@ -50,14 +50,28 @@ AI_CRAWLERS = [
 # What he actually wants to rank for. Regional and unqualified, because the goal
 # is global rather than Baltic.
 QUERIES = [
+    # identity
+    "Rastu Singh",
+    "Rastu Singh email",
+    "who is Rastu Singh",
+    # the phrases he wants to own, unqualified
+    "best email deliverability expert",
+    "email infrastructure expert",
+    "PowerMTA expert",
+    "KumoMTA expert",
+    "email engineer",
+    "SMTP expert",
+    "email deliverability consultant",
+    "email security expert SPF DKIM DMARC",
+    "IP warm-up expert",
+    "sender reputation expert",
+    "MTA engineer",
+    # regional cuts
     "email deliverability expert Estonia",
     "email infrastructure engineer Estonia",
     "email deliverability expert Baltics",
-    "best email deliverability experts",
     "email infrastructure consultant Europe",
-    "SMTP infrastructure expert",
     "email deliverability expert India",
-    "Rastu Singh",
 ]
 
 # Pages that currently outrank him and describe him as Adobe / Bengaluru.

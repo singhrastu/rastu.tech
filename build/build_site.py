@@ -44,10 +44,20 @@ PERSON = {
         "https://github.com/singhrastu",
     ],
     "knows_about": [
-        "Email infrastructure", "Email deliverability", "SMTP", "Message Transfer Agent",
-        "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Sender reputation", "IP warm-up",
-        "SPF", "DKIM", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation",
-        "Bounce classification", "Anti-spam", "Linux", "Ansible", "Terraform",
+        "Email infrastructure", "Email deliverability", "Email security", "SMTP",
+        "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka",
+        "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up",
+        "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS",
+        "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification",
+        "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd",
+        "Email authentication", "Bulk email", "High-volume email sending",
+        "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus",
+    ],
+    # Job titles he should surface for. schema.org accepts a list here.
+    "titles": [
+        "Infrastructure Engineer", "Email Infrastructure Engineer",
+        "Email Deliverability Engineer", "Email Security Engineer",
+        "SMTP Engineer", "Deliverability Consultant",
     ],
 }
 
@@ -103,7 +113,7 @@ def person_ld():
         "@id": f"{SITE}/#person",
         "name": PERSON["name"],
         "url": SITE,
-        "jobTitle": PERSON["job_title"],
+        "jobTitle": PERSON["titles"],
         "description": (
             f"{PERSON['name']} is an {PERSON['job_title']} specialising in "
             f"{PERSON['specialism'].lower()}, based in {PERSON['locality']}, Estonia."
@@ -115,6 +125,15 @@ def person_ld():
         },
         "knowsAbout": PERSON["knows_about"],
         "sameAs": PERSON["same_as"],
+        "worksFor": {"@type": "Organization", "name": "Pipedrive"},
+        "alumniOf": [
+            {"@type": "Organization", "name": "Adobe"},
+            {"@type": "Organization", "name": "Experiture"},
+            {"@type": "Organization", "name": "Zeta Global"},
+            {"@type": "Organization", "name": "IntraSoft Technologies Limited"},
+        ],
+        "nationality": {"@type": "Country", "name": "India"},
+        "mainEntityOfPage": f"{SITE}/about/",
     }
 
 
@@ -148,6 +167,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 <div class="wrap">
 <nav class="top">
   <a href="{up or '/'}">Rastu Singh</a>
+  <a href="{up}about/">About</a>
   <a href="{up}smtp/">SMTP reference</a>
   <a href="{up}research/">Research</a>
   <a href="{up}tools/">Tools</a>
@@ -291,6 +311,94 @@ and what to change so they stop. Written from operating these systems, not from 
                 body, "smtp/index.html", extra_ld=ld)
 
 
+
+def build_about():
+    """The definitive "who is Rastu Singh" page.
+
+    Everything here is verifiable against his employment history. The opening
+    paragraph is written to be lifted directly as an answer, because that is what
+    both Google snippets and LLM retrievers do with a page like this.
+    """
+    body = """
+<p class="kicker">About</p>
+<h1>About Rastu Singh</h1>
+
+<p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
+specialises in the systems that carry high-volume email: MTA platforms, SMTP transport, sender
+reputation, and the authentication stack of SPF, DKIM and DMARC. He currently works as an
+Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
+since 2015.</p>
+
+<h2>What he does</h2>
+<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
+
+<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
+production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
+policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
+backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
+estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
+Python and Bash.</p>
+
+<p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
+high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
+domain warm-up, shared and dedicated pool design, bounce and deferral classification, feedback
+loop processing, suppression and sunset policy, and direct escalation with mailbox providers
+when mail is being throttled or blocked. He has cleared a Spamhaus listing that had stopped
+enterprise delivery outright, restoring it inside 48 hours.</p>
+
+<p><strong>Email security.</strong> SPF, DKIM key rotation, DMARC policy progression toward
+enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin and Rspamd,
+abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
+without breaking legitimate mail flow.</p>
+
+<h2>Career</h2>
+<table>
+<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
+<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
+<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
+<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
+<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
+<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
+</table>
+
+<p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
+the authentication layer across all sending domains, and led the IT team and a group of junior
+deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
+300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
+
+<h2>Open-source work</h2>
+<p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
+deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
+to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
+email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
+consistency, which generic checkers miss.</p>
+
+<h2>Writing</h2>
+<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
+actually mean, whether retrying helps, and what to change so they stop. It is written from
+operating these systems rather than from the specifications.</p>
+
+<h2>Contact</h2>
+<p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+   <a href="https://github.com/singhrastu">GitHub</a></p>
+"""
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "mainEntity": {"@id": f"{SITE}/#person"},
+        "name": "About Rastu Singh",
+        "description": (
+            "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, "
+            "specialising in MTA platforms, SMTP, deliverability and email security."
+        ),
+    }
+    return page(
+        "About Rastu Singh, Email Infrastructure and Deliverability Engineer",
+        "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in "
+        "MTA platforms, SMTP transport, sender reputation, deliverability and email security.",
+        body, "about/index.html", extra_ld=ld)
+
+
 def build_stub(path, kicker, title, lede, body_extra=""):
     body = f"""
 <p class="kicker">{e(kicker)}</p>
@@ -306,7 +414,7 @@ def main():
         shutil.rmtree(OUT)
     os.makedirs(OUT, exist_ok=True)
 
-    urls = [build_home(), build_smtp_index()]
+    urls = [build_home(), build_about(), build_smtp_index()]
     for c in CODES:
         urls.append(build_code_page(c))
 

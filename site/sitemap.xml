@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://rastu.tech/</loc></url>
+  <url><loc>https://rastu.tech/about/</loc></url>
   <url><loc>https://rastu.tech/smtp/</loc></url>
   <url><loc>https://rastu.tech/smtp/gmail-4-7-28/</loc></url>
   <url><loc>https://rastu.tech/smtp/gmail-5-7-26/</loc></url>
