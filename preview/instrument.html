@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rastu.tech — alternative direction</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;450;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===========================================================================
+   An alternative direction for rastu.tech.
+
+   The central device is the verdict row: a status, a code, a plain-language
+   result. That is how every answer in this world actually arrives - "550 5.7.1
+   blocked using Spamhaus" - and it is the one control used at every scale, so
+   it is learned once and works everywhere.
+
+   Colour is SMTP's own: 2xx succeeded, 4xx is temporary, 5xx is permanent.
+   There is no brand accent. Colour appears only where a status has been earned.
+   =========================================================================== */
+:root{
+  --paper:#F7F8FA;        /* cool paper, not cream */
+  --raise:#FFFFFF;        /* a raised surface, used sparingly */
+  --ink:#14171C;          /* text, and the only interactive colour */
+  --ink-2:#4A5260;
+  --ink-3:#7C8696;
+  --rule:#E2E6EC;
+  --rule-2:#EEF1F5;
+
+  /* the SMTP status classes, and nothing else */
+  --s2:#0E7C4A;           /* 2xx accepted */
+  --s4:#9A5B00;           /* 4xx deferred */
+  --s5:#C0322B;           /* 5xx refused */
+  --s2-bg:#E9F5EF; --s4-bg:#FAF1E3; --s5-bg:#FBECEB;
+
+  --gutter:5.5rem;        /* the log's status column */
+  --measure:64ch;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --paper:#0F1216; --raise:#161A20; --ink:#E9ECF1; --ink-2:#A8B1BF;
+    --ink-3:#6C7686; --rule:#242A33; --rule-2:#1B2028;
+    --s2:#4ED08A; --s4:#E0A23C; --s5:#F0675E;
+    --s2-bg:#12251C; --s4-bg:#261E10; --s5-bg:#2A1715;
+  }
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:16px;line-height:1.6;font-weight:400;
+  -webkit-font-smoothing:antialiased;
+}
+code,kbd,.mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace}
+
+/* ---- the page frame: one column, hard left, with a status gutter --------- */
+.sheet{max-width:56rem;margin:0 auto;padding:0 1.5rem 6rem}
+.col{max-width:var(--measure)}
+
+/* ---- masthead ----------------------------------------------------------- */
+header.top{
+  display:flex;align-items:baseline;gap:2rem;flex-wrap:wrap;
+  padding:1.5rem 0 1.25rem;border-bottom:1px solid var(--ink);
+  margin-bottom:2.5rem;
+}
+.mark{font-family:"IBM Plex Mono",monospace;font-weight:600;font-size:1rem;
+  letter-spacing:-.02em;color:var(--ink);text-decoration:none}
+.mark b{font-weight:600}
+.mark span{color:var(--ink-3);font-weight:400}
+nav.top{display:flex;gap:1.5rem;margin-left:auto;font-size:.9375rem}
+nav.top a{color:var(--ink-2);text-decoration:none;padding:.15rem 0;
+  border-bottom:1.5px solid transparent}
+nav.top a:hover{color:var(--ink);border-bottom-color:var(--ink)}
+nav.top a[aria-current]{color:var(--ink);border-bottom-color:var(--ink);font-weight:500}
+
+/* ---- the opening: an input, not a headline ------------------------------ */
+.open{margin-bottom:3.5rem}
+.open h1{
+  font-size:clamp(1.75rem,3.2vw,2.375rem);line-height:1.2;font-weight:600;
+  letter-spacing:-.02em;margin:0 0 .6rem;max-width:22ch;
+}
+.open p.sub{font-size:1.0625rem;color:var(--ink-2);margin:0 0 1.75rem;max-width:56ch}
+
+.door{border:1px solid var(--ink);background:var(--raise)}
+.door-head{display:flex;align-items:center;gap:.75rem;padding:.6rem .9rem;
+  border-bottom:1px solid var(--rule);font-size:.8125rem;color:var(--ink-3)}
+.door-head .dot{width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.door-head .dot.live{background:var(--s2)}
+.door textarea{
+  display:block;width:100%;border:0;background:none;resize:vertical;
+  padding:1rem 1.1rem;min-height:7.5rem;color:var(--ink);
+  font-family:"IBM Plex Mono",monospace;font-size:.875rem;line-height:1.7;
+}
+.door textarea:focus{outline:0}
+.door textarea::placeholder{color:var(--ink-3)}
+.door-foot{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;
+  padding:.7rem .9rem;border-top:1px solid var(--rule);background:var(--paper)}
+.door-foot .what{font-size:.8125rem;color:var(--ink-3);margin-right:auto}
+.door-foot .what b{color:var(--ink);font-weight:500}
+
+button{font:inherit;cursor:pointer}
+.btn{background:var(--ink);color:var(--paper);border:1px solid var(--ink);
+  padding:.5rem 1.1rem;font-size:.9375rem;font-weight:500;min-height:40px}
+.btn:hover{opacity:.86}
+.btn.quiet{background:none;color:var(--ink-2);border-color:var(--rule)}
+.btn.quiet:hover{color:var(--ink);border-color:var(--ink);opacity:1}
+.btn:focus-visible,a:focus-visible,textarea:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+
+.samples{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:.85rem;
+  font-size:.8125rem;color:var(--ink-3);align-items:center}
+.samples button{background:none;border:1px solid var(--rule);color:var(--ink-2);
+  padding:.35rem .6rem;font-size:.8125rem;font-family:"IBM Plex Mono",monospace}
+.samples button:hover{border-color:var(--ink);color:var(--ink)}
+
+/* ---- the verdict row: the one device, used everywhere -------------------- */
+.rows{border-top:1px solid var(--rule)}
+.row{
+  display:grid;grid-template-columns:var(--gutter) 1fr;gap:1.25rem;
+  padding:1rem 0;border-bottom:1px solid var(--rule);
+  text-decoration:none;color:inherit;align-items:start;
+}
+a.row:hover{background:var(--rule-2)}
+a.row:hover .row-t{text-decoration:underline;text-underline-offset:2px}
+.row-g{font-family:"IBM Plex Mono",monospace;font-size:.8125rem;
+  padding-top:.15rem;text-align:right;color:var(--ink-3);white-space:nowrap}
+.row-g .st{display:block;font-weight:600;font-size:.6875rem;letter-spacing:.02em}
+.row.s2 .row-g .st{color:var(--s2)} .row.s4 .row-g .st{color:var(--s4)}
+.row.s5 .row-g .st{color:var(--s5)}
+/* A tool is not a status. Only a real response class earns a colour. */
+.row .row-g .st{color:var(--ink-3)}
+.row.s2 .row-g .st{color:var(--s2)} .row.s4 .row-g .st{color:var(--s4)}
+.row.s5 .row-g .st{color:var(--s5)}
+.row-b{min-width:0}
+.row-t{font-weight:550;font-size:1rem;margin:0 0 .15rem;letter-spacing:-.005em}
+.row-d{margin:0;color:var(--ink-2);font-size:.9375rem;max-width:62ch}
+.row-m{margin:.4rem 0 0;font-size:.8125rem;color:var(--ink-3);
+  font-family:"IBM Plex Mono",monospace}
+
+/* section headings sit in the gutter, so the content column stays unbroken */
+.sec{display:grid;grid-template-columns:var(--gutter) 1fr;gap:1.25rem;
+  margin:3.25rem 0 .9rem;align-items:start}
+.sec .n{grid-row:1;font-family:"IBM Plex Mono",monospace;font-size:.75rem;
+  color:var(--ink-3);text-align:right;padding-top:.3rem;line-height:1.35}
+.sec .t{grid-column:2;grid-row:1}
+.sec h2{font-size:1.0625rem;font-weight:600;margin:0 0 .2rem;letter-spacing:-.01em}
+.sec p{margin:0;color:var(--ink-2);font-size:.9375rem;max-width:60ch}
+
+/* ---- the live result, which is the point of the whole page --------------- */
+.result{margin-top:1.25rem;border:1px solid var(--rule);background:var(--raise);
+  display:none}
+.result.on{display:block}
+.result .head{display:flex;align-items:center;gap:.6rem;padding:.7rem .9rem;
+  border-bottom:1px solid var(--rule);font-size:.8125rem}
+.result .head .tag{font-family:"IBM Plex Mono",monospace;font-weight:600;
+  font-size:.6875rem;padding:.12rem .4rem;border:1px solid currentColor}
+.result.s2 .head .tag{color:var(--s2)} .result.s4 .head .tag{color:var(--s4)}
+.result.s5 .head .tag{color:var(--s5)}
+.result .head .what{color:var(--ink-3);margin-left:auto;
+  font-family:"IBM Plex Mono",monospace;font-size:.75rem}
+.result .body{padding:1rem 1.1rem}
+.result h3{margin:0 0 .35rem;font-size:1.0625rem;font-weight:600;letter-spacing:-.01em}
+.result p{margin:0 0 .7rem;color:var(--ink-2);font-size:.9375rem}
+.result p:last-child{margin-bottom:0}
+.result .act{display:inline-block;font-family:"IBM Plex Mono",monospace;
+  font-size:.75rem;font-weight:600;padding:.15rem .45rem;margin-right:.5rem;
+  border:1px solid currentColor}
+.result .more{font-size:.875rem}
+.result .more a{color:var(--ink);text-decoration:underline;text-underline-offset:2px}
+
+/* ---- a measured, single moment of motion -------------------------------- */
+@keyframes settle{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.result.on{animation:settle .18s ease-out}
+@media (prefers-reduced-motion:reduce){.result.on{animation:none}}
+
+/* ---- footer ------------------------------------------------------------- */
+footer{margin-top:4rem;padding-top:1.25rem;border-top:1px solid var(--ink);
+  display:grid;grid-template-columns:var(--gutter) 1fr;gap:1.25rem;
+  font-size:.875rem;color:var(--ink-3)}
+footer .who{grid-column:2;max-width:60ch}
+footer a{color:var(--ink-2)}
+
+@media (max-width:40rem){
+  :root{--gutter:3.5rem}
+  .row,.sec,footer{grid-template-columns:3.5rem 1fr;gap:.85rem}
+  header.top{gap:1rem}
+  nav.top{margin-left:0;width:100%;gap:1.1rem;font-size:.875rem}
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<header class="top">
+  <a class="mark" href="/"><b>rastu</b><span>.tech</span></a>
+  <nav class="top">
+    <a href="#" aria-current="page">Tools</a>
+    <a href="#responses">SMTP responses</a>
+    <a href="#">Research</a>
+    <a href="#">About</a>
+  </nav>
+</header>
+
+<section class="open">
+  <h1>Paste what you have. Get an answer.</h1>
+  <p class="sub">A bounce out of a mail log, a domain name, a block of raw headers, or a
+  DMARC report. It works out which one you gave it and reads it here, in this tab.</p>
+
+  <div class="door">
+    <div class="door-head">
+      <span class="dot live" id="door-dot"></span>
+      <span id="door-state">waiting for input</span>
+    </div>
+    <label class="sr-only" for="door-in" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Anything to analyse</label>
+    <textarea id="door-in" spellcheck="false" autocomplete="off"
+      placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org
+
+or  example.com
+or  Received: from mail.example.com ([192.0.2.1]) by mx.google.com ..."></textarea>
+    <div class="door-foot">
+      <span class="what" id="door-what">Nothing leaves this page.</span>
+      <button class="btn quiet" type="button" id="door-clear">Clear</button>
+      <button class="btn" type="button" id="door-run">Read it</button>
+    </div>
+  </div>
+
+  <div class="samples">
+    <span>Try:</span>
+    <button type="button" data-s="421-4.7.28 Our system has detected an unusual rate of unsolicited mail originating from your IP address. gsmtp">a Gmail throttle</button>
+    <button type="button" data-s="550 5.7.606 Access denied, banned sending IP [203.0.113.9] (S3140) protection.outlook.com">an Outlook block</button>
+    <button type="button" data-s="rastu.tech">a domain</button>
+    <button type="button" data-s="Received: from relay.esp.example.net ([198.51.100.20]) by mx.company.test with ESMTPS id 4f2a; Tue, 16 Sep 2026 09:41:12 +0000
+Authentication-Results: mx.company.test; dkim=pass header.d=esp.example.net header.s=sel1; spf=pass smtp.mailfrom=bounces.esp.example.net
+From: BrandCo <news@brandco.test>">some headers</button>
+  </div>
+
+  <div class="result" id="door-out" aria-live="polite"></div>
+</section>
+
+<div class="sec">
+  <span class="n">4 tools</span>
+  <div class="t"><h2>Or go straight to one</h2>
+  <p>Each answers a question that turns up in a real incident.</p></div>
+</div>
+
+<div class="rows">
+  <a class="row" href="/check/">
+    <span class="row-g">domain<span class="st">DNS</span></span>
+    <span class="row-b">
+      <span class="row-t">Domain check</span>
+      <p class="row-d">Is this domain's email authentication set up correctly? SPF, DKIM,
+      DMARC, MTA-STS, TLS-RPT and BIMI, including whether an MTA-STS policy really exists
+      behind the record that promises one.</p>
+      <p class="row-m">example.com</p>
+    </span>
+  </a>
+  <a class="row" href="/bounce/">
+    <span class="row-g">bounce<span class="st">LOG</span></span>
+    <span class="row-b">
+      <span class="row-t">Bounce classifier</span>
+      <p class="row-d">What is this bounce telling you, and what should happen next: retry,
+      back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse
+      to act on.</p>
+      <p class="row-m">550 5.7.1 Service unavailable...</p>
+    </span>
+  </a>
+  <a class="row" href="/dmarc/">
+    <span class="row-g">report<span class="st">XML</span></span>
+    <span class="row-b">
+      <span class="row-t">DMARC report reader</span>
+      <p class="row-d">Who is sending as your domain, what aligned, what did not, and what
+      would break the day you move to p=reject. The file is parsed in this tab.</p>
+      <p class="row-m">report.xml.gz · report.zip</p>
+    </span>
+  </a>
+  <a class="row" href="/headers/">
+    <span class="row-g">message<span class="st">HDR</span></span>
+    <span class="row-b">
+      <span class="row-t">Header analyser</span>
+      <p class="row-d">What went wrong with a message, and whether it is yours to fix, the
+      receiver's, or something a forwarder did in transit.</p>
+      <p class="row-m">Received: from ...</p>
+    </span>
+  </a>
+</div>
+
+<div class="sec" id="responses">
+  <span class="n">14 documented</span>
+  <div class="t"><h2>SMTP responses</h2>
+  <p>One page per response you actually see in a log: what it means, whether retrying
+  helps, and what to change so it stops.</p></div>
+</div>
+
+<div class="rows">
+  <a class="row s4" href="/smtp/gmail-4-7-28/">
+    <span class="row-g">4.7.28<span class="st">4xx</span></span>
+    <span class="row-b">
+      <span class="row-t">Gmail: unusual rate, deferred not blocked</span>
+      <p class="row-d">A throttle, not a block. Slow down for Gmail specifically and the
+      mail still goes.</p>
+    </span>
+  </a>
+  <a class="row s5" href="/smtp/gmail-5-7-1/">
+    <span class="row-g">5.7.1<span class="st">5xx</span></span>
+    <span class="row-b">
+      <span class="row-t">Gmail: message blocked for reputation</span>
+      <p class="row-d">A hard reputation block. Stop sending from this IP or domain and
+      remediate before resuming.</p>
+    </span>
+  </a>
+  <a class="row s5" href="/smtp/microsoft-outlook-5-7-606/">
+    <span class="row-g">5.7.606<span class="st">5xx</span></span>
+    <span class="row-b">
+      <span class="row-t">Microsoft: access denied, banned sending IP</span>
+      <p class="row-d">Your sending IP is on Outlook's block list. Delist, then fix what
+      caused it.</p>
+    </span>
+  </a>
+  <a class="row s5" href="/smtp/5-1-1/">
+    <span class="row-g">5.1.1<span class="st">5xx</span></span>
+    <span class="row-b">
+      <span class="row-t">Recipient address does not exist</span>
+      <p class="row-d">Permanent. Suppress it, because retrying costs reputation.</p>
+    </span>
+  </a>
+</div>
+
+<div class="sec">
+  <span class="n">100,000</span>
+  <div class="t"><h2>Measured, not asserted</h2>
+  <p>SPF, DMARC, MTA-STS, TLS-RPT and BIMI adoption across 100,000 domains from the
+  Tranco list, published with the methodology and the raw dataset.</p></div>
+</div>
+
+<div class="rows">
+  <a class="row" href="/research/">
+    <span class="row-g">58.7%<span class="st">DMARC</span></span>
+    <span class="row-b">
+      <span class="row-t">publish DMARC. 20.9% reach p=reject.</span>
+      <p class="row-d">Of those that publish, 35.8% leave it at p=none where it blocks
+      nothing, and 3.4% of every published SPF record is already over the ten-lookup limit
+      and silently permerroring.</p>
+      <p class="row-m">doi:10.5281/zenodo.22832936 — CC BY 4.0</p>
+    </span>
+  </a>
+</div>
+
+<footer>
+  <span class="n mono" style="text-align:right;color:var(--ink-3);font-size:.75rem">rastu.tech</span>
+  <div class="who">
+    <p style="margin:0 0 .4rem">Built and maintained by <a href="/about/">Rastu Singh</a>,
+    an infrastructure engineer in Tallinn who runs these systems for a living.</p>
+    <p style="margin:0">Everything here runs in your browser. Nothing you paste or upload
+    is sent anywhere, and there is no account to make.</p>
+  </div>
+</footer>
+
+</div>
+
+<script>
+/* The door: work out what was pasted, then say something useful about it.
+   A real implementation routes into the existing parsers; this shows the shape. */
+(function(){
+  var ta = document.getElementById('door-in');
+  var out = document.getElementById('door-out');
+  var state = document.getElementById('door-state');
+  var what = document.getElementById('door-what');
+  var dot = document.getElementById('door-dot');
+
+  function detect(t){
+    t = t.trim();
+    if (!t) return null;
+    if (/^[a-z0-9][a-z0-9.-]*\.[a-z]{2,}$/i.test(t)) return 'domain';
+    if (/^(received|authentication-results|dkim-signature|delivered-to|return-path):/im.test(t)) return 'headers';
+    if (/^\s*<\?xml|<feedback[\s>]/i.test(t)) return 'report';
+    if (/\b[45]\d\d[\s-]|\b[45]\.\d\.\d\b/.test(t)) return 'bounce';
+    return 'unknown';
+  }
+
+  var LABEL = {
+    domain:'a domain name', headers:'a header block',
+    report:'a DMARC report', bounce:'an SMTP response', unknown:'something unrecognised'
+  };
+
+  function say(cls, tag, route, title, body, link){
+    out.className = 'result on ' + cls;
+    out.innerHTML =
+      '<div class="head"><span class="tag">' + tag + '</span>' +
+      '<span>' + route + '</span>' +
+      '<span class="what">read in this tab</span></div>' +
+      '<div class="body"><h3>' + title + '</h3>' + body +
+      (link ? '<p class="more">' + link + '</p>' : '') + '</div>';
+  }
+
+  function run(){
+    var t = ta.value;
+    var kind = detect(t);
+    if (!kind) { out.className = 'result'; out.innerHTML = ''; return; }
+
+    if (kind === 'bounce') {
+      var spam = /spamhaus|blocked using|dnsbl/i.test(t);
+      var rate = /4\.7\.28|unusual rate|too many|throttl/i.test(t);
+      var rep  = /5\.7\.606|s3140|banned sending ip|likely unsolicited/i.test(t);
+      if (rate) return say('s4','4xx','bounce classifier','Rate limited, not blocked',
+        '<p><span class="act" style="color:var(--s4)">throttle</span> Drop concurrency ' +
+        'and rate for this provider only, then retry. The message is still queued.</p>',
+        '<a href="/smtp/gmail-4-7-28/">Read the 4.7.28 page</a>');
+      if (spam) return say('s5','5xx','bounce classifier','Blocklist listing',
+        '<p><span class="act" style="color:var(--s5)">pause</span> Delist first, and find ' +
+        'the emitting source before you request removal.</p>',
+        '<a href="/smtp/spamhaus/">Read the Spamhaus page</a>');
+      if (rep) return say('s5','5xx','bounce classifier','Reputation block',
+        '<p><span class="act" style="color:var(--s5)">pause</span> Stop sending to this ' +
+        'provider from this IP and remediate before resuming.</p>',
+        '<a href="/smtp/microsoft-outlook-5-7-606/">Read the 5.7.606 page</a>');
+      return say('s4','?','bounce classifier','Unrecognised response',
+        '<p>No rule matched this. That is a gap in the ruleset worth reporting, not a ' +
+        'verdict on your sending.</p>', '<a href="/bounce/">Open the classifier</a>');
+    }
+    if (kind === 'domain') {
+      return say('s2','DNS','domain check','Ready to check ' + t.trim(),
+        '<p>SPF, DKIM across 35 selectors, DMARC, MTA-STS including the policy file, ' +
+        'TLS-RPT and BIMI. The lookups go from your browser to a public resolver, so the ' +
+        'domain is never sent here.</p>',
+        '<a href="/check/?d=' + encodeURIComponent(t.trim()) + '">Run the check</a>');
+    }
+    if (kind === 'headers') {
+      return say('s4','HDR','header analyser','A header block, ' +
+        (t.match(/^received:/gim)||[]).length + ' hops',
+        '<p>Findings ranked, each marked as yours to fix, the receiver\'s, or something ' +
+        'a forwarder did in transit, with the DMARC arithmetic a receiver actually ran.</p>',
+        '<a href="/headers/">Open the analyser</a>');
+    }
+    if (kind === 'report') {
+      return say('s4','XML','DMARC report reader','A DMARC aggregate report',
+        '<p>Every source, what aligned, and what would stop arriving the day you move to ' +
+        'p=reject.</p>', '<a href="/dmarc/">Open the reader</a>');
+    }
+    return say('s4','?','','Not recognised',
+      '<p>That does not look like a bounce, a domain, a header block or a DMARC report. ' +
+      'Those are the four things this reads.</p>');
+  }
+
+  function poll(){
+    var kind = detect(ta.value);
+    state.textContent = kind ? 'reading ' + LABEL[kind] : 'waiting for input';
+    what.innerHTML = kind && kind !== 'unknown'
+      ? 'Detected <b>' + LABEL[kind] + '</b>. Nothing leaves this page.'
+      : 'Nothing leaves this page.';
+    dot.className = 'dot' + (kind && kind !== 'unknown' ? ' live' : '');
+  }
+
+  ta.addEventListener('input', poll);
+  document.getElementById('door-run').addEventListener('click', run);
+  document.getElementById('door-clear').addEventListener('click', function(){
+    ta.value=''; poll(); out.className='result'; out.innerHTML=''; ta.focus();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('[data-s]'), function(b){
+    b.addEventListener('click', function(){
+      ta.value = b.getAttribute('data-s'); poll(); run();
+      ta.scrollIntoView({block:'nearest'});
+    });
+  });
+  poll();
+})();
+</script>
+</body>
+</html>
