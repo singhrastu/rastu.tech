@@ -388,8 +388,9 @@ table.arith tr.s-critical td:last-child{color:var(--bad)}
 .ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
   flex-wrap:wrap}
 .ar ul{list-style:none;padding:0;margin:0}
-.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6}
-.ar li code{font-size:.72rem;color:var(--ink-3)}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6;word-break:break-word}
+.ar li code{font-size:.72rem;color:var(--ink-3);word-break:break-all}
+.ar ul{min-width:0}
 .ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
   padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
 .ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
