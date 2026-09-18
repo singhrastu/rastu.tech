@@ -134,6 +134,12 @@ def person_ld():
         ],
         "nationality": {"@type": "Country", "name": "India"},
         "mainEntityOfPage": f"{SITE}/about/",
+        "image": {
+            "@type": "ImageObject",
+            "url": f"{SITE}/rastu-singh.jpg",
+            "width": 1200,
+            "height": 1200,
+        },
     }
 
 
@@ -160,6 +166,12 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:type" content="{'profile' if is_home else 'article'}">
 <meta property="og:url" content="{e(canonical)}">
+<meta property="og:image" content="{SITE}/rastu-singh.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="1200">
+<meta property="og:site_name" content="Rastu Singh">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="{SITE}/rastu-singh.jpg">
 <style>{CSS}</style>
 {ld}
 </head>
@@ -192,6 +204,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 def build_home():
     # The identity statement has to land inside the first 150 words.
     body = f"""
+<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="120" height="120"
+     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:30%">
 <p class="kicker">{e(PERSON['job_title'])} &middot; {e(PERSON['locality'])}, Estonia</p>
 <h1>Rastu Singh</h1>
 <p class="lede">I am an infrastructure engineer working on email platforms, deliverability
@@ -321,6 +335,8 @@ def build_about():
     """
     body = """
 <p class="kicker">About</p>
+<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="150" height="150"
+     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:35%">
 <h1>About Rastu Singh</h1>
 
 <p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
@@ -442,6 +458,12 @@ DMARC policy strength, MTA-STS policy and MX consistency, TLS-RPT and BIMI, with
 verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
 <p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a></p>
 """))
+
+    # images
+    for name in ("rastu-singh.jpg", "rastu-singh-400.jpg"):
+        src = os.path.join(ROOT, "assets", name)
+        if os.path.exists(src):
+            shutil.copy2(src, os.path.join(OUT, name))
 
     # MTA-STS policy. The DNS record promises a policy at
     # https://mta-sts.<domain>/.well-known/mta-sts.txt; if that 404s the whole
