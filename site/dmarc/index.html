@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gmail 4.7.28: unusual rate, deferred not blocked</title>
-<meta name="description" content="Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or domain and is deferring rather than refusing it. The mail is still deliverable. Slow down and retry, and it will go through.">
+<title>DMARC report reader: read an aggregate rua report in your browser</title>
+<meta name="description" content="Drop in a DMARC aggregate (rua) report as .xml, .gz or .zip and read it: every sending source, SPF and DKIM alignment computed from the auth results, and what to fix first. Parsed in your browser, never uploaded.">
 <meta name="author" content="Rastu Singh">
-<link rel="canonical" href="https://rastu.tech/smtp/gmail-4-7-28/">
-<meta property="og:title" content="Gmail 4.7.28: unusual rate, deferred not blocked">
-<meta property="og:description" content="Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or domain and is deferring rather than refusing it. The mail is still deliverable. Slow down and retry, and it will go through.">
+<link rel="canonical" href="https://rastu.tech/dmarc/">
+<meta property="og:title" content="DMARC report reader: read an aggregate rua report in your browser">
+<meta property="og:description" content="Drop in a DMARC aggregate (rua) report as .xml, .gz or .zip and read it: every sending source, SPF and DKIM alignment computed from the auth results, and what to fix first. Parsed in your browser, never uploaded.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/smtp/gmail-4-7-28/">
+<meta property="og:url" content="https://rastu.tech/dmarc/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -600,62 +600,125 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Reference", "item": "https://rastu.tech/smtp/"}, {"@type": "ListItem", "position": 3, "name": "4.7.28"}]}, {"@type": "TechArticle", "headline": "Gmail 4.7.28: unusual rate, deferred not blocked", "description": "Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or domain and is deferring rather than refusing it. The mail is still deliverable. Slow down and retry, and it will go through.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "4.7.28", "mainEntityOfPage": "https://rastu.tech/smtp/gmail-4-7-28/", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Tools", "item": "https://rastu.tech/tools/"}, {"@type": "ListItem", "position": 3, "name": "DMARC report reader"}]}, {"@type": "SoftwareApplication", "name": "DMARC report reader", "url": "https://rastu.tech/dmarc/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "Drop in an aggregate (rua) report and read it: every source, what aligned, what did not, and which ones to fix first. The file is parsed in this tab and never uploaded.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}, "isAccessibleForFree": true, "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
-  <a class="mark" href="../../">rastu<span>.tech</span></a>
-  <a href="../../tools/">Tools</a>
-  <a href="../../smtp/" aria-current="page">Reference</a>
-  <a href="../../research/">Research</a>
-  <a href="../../about/">About</a>
+  <a class="mark" href="../">rastu<span>.tech</span></a>
+  <a href="../tools/" aria-current="page">Tools</a>
+  <a href="../smtp/">Reference</a>
+  <a href="../research/">Research</a>
+  <a href="../about/">About</a>
 </nav>
-<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../../smtp/">Reference</a><span>/</span>4.7.28</nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="../">Home</a><span>/</span><a href="../tools/">Tools</a><span>/</span>DMARC report reader</nav>
 <main id="main">
 
-<h1>Gmail 4.7.28: unusual rate, deferred not blocked</h1>
-<p><span class="badge">Gmail</span><span class="badge">rate_limited</span><span class="badge">action: throttle</span></p>
-<p class="lede">Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or domain and is deferring rather than refusing it. The mail is still deliverable. Slow down and retry, and it will go through.</p>
-<div class="callout"><p>Worth being precise here, because it is the single most common misclassification in bounce handling. Gmail uses similar wording for two different outcomes: &quot;unusual rate&quot; with 4.7.28 is a deferral, while &quot;likely unsolicited&quot; with 5.7.1 is a block. Treating the deferral as a block means you stop sending when you only needed to slow down. Treating the block as a deferral means you keep retrying into a wall and make the reputation worse.</p></div>
-<h2 class="r">What it looks like in the log</h2>
-<pre><code>421-4.7.28 Our system has detected an unusual rate of unsolicited mail originating from your IP address.</code></pre>
-<pre><code>450-4.7.28 Gmail has detected an unusual rate of mail originating from your IP address.</code></pre>
-<h2 class="r">Why it happens</h2>
-<ul><li>Sending volume ramped faster than the IP&#x27;s reputation supports, usually during warm-up.</li>
-<li>A new IP or a range with no established sending history at Gmail.</li>
-<li>A spike relative to your own baseline. Gmail reacts to the change more than the absolute number.</li>
-<li>Complaint rate climbing, which tightens the rate Gmail is willing to accept.</li></ul>
-<h2 class="r">What to do</h2>
-<ul><li>Reduce concurrency and messages per connection for Gmail specifically, not globally.</li>
-<li>Let the retry schedule work. This is a 4xx and the message is still queued.</li>
-<li>Check Google Postmaster Tools for the same period. If the spam rate is climbing, the rate limit is a symptom and the complaint rate is the problem.</li>
-<li>If you are mid warm-up, hold the current daily volume rather than continuing to ramp.</li></ul>
-<h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/gmail-5-7-26/">5.7.26</a></p>
-<p class="meta">Classified as <code>rate_limited</code>, action
-<code>throttle</code>. Paste a response into the
-<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
+<h1>DMARC report reader</h1>
+<p class="lede">Aggregate reports arrive as XML nobody wants to read, usually zipped, from
+a dozen receivers a week. Drop one in and see who is sending as your domain, what
+authenticated, and what to fix first.</p>
+
+<ul class="assure full">
+  <li><b>Parsed in this tab</b><span>The file never leaves your machine</span></li>
+  <li><b>.xml, .gz and .zip</b><span>Straight from the mail attachment</span></li>
+  <li><b>Alignment computed here</b><span>Not taken from the reporter's own verdict</span></li>
+</ul>
+
+<div class="tool">
+  <label class="drop" id="rua-drop" for="rua-file">
+    <b>Drop a report here</b>
+    <span>or choose a file &mdash; .xml, .xml.gz or .zip, and several at once is fine</span>
+    <input id="rua-file" type="file" multiple accept=".xml,.gz,.zip,text/xml,application/gzip,application/zip">
+  </label>
+  <details class="paste">
+    <summary>or paste the XML</summary>
+    <textarea class="field" id="rua-paste" spellcheck="false"
+      placeholder="&lt;?xml version=&quot;1.0&quot;?&gt;&#10;&lt;feedback&gt;..."></textarea>
+    <button type="button" class="btn sm" id="rua-paste-run">Read it</button>
+  </details>
+  <div class="report" id="rua-out" aria-live="polite"></div>
+</div>
+
+<h2 class="r">The distinction most readers get wrong</h2>
+<p>A DMARC report carries two different results for SPF and two for DKIM, and they are
+routinely different:</p>
+<div class="full"><div class="scroll-x r"><table>
+<tr><th>Field</th><th>What it is</th></tr>
+<tr><td><code>auth_results/spf/result</code></td>
+    <td>The <strong>raw</strong> result. Did SPF pass for the envelope sender?</td></tr>
+<tr><td><code>policy_evaluated/spf</code></td>
+    <td>The <strong>aligned</strong> result. Did the domain that passed also match the
+        <code>From:</code> header domain?</td></tr>
+</table></div></div>
+<p>A source can show <code>auth_results/spf/result = pass</code> and
+<code>policy_evaluated/spf = fail</code> at the same time. SPF authenticated correctly; the
+<code>MAIL FROM</code> domain just does not align with what the recipient sees. That is a
+completely different fix from "SPF is broken", and reading the wrong field sends you to fix
+the wrong thing.</p>
+<p>This tool computes alignment itself from <code>auth_results</code>, the
+<code>From:</code> domain and the published <code>adkim</code> and <code>aspf</code> modes,
+then compares that to what the reporter claimed. When the two disagree, it says so.</p>
+
+<h2 class="r">What each result means</h2>
+<div class="full"><div class="scroll-x r"><table>
+<tr><th>Result</th><th>What to do</th></tr>
+<tr class="s-ok"><td><strong>Aligned</strong></td>
+    <td>SPF and DKIM both align. Nothing to do.</td></tr>
+<tr class="s-ok"><td><strong>DKIM aligned</strong></td>
+    <td>Fine. DKIM survives forwarding, which is the one that matters.</td></tr>
+<tr class="s-warn"><td><strong>SPF only</strong></td>
+    <td>Passes today and fails the moment someone forwards it. Get DKIM signing and
+        aligning for this source.</td></tr>
+<tr class="s-info"><td><strong>Forwarded</strong></td>
+    <td>SPF broke in transit and DKIM carried it, or the receiver said so outright.
+        Expected behaviour, not a problem to solve.</td></tr>
+<tr class="s-fail"><td><strong>Unauthenticated</strong></td>
+    <td>Neither aligned. Either the source needs configuring or it is not yours.
+        Identify it before you change policy.</td></tr>
+</table></div></div>
+
+<h2 class="r">What a report cannot tell you</h2>
+<ul>
+  <li><strong>It is not your pass rate.</strong> One report is one receiver over one
+      window. Gmail's view of your mail is not the internet's view of your mail.</li>
+  <li><strong>An unrecognised source is not a spoofer.</strong> It is far more often a
+      vendor somebody set up and forgot about. This tool will never label a source as
+      spoofing, because the data cannot support it.</li>
+  <li><strong>DKIM validity is the receiver's verdict, not a check.</strong> Aggregate
+      reports carry no message content, so nothing here re-verifies a signature.</li>
+  <li><strong>Sender names are a courtesy.</strong> They come from reverse DNS, which is
+      set by whoever controls the IP block and is not authenticated. A name that could not
+      be forward-confirmed is marked.</li>
+</ul>
+
+<h2 class="r">Where to get your reports</h2>
+<p>They arrive at whatever address is in the <code>rua=</code> tag of your DMARC record.
+If you do not have one, that is worth fixing first: enforcing a policy with no aggregate
+reporting means enforcing without being able to see what you are enforcing, which
+<a href="/research/">20.8% of enforcing domains are doing right now</a>. The
+<a href="/check/">domain check</a> will tell you whether yours is set.</p>
 
 </main>
 <footer>
   <div class="cols">
     <div>
       <h2>Tools</h2>
-            <a href="../../check/">Domain check</a>
-      <a href="../../bounce/">Bounce classifier</a>
-      <a href="../../dmarc/">DMARC report reader</a>
-      <a href="../../spf/">SPF lookup counter</a>
-      <a href="../../tools/">All tools</a>
+            <a href="../check/">Domain check</a>
+      <a href="../bounce/">Bounce classifier</a>
+      <a href="../dmarc/">DMARC report reader</a>
+      <a href="../spf/">SPF lookup counter</a>
+      <a href="../tools/">All tools</a>
     </div>
     <div>
       <h2>Reference</h2>
-      <a href="../../smtp/">SMTP responses</a>
-      <a href="../../smtp/session/">Anatomy of a session</a>
+      <a href="../smtp/">SMTP responses</a>
+      <a href="../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
       <h2>Research</h2>
-      <a href="../../research/">State of email authentication</a>
+      <a href="../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
@@ -665,7 +728,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
       <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
     </div>
   </div>
-  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+  <p class="by">Built and maintained by <a href="../about/">Rastu Singh</a>,
      Infrastructure Engineer, Tallinn.
      Everything here runs in your browser.</p>
 </footer>
@@ -841,6 +904,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 })();
 </script>
 
-
+<script type="module" src="/js/rua-ui.js"></script>
 </body>
 </html>

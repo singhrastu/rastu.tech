@@ -87,6 +87,11 @@ CSS = """
   --ok:#3ddc84; --warn:#e6b25c; --bad:#ff7a7a; --info:#5db8ff;
   --radius:10px;
   --measure:44rem;
+  /* The readable band is 45-75 characters a line. Before this, list items on the
+     wide pages ran to 115 and headings to 93, which is where a reader starts
+     losing their place on the return sweep. Tools, tables and card grids opt out
+     and use the full container. */
+  --measure-text:42rem;
   /* Spacing and type scales. Before these, every size in the sheet was a bare
      rem literal, which is survivable at six pages and is not at fifteen. */
   --s1:.25rem; --s2:.5rem; --s3:.85rem; --s4:1.3rem; --s5:2.2rem; --s6:3.6rem;
@@ -99,8 +104,9 @@ CSS = """
 html{scroll-behavior:smooth}
 body{
   margin:0;background:var(--bg);color:var(--ink);
-  font:16.5px/1.68 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font:17px/1.72 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 
 /* ---- honeycomb field -------------------------------------------------
@@ -115,41 +121,63 @@ body{
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
 .wrap.wide{max-width:64rem}
-.wrap.wide .lede,.wrap.wide .prose{max-width:42rem}
-.wrap.wide h2{margin-top:3.4rem}
+/* Prose gets the readable measure; anything that is a layout opts out by not
+   being in this list. */
+.wrap.wide main > p,
+.wrap.wide main > ul,
+.wrap.wide main > ol,
+.wrap.wide main > dl,
+.wrap.wide main > h2,
+.wrap.wide main > h3,
+.wrap.wide main > pre,
+.wrap.wide main > .callout,
+.wrap.wide main > .sechead{max-width:var(--measure-text)}
+.wrap.wide main > .full{max-width:none}
+.wrap.wide main > h2{margin-top:var(--s6)}
 
 /* ---- nav ---------------------------------------------------------------- */
 .skip{position:absolute;left:-9999px;top:0;z-index:9;background:var(--accent);
   color:#08140d;padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:650}
 .skip:focus{left:0}
-nav.top{display:flex;gap:var(--s4);align-items:center;flex-wrap:wrap;
-  padding:1.4rem 0 var(--s5);font-size:var(--t3)}
-nav.top a{color:var(--ink-3);text-decoration:none;position:relative;
-  padding:.15rem 0;transition:color .16s}
-nav.top a:hover{color:var(--ink)}
-nav.top a[aria-current]{color:var(--ink)}
-nav.top a[aria-current]::after{content:"";position:absolute;left:0;right:0;bottom:-.3rem;
-  height:1.5px;background:var(--accent);border-radius:2px}
+nav.top{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
+  padding:1.25rem 0 var(--s5);font-size:1.02rem}
+nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:500;
+  padding:.5rem .85rem;border-radius:9px;border:1px solid transparent;
+  transition:color .18s,background .18s,border-color .18s,transform .18s}
+nav.top a:hover{color:var(--ink);background:var(--surface);border-color:var(--line);
+  transform:translateY(-2px)}
+nav.top a:active{transform:translateY(0)}
+nav.top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* The page you are on, and the one you just clicked, both read as accent. */
+nav.top a[aria-current]{color:var(--accent);background:var(--accent-soft);
+  border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:650}
+nav.top a[aria-current]:hover{color:var(--accent-2);transform:translateY(-2px)}
 nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  font-weight:650;color:var(--ink);font-size:var(--t3);letter-spacing:-.01em}
+  font-weight:700;color:var(--ink);font-size:1.12rem;letter-spacing:-.02em;
+  padding-left:0;border:0}
 nav.top .mark span{color:var(--accent)}
-nav.top .mark::after{display:none}
+nav.top .mark:hover{background:none;border-color:transparent;color:var(--accent-2)}
+
 @media(max-width:34rem){
-  nav.top{gap:var(--s3);padding-bottom:var(--s4)}
-  nav.top .mark{margin-right:0;width:100%}
+  nav.top{gap:.25rem;padding-bottom:var(--s4);font-size:.95rem}
+  nav.top .mark{margin-right:0;width:100%;margin-bottom:.4rem}
+  nav.top a{padding:.45rem .7rem}
 }
 
 /* ---- type ------------------------------------------------------------- */
 a{color:var(--accent);text-underline-offset:2px}
 h1{font-size:clamp(1.9rem,4.5vw,2.5rem);line-height:1.16;letter-spacing:-.021em;margin:.3rem 0 .7rem;font-weight:680}
-h2{font-size:1.24rem;letter-spacing:-.01em;margin:2.9rem 0 .85rem;padding-bottom:.45rem;border-bottom:1px solid var(--line);font-weight:650}
-h3{font-size:1.02rem;margin:1.9rem 0 .45rem;font-weight:650}
-p{margin:0 0 1.05rem}
+h2{font-size:1.3rem;letter-spacing:-.012em;margin:3rem 0 1rem;padding-bottom:.5rem;
+   border-bottom:1px solid var(--line);font-weight:650;line-height:1.3}
+h3{font-size:1.06rem;margin:2.1rem 0 .55rem;font-weight:650;line-height:1.4}
+p{margin:0 0 1.15rem}
 .kicker{color:var(--ink-3);font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .2rem;font-weight:600}
 .lede{font-size:1.14rem;line-height:1.6;color:var(--ink);margin-bottom:1.3rem}
 .meta{color:var(--ink-3);font-size:.9rem}
-ul{padding-left:1.15rem}
-li{margin:.4rem 0}
+ul,ol{padding-left:1.3rem}
+li{margin:.55rem 0;line-height:1.7}
+li::marker{color:var(--ink-3)}
+main ul li strong:first-child{color:var(--ink)}
 strong{font-weight:650}
 
 /* ---- code ------------------------------------------------------------- */
@@ -257,8 +285,62 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- drop zone ----------------------------------------------------------- */
+.drop{display:block;border:1.5px dashed var(--line);border-radius:12px;
+  padding:var(--s5) var(--s4);text-align:center;cursor:pointer;background:var(--bg);
+  transition:border-color .2s,background .2s,transform .2s}
+.drop:hover{border-color:var(--accent);background:var(--accent-soft)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.005)}
+.drop b{display:block;font-size:var(--t4);color:var(--ink);margin-bottom:.3rem}
+.drop span{display:block;font-size:var(--t2);color:var(--ink-3)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.paste{margin-top:var(--s3)}
+.paste summary{cursor:pointer;font-size:var(--t2);color:var(--ink-3);
+  list-style:none;display:inline-block;padding:.25rem 0}
+.paste summary::-webkit-details-marker{display:none}
+.paste summary::before{content:"+ ";color:var(--accent)}
+.paste[open] summary::before{content:"- "}
+.paste summary:hover{color:var(--accent)}
+.paste textarea{margin:.6rem 0;min-height:8rem}
+
+/* ---- report table -------------------------------------------------------- */
+table.rua{min-width:46rem}
+table.rua td{vertical-align:top}
+table.rua .ip{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:var(--t1);color:var(--ink-3);margin-top:.15rem}
+table.rua .ptr{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:.72rem;color:var(--ink-3);opacity:.7;word-break:break-all;margin-top:.1rem}
+table.rua .ptr em{font-style:normal;color:var(--warn)}
+table.rua .unk{color:var(--ink-3);font-weight:500}
+table.rua .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.rua .why{color:var(--ink-3);font-size:var(--t2);max-width:22rem}
+table.rua .tags{display:block;margin-top:.3rem}
+table.rua .tags code{font-size:.68rem;margin-right:.25rem}
+table.rua tr.s-fail .pill{color:var(--bad)}
+table.rua tr.s-warn .pill{color:var(--warn)}
+table.rua tr.s-ok .pill{color:var(--ok)}
+table.rua tr.s-info .pill{color:var(--info)}
+
+/* ---- assurances: three trust signals, glanceable ------------------------- */
+.assure{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));
+  gap:var(--s2);list-style:none;padding:0;margin:var(--s4) 0 var(--s3)}
+.assure li{margin:0;border:1px solid var(--line);border-left:2px solid var(--accent);
+  border-radius:0 10px 10px 0;padding:.7rem .95rem;background:var(--surface)}
+.assure b{display:block;font-size:var(--t3);font-weight:650;color:var(--ink)}
+.assure span{display:block;font-size:var(--t1);color:var(--ink-3);margin-top:.15rem;
+  line-height:1.5}
+.byline{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s5)}
+
+/* ---- cost table ---------------------------------------------------------- */
+table.cost td:first-child{white-space:nowrap}
+table.cost .num{text-align:right;white-space:nowrap;color:var(--ink);font-weight:600}
+table.cost tr.s-ok .num{color:var(--ok)}
+table.cost tr.s-warn .num{color:var(--warn)}
+table.cost tr.s-fail .num{color:var(--bad)}
+table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
+
 /* ---- tool cards ---------------------------------------------------------- */
-.bento.tools{grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
 @media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
 .bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
   margin:0 0 .5rem;line-height:1.45}
@@ -769,6 +851,14 @@ TOOLS = [
                  "retry, back off, suppress, or stop and fix the sender. Hard and soft "
                  "bounce is too coarse to act on.",
         "tag": "Logs",
+    },
+    {
+        "slug": "dmarc", "name": "DMARC report reader",
+        "q": "Who is sending mail as my domain, and what is failing?",
+        "blurb": "Drop in an aggregate (rua) report and read it: every source, what "
+                 "aligned, what did not, and which ones to fix first. The file is "
+                 "parsed in this tab and never uploaded.",
+        "tag": "Reports",
     },
     {
         "slug": "spf", "name": "SPF lookup counter",
@@ -1322,17 +1412,28 @@ include tree and shows you exactly where the count goes.</p>
 </div>
 
 <h2>What counts against the ten</h2>
-<p>Each of these costs one lookup, and every <code>include:</code> costs its own lookups on
-top of the one it costs to reach:</p>
-<ul>
-  <li><code>include:</code> and <code>redirect=</code>, recursively</li>
-  <li><code>a</code>, <code>a:</code>, <code>mx</code>, <code>mx:</code>, <code>exists:</code></li>
-  <li><code>ptr</code>, which is deprecated and should not be in a record at all</li>
-</ul>
-<p>These cost nothing, because they need no DNS query: <code>ip4:</code>, <code>ip6:</code>,
-<code>all</code> and <code>exp=</code>. Moving an ESP from an <code>include:</code> to its
-published <code>ip4:</code> ranges is the standard way to buy headroom, and it is also the
-thing that silently breaks six months later.</p>
+<div class="full"><table class="cost">
+<tr><th>Mechanism</th><th>Cost</th><th>Notes</th></tr>
+<tr class="s-warn"><td><code>include:</code></td><td class="num">1 + its own</td>
+    <td>Recursive. An include that itself has four includes costs you five.</td></tr>
+<tr class="s-warn"><td><code>redirect=</code></td><td class="num">1 + its own</td>
+    <td>Same as include, and it replaces the rest of the record.</td></tr>
+<tr class="s-warn"><td><code>a</code> <code>a:</code></td><td class="num">1</td>
+    <td>Including the CIDR forms, <code>a/24</code> and <code>a:host/24</code>.</td></tr>
+<tr class="s-warn"><td><code>mx</code> <code>mx:</code></td><td class="num">1</td>
+    <td>And capped separately at ten address records per evaluation.</td></tr>
+<tr class="s-warn"><td><code>exists:</code></td><td class="num">1</td>
+    <td>Often carries a macro, so the cost can depend on the sending IP.</td></tr>
+<tr class="s-fail"><td><code>ptr</code></td><td class="num">1</td>
+    <td>Deprecated by RFC 7208. Some receivers ignore it. Remove it.</td></tr>
+<tr class="s-ok"><td><code>ip4:</code> <code>ip6:</code></td><td class="num">0</td>
+    <td>No DNS query, so unlimited.</td></tr>
+<tr class="s-ok"><td><code>all</code> <code>exp=</code></td><td class="num">0</td>
+    <td><code>exp=</code> is only fetched on a fail, and never counts.</td></tr>
+</table></div>
+<p>Every mechanism can carry a qualifier, so <code>+include:</code>, <code>-a</code> and
+<code>~mx</code> cost exactly what the unqualified form costs. Tools that match on the bare
+token miss them and report a broken record as healthy.</p>
 
 <h2>Why this is worth checking</h2>
 <p>It is the failure nobody sees coming. The record resolves. It reads correctly. It passes a
@@ -1357,6 +1458,111 @@ its own record, and collapse two ESPs into one.</p>
         body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Tools", crumbs=(("Tools", "tools/"), ("SPF lookup counter", None)),
         modules=("/js/spf.js",))
+
+
+def build_dmarc():
+    """The DMARC aggregate report reader.
+
+    An aggregate report is a list of every system that sends mail as a domain,
+    which is exactly the map an attacker would want and exactly the thing people
+    upload to a stranger's website without thinking about it. Parsing it in the
+    tab is the whole product, not a footnote.
+    """
+    t = tool("dmarc")
+    body = """
+<h1>DMARC report reader</h1>
+<p class="lede">Aggregate reports arrive as XML nobody wants to read, usually zipped, from
+a dozen receivers a week. Drop one in and see who is sending as your domain, what
+authenticated, and what to fix first.</p>
+
+<ul class="assure full">
+  <li><b>Parsed in this tab</b><span>The file never leaves your machine</span></li>
+  <li><b>.xml, .gz and .zip</b><span>Straight from the mail attachment</span></li>
+  <li><b>Alignment computed here</b><span>Not taken from the reporter's own verdict</span></li>
+</ul>
+
+<div class="tool">
+  <label class="drop" id="rua-drop" for="rua-file">
+    <b>Drop a report here</b>
+    <span>or choose a file &mdash; .xml, .xml.gz or .zip, and several at once is fine</span>
+    <input id="rua-file" type="file" multiple accept=".xml,.gz,.zip,text/xml,application/gzip,application/zip">
+  </label>
+  <details class="paste">
+    <summary>or paste the XML</summary>
+    <textarea class="field" id="rua-paste" spellcheck="false"
+      placeholder="&lt;?xml version=&quot;1.0&quot;?&gt;&#10;&lt;feedback&gt;..."></textarea>
+    <button type="button" class="btn sm" id="rua-paste-run">Read it</button>
+  </details>
+  <div class="report" id="rua-out" aria-live="polite"></div>
+</div>
+
+<h2>The distinction most readers get wrong</h2>
+<p>A DMARC report carries two different results for SPF and two for DKIM, and they are
+routinely different:</p>
+<div class="full"><table>
+<tr><th>Field</th><th>What it is</th></tr>
+<tr><td><code>auth_results/spf/result</code></td>
+    <td>The <strong>raw</strong> result. Did SPF pass for the envelope sender?</td></tr>
+<tr><td><code>policy_evaluated/spf</code></td>
+    <td>The <strong>aligned</strong> result. Did the domain that passed also match the
+        <code>From:</code> header domain?</td></tr>
+</table></div>
+<p>A source can show <code>auth_results/spf/result = pass</code> and
+<code>policy_evaluated/spf = fail</code> at the same time. SPF authenticated correctly; the
+<code>MAIL FROM</code> domain just does not align with what the recipient sees. That is a
+completely different fix from "SPF is broken", and reading the wrong field sends you to fix
+the wrong thing.</p>
+<p>This tool computes alignment itself from <code>auth_results</code>, the
+<code>From:</code> domain and the published <code>adkim</code> and <code>aspf</code> modes,
+then compares that to what the reporter claimed. When the two disagree, it says so.</p>
+
+<h2>What each result means</h2>
+<div class="full"><table>
+<tr><th>Result</th><th>What to do</th></tr>
+<tr class="s-ok"><td><strong>Aligned</strong></td>
+    <td>SPF and DKIM both align. Nothing to do.</td></tr>
+<tr class="s-ok"><td><strong>DKIM aligned</strong></td>
+    <td>Fine. DKIM survives forwarding, which is the one that matters.</td></tr>
+<tr class="s-warn"><td><strong>SPF only</strong></td>
+    <td>Passes today and fails the moment someone forwards it. Get DKIM signing and
+        aligning for this source.</td></tr>
+<tr class="s-info"><td><strong>Forwarded</strong></td>
+    <td>SPF broke in transit and DKIM carried it, or the receiver said so outright.
+        Expected behaviour, not a problem to solve.</td></tr>
+<tr class="s-fail"><td><strong>Unauthenticated</strong></td>
+    <td>Neither aligned. Either the source needs configuring or it is not yours.
+        Identify it before you change policy.</td></tr>
+</table></div>
+
+<h2>What a report cannot tell you</h2>
+<ul>
+  <li><strong>It is not your pass rate.</strong> One report is one receiver over one
+      window. Gmail's view of your mail is not the internet's view of your mail.</li>
+  <li><strong>An unrecognised source is not a spoofer.</strong> It is far more often a
+      vendor somebody set up and forgot about. This tool will never label a source as
+      spoofing, because the data cannot support it.</li>
+  <li><strong>DKIM validity is the receiver's verdict, not a check.</strong> Aggregate
+      reports carry no message content, so nothing here re-verifies a signature.</li>
+  <li><strong>Sender names are a courtesy.</strong> They come from reverse DNS, which is
+      set by whoever controls the IP block and is not authenticated. A name that could not
+      be forward-confirmed is marked.</li>
+</ul>
+
+<h2>Where to get your reports</h2>
+<p>They arrive at whatever address is in the <code>rua=</code> tag of your DMARC record.
+If you do not have one, that is worth fixing first: enforcing a policy with no aggregate
+reporting means enforcing without being able to see what you are enforcing, which
+<a href="/research/">20.8% of enforcing domains are doing right now</a>. The
+<a href="/check/">domain check</a> will tell you whether yours is set.</p>
+"""
+    return page(
+        "DMARC report reader: read an aggregate rua report in your browser",
+        "Drop in a DMARC aggregate (rua) report as .xml, .gz or .zip and read it: every "
+        "sending source, SPF and DKIM alignment computed from the auth results, and what "
+        "to fix first. Parsed in your browser, never uploaded.",
+        body, "dmarc/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("DMARC report reader", None)),
+        modules=("/js/rua-ui.js",))
 
 
 def build_check():
@@ -1583,12 +1789,16 @@ def build_home():
     body = f"""
 <h1>Tools for running email infrastructure</h1>
 <p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
-or find the mechanism that pushed an SPF record past the lookup limit and quietly
-switched it off.</p>
-<p class="prose">Everything here runs in your browser. Nothing you paste or upload leaves
-the page, and there is no account to make. Built and maintained by
-<a href="/about/">Rastu Singh</a>, an infrastructure engineer in Tallinn who operates
-these systems for a living.</p>
+or find the mechanism that quietly switched off an SPF record.</p>
+
+<ul class="assure full">
+  <li><b>Runs in your browser</b><span>DNS and parsing happen on your machine</span></li>
+  <li><b>Nothing is uploaded</b><span>No file or domain reaches this server</span></li>
+  <li><b>No account</b><span>No signup, no limits, no email address</span></li>
+</ul>
+
+<p class="byline">Built and maintained by <a href="/about/">Rastu Singh</a>, an
+infrastructure engineer in Tallinn who runs these systems for a living.</p>
 
 <div class="bento tools">{cards}</div>
 
@@ -2190,13 +2400,15 @@ def check_js():
             if name.endswith(".js"):
                 full = os.path.join(root, name)
                 blobs[os.path.relpath(full, OUT)] = open(full, encoding="utf8").read()
-    parity = os.path.join(HERE, "parity.mjs")
-    if os.path.exists(parity):
-        rc = subprocess.run(["node", parity], capture_output=True, text=True,
+    for name, label in (("parity.mjs", "the in-browser auditor has drifted from dmarcsight"),
+                        ("parity-rua.mjs", "the DMARC report reader is wrong")):
+        path = os.path.join(HERE, name)
+        if not os.path.exists(path):
+            continue
+        rc = subprocess.run(["node", path], capture_output=True, text=True,
                             cwd=os.path.dirname(HERE))
         if rc.returncode:
-            sys.exit("the in-browser auditor has drifted from dmarcsight:\n"
-                     + rc.stdout + rc.stderr)
+            sys.exit(f"{label}:\n" + rc.stdout + rc.stderr)
         print(rc.stdout.rstrip())
 
     for name, src in blobs.items():
@@ -2219,7 +2431,7 @@ def main():
 
     build_sift()
     urls = [build_home(), build_tools(), build_about(),
-            build_check(), build_bounce(), build_spf(),
+            build_check(), build_bounce(), build_dmarc(), build_spf(),
             build_smtp_index(), build_session()]
     for c in CODES:
         urls.append(build_code_page(c))
@@ -2230,7 +2442,8 @@ def main():
     # them and so build/parity.mjs can import exactly what ships
     jsdir = os.path.join(OUT, "js")
     os.makedirs(jsdir, exist_ok=True)
-    for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js"):
+    for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
+                 "unzip.js", "rua.js", "rua-ui.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # images
