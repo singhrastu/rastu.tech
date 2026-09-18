@@ -3,3 +3,5 @@ __pycache__/
 .DS_Store
 track/history.json
 track/run.log
+research/data/scan-*.jsonl
+research/data/*.log

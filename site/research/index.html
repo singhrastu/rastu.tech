@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Email authentication adoption research</title>
-<meta name="description" content="Original measurement of SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI adoption across the public internet, published with the methodology and the raw dataset.">
+<title>The state of email authentication, 2026</title>
+<meta name="description" content="Across 100,000 domains, 58.7% publish DMARC but only 20.9% reject. MTA-STS is at 2.0%. Full methodology and dataset published.">
 <link rel="canonical" href="https://rastu.tech/research/">
-<meta property="og:title" content="Email authentication adoption research">
-<meta property="og:description" content="Original measurement of SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI adoption across the public internet, published with the methodology and the raw dataset.">
+<meta property="og:title" content="The state of email authentication, 2026">
+<meta property="og:description" content="Across 100,000 domains, 58.7% publish DMARC but only 20.9% reject. MTA-STS is at 2.0%. Full methodology and dataset published.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://rastu.tech/research/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
@@ -47,7 +47,7 @@ footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color
 .grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
 .grid a span{color:var(--muted);font-size:.9rem}
 </style>
-
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "The state of email authentication, 2026", "description": "Email authentication adoption across 100,000 domains from the Tranco top-1M list: SPF, DMARC, MTA-STS, TLS-RPT and BIMI, with regional and rank-band cuts.", "creator": {"@id": "https://rastu.tech/#person"}, "license": "https://creativecommons.org/licenses/by/4.0/", "distribution": [{"@type": "DataDownload", "encodingFormat": "application/gzip", "contentUrl": "https://rastu.tech/scan-100000.jsonl.gz"}], "temporalCoverage": "2026-09", "variableMeasured": ["SPF", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "MX"]}</script>
 </head>
 <body>
 <div class="wrap">
@@ -60,9 +60,112 @@ footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color
 </nav>
 
 <p class="kicker">Research</p>
-<h1>Email authentication adoption research</h1>
-<p class="lede">Original measurement of SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI adoption across the public internet, published with the methodology and the raw dataset.</p>
-<p class="meta">First edition in preparation. Methodology and dataset will be published alongside the findings, and mirrored with a citable DOI.</p>
+<h1>The state of email authentication, 2026</h1>
+
+<p class="lede">Most domains that deploy DMARC never turn it on. Across 100,000 domains from the
+Tranco top-1M list, 58.7% publish a DMARC record but only 20.9% actually
+reject anything. More than a third of everyone who has done the work gets none of the
+protection.</p>
+
+<p class="meta">Survey run September 2026 against the Tranco list, ID
+<code>V3YPN</code>. Methodology and raw dataset below.</p>
+
+<h2>Headline numbers</h2>
+<table>
+<tr><th>Mechanism</th><th>Share of domains</th></tr>
+<tr><td>Has MX (receives mail)</td><td>72.7%</td></tr>
+<tr><td>SPF published</td><td>70.7%</td></tr>
+<tr><td>DMARC published</td><td>58.7%</td></tr>
+<tr><td>DMARC at enforcement (quarantine or reject)</td><td>37.6%</td></tr>
+<tr><td>DMARC at p=reject</td><td>20.9%</td></tr>
+<tr><td>MTA-STS</td><td>2.0%</td></tr>
+<tr><td>TLS-RPT</td><td>2.4%</td></tr>
+<tr><td>BIMI</td><td>4.9%</td></tr>
+</table>
+
+<h2>The gaps, which are the interesting part</h2>
+
+<p>Adoption rates are the least useful thing a survey like this produces. The gap between
+publishing a record and being protected by it is where the real picture is. All figures below
+are shares of the domains that publish the record at all, so they describe people who have
+already done most of the work.</p>
+
+<table>
+<tr><th>Failure mode</th><th>Share</th></tr>
+<tr><td>DMARC left at p=none, blocking nothing</td><td>35.8%</td></tr>
+<tr><td>DMARC enforcing with no rua, no visibility</td><td>20.8%</td></tr>
+<tr><td>DMARC with pct below 100, partially applied</td><td>3.2%</td></tr>
+<tr><td>Enforcing but sp=none, subdomains unprotected</td><td>7.0%</td></tr>
+<tr><td>SPF over the 10-lookup limit, permerror</td><td>3.4%</td></tr>
+<tr><td>SPF with no all mechanism</td><td>2.7%</td></tr>
+</table>
+
+<h3>SPF records that silently do not work</h3>
+<p>3.4% of published SPF records exceed the ten DNS-lookup limit set
+by RFC 7208. Over that limit the evaluation is a permerror, and most receivers treat a permerror
+as no SPF at all. The record still resolves. It still looks correct in a DNS lookup. It has
+simply stopped working, usually because someone added one more vendor to a record that was
+already at nine. Nothing surfaces this except reading the aggregate reports or counting the
+lookups.</p>
+
+<h3>Enforcing blind</h3>
+<p>20.8% of domains at quarantine or reject publish no <code>rua</code>
+address. They are rejecting mail on the basis of a policy whose effects they cannot see. If that
+policy is breaking a legitimate sending source, the only signal is a user complaining.</p>
+
+<h3>The subdomain hole</h3>
+<p>7.0% of enforcing domains set <code>sp=none</code>, which exempts
+every subdomain. An attacker does not need to spoof the apex when
+<code>billing.example.com</code> is unprotected and equally convincing.</p>
+
+<h2>Adoption tracks popularity, steeply</h2>
+<table>
+<tr><th>Rank band</th><th>Domains</th><th>SPF</th><th>DMARC</th><th>Enforcing</th><th>MTA-STS</th></tr>
+<tr><td>Rank 1-1000</td><td>1000</td><td>76.4</td><td>73.0</td><td>61.3</td><td>3.6</td></tr><tr><td>Rank 1001-10000</td><td>9000</td><td>75.0</td><td>66.4</td><td>48.9</td><td>2.6</td></tr><tr><td>Rank 10001-100000</td><td>90000</td><td>70.2</td><td>57.7</td><td>36.2</td><td>1.9</td></tr>
+</table>
+<p>DMARC enforcement roughly halves between the top thousand domains and the hundred-thousandth.
+MTA-STS barely exists outside the top tier.</p>
+
+<h2>By region</h2>
+<p>Grouped by country-code TLD. This is a proxy for geography rather than a measurement of it:
+a <code>.com</code> can be operated from anywhere, so these cuts describe domains that chose a
+national TLD, not all domains in a country.</p>
+<table>
+<tr><th>Region</th><th>Domains</th><th>SPF</th><th>DMARC</th><th>Enforcing</th><th>MTA-STS</th></tr>
+<tr><td>Australia</td><td>532</td><td>92.7</td><td>87.2</td><td>67.1</td><td>5.6</td></tr><tr><td>Nordics</td><td>878</td><td>90.0</td><td>82.8</td><td>58.0</td><td>3.5</td></tr><tr><td>Benelux</td><td>939</td><td>89.6</td><td>81.2</td><td>59.6</td><td>5.5</td></tr><tr><td>Baltics</td><td>232</td><td>92.2</td><td>80.6</td><td>56.9</td><td>4.7</td></tr><tr><td>UK</td><td>1385</td><td>86.6</td><td>80.5</td><td>59.7</td><td>10.3</td></tr><tr><td>France</td><td>1004</td><td>89.4</td><td>77.0</td><td>44.0</td><td>1.8</td></tr><tr><td>Southern Europe</td><td>1848</td><td>90.3</td><td>76.4</td><td>44.0</td><td>1.1</td></tr><tr><td>Brazil</td><td>1446</td><td>86.2</td><td>75.4</td><td>45.7</td><td>1.3</td></tr><tr><td>DACH</td><td>2597</td><td>87.9</td><td>75.1</td><td>44.3</td><td>4.4</td></tr><tr><td>CEE</td><td>2159</td><td>91.8</td><td>73.7</td><td>44.0</td><td>1.6</td></tr><tr><td>Japan</td><td>1971</td><td>78.7</td><td>66.3</td><td>22.1</td><td>0.3</td></tr><tr><td>India</td><td>1291</td><td>72.0</td><td>62.7</td><td>45.4</td><td>0.4</td></tr>
+</table>
+
+<h2>Methodology</h2>
+<ul>
+<li><strong>Sample.</strong> The Tranco top-1M list, ID <code>V3YPN</code>. Tranco
+averages several providers over thirty days, so it is far more stable than snapshot rankings,
+and every list is permanently addressable by ID. The same population can be re-derived by
+anyone.</li>
+<li><strong>Method.</strong> DNS only. TXT at the apex for SPF, at <code>_dmarc</code>,
+<code>_mta-sts</code>, <code>_smtp._tls</code> and <code>default._bimi</code>, plus MX. SPF
+lookup counts are computed by walking <code>include</code> and <code>redirect</code> chains.</li>
+<li><strong>Resolvers.</strong> Queries were spread across four public resolvers. A single
+resolver rate-limits long before a sample this size completes, and the resulting failures look
+like absent records rather than failed queries, which would understate adoption.</li>
+<li><strong>DKIM is deliberately not reported.</strong> Selectors are arbitrary strings chosen
+by the sender, so probing a list of common ones and finding nothing proves nothing. Any DKIM
+adoption figure derived that way is a lower bound at best and misleading at worst. Surveys that
+publish one should be read with that in mind.</li>
+<li><strong>Limitations.</strong> DNS presence is not correctness: a published record may still
+be misconfigured in ways DNS cannot reveal. MTA-STS is counted on the DNS record alone; the
+policy file was not fetched for every domain, so the real enforcing figure is lower still.</li>
+</ul>
+
+<h2>Data</h2>
+<p>The full per-domain dataset and the computed findings are published so the numbers above can
+be checked rather than taken on trust.</p>
+<ul>
+<li><a href="/scan-100000.jsonl.gz">Raw dataset</a>, JSON Lines, one record per domain, gzipped</li>
+<li><a href="/findings.json">Computed findings</a>, JSON</li>
+<li><a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, the checks this survey
+is built on</li>
+</ul>
+<p class="meta">Free to reuse with attribution. If you cite it, I would like to know.</p>
 
 <footer>
   <p>Rastu Singh, Infrastructure Engineer specialising in
