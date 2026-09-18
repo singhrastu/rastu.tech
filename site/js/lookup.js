@@ -212,7 +212,7 @@ export function search(index, query) {
   };
 }
 
-/** A one-line answer for the top match, which is what somebody actually wants. */
+/** A one-line answer for the top match, which is what the reader came for. */
 export function verdictFor(match) {
   if (!match) return null;
   const CLS = {

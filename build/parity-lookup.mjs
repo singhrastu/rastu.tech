@@ -110,8 +110,8 @@ is('a 4xx is temporary', verdictFor(top('4.2.2')).label, 'Temporary');
 is('a 2xx is accepted', verdictFor(top('250')).label, 'Accepted');
 
 // ------------------------------------------------------- honesty of labels
-// A derived action is a sound default and is not the same as somebody having
-// operated the failure. The two must stay distinguishable.
+// A derived action is a sound default. An action I have worked myself is a tested
+// one. The page claims the difference, so the data has to keep them distinguishable.
 {
   const written = index.filter(i => i.kind === 'enhanced' && i.specific);
   const derived = index.filter(i => i.kind === 'enhanced' && !i.specific);

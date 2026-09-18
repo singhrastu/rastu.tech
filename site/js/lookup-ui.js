@@ -97,8 +97,9 @@ function entry(m, lead) {
     <p class="src">
       ${page ? `<a href="${esc(page)}">Read the full page</a> &middot; ` : ''}
       ${m.kind === 'enhanced' && m.specific === false
-        ? '<span title="The action comes from the class and subject of this code, not '
-          + 'from somebody having operated this specific failure">action derived from '
+        ? '<span title="The action follows from the class and subject of this code. '
+          + 'I have not worked this specific failure myself, so treat it as a safe '
+          + 'default rather than a tested one.">action derived from '
           + 'its class</span> &middot; '
         : ''}
       <span class="from">${esc(m.source || '')}</span>

@@ -2358,15 +2358,20 @@ def build_smtp_index():
 
     # Which codes have a written page, so the lookup can offer the deep version.
     pages = {c["code"]: "/smtp/" + slug(c) + "/" for c in CODES}
+    with open(os.path.join(HERE, "registry.json"), encoding="utf8") as fh:
+        _reg = json.load(fh)
+    total = sum(len(_reg[k]) for k in ("basic", "enhanced", "microsoft", "provider"))
 
     body = f"""
 <h1>SMTP responses: what each one means and what to do</h1>
-<p class="lede">Paste a bounce out of your mail log, or type any part of a code. The
-registry covers every reply code in RFC 5321, every enhanced status code IANA has
+<p class="lede">Paste a bounce out of your mail log, or type any part of a code.
+{total} responses: every reply code in RFC 5321, every enhanced status code IANA has
 registered, and Microsoft's own, which are mostly outside both.</p>
 
 <div class="tool">
-  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one</label>
+  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one
+    <em><span id="lk-count">loading</span> from RFC 5321, the IANA registry and
+    Microsoft&rsquo;s own</em></label>
   <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
          placeholder="Loading the registry...">
   <p class="hint">Try:
@@ -2383,30 +2388,30 @@ registered, and Microsoft's own, which are mostly outside both.</p>
 <div id="lk-browse">
   <div class="sechead r">
     <h2>Written up in full</h2>
-    <p>{len(CODES)} of them have a page: real log samples, why it happens, and what to
-    change. The rest resolve in the lookup above with their registry definition and the
-    action their class implies.</p>
+    <p>{len(CODES)} of the {total} have a page of their own: real log samples, why it
+    happens, and what to change. Every other response resolves in the lookup above with
+    its registry definition and the action its class implies.</p>
   </div>
 
-  <div class="filter" data-filter>
+  <div class="filter" data-filter data-noun="written up in full">
     <div class="chips">{chips}<span class="count"></span></div>
     <div class="grid">{"".join(items)}</div>
     <p class="empty noresult hidden">Nothing matches that filter.</p>
   </div>
 
   <h2>Where these come from</h2>
-  <p>Nothing here is written from memory. The reply codes are parsed from
+  <p>The reply codes are parsed from
   <a href="https://www.rfc-editor.org/rfc/rfc5321.html#section-4.2.3">RFC 5321 section
   4.2.3</a>, the enhanced status codes from the
   <a href="https://www.iana.org/assignments/smtp-enhanced-status-codes/">IANA registry</a>,
   and the Microsoft codes from
   <a href="https://learn.microsoft.com/en-us/exchange/mail-flow-best-practices/non-delivery-reports-in-exchange-online/non-delivery-reports-in-exchange-online">Microsoft's
-  own NDR reference</a>. Each entry says which.</p>
-  <p>What the registries do not carry is what to do about a code, which is the only
-  reason anybody looks one up. So every entry also has an action. Where that action was
-  derived from the code's class rather than from operating the failure, it says so:
-  a sound default and somebody's experience are not the same thing, and a reference that
-  lets the two read alike is not worth trusting.</p>
+  own NDR reference</a>. Every entry names its source and links back to it.</p>
+  <p>What none of those registries carry is what to <em>do</em> about a code, which is
+  the only reason anybody looks one up. So every entry also carries an action. Where I
+  have worked the failure myself, the action is what actually cleared it. Where it
+  follows from the code's class and subject, the entry is marked as derived, so you can
+  tell a safe default from a tested one.</p>
 </div>
 """
     ld = {
@@ -2420,8 +2425,9 @@ registered, and Microsoft's own, which are mostly outside both.</p>
     }
     return page(
         "SMTP response reference: error and deferral codes explained",
-        "Searchable reference for SMTP rejection and deferral responses: what each means, "
-        "whether to retry, and how to fix the cause.",
+        f"Look up any SMTP response from any part of it: {total} codes from RFC 5321, "
+        "the IANA enhanced status code registry and Microsoft's NDR reference. What each "
+        "one means, whether retrying helps, and what to change.",
         body, "smtp/index.html", extra_ld=ld, wide=True,
         nav_key="SMTP responses",
         modules=("/js/filter.js", "/js/lookup-ui.js"))
@@ -2854,6 +2860,53 @@ def check_copy():
     print(f"  copy ok ({len(NAV)} nav labels resolve, kickers are category labels)")
 
 
+def check_voice():
+    """Fail the build on anything that reads as written by a machine.
+
+    The site is Rastu's professional record. Two things must never ship: a
+    phrase that sounds like a model narrating its own process, and a passage
+    that puts his own operating experience in the third person. The second is
+    the subtler one, and it is what "somebody having operated this failure"
+    was doing: describing him as a stranger.
+
+    /about/ is exempt from the model-name rule. It carries his career history,
+    where LLM-assisted development is a competency he claims deliberately.
+    """
+    banned = [
+        (r"written from memory|from memory\b", "reads as a model disclaiming recall"),
+        (r"\bas an AI\b|language model|I do not have access|I cannot browse",
+         "model self-disclosure"),
+        (r"somebody having operated|rather than from operating",
+         "puts his own experience in the third person"),
+        (r"are not the same thing, and|is not worth trusting",
+         "sermon about its own trustworthiness"),
+        (r"I hope this helps|feel free to|as mentioned (?:above|earlier)",
+         "assistant register"),
+    ]
+    models = re.compile(r"\b(claude|chatgpt|anthropic|openai|copilot|gpt-[0-9])\b", re.I)
+    bad = []
+
+    for root, _, files in os.walk(OUT):
+        for n in files:
+            if not n.endswith((".html", ".js")):
+                continue
+            f = os.path.join(root, n)
+            rel = "/" + os.path.relpath(f, OUT)
+            body = open(f, encoding="utf8").read()
+            for pat, why in banned:
+                m = re.search(pat, body, re.I)
+                if m:
+                    bad.append(f"{rel}: {why} -> {m.group(0)!r}")
+            if not rel.startswith("/about/"):
+                m = models.search(body)
+                if m:
+                    bad.append(f"{rel}: names a model in shipped output -> {m.group(0)!r}")
+
+    if bad:
+        raise SystemExit("voice check failed:\n  " + "\n  ".join(bad))
+    print("  voice ok (no machine register, no model named outside /about/)")
+
+
 def check_links():
     """Three things the build could not previously catch, each of which happened.
 
@@ -3036,6 +3089,7 @@ def main():
 
     check_js()
     check_copy()
+    check_voice()
     check_links()
 
     # preview/instrument.html is the alternative direction that was compared

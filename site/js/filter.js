@@ -27,8 +27,12 @@ function init(root) {
       if (on) shown++;
     }
     if (count) {
+      // The noun comes from the markup. This filter sits under a lookup covering
+      // several hundred responses, and hard-coding "responses" here made the page
+      // announce that the whole reference was fourteen of them.
+      const noun = root.getAttribute('data-noun') || 'items';
       count.textContent = shown === items.length
-        ? `${items.length} responses`
+        ? `${items.length} ${noun}`
         : `${shown} of ${items.length}`;
     }
     root.querySelector('.noresult')?.classList.toggle('hidden', shown > 0);

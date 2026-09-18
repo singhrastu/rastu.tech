@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SMTP response reference: error and deferral codes explained</title>
-<meta name="description" content="Searchable reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<meta name="description" content="Look up any SMTP response from any part of it: 272 codes from RFC 5321, the IANA enhanced status code registry and Microsoft&#x27;s NDR reference. What each one means, whether retrying helps, and what to change.">
 <meta name="author" content="Rastu Singh">
 <link rel="canonical" href="https://rastu.tech/smtp/">
 <meta property="og:title" content="SMTP response reference: error and deferral codes explained">
-<meta property="og:description" content="Searchable reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<meta property="og:description" content="Look up any SMTP response from any part of it: 272 codes from RFC 5321, the IANA enhanced status code registry and Microsoft&#x27;s NDR reference. What each one means, whether retrying helps, and what to change.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://rastu.tech/smtp/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
@@ -871,12 +871,14 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <main id="main">
 
 <h1>SMTP responses: what each one means and what to do</h1>
-<p class="lede">Paste a bounce out of your mail log, or type any part of a code. The
-registry covers every reply code in RFC 5321, every enhanced status code IANA has
+<p class="lede">Paste a bounce out of your mail log, or type any part of a code.
+272 responses: every reply code in RFC 5321, every enhanced status code IANA has
 registered, and Microsoft's own, which are mostly outside both.</p>
 
 <div class="tool">
-  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one</label>
+  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one
+    <em><span id="lk-count">loading</span> from RFC 5321, the IANA registry and
+    Microsoft&rsquo;s own</em></label>
   <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
          placeholder="Loading the registry...">
   <p class="hint">Try:
@@ -893,30 +895,30 @@ registered, and Microsoft's own, which are mostly outside both.</p>
 <div id="lk-browse">
   <div class="sechead r">
     <h2 class="r">Written up in full</h2>
-    <p>14 of them have a page: real log samples, why it happens, and what to
-    change. The rest resolve in the lookup above with their registry definition and the
-    action their class implies.</p>
+    <p>14 of the 272 have a page of their own: real log samples, why it
+    happens, and what to change. Every other response resolves in the lookup above with
+    its registry definition and the action its class implies.</p>
   </div>
 
-  <div class="filter" data-filter>
+  <div class="filter" data-filter data-noun="written up in full">
     <div class="chips"><button class="chip on" data-group="all" type="button">All</button><button class="chip" data-group="Generic" type="button">Generic</button><button class="chip" data-group="Gmail" type="button">Gmail</button><button class="chip" data-group="Microsoft / Outlook" type="button">Microsoft / Outlook</button><button class="chip" data-group="Yahoo" type="button">Yahoo</button><span class="count"></span></div>
     <div class="grid"><a href="/smtp/4-2-2/" data-terms="4.2.2 4.2.2 generic mailbox full retry the mailbox is over quota. temporary, and the address is still good. retry with backoff." data-group="Generic"><strong>4.2.2</strong><span class="p">RFC 3463</span><span class="d">The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.</span><span class="act a-retry">retry</span></a><a href="/smtp/4-4-1/" data-terms="4.4.1 4.4.1 generic connection retry a transport failure, not a mail failure. retry, but investigate if it sticks to one route." data-group="Generic"><strong>4.4.1</strong><span class="p">RFC 3463</span><span class="d">A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.</span><span class="act a-retry">retry</span></a><a href="/smtp/5-1-1/" data-terms="5.1.1 5.1.1 generic invalid recipient suppress the mailbox does not exist. permanent. suppress it, because retrying costs reputation." data-group="Generic"><strong>5.1.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-2-1/" data-terms="5.2.1 5.2.1 generic mailbox inactive suppress the mailbox exists but is disabled. suppress it, these turn into spam traps." data-group="Generic"><strong>5.2.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox exists but is disabled. Suppress it, these turn into spam traps.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-7-1/" data-terms="5.7.1 5.7.1 generic policy block review a deliberate policy rejection by the receiver, usually not about your reputation." data-group="Generic"><strong>5.7.1</strong><span class="p">RFC 3463</span><span class="d">A deliberate policy rejection by the receiver, usually not about your reputation.</span><span class="act a-review">review</span></a><a href="/smtp/spamhaus/" data-terms="spamhaus listing spamhaus generic blocklist pause the receiver queried spamhaus and found your ip listed. delist before sending again." data-group="Generic"><strong>Spamhaus listing</strong><span class="p">Blocklist</span><span class="d">The receiver queried Spamhaus and found your IP listed. Delist before sending again.</span><span class="act a-pause">pause</span></a><a href="/smtp/tls-handshake/" data-terms="tls handshake tls-handshake generic connection retry the connection opened but encryption could not be negotiated. usually cipher or certificate." data-group="Generic"><strong>TLS handshake</strong><span class="p">Transport</span><span class="d">The connection opened but encryption could not be negotiated. Usually cipher or certificate.</span><span class="act a-retry">retry</span></a><a href="/smtp/gmail-4-7-28/" data-terms="4.7.28 4.7.28 gmail rate limited throttle a throttle, not a block. slow down for gmail specifically and the mail still goes." data-group="Gmail"><strong>4.7.28</strong><span class="p">Gmail</span><span class="d">A throttle, not a block. Slow down for Gmail specifically and the mail still goes.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/gmail-5-7-1/" data-terms="5.7.1 5.7.1 gmail reputation block pause a hard reputation block. stop sending from this ip or domain and remediate." data-group="Gmail"><strong>5.7.1</strong><span class="p">Gmail</span><span class="d">A hard reputation block. Stop sending from this IP or domain and remediate.</span><span class="act a-pause">pause</span></a><a href="/smtp/gmail-5-7-26/" data-terms="5.7.26 5.7.26 gmail auth failure fix_config authentication failed. spf or dkim has to pass and align, and retrying will not help." data-group="Gmail"><strong>5.7.26</strong><span class="p">Gmail</span><span class="d">Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-4-7-500/" data-terms="4.7.500 4.7.500 microsoft / outlook rate limited throttle throttling. deferred rather than refused, so back off per-provider and retry." data-group="Microsoft / Outlook"><strong>4.7.500</strong><span class="p">Microsoft / Outlook</span><span class="d">Throttling. Deferred rather than refused, so back off per-provider and retry.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-5-7-606/" data-terms="5.7.606 5.7.606 microsoft / outlook reputation block pause your sending ip is on outlook&#x27;s block list. delist, then fix what caused it." data-group="Microsoft / Outlook"><strong>5.7.606</strong><span class="p">Microsoft / Outlook</span><span class="d">Your sending IP is on Outlook&#x27;s block list. Delist, then fix what caused it.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-s3140/" data-terms="s3140 s3140 microsoft / outlook reputation block pause microsoft&#x27;s internal reason code on a block. it points at ip reputation." data-group="Microsoft / Outlook"><strong>S3140</strong><span class="p">Microsoft / Outlook</span><span class="d">Microsoft&#x27;s internal reason code on a block. It points at IP reputation.</span><span class="act a-pause">pause</span></a><a href="/smtp/yahoo-ts03/" data-terms="ts03 ts03 yahoo reputation block pause a 4xx that behaves like a block. retrying on schedule will not clear it." data-group="Yahoo"><strong>TS03</strong><span class="p">Yahoo</span><span class="d">A 4xx that behaves like a block. Retrying on schedule will not clear it.</span><span class="act a-pause">pause</span></a></div>
     <p class="empty noresult hidden">Nothing matches that filter.</p>
   </div>
 
   <h2 class="r">Where these come from</h2>
-  <p>Nothing here is written from memory. The reply codes are parsed from
+  <p>The reply codes are parsed from
   <a href="https://www.rfc-editor.org/rfc/rfc5321.html#section-4.2.3">RFC 5321 section
   4.2.3</a>, the enhanced status codes from the
   <a href="https://www.iana.org/assignments/smtp-enhanced-status-codes/">IANA registry</a>,
   and the Microsoft codes from
   <a href="https://learn.microsoft.com/en-us/exchange/mail-flow-best-practices/non-delivery-reports-in-exchange-online/non-delivery-reports-in-exchange-online">Microsoft's
-  own NDR reference</a>. Each entry says which.</p>
-  <p>What the registries do not carry is what to do about a code, which is the only
-  reason anybody looks one up. So every entry also has an action. Where that action was
-  derived from the code's class rather than from operating the failure, it says so:
-  a sound default and somebody's experience are not the same thing, and a reference that
-  lets the two read alike is not worth trusting.</p>
+  own NDR reference</a>. Every entry names its source and links back to it.</p>
+  <p>What none of those registries carry is what to <em>do</em> about a code, which is
+  the only reason anybody looks one up. So every entry also carries an action. Where I
+  have worked the failure myself, the action is what actually cleared it. Where it
+  follows from the code's class and subject, the entry is marked as derived, so you can
+  tell a safe default from a tested one.</p>
 </div>
 
 </main>
