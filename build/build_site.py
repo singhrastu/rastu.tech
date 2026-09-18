@@ -973,7 +973,7 @@ TOOLS = [
 # the nav link, the footer link, and the head of the destination's h1.
 NAV = [
     ("Tools", "tools/"),
-    ("Reference", "smtp/"),
+    ("SMTP responses", "smtp/"),
     ("Research", "research/"),
     ("About", "about/"),
 ]
@@ -1141,8 +1141,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
       <a href="{up}tools/">All tools</a>
     </div>
     <div>
-      <h2>Reference</h2>
-      <a href="{up}smtp/">SMTP responses</a>
+      <h2>SMTP responses</h2>
+      <a href="{up}smtp/">All responses</a>
       <a href="{up}smtp/session/">Anatomy of a session</a>
     </div>
     <div>
@@ -1978,8 +1978,8 @@ def build_code_page(c):
         "mainEntityOfPage": f"{SITE}/smtp/{s}/",
     }
     return page(c["title"], c["answer"][:300], body, f"smtp/{s}/index.html",
-                extra_ld=ld, nav_key="Reference",
-                crumbs=(("Reference", "smtp/"), (c.get("label") or c["code"], None)))
+                extra_ld=ld, nav_key="SMTP responses",
+                crumbs=(("SMTP responses", "smtp/"), (c.get("label") or c["code"], None)))
 
 
 def build_smtp_index():
@@ -2019,7 +2019,7 @@ def build_smtp_index():
             f"</a>")
 
     body = f"""
-<h1>SMTP response reference</h1>
+<h1>SMTP responses: what each one means and what to do</h1>
 <p class="lede">What the responses in your mail log actually mean, whether retrying will
 help, and what to change so they stop. Written from operating these systems, not from the
 spec.</p>
@@ -2055,7 +2055,7 @@ here always agree.</p>
         "Searchable reference for SMTP rejection and deferral responses: what each means, "
         "whether to retry, and how to fix the cause.",
         body, "smtp/index.html", extra_ld=ld, wide=True,
-        nav_key="Reference", modules=("/js/filter.js",))
+        nav_key="SMTP responses", modules=("/js/filter.js",))
 
 
 def build_session():
@@ -2166,8 +2166,8 @@ when you are testing a submission endpoint that requires authentication.</p>
         "Anatomy of an SMTP session: a real delivery, line by line",
         "A real swaks SMTP session against Gmail's MX, annotated line by line: the 220 "
         "greeting, EHLO, STARTTLS, MAIL FROM, RCPT TO, and where each one can fail.",
-        body, "smtp/session/index.html", extra_ld=ld, wide=True, nav_key="Reference",
-        crumbs=(("Reference", "smtp/"), ("Anatomy of a session", None)))
+        body, "smtp/session/index.html", extra_ld=ld, wide=True, nav_key="SMTP responses",
+        crumbs=(("SMTP responses", "smtp/"), ("Anatomy of a session", None)))
 
 
 def build_about():
@@ -2625,13 +2625,17 @@ def main():
     # MTA-STS policy. The DNS record promises a policy at
     # https://mta-sts.<domain>/.well-known/mta-sts.txt; if that 404s the whole
     # mechanism is inert, which is the failure the reference page describes.
-    # Starts in testing mode: it reports without enforcing, so a wrong MX list
-    # cannot break inbound mail. Move to enforce once TLS-RPT looks clean.
+    #
+    # enforce, not testing: the mx list below matches the live MX records exactly
+    # and TLS-RPT has been reporting cleanly. Testing mode reports without
+    # enforcing, which means a downgrade attack still succeeds. Changing this
+    # file requires bumping the id in the _mta-sts TXT record, or receivers keep
+    # serving the cached policy until max_age expires.
     wk = os.path.join(OUT, ".well-known")
     os.makedirs(wk, exist_ok=True)
     open(os.path.join(wk, "mta-sts.txt"), "w").write(
         "version: STSv1\n"
-        "mode: testing\n"
+        "mode: enforce\n"
         "mx: mail.protonmail.ch\n"
         "mx: mailsec.protonmail.ch\n"
         "max_age: 604800\n"

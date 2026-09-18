@@ -16,9 +16,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -99,9 +99,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -182,9 +182,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -265,9 +265,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -348,9 +348,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -438,9 +438,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -508,9 +508,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -624,9 +624,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -713,9 +713,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -806,9 +806,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -889,9 +889,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -975,9 +975,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1061,9 +1061,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1175,9 +1175,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1289,9 +1289,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1410,9 +1410,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1524,9 +1524,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1639,9 +1639,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -1984,9 +1984,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -2063,9 +2063,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -2146,9 +2146,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -2229,9 +2229,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
@@ -2301,9 +2301,9 @@
    [
     "DKIM",
     "warn",
-    "No DKIM key found on 22 common selectors",
+    "No DKIM key found on 34 common selectors",
     "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
-    "tried: default, google, selector1, selector2, k1, k2, s1, s2..."
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
    ],
    [
     "DMARC",
