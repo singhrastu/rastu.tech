@@ -17,39 +17,155 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://rastu.tech/rastu-singh.jpg">
 <style>
-:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
-@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+/* Design tokens. Light is the base; dark redefines only the tokens. */
+:root{
+  --ink:#14171c; --ink-2:#3d4450; --ink-3:#6b7280;
+  --line:#e4e7ec; --line-2:#f1f3f6;
+  --bg:#fff; --surface:#f8f9fb; --code:#f4f6f8;
+  --accent:#1f4e79; --accent-2:#2d6ca8; --accent-soft:#eaf1f8;
+  --hex:#1f4e79;
+  --radius:10px;
+  --measure:44rem;
+}
+@media(prefers-color-scheme:dark){:root{
+  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8а93a1; --ink-3:#8b93a1;
+  --line:#272c34; --line-2:#1e222a;
+  --bg:#101318; --surface:#161a21; --code:#1a1f27;
+  --accent:#7fb2e5; --accent-2:#9cc6f0; --accent-soft:#18222e;
+  --hex:#7fb2e5;
+}}
+
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
-.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
-a{color:var(--accent)}
-h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
-h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
-h3{font-size:1rem;margin:1.6rem 0 .4rem}
-.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
-.lede{font-size:1.08rem}
-.meta{color:var(--muted);font-size:.9rem}
-nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
-nav.top a{text-decoration:none}
-pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
-code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
-pre code{background:none;padding:0}
-.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:16.5px/1.68 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ---- honeycomb field -------------------------------------------------
+   Fixed behind everything, drifting slowly as the page scrolls. Pure CSS
+   background + one transform driven by a custom property, so it costs one
+   compositor layer and no layout. Hidden entirely under reduced-motion. */
+.hex{
+  position:fixed;inset:-20vh -10vw;z-index:0;pointer-events:none;
+  opacity:.055;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
+  background-size:64px 112px;
+  transform:translate3d(0,calc(var(--sy,0) * -90px),0);
+  will-change:transform;
+}
+@media(prefers-color-scheme:dark){.hex{opacity:.07;filter:invert(1)}}
+.hex::after{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(70% 55% at 50% 0%,transparent 0%,var(--bg) 78%);
+}
+
+.wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
+
+/* ---- nav -------------------------------------------------------------- */
+nav.top{
+  display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;
+  padding:1.4rem 0 2.6rem;font-size:.93rem;
+}
+nav.top a{color:var(--ink-2);text-decoration:none;transition:color .15s}
+nav.top a:hover{color:var(--accent)}
+nav.top a:first-child{font-weight:650;color:var(--ink)}
+
+/* ---- type ------------------------------------------------------------- */
+a{color:var(--accent);text-underline-offset:2px}
+h1{font-size:clamp(1.9rem,4.5vw,2.5rem);line-height:1.16;letter-spacing:-.021em;margin:.3rem 0 .7rem;font-weight:680}
+h2{font-size:1.24rem;letter-spacing:-.01em;margin:2.9rem 0 .85rem;padding-bottom:.45rem;border-bottom:1px solid var(--line);font-weight:650}
+h3{font-size:1.02rem;margin:1.9rem 0 .45rem;font-weight:650}
+p{margin:0 0 1.05rem}
+.kicker{color:var(--ink-3);font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .2rem;font-weight:600}
+.lede{font-size:1.14rem;line-height:1.6;color:var(--ink);margin-bottom:1.3rem}
+.meta{color:var(--ink-3);font-size:.9rem}
 ul{padding-left:1.15rem}
-li{margin:.35rem 0}
-.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
-table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
-th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
-th{color:var(--muted);font-weight:600;font-size:.85rem}
-footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
-.grid{display:grid;gap:.1rem}
-.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
-.grid a span{color:var(--muted);font-size:.9rem}
+li{margin:.4rem 0}
+strong{font-weight:650}
+
+/* ---- code ------------------------------------------------------------- */
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.9rem 1.05rem;border-radius:var(--radius);overflow-x:auto;
+    font-size:.845rem;line-height:1.55;border:1px solid var(--line);margin:.9rem 0}
+code{background:var(--code);padding:.12rem .38rem;border-radius:5px;font-size:.88em}
+pre code{background:none;padding:0}
+
+/* ---- badges ----------------------------------------------------------- */
+.badge{display:inline-block;background:var(--surface);border:1px solid var(--line);
+       border-radius:100px;padding:.2rem .68rem;font-size:.775rem;color:var(--ink-2);
+       margin:0 .4rem .4rem 0;font-weight:500}
+
+/* ---- callout ---------------------------------------------------------- */
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);
+         padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;
+         color:var(--ink-2);font-size:.96rem}
+.callout p{margin:0}
+
+/* ---- tables ----------------------------------------------------------- */
+.scroll-x{overflow-x:auto;margin:1.1rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:30rem}
+th,td{text-align:left;padding:.58rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-3);font-weight:600;font-size:.79rem;letter-spacing:.045em;
+   text-transform:uppercase;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:var(--surface)}
+td:not(:first-child){font-variant-numeric:tabular-nums}
+
+/* ---- stat tiles: the right form for a single headline number ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem;margin:1.4rem 0 1.8rem}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.05rem}
+.stat .n{font-size:1.85rem;line-height:1.1;font-weight:680;letter-spacing:-.025em;
+         font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat .l{font-size:.815rem;color:var(--ink-3);margin-top:.3rem;line-height:1.35}
+
+/* ---- single-series magnitude bars ------------------------------------- */
+.bars{margin:1.3rem 0 1.8rem}
+.bar-row{display:grid;grid-template-columns:1fr 3.2rem;gap:.85rem;align-items:center;margin:.55rem 0}
+.bar-label{font-size:.885rem;color:var(--ink-2);line-height:1.35}
+.bar-track{grid-column:1/-1;height:7px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:4px;
+          width:0;transition:width .9s cubic-bezier(.22,.7,.3,1)}
+.reveal .bar-fill{width:var(--w)}
+.bar-val{font-size:.885rem;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+
+/* ---- card grid for the reference index -------------------------------- */
+.grid{display:grid;gap:.55rem;margin-top:1.2rem}
+.grid a{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
+        text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
+.grid a:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid a strong{color:var(--ink);font-size:.97rem}
+.grid a .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
+.grid a span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
+
+/* ---- portrait --------------------------------------------------------- */
+.portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
+          max-width:32%;border:1px solid var(--line)}
+
+/* ---- footer ----------------------------------------------------------- */
+footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
+       color:var(--ink-3);font-size:.885rem}
+
+/* ---- scroll reveal ---------------------------------------------------- */
+.r{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,.7,.3,1)}
+.r.reveal{opacity:1;transform:none}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .hex{display:none}
+  .r{opacity:1;transform:none;transition:none}
+  .bar-fill{transition:none;width:var(--w)}
+  .grid a:hover{transform:none}
+}
+@media(max-width:34rem){
+  .portrait{max-width:38%;margin-left:1rem}
+  h2{margin-top:2.3rem}
+}
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
 </head>
 <body>
+<div class="hex" aria-hidden="true"></div>
 <div class="wrap">
 <nav class="top">
   <a href="../">Rastu Singh</a>
@@ -70,7 +186,7 @@ reputation, and the authentication stack of SPF, DKIM and DMARC. He currently wo
 Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
 since 2015.</p>
 
-<h2>What he does</h2>
+<h2 class="r">What he does</h2>
 <p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
 
 <p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
@@ -92,34 +208,34 @@ enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin 
 abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
 without breaking legitimate mail flow.</p>
 
-<h2>Career</h2>
-<table>
+<h2 class="r">Career</h2>
+<div class="scroll-x r"><table>
 <tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
 <tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
 <tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
 <tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
 <tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
 <tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
-</table>
+</table></div>
 
 <p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
 the authentication layer across all sending domains, and led the IT team and a group of junior
 deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
 300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
 
-<h2>Open-source work</h2>
+<h2 class="r">Open-source work</h2>
 <p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
 deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
 to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
 email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
 consistency, which generic checkers miss.</p>
 
-<h2>Writing</h2>
+<h2 class="r">Writing</h2>
 <p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
 actually mean, whether retrying helps, and what to change so they stop. It is written from
 operating these systems rather than from the specifications.</p>
 
-<h2>Contact</h2>
+<h2 class="r">Contact</h2>
 <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
    <a href="https://github.com/singhrastu">GitHub</a> &middot;
    <a href="https://orcid.org/0009-0002-0526-3005">ORCID 0009-0002-0526-3005</a></p>
@@ -132,5 +248,26 @@ operating these systems rather than from the specifications.</p>
      <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a></p>
 </footer>
 </div>
+<script>
+(function(){
+  var t=false;
+  function sy(){
+    document.documentElement.style.setProperty('--sy',
+      (window.scrollY/Math.max(1,document.body.scrollHeight-innerHeight)).toFixed(4));
+    t=false;
+  }
+  addEventListener('scroll',function(){if(!t){t=true;requestAnimationFrame(sy);}},{passive:true});
+  sy();
+
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('.r,.bars').forEach(function(n){n.classList.add('reveal');});
+    return;
+  }
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('reveal'); io.unobserve(e.target);} });
+  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
+  document.querySelectorAll('.r,.bars').forEach(function(n){io.observe(n);});
+})();
+</script>
 </body>
 </html>
