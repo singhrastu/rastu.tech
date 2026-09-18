@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Yahoo TS03: deferred for policy reasons</h1>
 <p><span class="badge">Yahoo</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
 <p class="lede">Yahoo&#x27;s [TS03] tag marks a deferral for policy or reputation reasons. It arrives as a 4xx, so the message is still queued, but it is a reputation signal rather than a capacity one. Back off and look at your complaint rate.</p>
@@ -533,11 +532,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Enrol in Yahoo&#x27;s complaint feedback loop and make sure complaints reach suppression.</li>
 <li>Reduce volume to Yahoo domains and rebuild with engaged recipients only.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/gmail-4-7-28/">4.7.28</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>reputation_block</code> with a recommended action of
-<code>pause</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>reputation_block</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>SMTP 4.4.1: connection timed out or refused</h1>
 <p><span class="badge">RFC 3463</span><span class="badge">connection</span><span class="badge">action: retry</span></p>
 <p class="lede">4.4.1 means your server could not complete a connection to the receiving host. It is a transport problem rather than a policy one. Retry, but investigate if it is concentrated on one route or one destination.</p>
@@ -534,11 +533,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>If it is one destination only, test from a different egress IP. If that works, it is reputation, not networking.</li>
 <li>If it is every destination, the problem is on your side: routing, firewall or DNS.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/tls-handshake/">tls-handshake</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>connection</code> with a recommended action of
-<code>retry</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>connection</code>, action
+<code>retry</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

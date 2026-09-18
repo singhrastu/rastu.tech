@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <nav class="crumb" aria-label="Breadcrumb"><a href="../">Home</a><span>/</span><a href="../tools/">Tools</a><span>/</span>Domain check</nav>
 <main id="main">
 
-<p class="kicker">Tool</p>
 <h1>Check a domain's email authentication</h1>
 <p class="lede">SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI, with the things generic
 checkers miss: the RFC 7208 ten-lookup limit, whether an MTA-STS policy actually
@@ -539,32 +538,28 @@ hosts that are live right now.</p>
   <div class="report" id="check-out" aria-live="polite"></div>
 </div>
 
-<h2 class="r">What it checks, and why each one is here</h2>
+<h2 class="r">What it checks</h2>
 
-<h3>SPF, and the limit that breaks it silently</h3>
-<p>Beyond whether a record exists: the qualifier it ends on, whether more than one
-record is published (which is a permerror, not a merge), and the DNS lookup count.
-RFC 7208 caps that count at ten. Over the cap the evaluation is a permerror and most
-receivers treat a permerror as no SPF at all. The record still resolves. It still
-looks correct in a lookup. It has simply stopped working, usually because somebody
-added one more vendor to a record that was already at nine. In the
-<a href="/research/">100,000-domain survey</a> this had happened to 3.4% of every SPF
-record published.</p>
+<h3>SPF</h3>
+<p>Beyond whether a record exists: the qualifier it ends on, whether more than one is
+published (which is a permerror, not a merge), and the RFC 7208 lookup count. For the
+full include tree and the mechanism that tips a record over the limit, use the
+<a href="/spf/">SPF lookup counter</a>.</p>
 
-<h3>DMARC, and whether the policy does anything</h3>
+<h3>DMARC</h3>
 <p>Policy strength, subdomain policy, pct, and whether an aggregate reporting address
 is set. The common failures are a policy left at p=none where it blocks nothing,
 enforcement with no rua so there is no way to see what is being enforced, and sp=none
 under an enforcing p, which leaves every subdomain spoofable while the main domain
 looks protected.</p>
 
-<h3>DKIM, reported honestly</h3>
+<h3>DKIM</h3>
 <p>Selectors are arbitrary strings chosen by the sender. Probing a list of common ones
 and finding nothing proves nothing, so a miss is reported as inconclusive rather than
 as absent. Where a key is found, the approximate key length is reported, because keys
 under 1024 bits are rejected outright by several receivers.</p>
 
-<h3>MTA-STS, including the policy file</h3>
+<h3>MTA-STS</h3>
 <p>The DNS record is a promise that a policy exists at
 <code>https://mta-sts.&lt;domain&gt;/.well-known/mta-sts.txt</code>. If that URL 404s
 the entire mechanism is inert while appearing configured, and a DNS-only checker will
@@ -579,17 +574,15 @@ over 5,000 messages a day. Two of those requirements, one-click List-Unsubscribe
 complaint rate under 0.3%, are not visible from DNS, so the report says so rather than
 guessing.</p>
 
-<h2 class="r">Where it runs</h2>
+<h2 class="r">Your domain is never sent to this site</h2>
 <p>In your browser. The DNS lookups go from your machine to a public DNS-over-HTTPS
 resolver, not through this site, so the domain you type is never sent here and there
 is nothing to log. The one exception is the MTA-STS policy file: a page cannot fetch
 a URL on another origin, so that single request is proxied, and the endpoint takes a
 domain rather than a URL so it cannot be used to fetch anything else.</p>
 
-<p>It is the same logic as
-<a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, which is the
-command-line version and the source of truth. The two are tested against each other
-on every build, so this page cannot tell you something the tool would not.</p>
+<p>Same logic as <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>,
+the command-line version, checked against it on every build.</p>
 
 </main>
 <footer>

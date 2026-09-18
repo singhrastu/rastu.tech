@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Gmail 5.7.1: message blocked for reputation</h1>
 <p><span class="badge">Gmail</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
 <p class="lede">Gmail 5.7.1 is a hard block. Unlike 4.7.28, this is Gmail refusing the message outright, usually on content or on the reputation of the sending IP or domain. Retrying makes it worse. Stop sending to Gmail from that source and find the cause.</p>
@@ -536,11 +535,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Separate the variables: if only one range is affected, it is reputation. If every range is affected, it is content or authentication.</li>
 <li>Clean the list before resuming. Reputation recovers through good sending, not through appeals.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-4-7-28/">4.7.28</a> &middot; <a href="/smtp/gmail-5-7-26/">5.7.26</a> &middot; <a href="/smtp/spamhaus/">spamhaus</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>reputation_block</code> with a recommended action of
-<code>pause</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>reputation_block</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

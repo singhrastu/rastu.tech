@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>SMTP 4.2.2: recipient mailbox is full</h1>
 <p><span class="badge">RFC 3463</span><span class="badge">mailbox_full</span><span class="badge">action: retry</span></p>
 <p class="lede">4.2.2 means the recipient&#x27;s mailbox is over quota. It is temporary and the address is still valid, so retry. If it persists for several days the mailbox is likely abandoned and should be suppressed.</p>
@@ -533,11 +532,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Suppress after a sustained period. A permanently full mailbox is an unengaged recipient and often becomes a spam trap.</li>
 <li>Note the 5.2.2 variant is permanent: same meaning, different verdict.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/5-1-1/">5.1.1</a> &middot; <a href="/smtp/5-2-1/">5.2.1</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>mailbox_full</code> with a recommended action of
-<code>retry</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>mailbox_full</code>, action
+<code>retry</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

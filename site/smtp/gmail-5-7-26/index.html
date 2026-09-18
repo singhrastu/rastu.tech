@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Gmail 5.7.26: unauthenticated mail rejected</h1>
 <p><span class="badge">Gmail</span><span class="badge">auth_failure</span><span class="badge">action: fix_config</span></p>
 <p class="lede">Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignment, and this message did neither. Retrying will not help. Fix the authentication and resend.</p>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Check alignment: the domain that passes SPF or DKIM has to match the From domain, relaxed or strict as the policy requires.</li>
 <li>Read your DMARC aggregate reports for the sending source rather than guessing which leg is failing.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/gmail-4-7-28/">4.7.28</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>auth_failure</code> with a recommended action of
-<code>fix_config</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>auth_failure</code>, action
+<code>fix_config</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

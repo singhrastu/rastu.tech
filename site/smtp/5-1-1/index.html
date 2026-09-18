@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>SMTP 5.1.1: recipient address does not exist</h1>
 <p><span class="badge">RFC 3463</span><span class="badge">invalid_recipient</span><span class="badge">action: suppress</span></p>
 <p class="lede">5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.</p>
@@ -534,11 +533,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>If the hard bounce rate is above about 2%, the problem is list acquisition, not delivery.</li>
 <li>Validate at the point of capture rather than discovering invalid addresses at send time.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/5-2-1/">5.2.1</a> &middot; <a href="/smtp/4-2-2/">4.2.2</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>invalid_recipient</code> with a recommended action of
-<code>suppress</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>invalid_recipient</code>, action
+<code>suppress</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

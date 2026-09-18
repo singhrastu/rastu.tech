@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Gmail 4.7.28: unusual rate, deferred not blocked</h1>
 <p><span class="badge">Gmail</span><span class="badge">rate_limited</span><span class="badge">action: throttle</span></p>
 <p class="lede">Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or domain and is deferring rather than refusing it. The mail is still deliverable. Slow down and retry, and it will go through.</p>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Check Google Postmaster Tools for the same period. If the spam rate is climbing, the rate limit is a symptom and the complaint rate is the problem.</li>
 <li>If you are mid warm-up, hold the current daily volume rather than continuing to ramp.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/gmail-5-7-26/">5.7.26</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>rate_limited</code> with a recommended action of
-<code>throttle</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>rate_limited</code>, action
+<code>throttle</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

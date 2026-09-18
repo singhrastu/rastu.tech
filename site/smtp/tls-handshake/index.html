@@ -516,9 +516,8 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>TLS handshake failures on outbound SMTP</h1>
-<p><span class="badge">RFC 3463</span><span class="badge">connection</span><span class="badge">action: retry</span></p>
+<p><span class="badge">Transport</span><span class="badge">connection</span><span class="badge">action: retry</span></p>
 <p class="lede">A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are normal. A failure rate concentrated on one destination or one IP range is almost never a certificate problem, it is a reputation problem being expressed at the transport layer.</p>
 <div class="callout"><p>This one is worth internalising. A near-total TLS failure rate against a single provider from a single IP range looks exactly like a configuration bug and is usually reputation damage. The diagnostic that separates them is comparing separated egress paths to the same destination, which is only possible if the estate was built with that separation in the first place.</p></div>
 <h2 class="r">What it looks like in the log</h2>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Confirm your own certificate and protocol support before assuming the receiver is at fault.</li>
 <li>If TLS-RPT is published for the destination, read the reports rather than inferring.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/4-4-1/">4.4.1</a> &middot; <a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>connection</code> with a recommended action of
-<code>retry</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>connection</code>, action
+<code>retry</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

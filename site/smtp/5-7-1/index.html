@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>SMTP 5.7.1: delivery not authorized, message refused</h1>
 <p><span class="badge">RFC 3463</span><span class="badge">policy_block</span><span class="badge">action: review</span></p>
 <p class="lede">5.7.1 is a policy rejection. The receiving server understood the message and refused it on purpose. The cause sits in the accompanying text, which is where the actual diagnosis lives: reputation, content, relaying, or authentication.</p>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>If a blocklist is named, work that listing specifically.</li>
 <li>If it says relay access denied and you are the sender, check that you are connecting to the right host and authenticating.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-26/">5.7.26</a> &middot; <a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a> &middot; <a href="/smtp/spamhaus/">spamhaus</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>policy_block</code> with a recommended action of
-<code>review</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>policy_block</code>, action
+<code>review</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

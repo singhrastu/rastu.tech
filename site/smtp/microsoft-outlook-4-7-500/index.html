@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Microsoft 4.7.500: server busy, throttled</h1>
 <p><span class="badge">Microsoft / Outlook</span><span class="badge">rate_limited</span><span class="badge">action: throttle</span></p>
 <p class="lede">Microsoft 4.7.500 is throttling. The message has not been rejected, it has been deferred because Microsoft is limiting how much it will take from you right now. Reduce concurrency for Microsoft destinations and let the retries run.</p>
@@ -533,11 +532,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Spread delivery over a longer window rather than bursting.</li>
 <li>Check SNDS. Persistent throttling is usually an early warning of a reputation problem, not a capacity issue on their side.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a> &middot; <a href="/smtp/microsoft-outlook-s3140/">S3140</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>rate_limited</code> with a recommended action of
-<code>throttle</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>rate_limited</code>, action
+<code>throttle</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

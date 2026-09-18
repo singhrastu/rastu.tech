@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Microsoft 5.7.606: access denied, banned sending IP</h1>
 <p><span class="badge">Microsoft / Outlook</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
 <p class="lede">Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentication problem, and it will not clear on its own. You need to request delisting through Microsoft and fix whatever caused the listing.</p>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Fix the cause before requesting removal. Microsoft relists quickly, and repeat listings are harder to clear.</li>
 <li>Route Microsoft traffic off the affected range while you work the delisting.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/microsoft-outlook-s3140/">S3140</a> &middot; <a href="/smtp/microsoft-outlook-4-7-500/">4.7.500</a> &middot; <a href="/smtp/gmail-5-7-1/">5.7.1</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>reputation_block</code> with a recommended action of
-<code>pause</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>reputation_block</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

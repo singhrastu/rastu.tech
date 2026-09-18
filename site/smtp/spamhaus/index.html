@@ -516,9 +516,8 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Blocked using Spamhaus: how to diagnose and get delisted</h1>
-<p><span class="badge">RFC 3463</span><span class="badge">blocklist</span><span class="badge">action: pause</span></p>
+<p><span class="badge">Blocklist</span><span class="badge">blocklist</span><span class="badge">action: pause</span></p>
 <p class="lede">This means the receiving server queried Spamhaus, found your sending IP listed, and refused the connection. Delisting is straightforward and usually fast, but it is pointless until the source is fixed, because Spamhaus will relist you.</p>
 <div class="callout"><p>A CSS listing usually points at snowshoe-style patterns or poor list hygiene rather than outright abuse, and PBL simply means the IP is in a range the owner has declared should not be sending mail directly. Reading which list you are on tells you most of what you need to know before you touch the removal form.</p></div>
 <h2 class="r">What it looks like in the log</h2>
@@ -535,11 +534,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Request delisting once, describing what you fixed. Repeated requests without a fix damage your standing with them.</li>
 <li>Move production traffic off the listed range while you work it, so delivery continues.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>blocklist</code> with a recommended action of
-<code>pause</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>blocklist</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

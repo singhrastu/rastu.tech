@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>Microsoft S3140: sending IP reputation block</h1>
 <p><span class="badge">Microsoft / Outlook</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
 <p class="lede">S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You will normally see it alongside a 550 5.7.x response. Treat it the same as any Outlook reputation block: stop sending from that IP and work the delisting.</p>
@@ -533,11 +532,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Request delisting once, with the cause already fixed.</li>
 <li>Warm the IP back up slowly rather than resuming at previous volume.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a> &middot; <a href="/smtp/microsoft-outlook-4-7-500/">4.7.500</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>reputation_block</code> with a recommended action of
-<code>pause</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>reputation_block</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>

@@ -1339,7 +1339,6 @@ def build_check():
     }
 
     body = """
-<p class="kicker">Tool</p>
 <h1>Check a domain's email authentication</h1>
 <p class="lede">SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI, with the things generic
 checkers miss: the RFC 7208 ten-lookup limit, whether an MTA-STS policy actually
@@ -1362,32 +1361,28 @@ hosts that are live right now.</p>
   <div class="report" id="check-out" aria-live="polite"></div>
 </div>
 
-<h2>What it checks, and why each one is here</h2>
+<h2>What it checks</h2>
 
-<h3>SPF, and the limit that breaks it silently</h3>
-<p>Beyond whether a record exists: the qualifier it ends on, whether more than one
-record is published (which is a permerror, not a merge), and the DNS lookup count.
-RFC 7208 caps that count at ten. Over the cap the evaluation is a permerror and most
-receivers treat a permerror as no SPF at all. The record still resolves. It still
-looks correct in a lookup. It has simply stopped working, usually because somebody
-added one more vendor to a record that was already at nine. In the
-<a href="/research/">100,000-domain survey</a> this had happened to 3.4% of every SPF
-record published.</p>
+<h3>SPF</h3>
+<p>Beyond whether a record exists: the qualifier it ends on, whether more than one is
+published (which is a permerror, not a merge), and the RFC 7208 lookup count. For the
+full include tree and the mechanism that tips a record over the limit, use the
+<a href="/spf/">SPF lookup counter</a>.</p>
 
-<h3>DMARC, and whether the policy does anything</h3>
+<h3>DMARC</h3>
 <p>Policy strength, subdomain policy, pct, and whether an aggregate reporting address
 is set. The common failures are a policy left at p=none where it blocks nothing,
 enforcement with no rua so there is no way to see what is being enforced, and sp=none
 under an enforcing p, which leaves every subdomain spoofable while the main domain
 looks protected.</p>
 
-<h3>DKIM, reported honestly</h3>
+<h3>DKIM</h3>
 <p>Selectors are arbitrary strings chosen by the sender. Probing a list of common ones
 and finding nothing proves nothing, so a miss is reported as inconclusive rather than
 as absent. Where a key is found, the approximate key length is reported, because keys
 under 1024 bits are rejected outright by several receivers.</p>
 
-<h3>MTA-STS, including the policy file</h3>
+<h3>MTA-STS</h3>
 <p>The DNS record is a promise that a policy exists at
 <code>https://mta-sts.&lt;domain&gt;/.well-known/mta-sts.txt</code>. If that URL 404s
 the entire mechanism is inert while appearing configured, and a DNS-only checker will
@@ -1402,17 +1397,15 @@ over 5,000 messages a day. Two of those requirements, one-click List-Unsubscribe
 complaint rate under 0.3%, are not visible from DNS, so the report says so rather than
 guessing.</p>
 
-<h2>Where it runs</h2>
+<h2>Your domain is never sent to this site</h2>
 <p>In your browser. The DNS lookups go from your machine to a public DNS-over-HTTPS
 resolver, not through this site, so the domain you type is never sent here and there
 is nothing to log. The one exception is the MTA-STS policy file: a page cannot fetch
 a URL on another origin, so that single request is proxied, and the endpoint takes a
 domain rather than a URL so it cannot be used to fetch anything else.</p>
 
-<p>It is the same logic as
-<a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, which is the
-command-line version and the source of truth. The two are tested against each other
-on every build, so this page cannot tell you something the tool would not.</p>
+<p>Same logic as <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>,
+the command-line version, checked against it on every build.</p>
 """
     return page(
         "Email authentication checker: SPF, DKIM, DMARC, MTA-STS and BIMI",
@@ -1584,8 +1577,8 @@ these systems for a living.</p>
 
 def build_code_page(c):
     s = slug(c)
-    prov = f"<span class=\"badge\">{e(c['provider'])}</span>" if c.get("provider") else \
-           '<span class="badge">RFC 3463</span>'
+    prov = '<span class="badge">' + e(c.get("provider") or c.get("badge") or "RFC 3463") \
+           + "</span>"
     seen = "\n".join(f"<pre><code>{e(x)}</code></pre>" for x in c["seen_as"])
     causes = "\n".join(f"<li>{e(x)}</li>" for x in c["causes"])
     fixes = "\n".join(f"<li>{e(x)}</li>" for x in c["fix"])
@@ -1601,7 +1594,6 @@ def build_code_page(c):
             rel = f"<h2>Related</h2><p>{' &middot; '.join(links)}</p>"
 
     body = f"""
-<p class="kicker">SMTP reference</p>
 <h1>{e(c['title'])}</h1>
 <p>{prov}<span class="badge">{e(c['category'])}</span><span class="badge">action: {e(c['action'])}</span></p>
 <p class="lede">{e(c['answer'])}</p>
@@ -1613,11 +1605,9 @@ def build_code_page(c):
 <h2>What to do</h2>
 <ul>{fixes}</ul>
 {rel}
-<h2>Classifying this automatically</h2>
-<p>This response maps to <code>{e(c['category'])}</code> with a recommended action of
-<code>{e(c['action'])}</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>{e(c['category'])}</code>, action
+<code>{e(c['action'])}</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 """
     ld = {
         "@context": "https://schema.org",
@@ -1800,8 +1790,6 @@ Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and
 since 2015.</p>
 
 <h2>What he does</h2>
-<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
-
 <p><strong>Email infrastructure.</strong> Building and operating the transport layer at scale:
 estates running to over a thousand sending IPs and delivering millions of messages a day. Six
 MTAs in production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and
@@ -1823,7 +1811,6 @@ abuse prevention, open-relay protection, and reducing domain spoofing and phishi
 without breaking legitimate mail flow.</p>
 
 <h2>Career</h2>
-<p>Every role, and what actually got done in it. Open one to read the detail.</p>
 {career_html()}
 
 <p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
@@ -1831,9 +1818,7 @@ the authentication layer across all sending domains, and led the IT team and a g
 deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
 300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
 
-<h2>What he works with</h2>
-<p>Production experience rather than a reading list. Every item below has been run in
-anger on a live sending estate.</p>
+<h2>Stack</h2>
 {stack_html()}
 
 <h2>Open-source work</h2>
@@ -1842,11 +1827,6 @@ deferrals into a category and an action, on the argument that hard and soft boun
 to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
 email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
 consistency, which generic checkers miss.</p>
-
-<h2>Writing</h2>
-<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
-actually mean, whether retrying helps, and what to change so they stop. It is written from
-operating these systems rather than from the specifications.</p>
 
 <h2>Contact</h2>
 <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
@@ -1939,10 +1919,10 @@ protection.</p>
 <tr><td>BIMI</td><td>{g['bimi']}%</td></tr>
 </table>
 
-<h2>The gaps, which are the interesting part</h2>
+<h2>The gaps</h2>
 
-<p>Adoption rates are the least useful thing a survey like this produces. The gap between
-publishing a record and being protected by it is where the real picture is. All figures below
+<p>The gap between publishing a record and being protected by it is where the real
+picture is. All figures below
 are shares of the domains that publish the record at all, so they describe people who have
 already done most of the work.</p>
 
@@ -2062,6 +2042,45 @@ def build_stub(path, kicker, title, lede, body_extra=""):
     return page(title, lede, body, path)
 
 
+def check_copy():
+    """Two rules the audit showed the site had drifted away from.
+
+    1. A nav label must be findable on the page it leads to. The audit found six
+       nav labels and not one matched its destination, with "Domain check" going
+       by three different names across the site.
+    2. A kicker is a category label or it is nothing. "Everything else here",
+       "When it works" and "When it does not" were filing labels that told a
+       reader nothing and could not be searched for.
+
+    Cheap to assert, and the kind of thing that silently comes back otherwise.
+    """
+    allowed = {label for label, _ in NAV}
+    problems = []
+
+    for label, href in NAV:
+        path = os.path.join(OUT, href, "index.html")
+        html_src = open(path, encoding="utf8").read()
+        found = re.findall(r"<h1>(.*?)</h1>|<title>(.*?)</title>"
+                           r"|class=\"kicker\">(.*?)<", html_src, re.S)
+        hay = " ".join(part for groups in found for part in groups)
+        if label.lower() not in hay.lower():
+            problems.append(f"nav label {label!r} appears nowhere on /{href}")
+
+    for root, _, files in os.walk(OUT):
+        for name in files:
+            if not name.endswith(".html"):
+                continue
+            full = os.path.join(root, name)
+            for k in re.findall(r'class="kicker">([^<]*)<', open(full, encoding="utf8").read()):
+                if k.strip() not in allowed:
+                    rel = os.path.relpath(full, OUT)
+                    problems.append(f"kicker {k.strip()!r} on {rel} is not a category label")
+
+    if problems:
+        sys.exit("copy rules broken:\n  " + "\n  ".join(problems))
+    print(f"  copy ok ({len(NAV)} nav labels resolve, kickers are category labels)")
+
+
 def check_js():
     """Parse every script the site ships.
 
@@ -2161,6 +2180,7 @@ def main():
         f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
 
     check_js()
+    check_copy()
 
     n = sum(len(files) for _, _, files in os.walk(OUT))
     print(f"built {n} files, {len(urls)} pages -> {OUT}")

@@ -516,7 +516,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
 <h1>SMTP 5.2.1: mailbox disabled or inactive</h1>
 <p><span class="badge">RFC 3463</span><span class="badge">mailbox_inactive</span><span class="badge">action: suppress</span></p>
 <p class="lede">5.2.1 means the mailbox exists but is disabled, suspended or not accepting mail. It is permanent. Suppress it, and treat these addresses with more care than an ordinary hard bounce, because dormant mailboxes are frequently recycled into spam traps.</p>
@@ -532,11 +531,9 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <li>Treat a rise in 5.2.1 as a list-age signal. These addresses are prime candidates for recycled spam traps.</li>
 <li>Apply a sunset policy so unengaged addresses stop being mailed before they become traps.</li></ul>
 <h2 class="r">Related</h2><p><a href="/smtp/5-1-1/">5.1.1</a> &middot; <a href="/smtp/4-2-2/">4.2.2</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>mailbox_inactive</code> with a recommended action of
-<code>suppress</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<p class="meta">Classified as <code>mailbox_inactive</code>, action
+<code>suppress</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>
