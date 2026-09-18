@@ -334,6 +334,21 @@ verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
 <p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a></p>
 """))
 
+    # MTA-STS policy. The DNS record promises a policy at
+    # https://mta-sts.<domain>/.well-known/mta-sts.txt; if that 404s the whole
+    # mechanism is inert, which is the failure the reference page describes.
+    # Starts in testing mode: it reports without enforcing, so a wrong MX list
+    # cannot break inbound mail. Move to enforce once TLS-RPT looks clean.
+    wk = os.path.join(OUT, ".well-known")
+    os.makedirs(wk, exist_ok=True)
+    open(os.path.join(wk, "mta-sts.txt"), "w").write(
+        "version: STSv1\n"
+        "mode: testing\n"
+        "mx: mail.protonmail.ch\n"
+        "mx: mailsec.protonmail.ch\n"
+        "max_age: 604800\n"
+    )
+
     # sitemap + robots
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
