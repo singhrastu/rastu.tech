@@ -31,6 +31,7 @@ sys.path.insert(0, HERE)
 from codes import CODES
 
 SITE = "https://rastu.tech"
+INDEXNOW_KEY = "842e66c906302afc62fc2a281224035a"
 
 PERSON = {
     "name": "Rastu Singh",
@@ -348,6 +349,11 @@ verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
         "mx: mailsec.protonmail.ch\n"
         "max_age: 604800\n"
     )
+
+    # IndexNow key. Bing, Yandex and Seznam accept instant submissions with no
+    # account and no verification beyond this file being reachable at the root.
+    # Google does not participate, so it still needs Search Console.
+    open(os.path.join(OUT, INDEXNOW_KEY + ".txt"), "w").write(INDEXNOW_KEY)
 
     # sitemap + robots
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
