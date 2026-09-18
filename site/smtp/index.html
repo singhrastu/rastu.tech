@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMTP response reference: error and deferral codes explained</title>
+<meta name="description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<link rel="canonical" href="https://rastu.tech/smtp/">
+<meta property="og:title" content="SMTP response reference: error and deferral codes explained">
+<meta property="og:description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/smtp/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "SMTP response reference", "author": {"@id": "https://rastu.tech/#person"}, "mainEntityOfPage": "https://rastu.tech/smtp/"}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="../">Rastu Singh</a>
+  <a href="../smtp/">SMTP reference</a>
+  <a href="../research/">Research</a>
+  <a href="../tools/">Tools</a>
+</nav>
+
+<p class="kicker">Reference</p>
+<h1>SMTP response reference</h1>
+<p class="lede">What the responses in your mail log actually mean, whether retrying will help,
+and what to change so they stop. Written from operating these systems, not from the spec.</p>
+<p class="meta">14 responses documented. Categories and recommended actions match
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>.</p>
+<div class="grid"><a href="/smtp/4-2-2/"><strong>4.2.2</strong><br><span>4.2.2 means the recipient&#x27;s mailbox is over quota. It is temporary and the address is still valid, so retry. If it persi...</span></a><a href="/smtp/4-4-1/"><strong>4.4.1</strong><br><span>4.4.1 means your server could not complete a connection to the receiving host. It is a transport problem rather than a p...</span></a><a href="/smtp/5-1-1/"><strong>5.1.1</strong><br><span>5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Conti...</span></a><a href="/smtp/5-2-1/"><strong>5.2.1</strong><br><span>5.2.1 means the mailbox exists but is disabled, suspended or not accepting mail. It is permanent. Suppress it, and treat...</span></a><a href="/smtp/5-7-1/"><strong>5.7.1</strong><br><span>5.7.1 is a policy rejection. The receiving server understood the message and refused it on purpose. The cause sits in th...</span></a><a href="/smtp/spamhaus/"><strong>spamhaus</strong><br><span>This means the receiving server queried Spamhaus, found your sending IP listed, and refused the connection. Delisting is...</span></a><a href="/smtp/tls-handshake/"><strong>tls-handshake</strong><br><span>A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are norm...</span></a><a href="/smtp/gmail-4-7-28/"><strong>4.7.28</strong> &middot; Gmail<br><span>Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or do...</span></a><a href="/smtp/gmail-5-7-1/"><strong>5.7.1</strong> &middot; Gmail<br><span>Gmail 5.7.1 is a hard block. Unlike 4.7.28, this is Gmail refusing the message outright, usually on content or on the re...</span></a><a href="/smtp/gmail-5-7-26/"><strong>5.7.26</strong> &middot; Gmail<br><span>Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignm...</span></a><a href="/smtp/microsoft-outlook-4-7-500/"><strong>4.7.500</strong> &middot; Microsoft / Outlook<br><span>Microsoft 4.7.500 is throttling. The message has not been rejected, it has been deferred because Microsoft is limiting h...</span></a><a href="/smtp/microsoft-outlook-5-7-606/"><strong>5.7.606</strong> &middot; Microsoft / Outlook<br><span>Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentic...</span></a><a href="/smtp/microsoft-outlook-s3140/"><strong>S3140</strong> &middot; Microsoft / Outlook<br><span>S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You wi...</span></a><a href="/smtp/yahoo-ts03/"><strong>TS03</strong> &middot; Yahoo<br><span>Yahoo&#x27;s [TS03] tag marks a deferral for policy or reputation reasons. It arrives as a 4xx, so the message is still queue...</span></a></div>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

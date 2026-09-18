@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SMTP 5.1.1: recipient address does not exist</title>
+<meta name="description" content="5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.">
+<link rel="canonical" href="https://rastu.tech/smtp/5-1-1/">
+<meta property="og:title" content="SMTP 5.1.1: recipient address does not exist">
+<meta property="og:description" content="5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/smtp/5-1-1/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SMTP 5.1.1: recipient address does not exist", "description": "5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "5.1.1", "mainEntityOfPage": "https://rastu.tech/smtp/5-1-1/"}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="../../">Rastu Singh</a>
+  <a href="../../smtp/">SMTP reference</a>
+  <a href="../../research/">Research</a>
+  <a href="../../tools/">Tools</a>
+</nav>
+
+<p class="kicker">SMTP reference</p>
+<h1>SMTP 5.1.1: recipient address does not exist</h1>
+<p><span class="badge">RFC 3463</span><span class="badge">invalid_recipient</span><span class="badge">action: suppress</span></p>
+<p class="lede">5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.</p>
+
+<h2>What it looks like in the log</h2>
+<pre><code>550 5.1.1 &lt;user@example.com&gt;: Recipient address rejected: User unknown in virtual mailbox table</code></pre>
+<pre><code>550 5.1.1 The email account that you tried to reach does not exist.</code></pre>
+<pre><code>550 5.1.1 unknown or illegal alias</code></pre>
+<h2>Why it happens</h2>
+<ul><li>The address was mistyped at collection.</li>
+<li>The mailbox was deleted, commonly after someone leaves an organisation.</li>
+<li>The address was never real, which points at list quality or a lack of confirmed opt-in.</li></ul>
+<h2>What to do</h2>
+<ul><li>Suppress permanently on the first occurrence. There is no reason to retry.</li>
+<li>If the hard bounce rate is above about 2%, the problem is list acquisition, not delivery.</li>
+<li>Validate at the point of capture rather than discovering invalid addresses at send time.</li></ul>
+<h2>Related</h2><p><a href="/smtp/5-2-1/">5.2.1</a> &middot; <a href="/smtp/4-2-2/">4.2.2</a></p>
+<h2>Classifying this automatically</h2>
+<p>This response maps to <code>invalid_recipient</code> with a recommended action of
+<code>suppress</code> in
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
+SMTP rejections and deferrals.</p>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

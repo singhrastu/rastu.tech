@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microsoft 5.7.606: access denied, banned sending IP</title>
+<meta name="description" content="Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentication problem, and it will not clear on its own. You need to request delisting through Microsoft and fix whatever caused the listing.">
+<link rel="canonical" href="https://rastu.tech/smtp/microsoft-outlook-5-7-606/">
+<meta property="og:title" content="Microsoft 5.7.606: access denied, banned sending IP">
+<meta property="og:description" content="Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentication problem, and it will not clear on its own. You need to request delisting through Microsoft and fix whatever caused the listing.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/smtp/microsoft-outlook-5-7-606/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Microsoft 5.7.606: access denied, banned sending IP", "description": "Microsoft 5.7.606 means your sending IP is on Outlook's block list. It is a reputation block, not a content or authentication problem, and it will not clear on its own. You need to request delisting through Microsoft and fix whatever caused the listing.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "5.7.606", "mainEntityOfPage": "https://rastu.tech/smtp/microsoft-outlook-5-7-606/"}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="../../">Rastu Singh</a>
+  <a href="../../smtp/">SMTP reference</a>
+  <a href="../../research/">Research</a>
+  <a href="../../tools/">Tools</a>
+</nav>
+
+<p class="kicker">SMTP reference</p>
+<h1>Microsoft 5.7.606: access denied, banned sending IP</h1>
+<p><span class="badge">Microsoft / Outlook</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
+<p class="lede">Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentication problem, and it will not clear on its own. You need to request delisting through Microsoft and fix whatever caused the listing.</p>
+<div class="callout"><p>Microsoft is the slowest of the major providers to forgive and the least communicative about why. Assume recovery is measured in weeks, and that consistent low-complaint sending is the only lever that actually moves it.</p></div>
+<h2>What it looks like in the log</h2>
+<pre><code>550 5.7.606 Access denied, banned sending IP [x.x.x.x]</code></pre>
+<pre><code>550 5.7.606 Access denied, banned sending IP [x.x.x.x]; To request removal from this list please visit https://sender.office.com/ and follow the directions.</code></pre>
+<h2>Why it happens</h2>
+<ul><li>Complaints from Outlook, Hotmail or Live recipients.</li>
+<li>Hitting spam traps in a Microsoft-operated domain.</li>
+<li>A sharp volume increase from an IP with no history at Microsoft.</li>
+<li>Inheriting a range that was abused before you had it.</li></ul>
+<h2>What to do</h2>
+<ul><li>Submit a delisting request through the Microsoft sender support form. Do this once, not repeatedly.</li>
+<li>Register the IPs for SNDS and JMRP first, so you can see complaint data and receive feedback.</li>
+<li>Fix the cause before requesting removal. Microsoft relists quickly, and repeat listings are harder to clear.</li>
+<li>Route Microsoft traffic off the affected range while you work the delisting.</li></ul>
+<h2>Related</h2><p><a href="/smtp/microsoft-outlook-s3140/">S3140</a> &middot; <a href="/smtp/microsoft-outlook-4-7-500/">4.7.500</a> &middot; <a href="/smtp/gmail-5-7-1/">5.7.1</a></p>
+<h2>Classifying this automatically</h2>
+<p>This response maps to <code>reputation_block</code> with a recommended action of
+<code>pause</code> in
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
+SMTP rejections and deferrals.</p>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

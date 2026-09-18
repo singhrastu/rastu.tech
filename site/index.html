@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rastu Singh — Infrastructure Engineer, Email Infrastructure and Deliverability</title>
+<meta name="description" content="Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, SPF, DKIM and DMARC.">
+<link rel="canonical" href="https://rastu.tech/">
+<meta property="og:title" content="Rastu Singh — Infrastructure Engineer, Email Infrastructure and Deliverability">
+<meta property="og:description" content="Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, SPF, DKIM and DMARC.">
+<meta property="og:type" content="profile">
+<meta property="og:url" content="https://rastu.tech/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": "Infrastructure Engineer", "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "SMTP", "Message Transfer Agent", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Sender reputation", "IP warm-up", "SPF", "DKIM", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Bounce classification", "Anti-spam", "Linux", "Ansible", "Terraform"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu"]}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="/">Rastu Singh</a>
+  <a href="smtp/">SMTP reference</a>
+  <a href="research/">Research</a>
+  <a href="tools/">Tools</a>
+</nav>
+
+<p class="kicker">Infrastructure Engineer &middot; Tallinn, Estonia</p>
+<h1>Rastu Singh</h1>
+<p class="lede">I am an infrastructure engineer working on email platforms, deliverability
+and email security. I build and operate the systems that decide whether mail actually
+arrives: MTA clusters, SMTP transport, IP and domain reputation, and the authentication
+layer underneath them.</p>
+
+<p>Day to day that means PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
+production; queueing, throttling and retry behaviour; DNS and the SPF, DKIM, DMARC, MTA-STS
+and TLS-RPT stack; IP pool design and warm-up; bounce, deferral and complaint classification;
+and blocklist remediation when reputation goes wrong. I have run outbound estates on bare
+metal and cloud across several hosting providers, and led the team that operated them.</p>
+
+<p>I write here about the parts of this that are hard to find written down properly.</p>
+
+<h2>SMTP response reference</h2>
+<p>A reference for the responses that actually show up in mail logs, written from operating
+them rather than from the RFCs. What each one means, whether it is worth retrying, and what
+to change so it stops happening.</p>
+<p><a href="/smtp/">Browse the SMTP reference &rarr;</a></p>
+
+<h2>Research</h2>
+<p>Original measurement of email authentication adoption across the public internet, with
+the methodology and the raw dataset published alongside the findings.</p>
+<p><a href="/research/">Research and datasets &rarr;</a></p>
+
+<h2>Tools</h2>
+<p>Open-source tooling for email operations: bounce and deferral classification, and
+authentication auditing.</p>
+<p><a href="/tools/">Tools &rarr;</a></p>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

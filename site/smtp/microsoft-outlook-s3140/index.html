@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microsoft S3140: what this error code means</title>
+<meta name="description" content="S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You will normally see it alongside a 550 5.7.x response. Treat it the same as any Outlook reputation block: stop sending from that IP and work the delisting.">
+<link rel="canonical" href="https://rastu.tech/smtp/microsoft-outlook-s3140/">
+<meta property="og:title" content="Microsoft S3140: what this error code means">
+<meta property="og:description" content="S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You will normally see it alongside a 550 5.7.x response. Treat it the same as any Outlook reputation block: stop sending from that IP and work the delisting.">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/smtp/microsoft-outlook-s3140/">
+<style>
+:root{--fg:#16181d;--muted:#5b6270;--line:#e3e6ea;--accent:#1f4e79;--bg:#fff;--code:#f5f6f8}
+@media(prefers-color-scheme:dark){:root{--fg:#e6e8ec;--muted:#9aa3b2;--line:#2a2f38;--accent:#7fb2e5;--bg:#14161a;--code:#1d2026}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:46rem;margin:0 auto;padding:2.5rem 1.25rem 4rem}
+a{color:var(--accent)}
+h1{font-size:1.85rem;line-height:1.25;margin:.2rem 0 .6rem}
+h2{font-size:1.2rem;margin:2.2rem 0 .6rem;padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+h3{font-size:1rem;margin:1.6rem 0 .4rem}
+.kicker{color:var(--muted);font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;margin:0}
+.lede{font-size:1.08rem}
+.meta{color:var(--muted);font-size:.9rem}
+nav.top{display:flex;gap:1.2rem;margin-bottom:2.5rem;font-size:.92rem;flex-wrap:wrap}
+nav.top a{text-decoration:none}
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.85rem 1rem;border-radius:6px;overflow-x:auto;font-size:.86rem;line-height:1.5;border:1px solid var(--line)}
+code{background:var(--code);padding:.1rem .35rem;border-radius:4px;font-size:.88em}
+pre code{background:none;padding:0}
+.badge{display:inline-block;background:var(--code);border:1px solid var(--line);border-radius:4px;padding:.15rem .5rem;font-size:.8rem;color:var(--muted);margin-right:.4rem}
+ul{padding-left:1.15rem}
+li{margin:.35rem 0}
+.callout{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin:1.4rem 0;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;margin:1rem 0}
+th,td{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;font-size:.85rem}
+footer{margin-top:4rem;padding-top:1.2rem;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+.grid{display:grid;gap:.1rem}
+.grid a{display:block;padding:.6rem .1rem;border-bottom:1px solid var(--line);text-decoration:none}
+.grid a span{color:var(--muted);font-size:.9rem}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "Microsoft S3140: what this error code means", "description": "S3140 is Microsoft's internal reason code attached to a block, and it points at the reputation of the sending IP. You will normally see it alongside a 550 5.7.x response. Treat it the same as any Outlook reputation block: stop sending from that IP and work the delisting.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "S3140", "mainEntityOfPage": "https://rastu.tech/smtp/microsoft-outlook-s3140/"}</script>
+</head>
+<body>
+<div class="wrap">
+<nav class="top">
+  <a href="../../">Rastu Singh</a>
+  <a href="../../smtp/">SMTP reference</a>
+  <a href="../../research/">Research</a>
+  <a href="../../tools/">Tools</a>
+</nav>
+
+<p class="kicker">SMTP reference</p>
+<h1>Microsoft S3140: what this error code means</h1>
+<p><span class="badge">Microsoft / Outlook</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
+<p class="lede">S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You will normally see it alongside a 550 5.7.x response. Treat it the same as any Outlook reputation block: stop sending from that IP and work the delisting.</p>
+
+<h2>What it looks like in the log</h2>
+<pre><code>550 5.7.1 Unfortunately, messages from [x.x.x.x] weren&#x27;t sent. Please contact your Internet service provider. You can tell them that Outlook refused to accept your message. [S3140]</code></pre>
+<h2>Why it happens</h2>
+<ul><li>Poor IP reputation at Outlook, usually complaint-driven.</li>
+<li>Little or no sending history from this IP to Microsoft domains.</li>
+<li>Volume out of proportion to the IP&#x27;s established reputation.</li></ul>
+<h2>What to do</h2>
+<ul><li>Enrol the IPs in SNDS so you can see the complaint and trap data behind the block.</li>
+<li>Join JMRP so Outlook complaints reach your suppression pipeline.</li>
+<li>Request delisting once, with the cause already fixed.</li>
+<li>Warm the IP back up slowly rather than resuming at previous volume.</li></ul>
+<h2>Related</h2><p><a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a> &middot; <a href="/smtp/microsoft-outlook-4-7-500/">4.7.500</a></p>
+<h2>Classifying this automatically</h2>
+<p>This response maps to <code>reputation_block</code> with a recommended action of
+<code>pause</code> in
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
+SMTP rejections and deferrals.</p>
+
+<footer>
+  <p>Rastu Singh, Infrastructure Engineer specialising in
+     email platforms, deliverability and security. Based in Tallinn, Estonia.</p>
+  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
+     <a href="https://github.com/singhrastu">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>
