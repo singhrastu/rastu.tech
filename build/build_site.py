@@ -87,6 +87,11 @@ CSS = """
   --ok:#3ddc84; --warn:#e6b25c; --bad:#ff7a7a; --info:#5db8ff;
   --radius:10px;
   --measure:44rem;
+  /* Spacing and type scales. Before these, every size in the sheet was a bare
+     rem literal, which is survivable at six pages and is not at fifteen. */
+  --s1:.25rem; --s2:.5rem; --s3:.85rem; --s4:1.3rem; --s5:2.2rem; --s6:3.6rem;
+  --t0:.72rem; --t1:.8rem; --t2:.885rem; --t3:.95rem; --t4:1.14rem;
+  --t5:1.5rem; --t6:2.4rem;
 }
 ::selection{background:var(--accent-soft);color:var(--accent-2)}
 
@@ -113,14 +118,26 @@ body{
 .wrap.wide .lede,.wrap.wide .prose{max-width:42rem}
 .wrap.wide h2{margin-top:3.4rem}
 
-/* ---- nav -------------------------------------------------------------- */
-nav.top{
-  display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;
-  padding:1.4rem 0 2.6rem;font-size:.93rem;
+/* ---- nav ---------------------------------------------------------------- */
+.skip{position:absolute;left:-9999px;top:0;z-index:9;background:var(--accent);
+  color:#08140d;padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:650}
+.skip:focus{left:0}
+nav.top{display:flex;gap:var(--s4);align-items:center;flex-wrap:wrap;
+  padding:1.4rem 0 var(--s5);font-size:var(--t3)}
+nav.top a{color:var(--ink-3);text-decoration:none;position:relative;
+  padding:.15rem 0;transition:color .16s}
+nav.top a:hover{color:var(--ink)}
+nav.top a[aria-current]{color:var(--ink)}
+nav.top a[aria-current]::after{content:"";position:absolute;left:0;right:0;bottom:-.3rem;
+  height:1.5px;background:var(--accent);border-radius:2px}
+nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-weight:650;color:var(--ink);font-size:var(--t3);letter-spacing:-.01em}
+nav.top .mark span{color:var(--accent)}
+nav.top .mark::after{display:none}
+@media(max-width:34rem){
+  nav.top{gap:var(--s3);padding-bottom:var(--s4)}
+  nav.top .mark{margin-right:0;width:100%}
 }
-nav.top a{color:var(--ink-2);text-decoration:none;transition:color .15s}
-nav.top a:hover{color:var(--accent)}
-nav.top a:first-child{font-weight:650;color:var(--ink)}
 
 /* ---- type ------------------------------------------------------------- */
 a{color:var(--accent);text-underline-offset:2px}
@@ -318,27 +335,62 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 @keyframes blink{50%{opacity:0}}
 @media(max-width:34rem){.term pre{font-size:.695rem;height:19rem}}
 
-/* ---- the classifier ----------------------------------------------------
-   The site's one interactive tool. Same ruleset as smtpsift, exported at build
-   time, so the page and the CLI can never disagree about a response. */
-.sift{border:1px solid var(--line);border-radius:16px;background:var(--surface);
-  padding:1.25rem 1.3rem 1.35rem;margin:1.2rem 0 0;position:relative;overflow:hidden}
-.sift::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
-  background:linear-gradient(90deg,var(--accent),transparent 65%)}
-.sift label{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
-  color:var(--ink-3);font-weight:650;margin-bottom:.5rem}
-.sift textarea{width:100%;min-height:5.2rem;resize:vertical;background:var(--bg);
-  color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.8rem .9rem;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.845rem;line-height:1.55;
-  transition:border-color .2s,box-shadow .2s}
-.sift textarea:focus{outline:0;border-color:var(--accent);
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
-.sift .ex{display:flex;gap:.4rem;flex-wrap:wrap;margin:.7rem 0 0}
-.sift .ex button{font-family:inherit;font-size:.775rem;padding:.3rem .66rem;cursor:pointer;
-  border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink-2);
-  transition:border-color .2s,color .2s,transform .2s}
-.sift .ex button:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+/* ---- buttons: one definition, three sizes -------------------------------- */
+.btn{font:inherit;font-size:var(--t3);font-weight:650;cursor:pointer;
+  padding:.72rem 1.4rem;border-radius:10px;border:1px solid var(--accent);
+  background:var(--accent);color:#08140d;
+  transition:transform .2s,opacity .2s,border-color .2s,color .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:progress;transform:none}
+.btn.ghost{background:var(--bg);color:var(--ink-2);border-color:var(--line);font-weight:500}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn.sm{font-size:var(--t1);padding:.3rem .7rem;border-radius:7px}
 
+/* ---- fields: one definition, one focus ring ------------------------------ */
+.field{width:100%;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t3);
+  line-height:1.55;transition:border-color .2s,box-shadow .2s}
+.field:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+textarea.field{min-height:5.2rem;resize:vertical;font-size:var(--t2)}
+.lbl-mi{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;margin-bottom:var(--s2)}
+
+/* ---- tool panel: the shell every tool sits in ---------------------------- */
+.tool{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:var(--s4) var(--s4) 1.35rem;margin:var(--s4) 0 0;position:relative;overflow:hidden}
+.tool::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.tool .row{display:flex;gap:var(--s2);flex-wrap:wrap}
+.tool .row .field{flex:1 1 16rem;min-width:0;width:auto}
+.tool .hint{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0 0;
+  font-size:var(--t1);color:var(--ink-3);align-items:center}
+.tool .hint a,.tool .hint button{font:inherit;font-size:var(--t1);cursor:pointer;
+  color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
+  border-radius:7px;padding:.2rem .55rem;background:var(--bg);
+  transition:border-color .2s,color .2s}
+.tool .hint a:hover,.tool .hint button:hover{border-color:var(--accent);color:var(--accent)}
+.empty{color:var(--ink-3);font-size:var(--t2);line-height:1.6;margin:var(--s3) 0 0}
+
+/* ---- filter: search field + chip row for the reference ------------------- */
+.filter{margin:var(--s4) 0 var(--s3)}
+.filter input{margin-bottom:.7rem}
+.filter .chips{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.filter .count{font-size:var(--t1);color:var(--ink-3);margin-left:auto;
+  font-variant-numeric:tabular-nums}
+button.chip{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---- breadcrumbs --------------------------------------------------------- */
+.crumb{font-size:var(--t1);color:var(--ink-3);margin:0 0 var(--s3);display:flex;
+  gap:.45rem;flex-wrap:wrap;align-items:center}
+.crumb a{color:var(--ink-3);text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.crumb span{opacity:.5}
+
+/* ---- classifier verdict --------------------------------------------------- */
 .verdict{margin-top:1rem;border-top:1px solid var(--line);padding-top:1rem;
   opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
 .verdict.on{opacity:1;transform:none}
@@ -358,38 +410,12 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
   clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
-/* ---- domain checker ----------------------------------------------------- */
-.checkbox{border:1px solid var(--line);border-radius:16px;background:var(--surface);
-  padding:1.25rem 1.3rem;margin:1.3rem 0 0;position:relative;overflow:hidden}
-.checkbox::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
-  background:linear-gradient(90deg,var(--accent),transparent 65%)}
-.checkbox form{display:flex;gap:.5rem;flex-wrap:wrap}
-.checkbox input{flex:1 1 16rem;min-width:0;background:var(--bg);color:var(--ink);
-  border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92rem;
-  transition:border-color .2s,box-shadow .2s}
-.checkbox input:focus{outline:0;border-color:var(--accent);
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
-.checkbox button{font-family:inherit;font-size:.9rem;font-weight:650;cursor:pointer;
-  padding:.72rem 1.4rem;border-radius:10px;border:1px solid var(--accent);
-  background:var(--accent);color:#08140d;transition:opacity .2s,transform .2s}
-.checkbox button:hover{transform:translateY(-1px)}
-.checkbox button:disabled{opacity:.55;cursor:progress;transform:none}
-.checkbox .examples{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0 0;
-  font-size:.8rem;color:var(--ink-3);align-items:center}
-.checkbox .examples a{color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
-  border-radius:7px;padding:.2rem .55rem;transition:border-color .2s,color .2s}
-.checkbox .examples a:hover{border-color:var(--accent);color:var(--accent)}
-
+/* ---- tool result surfaces ------------------------------------------------ */
 .report{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;margin-top:1.6rem}
 .report.on{opacity:1;transform:none}
 .report .head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .report h2{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.15rem;
   border:0;padding:0;margin:0}
-.report .ghost{font-family:inherit;font-size:.78rem;cursor:pointer;padding:.3rem .7rem;
-  border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink-2);
-  transition:border-color .2s,color .2s}
-.report .ghost:hover{border-color:var(--accent);color:var(--accent)}
 .report .verdict-line{margin:.7rem 0 0;font-size:.97rem;font-weight:600}
 .report .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0 1.6rem}
 .report .t{background:var(--surface);border:1px solid var(--line);border-radius:10px;
@@ -423,9 +449,17 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .report .t.s-info b{color:var(--info)} .report .t.s-ok b{color:var(--ok)}
 @media(max-width:34rem){.report .tiles{grid-template-columns:repeat(2,1fr)}}
 
-/* ---- footer ----------------------------------------------------------- */
-footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
-       color:var(--ink-3);font-size:.885rem}
+/* ---- footer -------------------------------------------------------------- */
+footer{margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:var(--t2)}
+footer .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+  gap:var(--s4) var(--s3);margin-bottom:var(--s4)}
+footer h2{font-size:var(--t0);letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .55rem;padding:0;border:0;font-weight:650}
+footer .cols a{display:block;color:var(--ink-2);text-decoration:none;
+  padding:.16rem 0;font-size:var(--t2);transition:color .16s}
+footer .cols a:hover{color:var(--accent)}
+footer .by{margin:0;line-height:1.6;max-width:44rem}
 
 /* ---- scroll reveal ---------------------------------------------------- */
 .r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
@@ -639,6 +673,47 @@ FAVICON = (
 )
 
 
+# One registry, four consumers: the nav, the homepage grid, the /tools/ index and
+# the footer. The audit found "Domain check" / "Check a domain" / "Check a domain's
+# email authentication" all naming the same page; a single list is what stops that
+# happening again. `q` is the question the tool answers, which is what a visitor is
+# actually searching for.
+TOOLS = [
+    {
+        "slug": "check", "name": "Domain check",
+        "q": "Is this domain's email authentication set up correctly?",
+        "blurb": "SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including "
+                 "the RFC 7208 ten-lookup limit and whether an MTA-STS policy really "
+                 "exists behind the record that promises one.",
+        "tag": "DNS",
+    },
+    {
+        "slug": "bounce", "name": "Bounce classifier",
+        "q": "What is this bounce or deferral telling me?",
+        "blurb": "Paste an SMTP response and get the category and the action it needs: "
+                 "retry, back off, suppress, or stop and fix the sender. Hard and soft "
+                 "bounce is too coarse to act on.",
+        "tag": "Logs",
+    },
+    {
+        "slug": "spf", "name": "SPF lookup counter",
+        "q": "How close is this SPF record to the ten-lookup limit?",
+        "blurb": "The full include tree with a running DNS lookup count, and the exact "
+                 "mechanism that tips a record over ten and turns it into a permerror.",
+        "tag": "DNS",
+    },
+]
+
+# Destinations, in nav order. The label here is the only name each section has: it is
+# the nav link, the footer link, and the head of the destination's h1.
+NAV = [
+    ("Tools", "tools/"),
+    ("Reference", "smtp/"),
+    ("Research", "research/"),
+    ("About", "about/"),
+]
+
+
 def e(s):
     return html.escape(str(s), quote=True)
 
@@ -698,7 +773,7 @@ def person_ld():
 
 
 def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
-         scripts=(), modules=()):
+         scripts=(), modules=(), nav_key=None, crumbs=()):
     lds = [person_ld()] if is_home else []
     if extra_ld:
         lds.append(extra_ld)
@@ -709,6 +784,23 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
     canonical = SITE + ("/" if path == "index.html" else "/" + path.replace("index.html", ""))
     depth = path.count("/")
     up = "../" * depth
+
+    # Python 3.9 f-strings cannot carry a backslash, so the attribute is built first.
+    def nav_link(label, href):
+        cur = ' aria-current="page"' if nav_key == label else ""
+        return '<a href="' + up + href + '"' + cur + ">" + label + "</a>"
+
+    nav_links = "\n  ".join(nav_link(lbl, href) for lbl, href in NAV)
+
+    # Breadcrumbs are for the reader who landed from a search on one code page and
+    # has no idea the rest of the site exists. They also emit BreadcrumbList.
+    crumb_html = ""
+    if crumbs:
+        parts = ['<a href="' + up + '">Home</a>']
+        for label, href in crumbs:
+            parts.append("<span>/</span>")
+            parts.append(f'<a href="{up}{href}">{e(label)}</a>' if href else e(label))
+        crumb_html = '<nav class="crumb" aria-label="Breadcrumb">' + "".join(parts) + "</nav>"
     doc = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -735,21 +827,42 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 </head>
 <body>
 <div class="wrap{' wide' if wide else ''}">
-<nav class="top">
-  <a href="{up or '/'}">Rastu Singh</a>
-  <a href="{up}about/">About</a>
-  <a href="{up}check/">Domain check</a>
-  <a href="{up}smtp/">SMTP reference</a>
-  <a href="{up}research/">Research</a>
-  <a href="{up}tools/">Tools</a>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="top" aria-label="Primary">
+  <a class="mark" href="{up or '/'}">rastu<span>.tech</span></a>
+  {nav_links}
 </nav>
+{crumb_html}
+<main id="main">
 {body}
+</main>
 <footer>
-  <p>{e(PERSON['name'])}, {e(PERSON['job_title'])} specialising in
-     {e(PERSON['specialism'].lower())}. Based in {e(PERSON['locality'])}, Estonia.</p>
-  <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-     <a href="https://github.com/singhrastu">GitHub</a> &middot;
-     <a href="https://orcid.org/{PERSON['orcid']}">ORCID</a></p>
+  <div class="cols">
+    <div>
+      <h2>Tools</h2>
+      {chr(10).join(f'      <a href="{up}{t["slug"]}/">{e(t["name"])}</a>' for t in TOOLS)}
+      <a href="{up}tools/">All tools</a>
+    </div>
+    <div>
+      <h2>Reference</h2>
+      <a href="{up}smtp/">SMTP responses</a>
+      <a href="{up}smtp/session/">Anatomy of a session</a>
+    </div>
+    <div>
+      <h2>Research</h2>
+      <a href="{up}research/">State of email authentication</a>
+      <a href="{SITE}/scan-100000.jsonl.gz">Raw dataset</a>
+    </div>
+    <div>
+      <h2>Elsewhere</h2>
+      <a href="https://github.com/singhrastu">GitHub</a>
+      <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>
+      <a href="https://orcid.org/{PERSON['orcid']}">ORCID</a>
+    </div>
+  </div>
+  <p class="by">Built and maintained by <a href="{up}about/">{e(PERSON['name'])}</a>,
+     {e(PERSON['job_title'])}, {e(PERSON['locality'])}.
+     Everything here runs in your browser.</p>
 </footer>
 </div>
 <script>{JS}</script>
@@ -1025,14 +1138,14 @@ checkers miss: the RFC 7208 ten-lookup limit, whether an MTA-STS policy actually
 exists behind the DNS record that promises it, and whether the policy covers the MX
 hosts that are live right now.</p>
 
-<div class="checkbox">
-  <form id="check-form" autocomplete="off">
+<div class="tool">
+  <form id="check-form" autocomplete="off" class="row">
     <label class="sr" for="check-domain">Domain</label>
-    <input id="check-domain" name="d" type="text" spellcheck="false"
+    <input class="field" id="check-domain" name="d" type="text" spellcheck="false"
            placeholder="example.com" aria-label="Domain to check">
-    <button type="submit" id="check-run">Check</button>
+    <button class="btn" type="submit" id="check-run">Check</button>
   </form>
-  <p class="examples">Try:
+  <p class="hint">Try:
     <a href="?d=gov.uk">gov.uk</a>
     <a href="?d=paypal.com">paypal.com</a>
     <a href="?d=github.com">github.com</a>
@@ -1178,11 +1291,11 @@ def build_home():
   fix the sender. Nothing is sent anywhere. It runs in your browser.</p>
 </div>
 
-<div class="sift" id="sift">
-  <label for="sift-in">SMTP response</label>
-  <textarea id="sift-in" spellcheck="false" autocomplete="off"
+<div class="tool" id="sift">
+  <label class="lbl-mi" for="sift-in">SMTP response</label>
+  <textarea class="field" id="sift-in" spellcheck="false" autocomplete="off"
     placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
-  <div class="ex">{ex}</div>
+  <div class="hint">{ex}</div>
   <div class="verdict" id="sift-out" aria-live="polite"></div>
 </div>
 

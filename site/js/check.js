@@ -84,7 +84,7 @@ function render(domain, rep) {
   out.innerHTML = `
     <div class="head">
       <h2>${esc(domain)}</h2>
-      <button type="button" id="copy-report" class="ghost">Copy as text</button>
+      <button type="button" id="copy-report" class="btn ghost sm">Copy as text</button>
     </div>
     ${verdict ? `<p class="verdict-line s-${verdict.severity}">
        <span class="pill">${LABEL[verdict.severity]}</span> ${esc(verdict.finding)}</p>` : ''}
