@@ -737,7 +737,7 @@ include tree and shows you exactly where the count goes.</p>
 </div>
 
 <h2 class="r">What counts against the ten</h2>
-<div class="full"><table class="cost">
+<div class="full"><div class="scroll-x r" tabindex="0" role="region" aria-label="Scrollable table"><table class="cost">
 <tr><th>Mechanism</th><th>Cost</th><th>Notes</th></tr>
 <tr class="s-warn"><td><code>include:</code></td><td class="num">1 + its own</td>
     <td>Recursive. An include that itself has four includes costs you five.</td></tr>
@@ -755,7 +755,7 @@ include tree and shows you exactly where the count goes.</p>
     <td>No DNS query, so unlimited.</td></tr>
 <tr class="s-ok"><td><code>all</code> <code>exp=</code></td><td class="num">0</td>
     <td><code>exp=</code> is only fetched on a fail, and never counts.</td></tr>
-</table></div></div>
+</table></div>
 <p>Every mechanism can carry a qualifier, so <code>+include:</code>, <code>-a</code> and
 <code>~mx</code> cost exactly what the unqualified form costs. Tools that match on the bare
 token miss them and report a broken record as healthy.</p>

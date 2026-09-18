@@ -745,14 +745,14 @@ authenticated, and what to fix first.</p>
 <h2 class="r">The distinction most readers get wrong</h2>
 <p>A DMARC report carries two different results for SPF and two for DKIM, and they are
 routinely different:</p>
-<div class="full"><div class="scroll-x r"><table>
+<div class="full"><div class="scroll-x r" tabindex="0" role="region" aria-label="Scrollable table"><table>
 <tr><th>Field</th><th>What it is</th></tr>
 <tr><td><code>auth_results/spf/result</code></td>
     <td>The <strong>raw</strong> result. Did SPF pass for the envelope sender?</td></tr>
 <tr><td><code>policy_evaluated/spf</code></td>
     <td>The <strong>aligned</strong> result. Did the domain that passed also match the
         <code>From:</code> header domain?</td></tr>
-</table></div></div>
+</table></div>
 <p>A source can show <code>auth_results/spf/result = pass</code> and
 <code>policy_evaluated/spf = fail</code> at the same time. SPF authenticated correctly; the
 <code>MAIL FROM</code> domain just does not align with what the recipient sees. That is a
@@ -763,7 +763,7 @@ the wrong thing.</p>
 then compares that to what the reporter claimed. When the two disagree, it says so.</p>
 
 <h2 class="r">What each result means</h2>
-<div class="full"><div class="scroll-x r"><table>
+<div class="full"><div class="scroll-x r" tabindex="0" role="region" aria-label="Scrollable table"><table>
 <tr><th>Result</th><th>What to do</th></tr>
 <tr class="s-ok"><td><strong>Aligned</strong></td>
     <td>SPF and DKIM both align. Nothing to do.</td></tr>
@@ -778,7 +778,7 @@ then compares that to what the reporter claimed. When the two disagree, it says 
 <tr class="s-fail"><td><strong>Unauthenticated</strong></td>
     <td>Neither aligned. Either the source needs configuring or it is not yours.
         Identify it before you change policy.</td></tr>
-</table></div></div>
+</table></div>
 
 <h2 class="r">What a report cannot tell you</h2>
 <ul>

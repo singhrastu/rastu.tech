@@ -1170,8 +1170,29 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 """
     # wrap tables so wide data scrolls inside its own container rather than
     # forcing the page to scroll sideways
-    doc = doc.replace("<table>", '<div class="scroll-x r"><table>').replace(
-        "</table>", "</table></div>")
+    def wrap_tables(html_src):
+        out, at = [], 0
+        for m in re.finditer(r"<table\b[^>]*>", html_src):
+            before = html_src[max(0, m.start() - 140):m.start()]
+            out.append(html_src[at:m.start()])
+            # A table already inside a scroller, or emitted at runtime by a tool,
+            # is left alone.
+            out.append(m.group(0) if "scroll-x" in before
+                       else '<div class="scroll-x r" tabindex="0" role="region" '
+                       'aria-label="Scrollable table">' + m.group(0))
+            at = m.end()
+        out.append(html_src[at:])
+        html_src = "".join(out)
+        # Close the divs we opened, in the same order.
+        parts = html_src.split("</table>")
+        rebuilt = [parts[0]]
+        opened = html_src.count('<div class="scroll-x r"><table')
+        for i, part in enumerate(parts[1:], 1):
+            rebuilt.append("</table></div>" if i <= opened else "</table>")
+            rebuilt.append(part)
+        return "".join(rebuilt)
+
+    doc = wrap_tables(doc)
     # Scroll-reveal only inside <main>. The footer's column headings are <h2> too,
     # and the observer never reaches them, so a blanket replace hid them for good.
     head, sep, rest = doc.partition('<main id="main">')
