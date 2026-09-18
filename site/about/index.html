@@ -47,19 +47,9 @@ body{
    Fixed behind everything, drifting slowly as the page scrolls. Pure CSS
    background + one transform driven by a custom property, so it costs one
    compositor layer and no layout. Hidden entirely under reduced-motion. */
-.hex{
-  position:fixed;inset:-20vh -10vw;z-index:0;pointer-events:none;
-  opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-  background-size:64px 112px;
-  transform:translate3d(0,calc(var(--sy,0) * -90px),0);
-  will-change:transform;
-}
-@media(prefers-color-scheme:dark){.hex{opacity:.07;filter:invert(1)}}
-.hex::after{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(70% 55% at 50% 0%,transparent 0%,var(--bg) 78%);
-}
+#hexcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.hexveil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,transparent 38%,var(--bg) 92%)}
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
 
@@ -115,6 +105,8 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 /* ---- stat tiles: the right form for a single headline number ---------- */
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem;margin:1.4rem 0 1.8rem}
 .stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.05rem}
+.stat{transition:transform .4s cubic-bezier(.22,.7,.3,1),border-color .3s}
+.stat:hover{transform:translateY(-3px);border-color:var(--accent)}
 .stat .n{font-size:1.85rem;line-height:1.1;font-weight:680;letter-spacing:-.025em;
          font-variant-numeric:tabular-nums;color:var(--ink)}
 .stat .l{font-size:.815rem;color:var(--ink-3);margin-top:.3rem;line-height:1.35}
@@ -142,17 +134,98 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
           max-width:32%;border:1px solid var(--line)}
 
+/* ---- hero: split copy-left, portrait right ---------------------------- */
+.hero{display:grid;grid-template-columns:1fr auto;gap:2.2rem;align-items:start;
+      padding:1rem 0 .5rem;margin-bottom:.4rem}
+.hero-copy{min-width:0}
+.hero img{width:150px;height:150px;border-radius:14px;border:1px solid var(--line);
+          box-shadow:0 10px 34px rgba(0,0,0,.18);display:block}
+@media(max-width:44rem){
+  .hero{grid-template-columns:1fr;gap:1.2rem}
+  .hero img{width:108px;height:108px}
+}
+
+/* ---- credential strip -------------------------------------------------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));
+       gap:.55rem;margin:1.6rem 0 .6rem}
+.strip div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+           padding:.8rem .9rem}
+.strip b{display:block;font-size:1.32rem;font-weight:680;letter-spacing:-.02em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+.strip span{display:block;font-size:.755rem;color:var(--ink-3);margin-top:.22rem;line-height:1.3}
+
+/* ---- bento cards ------------------------------------------------------- */
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0 .5rem}
+.bento .card{position:relative;overflow:hidden;background:var(--surface);
+     border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
+     text-decoration:none;color:inherit;display:block;
+     transition:transform .28s cubic-bezier(.22,.8,.3,1),border-color .28s,box-shadow .28s}
+.bento .card:hover{transform:translateY(-4px);border-color:var(--accent);
+     box-shadow:0 14px 34px -18px rgba(0,0,0,.45)}
+.bento .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+     background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .28s}
+.bento .card:hover::before{opacity:1}
+.bento h3{margin:.1rem 0 .4rem;font-size:1.04rem;color:var(--ink)}
+.bento p{margin:0;font-size:.89rem;color:var(--ink-3);line-height:1.52}
+.bento .tag{display:inline-block;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;
+     color:var(--accent);font-weight:650;margin-bottom:.35rem}
+.bento .card .go{display:inline-block;margin-top:.7rem;font-size:.85rem;color:var(--accent);font-weight:600}
+
+/* ---- highlight panel --------------------------------------------------- */
+.panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.5rem 0;
+   background:linear-gradient(140deg,var(--accent-soft),transparent 70%)}
+.panel h3{margin:0 0 .45rem;font-size:1.05rem}
+.panel p{margin:0 0 .6rem;font-size:.93rem;color:var(--ink-2)}
+.panel .doi{font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--ink-3)}
+
+/* ---- stack chips ------------------------------------------------------- */
+.stack{margin:1.1rem 0}
+.stack .row{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;margin:.5rem 0 .9rem}
+.stack .lbl{font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+   font-weight:650;width:100%;margin-bottom:.1rem}
+.chip{font-size:.815rem;padding:.3rem .68rem;border:1px solid var(--line);border-radius:7px;
+   background:var(--bg);color:var(--ink-2);transition:border-color .2s,color .2s,transform .2s}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+
+/* ---- timeline ---------------------------------------------------------- */
+.tl{position:relative;margin:1.2rem 0 .5rem;padding-left:1.5rem}
+.tl::before{content:"";position:absolute;left:5px;top:.5rem;bottom:.5rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.55rem 0 .9rem}
+.tl .e::before{content:"";position:absolute;left:-1.5rem;top:1rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:border-color .25s}
+.tl .e:hover::before{border-color:var(--accent)}
+.tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
+.tl .role{font-weight:650;font-size:.97rem}
+.tl .org{color:var(--ink-2);font-size:.9rem}
+.tl .yr{color:var(--ink-3);font-size:.8rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
        color:var(--ink-3);font-size:.885rem}
 
 /* ---- scroll reveal ---------------------------------------------------- */
-.r{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,.7,.3,1)}
+.r{opacity:0;transform:translateY(16px);
+   transition:opacity .7s ease var(--d,0s),transform .7s cubic-bezier(.22,.7,.3,1) var(--d,0s)}
 .r.reveal{opacity:1;transform:none}
+/* stagger children of a revealed group */
+.stats.reveal .stat{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
+.stats.reveal .stat:nth-child(2){animation-delay:.07s}
+.stats.reveal .stat:nth-child(3){animation-delay:.14s}
+.stats.reveal .stat:nth-child(4){animation-delay:.21s}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+.grid.reveal a{animation:slidein .5s cubic-bezier(.22,.9,.3,1) both}
+.grid.reveal a:nth-child(2n){animation-delay:.05s}
+.grid.reveal a:nth-child(3n){animation-delay:.1s}
+@keyframes slidein{from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:none}}
+h1{animation:rise .8s cubic-bezier(.22,.8,.3,1) both}
+.lede{animation:rise .8s cubic-bezier(.22,.8,.3,1) .1s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .hex{display:none}
+  #hexcanvas{display:none}
+  h1,.lede,.stats.reveal .stat,.grid.reveal a{animation:none;opacity:1;transform:none}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
   .grid a:hover{transform:none}
@@ -165,7 +238,6 @@ footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
 </head>
 <body>
-<div class="hex" aria-hidden="true"></div>
 <div class="wrap">
 <nav class="top">
   <a href="../">Rastu Singh</a>
@@ -250,23 +322,166 @@ operating these systems rather than from the specifications.</p>
 </div>
 <script>
 (function(){
-  var t=false;
-  function sy(){
-    document.documentElement.style.setProperty('--sy',
-      (window.scrollY/Math.max(1,document.body.scrollHeight-innerHeight)).toFixed(4));
-    t=false;
-  }
-  addEventListener('scroll',function(){if(!t){t=true;requestAnimationFrame(sy);}},{passive:true});
-  sy();
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  if(!('IntersectionObserver' in window)){
-    document.querySelectorAll('.r,.bars').forEach(function(n){n.classList.add('reveal');});
-    return;
+  /* ---- scroll progress, drives the drift ---------------------------- */
+  var ticking=false, SY=0;
+  function onScroll(){
+    SY = scrollY/Math.max(1, document.body.scrollHeight-innerHeight);
+    document.documentElement.style.setProperty('--sy', SY.toFixed(4));
+    ticking=false;
   }
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('reveal'); io.unobserve(e.target);} });
-  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
-  document.querySelectorAll('.r,.bars').forEach(function(n){io.observe(n);});
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
+  onScroll();
+
+  /* ---- reveal -------------------------------------------------------- */
+  var targets = document.querySelectorAll('.r,.bars,.stats,.grid');
+  if(!('IntersectionObserver' in window) || reduce){
+    targets.forEach(function(n){n.classList.add('reveal');});
+  } else {
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('reveal');
+        io.unobserve(e.target);
+        if(e.target.classList.contains('stats')) countUp(e.target);
+      });
+    },{rootMargin:'0px 0px -6% 0px',threshold:.06});
+    targets.forEach(function(n){io.observe(n);});
+  }
+
+  /* ---- stat tiles count up ------------------------------------------- */
+  function countUp(root){
+    root.querySelectorAll('.n').forEach(function(el){
+      var raw = el.textContent, m = raw.match(/[\d.,]+/);
+      if(!m) return;
+      var end = parseFloat(m[0].replace(/,/g,'')), dec = (m[0].split('.')[1]||'').length;
+      var pre = raw.slice(0,m.index), post = raw.slice(m.index+m[0].length), t0=null;
+      function frame(ts){
+        if(!t0) t0=ts;
+        var p = Math.min(1,(ts-t0)/900), e = 1-Math.pow(1-p,3), v = end*e;
+        el.textContent = pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString()) + post;
+        if(p<1) requestAnimationFrame(frame);
+      }
+      el.textContent = pre + (dec?'0.0':'0') + post;
+      requestAnimationFrame(frame);
+    });
+  }
+
+  /* ---- living honeycomb ----------------------------------------------
+     A hex lattice on canvas. Cells brighten near the pointer, and packets
+     travel node to node along the lattice, which is what the site is about:
+     messages being routed through infrastructure. Pauses when the tab is
+     hidden so it costs nothing in the background. */
+  if(reduce) return;
+  var cv = document.createElement('canvas');
+  cv.id='hexcanvas'; cv.setAttribute('aria-hidden','true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  var veil=document.createElement('div'); veil.className='hexveil'; veil.setAttribute('aria-hidden','true');
+  document.body.insertBefore(veil, cv.nextSibling);
+
+  var ctx=cv.getContext('2d'), W=0,H=0,DPR=Math.min(2,devicePixelRatio||1);
+  var R=34, nodes=[], packets=[], mx=-1e4, my=-1e4, raf=null;
+
+  function accent(){
+    return getComputedStyle(document.documentElement).getPropertyValue('--hex').trim() || '#1f4e79';
+  }
+  function hexToRgb(h){
+    h=h.replace('#','');
+    if(h.length===3) h=h.split('').map(function(c){return c+c;}).join('');
+    var n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255];
+  }
+  var RGB=hexToRgb(accent());
+
+  function build(){
+    W=cv.width=innerWidth*DPR; H=cv.height=innerHeight*DPR;
+    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    var dx=R*Math.sqrt(3), dy=R*1.5;
+    nodes=[];
+    for(var row=-2, y=-dy*2; y<H/DPR+dy*2; row++, y+=dy){
+      for(var x=(row%2?dx/2:0)-dx; x<W/DPR+dx; x+=dx){
+        nodes.push({x:x,y:y,g:0});
+      }
+    }
+    packets=[];
+    for(var i=0;i<14;i++) spawn();
+  }
+  function spawn(){
+    if(!nodes.length) return;
+    var a=nodes[(Math.random()*nodes.length)|0];
+    packets.push({x:a.x,y:a.y,tx:a.x,ty:a.y,t:1,sp:.006+Math.random()*.01,life:0});
+  }
+  function hexPath(x,y,r){
+    ctx.beginPath();
+    for(var i=0;i<6;i++){
+      var a=Math.PI/180*(60*i-30), px=x+r*Math.cos(a), py=y+r*Math.sin(a);
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py);
+    }
+    ctx.closePath();
+  }
+
+  function draw(){
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    var drift = SY*-120;
+    var c=RGB.join(',');
+
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i], y=n.y+drift;
+      if(y<-R*2||y>innerHeight+R*2) continue;
+      var d=Math.hypot(n.x-mx, y-my);
+      var near = d<190 ? (1-d/190) : 0;
+      n.g += (near-n.g)*.09;
+      var a=.045 + n.g*.42;
+      ctx.strokeStyle='rgba('+c+','+a.toFixed(3)+')';
+      ctx.lineWidth = 1 + n.g*.8;
+      hexPath(n.x,y,R*.92);
+      ctx.stroke();
+      if(n.g>.22){
+        ctx.fillStyle='rgba('+c+','+(n.g*.06).toFixed(3)+')';
+        ctx.fill();
+      }
+    }
+
+    for(var j=packets.length-1;j>=0;j--){
+      var p=packets[j];
+      p.t+=p.sp;
+      if(p.t>=1){
+        var from={x:p.tx,y:p.ty};
+        var cand=null, best=1e9;
+        for(var k=0;k<24;k++){
+          var q=nodes[(Math.random()*nodes.length)|0];
+          var dd=Math.hypot(q.x-from.x,q.y-from.y);
+          if(dd>R*1.2 && dd<R*2.4 && dd<best){best=dd;cand=q;}
+        }
+        if(!cand){ packets.splice(j,1); spawn(); continue; }
+        p.x=from.x; p.y=from.y; p.tx=cand.x; p.ty=cand.y; p.t=0; p.life++;
+        if(p.life>26){ packets.splice(j,1); spawn(); continue; }
+      }
+      var e=p.t<.5?2*p.t*p.t:1-Math.pow(-2*p.t+2,2)/2;
+      var cx=p.x+(p.tx-p.x)*e, cy=p.y+(p.ty-p.y)*e+drift;
+      if(cy<-30||cy>innerHeight+30) continue;
+      var tail=ctx.createLinearGradient(p.x,p.y+drift,cx,cy);
+      tail.addColorStop(0,'rgba('+c+',0)');
+      tail.addColorStop(1,'rgba('+c+',.30)');
+      ctx.strokeStyle=tail; ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(p.x,p.y+drift); ctx.lineTo(cx,cy); ctx.stroke();
+      ctx.fillStyle='rgba('+c+',.55)';
+      ctx.beginPath(); ctx.arc(cx,cy,1.9,0,7); ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+
+  addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  addEventListener('pointerleave',function(){mx=my=-1e4;});
+  addEventListener('resize',build,{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){ cancelAnimationFrame(raf); raf=null; }
+    else if(!raf){ raf=requestAnimationFrame(draw); }
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){RGB=hexToRgb(accent());});
+
+  build(); draw();
 })();
 </script>
 </body>

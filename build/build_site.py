@@ -97,19 +97,9 @@ body{
    Fixed behind everything, drifting slowly as the page scrolls. Pure CSS
    background + one transform driven by a custom property, so it costs one
    compositor layer and no layout. Hidden entirely under reduced-motion. */
-.hex{
-  position:fixed;inset:-20vh -10vw;z-index:0;pointer-events:none;
-  opacity:.055;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='100' viewBox='0 0 56 100'%3E%3Cpath d='M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100' fill='none' stroke='%23000' stroke-width='2'/%3E%3Cpath d='M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34' fill='none' stroke='%23000' stroke-width='2'/%3E%3C/svg%3E");
-  background-size:64px 112px;
-  transform:translate3d(0,calc(var(--sy,0) * -90px),0);
-  will-change:transform;
-}
-@media(prefers-color-scheme:dark){.hex{opacity:.07;filter:invert(1)}}
-.hex::after{
-  content:"";position:absolute;inset:0;
-  background:radial-gradient(70% 55% at 50% 0%,transparent 0%,var(--bg) 78%);
-}
+#hexcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.hexveil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 0%,transparent 42%,var(--bg) 94%)}
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
 
@@ -192,17 +182,89 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
           max-width:32%;border:1px solid var(--line)}
 
+/* ---- hero -------------------------------------------------------------- */
+.hero{display:grid;grid-template-columns:1fr auto;gap:2.2rem;align-items:start;padding:.4rem 0}
+.hero-copy{min-width:0}
+.hero img{width:152px;height:152px;border-radius:14px;border:1px solid var(--line);
+          box-shadow:0 12px 36px -14px rgba(0,0,0,.5);display:block}
+@media(max-width:44rem){.hero{grid-template-columns:1fr;gap:1.1rem}
+  .hero img{width:104px;height:104px}}
+
+/* ---- credential strip -------------------------------------------------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.55rem;margin:1.7rem 0 1.4rem}
+.strip div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+           padding:.82rem .9rem;transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s}
+.strip div:hover{transform:translateY(-3px);border-color:var(--accent)}
+.strip b{display:block;font-size:1.34rem;font-weight:680;letter-spacing:-.022em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+.strip span{display:block;font-size:.755rem;color:var(--ink-3);margin-top:.22rem;line-height:1.3}
+
+/* ---- bento ------------------------------------------------------------- */
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0}
+.bento .card{position:relative;overflow:hidden;background:var(--surface);
+     border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
+     text-decoration:none;color:inherit;display:block;
+     transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s,box-shadow .3s}
+.bento .card:hover{transform:translateY(-4px);border-color:var(--accent);
+     box-shadow:0 16px 38px -20px rgba(0,0,0,.5)}
+.bento .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+     background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.bento .card:hover::before{opacity:1}
+.bento h3{margin:.1rem 0 .4rem;font-size:1.05rem;color:var(--ink)}
+.bento p{margin:0;font-size:.885rem;color:var(--ink-3);line-height:1.52}
+.bento .tag{display:inline-block;font-size:.695rem;letter-spacing:.09em;text-transform:uppercase;
+     color:var(--accent);font-weight:650;margin-bottom:.35rem}
+.bento .go{display:inline-block;margin-top:.75rem;font-size:.85rem;color:var(--accent);font-weight:600}
+
+/* ---- highlight panel --------------------------------------------------- */
+.panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
+   background:linear-gradient(140deg,var(--accent-soft),transparent 72%)}
+.panel h3{margin:0 0 .45rem;font-size:1.06rem}
+.panel p{margin:0 0 .55rem;font-size:.93rem;color:var(--ink-2)}
+.panel .doi{font-family:ui-monospace,Menlo,monospace;font-size:.805rem;color:var(--ink-3)}
+
+/* ---- stack chips ------------------------------------------------------- */
+.stack .row{display:flex;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 1rem}
+.stack .lbl{font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+   font-weight:650;width:100%;margin-bottom:.15rem}
+.chip{font-size:.815rem;padding:.3rem .68rem;border:1px solid var(--line);border-radius:7px;
+   background:var(--bg);color:var(--ink-2);transition:border-color .22s,color .22s,transform .22s}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+/* ---- timeline ---------------------------------------------------------- */
+.tl{position:relative;margin:1.2rem 0;padding-left:1.55rem}
+.tl::before{content:"";position:absolute;left:5px;top:.6rem;bottom:.6rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.5rem 0 .95rem}
+.tl .e::before{content:"";position:absolute;left:-1.55rem;top:.95rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:border-color .25s}
+.tl .e:hover::before{border-color:var(--accent)}
+.tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
+.tl .role{font-weight:650;font-size:.97rem}
+.tl .org{color:var(--ink-2);font-size:.895rem}
+.tl .yr{color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
        color:var(--ink-3);font-size:.885rem}
 
 /* ---- scroll reveal ---------------------------------------------------- */
-.r{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,.7,.3,1)}
+.r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
 .r.reveal{opacity:1;transform:none}
+.strip.reveal div,.bento.reveal .card{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
+.strip.reveal div:nth-child(2),.bento.reveal .card:nth-child(2){animation-delay:.07s}
+.strip.reveal div:nth-child(3),.bento.reveal .card:nth-child(3){animation-delay:.14s}
+.strip.reveal div:nth-child(4){animation-delay:.21s}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
+.lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
+.hero img{animation:rise .85s cubic-bezier(.22,.8,.3,1) .18s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
 @media(prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .hex{display:none}
+  #hexcanvas{display:none}
+  h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
   .grid a:hover{transform:none}
@@ -327,7 +389,6 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 {ld}
 </head>
 <body>
-<div class="hex" aria-hidden="true"></div>
 <div class="wrap">
 <nav class="top">
   <a href="{up or '/'}">Rastu Singh</a>
