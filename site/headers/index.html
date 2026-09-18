@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gmail 5.7.26: unauthenticated mail rejected</title>
-<meta name="description" content="Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignment, and this message did neither. Retrying will not help. Fix the authentication and resend.">
+<title>Email header analyser: what went wrong and whose problem it is</title>
+<meta name="description" content="Paste raw email headers and get ranked findings, each marked as yours to fix, the receiver&#x27;s or an intermediary&#x27;s, with the DMARC alignment arithmetic and DKIM signature tag checks no other analyser runs.">
 <meta name="author" content="Rastu Singh">
-<link rel="canonical" href="https://rastu.tech/smtp/gmail-5-7-26/">
-<meta property="og:title" content="Gmail 5.7.26: unauthenticated mail rejected">
-<meta property="og:description" content="Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignment, and this message did neither. Retrying will not help. Fix the authentication and resend.">
+<link rel="canonical" href="https://rastu.tech/headers/">
+<meta property="og:title" content="Email header analyser: what went wrong and whose problem it is">
+<meta property="og:description" content="Paste raw email headers and get ranked findings, each marked as yours to fix, the receiver&#x27;s or an intermediary&#x27;s, with the DMARC alignment arithmetic and DKIM signature tag checks no other analyser runs.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/smtp/gmail-5-7-26/">
+<meta property="og:url" content="https://rastu.tech/headers/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -823,63 +823,134 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "SMTP responses", "item": "https://rastu.tech/smtp/"}, {"@type": "ListItem", "position": 3, "name": "5.7.26"}]}, {"@type": "TechArticle", "headline": "Gmail 5.7.26: unauthenticated mail rejected", "description": "Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignment, and this message did neither. Retrying will not help. Fix the authentication and resend.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "5.7.26", "mainEntityOfPage": "https://rastu.tech/smtp/gmail-5-7-26/", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Tools", "item": "https://rastu.tech/tools/"}, {"@type": "ListItem", "position": 3, "name": "Header analyser"}]}, {"@type": "SoftwareApplication", "name": "Header analyser", "url": "https://rastu.tech/headers/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "Paste raw headers and get the issues, ranked, each one saying whether it is yours to fix, the receiver's, or something a forwarder did in transit. Plus the DMARC arithmetic a receiver actually ran.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}, "isAccessibleForFree": true, "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
-  <a class="mark" href="../../">rastu<span>.tech</span></a>
-  <a href="../../tools/">Tools</a>
-  <a href="../../smtp/" aria-current="page">SMTP responses</a>
-  <a href="../../research/">Research</a>
-  <a href="../../about/">About</a>
+  <a class="mark" href="../">rastu<span>.tech</span></a>
+  <a href="../tools/" aria-current="page">Tools</a>
+  <a href="../smtp/">SMTP responses</a>
+  <a href="../research/">Research</a>
+  <a href="../about/">About</a>
 </nav>
-<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../../smtp/">SMTP responses</a><span>/</span>5.7.26</nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="../">Home</a><span>/</span><a href="../tools/">Tools</a><span>/</span>Header analyser</nav>
 <main id="main">
 
-<h1>Gmail 5.7.26: unauthenticated mail rejected</h1>
-<p><span class="badge">Gmail</span><span class="badge">auth_failure</span><span class="badge">action: fix_config</span></p>
-<p class="lede">Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignment, and this message did neither. Retrying will not help. Fix the authentication and resend.</p>
+<h1>Header analyser: what went wrong, and whose problem it is</h1>
+<p class="lede">Paste the raw headers of a message. You get the issues ranked, each one
+marked as yours to fix, the receiver's, or something an intermediary did in transit, plus
+the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
 
-<h2 class="r">What it looks like in the log</h2>
-<pre><code>550-5.7.26 This message does not have authentication information or fails to pass authentication checks.</code></pre>
-<pre><code>550-5.7.26 Unauthenticated email from &lt;domain&gt; is not accepted due to domain&#x27;s DMARC policy.</code></pre>
-<h2 class="r">Why it happens</h2>
-<ul><li>No SPF record, or the sending IP is not authorised by it.</li>
-<li>DKIM not signing, or signing with a selector whose public key is missing or malformed.</li>
-<li>SPF and DKIM pass but neither aligns with the From domain, so DMARC still fails.</li>
-<li>The domain publishes a DMARC policy of quarantine or reject and the message did not satisfy it.</li></ul>
-<h2 class="r">What to do</h2>
-<ul><li>Confirm the sending IP is covered by SPF, and that the record stays inside the 10 DNS-lookup limit.</li>
-<li>Confirm DKIM signing is on and the selector resolves with a valid public key.</li>
-<li>Check alignment: the domain that passes SPF or DKIM has to match the From domain, relaxed or strict as the policy requires.</li>
-<li>Read your DMARC aggregate reports for the sending source rather than guessing which leg is failing.</li></ul>
-<h2 class="r">Related</h2><p><a href="/smtp/gmail-5-7-1/">5.7.1</a> &middot; <a href="/smtp/gmail-4-7-28/">4.7.28</a></p>
-<p class="meta">Classified as <code>auth_failure</code>, action
-<code>fix_config</code>. Paste a response into the
-<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
+<ul class="assure full">
+  <li><b>Nothing is uploaded</b><span>Parsed in this tab, like everything here</span></li>
+  <li><b>Findings, not a dump</b><span>Ranked, with the fix attached to each</span></li>
+  <li><b>Says what it cannot know</b><span>And there is a lot of it</span></li>
+</ul>
+
+<div class="tool">
+  <form id="hdr-form" autocomplete="off">
+    <label class="lbl-mi" for="hdr-in">Raw headers</label>
+    <textarea class="field tall" id="hdr-in" spellcheck="false"
+      placeholder="Received: from mail.example.com ([192.0.2.1]) by mx.google.com with ESMTPS id ...&#10;Authentication-Results: mx.google.com; dkim=pass header.d=example.com; spf=pass ...&#10;DKIM-Signature: v=1; a=rsa-sha256; d=example.com; s=s1; ...&#10;From: Someone &lt;hello@example.com&gt;"></textarea>
+    <div class="row-2">
+      <div>
+        <label class="lbl-mi" for="hdr-boundary">Your receiving domain (optional)</label>
+        <input class="field" id="hdr-boundary" type="text" spellcheck="false"
+               placeholder="mx.yourcompany.com">
+        <p class="hint-text">Naming your own inbound gateway lets the tool mark which
+        Authentication-Results header is the only one worth believing.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Analyse</button>
+        <button class="btn ghost" type="button" id="hdr-clear">Clear</button>
+      </div>
+    </div>
+  </form>
+  <div class="report" id="hdr-out" aria-live="polite"></div>
+</div>
+
+<h2 class="r">What it finds that other analysers do not</h2>
+
+<h3>Whose problem each finding is</h3>
+<p>Every finding is marked <strong>yours</strong>, <strong>in transit</strong> or
+<strong>receiver side</strong>. This matters more than it sounds: the single most common
+way to waste a day on a delivery problem is to go and change SPF because a message that
+was forwarded failed it, which is what forwarding does to every message and always has.</p>
+
+<h3>The DMARC arithmetic, shown as arithmetic</h3>
+<p>Which domain authenticated, which domain is in the <code>From:</code> header, which
+alignment mode applies, and therefore what a receiver would do at <code>p=none</code>,
+<code>p=quarantine</code> and <code>p=reject</code>. A valid DKIM signature by the wrong
+domain fails DMARC, and seeing the two domains side by side is usually the moment that
+lands.</p>
+
+<h3>Signature tags nobody checks</h3>
+<p>Every DKIM checker on the market reads the DNS record at the selector. But
+<code>l=</code>, <code>x=</code>, <code>a=</code> and <code>h=</code> are tags on the
+<code>DKIM-Signature</code> header, not on the record, so a record checker structurally
+cannot see them. This reads them:</p>
+<ul>
+  <li><strong>A body-length limit</strong> (<code>l=</code>) means only the first N bytes
+      are signed. Anything can be appended below that point and the signature still
+      verifies, so a DKIM pass stops meaning the message is intact. RFC 6376 has a section
+      titled "Misuse of Body Length Limits".</li>
+  <li><strong>An expired signature</strong> (<code>x=</code> in the past), or one whose
+      validity window is shorter than a normal retry schedule, so a deferred message
+      arrives unverifiable.</li>
+  <li><strong>SHA-1 signing</strong>, which several receivers now treat as no signature.</li>
+  <li><strong>A signed-header list that omits <code>From:</code></strong>, which RFC 6376
+      forbids, or omits <code>Subject:</code>, which lets it be rewritten in transit
+      without breaking the signature.</li>
+</ul>
+
+<h3>Which Authentication-Results header you can believe</h3>
+<p>None of them, by default. They are plain text, and anything upstream of your own mail
+server can write one, including the sender. Only the header your own inbound gateway
+added means anything, and a pasted block carries no proof of which that is. Name your
+gateway above and it gets marked; anything below it is shown as a claim. If a header
+carrying <em>your own</em> authserv-id turns up below your boundary, that is either a
+relay failing to strip it or a forgery, and it is reported as critical.</p>
+
+<h3>Timing that refuses to invent a number</h3>
+<p>RFC 5322 defines <code>-0000</code> and the obsolete alphabetic zones as
+<em>offset unknown</em>. A delay computed across one of those is fabricated, so it is
+left blank instead. Clocks on adjacent servers are not synchronised either, so a negative
+gap is reported as skew rather than as a negative duration.</p>
+
+<h2 class="r">What it cannot tell you</h2>
+<ul>
+  <li><strong>Whether a DKIM signature is cryptographically valid.</strong> That needs the
+      canonicalised message body, which is not in a header paste. This reads what the
+      signature claims and what the receiver concluded, never whether it holds.</li>
+  <li><strong>Whether an ARC chain validates.</strong> Same reason. Structure only.</li>
+  <li><strong>Whether the originating IP is genuine.</strong> Only the hops above your own
+      boundary are trustworthy, and everything below can be fabricated wholesale.</li>
+  <li><strong>Whether a message is a phish.</strong> It can tell you the message
+      authenticates as nothing, which is a fact. What that means is your call.</li>
+</ul>
 
 </main>
 <footer>
   <div class="cols">
     <div>
       <h2>Tools</h2>
-            <a href="../../check/">Domain check</a>
-      <a href="../../bounce/">Bounce classifier</a>
-      <a href="../../dmarc/">DMARC report reader</a>
-      <a href="../../headers/">Header analyser</a>
-      <a href="../../spf/">SPF lookup counter</a>
-      <a href="../../tools/">All tools</a>
+            <a href="../check/">Domain check</a>
+      <a href="../bounce/">Bounce classifier</a>
+      <a href="../dmarc/">DMARC report reader</a>
+      <a href="../headers/">Header analyser</a>
+      <a href="../spf/">SPF lookup counter</a>
+      <a href="../tools/">All tools</a>
     </div>
     <div>
       <h2>SMTP responses</h2>
-      <a href="../../smtp/">All responses</a>
-      <a href="../../smtp/session/">Anatomy of a session</a>
+      <a href="../smtp/">All responses</a>
+      <a href="../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
       <h2>Research</h2>
-      <a href="../../research/">State of email authentication</a>
+      <a href="../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
@@ -889,7 +960,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
       <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
     </div>
   </div>
-  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+  <p class="by">Built and maintained by <a href="../about/">Rastu Singh</a>,
      Infrastructure Engineer, Tallinn.
      Everything here runs in your browser.</p>
 </footer>
@@ -1065,6 +1136,6 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 })();
 </script>
 
-
+<script type="module" src="/js/headers-ui.js"></script>
 </body>
 </html>

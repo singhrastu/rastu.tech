@@ -379,6 +379,93 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .paste summary:hover{color:var(--accent)}
 .paste textarea{margin:.6rem 0;min-height:8rem}
 
+/* ---- header analyser ------------------------------------------------------ */
+textarea.field.tall{min-height:13rem}
+.tool .row-2{display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+  align-items:start;margin-top:var(--s3)}
+.tool .row-2 .actions{display:flex;gap:.5rem;align-items:center;padding-top:1.45rem}
+.hint-text{margin:.4rem 0 0;font-size:var(--t1);color:var(--ink-3);line-height:1.5;
+  max-width:30rem}
+@media(max-width:44rem){
+  .tool .row-2{grid-template-columns:1fr}
+  .tool .row-2 .actions{padding-top:0}
+}
+
+/* key/value summary of the message */
+table.kv{min-width:0;margin:var(--s3) 0}
+table.kv th{width:9rem;text-align:left;vertical-align:top;color:var(--ink-3);
+  font-size:var(--t1);text-transform:none;letter-spacing:0;font-weight:600;
+  white-space:nowrap}
+table.kv td{font-size:var(--t2);word-break:break-word}
+.warnnote{display:block;margin-top:.25rem;font-size:var(--t1);color:var(--warn);
+  line-height:1.5}
+
+/* the alignment arithmetic, which is the differentiator and gets the space */
+.align{border:1px solid var(--line);border-radius:14px;padding:var(--s4);
+  margin:var(--s5) 0;background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.align h3{margin:0 0 var(--s3);font-size:var(--t4)}
+table.arith{min-width:38rem;font-size:var(--t2)}
+table.arith td,table.arith th{padding:.5rem .6rem}
+table.arith .op{color:var(--ink-3);text-align:center;width:2rem}
+table.arith .pill{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.12rem .45rem;border-radius:100px;border:1px solid currentColor}
+table.arith tr.s-ok .pill{color:var(--ok)}
+table.arith tr.s-critical .pill{color:var(--bad)}
+table.arith tr.s-info .pill{color:var(--info)}
+table.arith tr.s-ok td:last-child{color:var(--ok)}
+table.arith tr.s-critical td:last-child{color:var(--bad)}
+
+.dispo{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:.55rem;margin-top:var(--s4)}
+.dispo div{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+  background:var(--bg)}
+.dispo b{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t2);
+  margin-bottom:.2rem}
+.dispo span{font-size:var(--t1);color:var(--ink-3);line-height:1.45}
+.dispo .s-ok b{color:var(--ok)} .dispo .s-warn b{color:var(--warn)}
+.dispo .s-critical b{color:var(--bad)}
+.dispo .s-critical{border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+
+/* the Authentication-Results stack, with the trust boundary drawn through it */
+.ar{border:1px solid var(--line);border-radius:12px;padding:var(--s3) var(--s4);
+  margin:0 0 .6rem;background:var(--surface)}
+.ar.trusted{border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%)}
+.ar.untrusted{opacity:.6;border-style:dashed}
+.ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
+  flex-wrap:wrap}
+.ar ul{list-style:none;padding:0;margin:0}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6}
+.ar li code{font-size:.72rem;color:var(--ink-3)}
+.ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
+.ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
+.ar li.s-warn .pill{color:var(--warn)} .ar li.s-info .pill{color:var(--info)}
+.badge.ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+
+/* the path */
+table.hops{min-width:34rem;font-size:var(--t2)}
+table.hops .ip{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.15rem}
+table.hops .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tls{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--ok);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.cleartext{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--warn);
+  border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.skew{color:var(--ink-3);font-style:italic;font-size:var(--t1)}
+.muted{color:var(--ink-3)}
+.rawhops{display:none;font-size:.7rem;max-height:22rem;overflow:auto}
+.rawhops.open{display:block}
+@media(max-width:40rem){
+  table.arith,table.hops{min-width:28rem}
+}
+
 /* ---- report table -------------------------------------------------------- */
 table.rua{min-width:46rem}
 @media(max-width:40rem){
@@ -1036,6 +1123,15 @@ TOOLS = [
                  "parsed in this tab and never uploaded.",
         "tag": "Reports",
         "takes": "report.xml.gz  ·  report.zip",
+    },
+    {
+        "slug": "headers", "name": "Header analyser",
+        "q": "What went wrong with this message, and whose problem is it?",
+        "blurb": "Paste raw headers and get the issues, ranked, each one saying whether "
+                 "it is yours to fix, the receiver's, or something a forwarder did in "
+                 "transit. Plus the DMARC arithmetic a receiver actually ran.",
+        "tag": "Messages",
+        "takes": "Received: from ...  (full header block)",
     },
     {
         "slug": "spf", "name": "SPF lookup counter",
@@ -1934,10 +2030,6 @@ make.</p>
   demonstrable.</p>
 </div>
 <ul>
-  <li><strong>Header analyser</strong> &mdash; paste raw headers and get the issues, ranked,
-      each one saying whether it is yours to fix, the receiver's, or something a forwarder
-      did in transit. Plus what a p=reject receiver would have done with the message, with
-      the alignment arithmetic shown.</li>
   <li><strong>Warm-up planner</strong> &mdash; a ramp gated on reputation metrics rather
       than on days elapsed, split by mailbox provider, with a recovery path for the day it
       goes wrong.</li>
@@ -1951,6 +2043,119 @@ make.</p>
         "Browser-based tools for email operations: classify a bounce, audit a domain's "
         "SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. Nothing is uploaded.",
         body, "tools/index.html", wide=True, nav_key="Tools")
+
+
+def build_headers():
+    """The header analyser.
+
+    Every other tool in this category extracts and displays. This one answers
+    two questions instead: what is wrong, and whose problem is it. The second is
+    the one that decides whether somebody goes and "fixes" a forwarder doing
+    exactly what forwarders do.
+    """
+    t = tool("headers")
+    body = """
+<h1>Header analyser: what went wrong, and whose problem it is</h1>
+<p class="lede">Paste the raw headers of a message. You get the issues ranked, each one
+marked as yours to fix, the receiver's, or something an intermediary did in transit, plus
+the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
+
+<ul class="assure full">
+  <li><b>Nothing is uploaded</b><span>Parsed in this tab, like everything here</span></li>
+  <li><b>Findings, not a dump</b><span>Ranked, with the fix attached to each</span></li>
+  <li><b>Says what it cannot know</b><span>And there is a lot of it</span></li>
+</ul>
+
+<div class="tool">
+  <form id="hdr-form" autocomplete="off">
+    <label class="lbl-mi" for="hdr-in">Raw headers</label>
+    <textarea class="field tall" id="hdr-in" spellcheck="false"
+      placeholder="Received: from mail.example.com ([192.0.2.1]) by mx.google.com with ESMTPS id ...&#10;Authentication-Results: mx.google.com; dkim=pass header.d=example.com; spf=pass ...&#10;DKIM-Signature: v=1; a=rsa-sha256; d=example.com; s=s1; ...&#10;From: Someone &lt;hello@example.com&gt;"></textarea>
+    <div class="row-2">
+      <div>
+        <label class="lbl-mi" for="hdr-boundary">Your receiving domain (optional)</label>
+        <input class="field" id="hdr-boundary" type="text" spellcheck="false"
+               placeholder="mx.yourcompany.com">
+        <p class="hint-text">Naming your own inbound gateway lets the tool mark which
+        Authentication-Results header is the only one worth believing.</p>
+      </div>
+      <div class="actions">
+        <button class="btn" type="submit">Analyse</button>
+        <button class="btn ghost" type="button" id="hdr-clear">Clear</button>
+      </div>
+    </div>
+  </form>
+  <div class="report" id="hdr-out" aria-live="polite"></div>
+</div>
+
+<h2>What it finds that other analysers do not</h2>
+
+<h3>Whose problem each finding is</h3>
+<p>Every finding is marked <strong>yours</strong>, <strong>in transit</strong> or
+<strong>receiver side</strong>. This matters more than it sounds: the single most common
+way to waste a day on a delivery problem is to go and change SPF because a message that
+was forwarded failed it, which is what forwarding does to every message and always has.</p>
+
+<h3>The DMARC arithmetic, shown as arithmetic</h3>
+<p>Which domain authenticated, which domain is in the <code>From:</code> header, which
+alignment mode applies, and therefore what a receiver would do at <code>p=none</code>,
+<code>p=quarantine</code> and <code>p=reject</code>. A valid DKIM signature by the wrong
+domain fails DMARC, and seeing the two domains side by side is usually the moment that
+lands.</p>
+
+<h3>Signature tags nobody checks</h3>
+<p>Every DKIM checker on the market reads the DNS record at the selector. But
+<code>l=</code>, <code>x=</code>, <code>a=</code> and <code>h=</code> are tags on the
+<code>DKIM-Signature</code> header, not on the record, so a record checker structurally
+cannot see them. This reads them:</p>
+<ul>
+  <li><strong>A body-length limit</strong> (<code>l=</code>) means only the first N bytes
+      are signed. Anything can be appended below that point and the signature still
+      verifies, so a DKIM pass stops meaning the message is intact. RFC 6376 has a section
+      titled "Misuse of Body Length Limits".</li>
+  <li><strong>An expired signature</strong> (<code>x=</code> in the past), or one whose
+      validity window is shorter than a normal retry schedule, so a deferred message
+      arrives unverifiable.</li>
+  <li><strong>SHA-1 signing</strong>, which several receivers now treat as no signature.</li>
+  <li><strong>A signed-header list that omits <code>From:</code></strong>, which RFC 6376
+      forbids, or omits <code>Subject:</code>, which lets it be rewritten in transit
+      without breaking the signature.</li>
+</ul>
+
+<h3>Which Authentication-Results header you can believe</h3>
+<p>None of them, by default. They are plain text, and anything upstream of your own mail
+server can write one, including the sender. Only the header your own inbound gateway
+added means anything, and a pasted block carries no proof of which that is. Name your
+gateway above and it gets marked; anything below it is shown as a claim. If a header
+carrying <em>your own</em> authserv-id turns up below your boundary, that is either a
+relay failing to strip it or a forgery, and it is reported as critical.</p>
+
+<h3>Timing that refuses to invent a number</h3>
+<p>RFC 5322 defines <code>-0000</code> and the obsolete alphabetic zones as
+<em>offset unknown</em>. A delay computed across one of those is fabricated, so it is
+left blank instead. Clocks on adjacent servers are not synchronised either, so a negative
+gap is reported as skew rather than as a negative duration.</p>
+
+<h2>What it cannot tell you</h2>
+<ul>
+  <li><strong>Whether a DKIM signature is cryptographically valid.</strong> That needs the
+      canonicalised message body, which is not in a header paste. This reads what the
+      signature claims and what the receiver concluded, never whether it holds.</li>
+  <li><strong>Whether an ARC chain validates.</strong> Same reason. Structure only.</li>
+  <li><strong>Whether the originating IP is genuine.</strong> Only the hops above your own
+      boundary are trustworthy, and everything below can be fabricated wholesale.</li>
+  <li><strong>Whether a message is a phish.</strong> It can tell you the message
+      authenticates as nothing, which is a fact. What that means is your call.</li>
+</ul>
+"""
+    return page(
+        "Email header analyser: what went wrong and whose problem it is",
+        "Paste raw email headers and get ranked findings, each marked as yours to fix, "
+        "the receiver's or an intermediary's, with the DMARC alignment arithmetic and "
+        "DKIM signature tag checks no other analyser runs.",
+        body, "headers/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Header analyser", None)),
+        modules=("/js/headers-ui.js",))
 
 
 def build_home():
@@ -2674,7 +2879,8 @@ def check_js():
     for name, label in (("parity-findings.mjs", "the findings layer is wrong"),
                         ("parity.mjs", "the in-browser auditor has drifted from dmarcsight"),
                         ("parity-unzip.mjs", "the zip reader is wrong"),
-                        ("parity-rua.mjs", "the DMARC report reader is wrong")):
+                        ("parity-rua.mjs", "the DMARC report reader is wrong"),
+                        ("parity-headers.mjs", "the header analyser is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue
@@ -2705,6 +2911,7 @@ def main():
     build_sift()
     urls = [build_home(), build_tools(), build_about(),
             build_check(), build_bounce(), build_dmarc(), build_spf(),
+            build_headers(),
             build_smtp_index(), build_session()]
     for c in CODES:
         urls.append(build_code_page(c))
@@ -2716,7 +2923,8 @@ def main():
     jsdir = os.path.join(OUT, "js")
     os.makedirs(jsdir, exist_ok=True)
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
-                 "unzip.js", "rua.js", "rua-ui.js", "findings.js"):
+                 "unzip.js", "rua.js", "rua-ui.js", "findings.js",
+                 "headers.js", "headers-ui.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # images

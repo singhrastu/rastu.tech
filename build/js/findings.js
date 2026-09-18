@@ -152,8 +152,10 @@ export function renderFindings(findings, opts = {}) {
 
   // The shortlist is a scannable index, not a second copy of the cards. Only the
   // first sentence of each fix, because the full version is twenty lines below.
+  // Splitting on the first "." cuts "brandco.test" to "brandco." A sentence ends
+  // with a full stop followed by a space and a capital, or by the end of the text.
   const firstSentence = (t) => {
-    const m = t.match(/^[^.]+\./);
+    const m = t.match(/^.*?[.!?](?=\s+[A-Z"'(]|\s*$)/s);
     return m ? m[0] : t;
   };
   const shortlist = fixes.length > 1 ? `

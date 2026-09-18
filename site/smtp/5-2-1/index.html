@@ -332,6 +332,93 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .paste summary:hover{color:var(--accent)}
 .paste textarea{margin:.6rem 0;min-height:8rem}
 
+/* ---- header analyser ------------------------------------------------------ */
+textarea.field.tall{min-height:13rem}
+.tool .row-2{display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+  align-items:start;margin-top:var(--s3)}
+.tool .row-2 .actions{display:flex;gap:.5rem;align-items:center;padding-top:1.45rem}
+.hint-text{margin:.4rem 0 0;font-size:var(--t1);color:var(--ink-3);line-height:1.5;
+  max-width:30rem}
+@media(max-width:44rem){
+  .tool .row-2{grid-template-columns:1fr}
+  .tool .row-2 .actions{padding-top:0}
+}
+
+/* key/value summary of the message */
+table.kv{min-width:0;margin:var(--s3) 0}
+table.kv th{width:9rem;text-align:left;vertical-align:top;color:var(--ink-3);
+  font-size:var(--t1);text-transform:none;letter-spacing:0;font-weight:600;
+  white-space:nowrap}
+table.kv td{font-size:var(--t2);word-break:break-word}
+.warnnote{display:block;margin-top:.25rem;font-size:var(--t1);color:var(--warn);
+  line-height:1.5}
+
+/* the alignment arithmetic, which is the differentiator and gets the space */
+.align{border:1px solid var(--line);border-radius:14px;padding:var(--s4);
+  margin:var(--s5) 0;background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.align h3{margin:0 0 var(--s3);font-size:var(--t4)}
+table.arith{min-width:38rem;font-size:var(--t2)}
+table.arith td,table.arith th{padding:.5rem .6rem}
+table.arith .op{color:var(--ink-3);text-align:center;width:2rem}
+table.arith .pill{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.12rem .45rem;border-radius:100px;border:1px solid currentColor}
+table.arith tr.s-ok .pill{color:var(--ok)}
+table.arith tr.s-critical .pill{color:var(--bad)}
+table.arith tr.s-info .pill{color:var(--info)}
+table.arith tr.s-ok td:last-child{color:var(--ok)}
+table.arith tr.s-critical td:last-child{color:var(--bad)}
+
+.dispo{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:.55rem;margin-top:var(--s4)}
+.dispo div{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+  background:var(--bg)}
+.dispo b{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t2);
+  margin-bottom:.2rem}
+.dispo span{font-size:var(--t1);color:var(--ink-3);line-height:1.45}
+.dispo .s-ok b{color:var(--ok)} .dispo .s-warn b{color:var(--warn)}
+.dispo .s-critical b{color:var(--bad)}
+.dispo .s-critical{border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+
+/* the Authentication-Results stack, with the trust boundary drawn through it */
+.ar{border:1px solid var(--line);border-radius:12px;padding:var(--s3) var(--s4);
+  margin:0 0 .6rem;background:var(--surface)}
+.ar.trusted{border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%)}
+.ar.untrusted{opacity:.6;border-style:dashed}
+.ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
+  flex-wrap:wrap}
+.ar ul{list-style:none;padding:0;margin:0}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6}
+.ar li code{font-size:.72rem;color:var(--ink-3)}
+.ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
+.ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
+.ar li.s-warn .pill{color:var(--warn)} .ar li.s-info .pill{color:var(--info)}
+.badge.ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+
+/* the path */
+table.hops{min-width:34rem;font-size:var(--t2)}
+table.hops .ip{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.15rem}
+table.hops .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tls{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--ok);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.cleartext{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--warn);
+  border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.skew{color:var(--ink-3);font-style:italic;font-size:var(--t1)}
+.muted{color:var(--ink-3)}
+.rawhops{display:none;font-size:.7rem;max-height:22rem;overflow:auto}
+.rawhops.open{display:block}
+@media(max-width:40rem){
+  table.arith,table.hops{min-width:28rem}
+}
+
 /* ---- report table -------------------------------------------------------- */
 table.rua{min-width:46rem}
 @media(max-width:40rem){
@@ -778,6 +865,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
             <a href="../../check/">Domain check</a>
       <a href="../../bounce/">Bounce classifier</a>
       <a href="../../dmarc/">DMARC report reader</a>
+      <a href="../../headers/">Header analyser</a>
       <a href="../../spf/">SPF lookup counter</a>
       <a href="../../tools/">All tools</a>
     </div>

@@ -103,6 +103,19 @@ throws('requires a title', () => finding({ severity: 'warn', owner: 'you' }), 'n
   is('and drops the rest', list.includes('Second sentence'), false);
 }
 {
+  // A dot inside a domain name is not the end of a sentence.
+  const html = renderFindings([
+    finding({ severity: 'critical', owner: 'you', title: 'A',
+              fix: 'Publish a key on brandco.test, then retry. And something else.' }),
+    finding({ severity: 'critical', owner: 'you', title: 'B', fix: 'Short.' }),
+  ]);
+  const list = html.slice(html.indexOf('<ol class="shortlist">'), html.indexOf('</ol>'));
+  is('a dotted domain is not treated as a sentence end',
+     list.includes('brandco.test, then retry.'), true);
+  is('and the following sentence is still dropped',
+     list.includes('And something else'), false);
+}
+{
   const t = findingsText([f('critical', 'you', { fix: 'do it', detail: 'because' })], 'HEAD');
   is('text output carries the fix', t.includes('fix: do it'), true);
   is('text output carries the owner', t.includes('owner: Your problem'), true);

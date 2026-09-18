@@ -332,6 +332,93 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .paste summary:hover{color:var(--accent)}
 .paste textarea{margin:.6rem 0;min-height:8rem}
 
+/* ---- header analyser ------------------------------------------------------ */
+textarea.field.tall{min-height:13rem}
+.tool .row-2{display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+  align-items:start;margin-top:var(--s3)}
+.tool .row-2 .actions{display:flex;gap:.5rem;align-items:center;padding-top:1.45rem}
+.hint-text{margin:.4rem 0 0;font-size:var(--t1);color:var(--ink-3);line-height:1.5;
+  max-width:30rem}
+@media(max-width:44rem){
+  .tool .row-2{grid-template-columns:1fr}
+  .tool .row-2 .actions{padding-top:0}
+}
+
+/* key/value summary of the message */
+table.kv{min-width:0;margin:var(--s3) 0}
+table.kv th{width:9rem;text-align:left;vertical-align:top;color:var(--ink-3);
+  font-size:var(--t1);text-transform:none;letter-spacing:0;font-weight:600;
+  white-space:nowrap}
+table.kv td{font-size:var(--t2);word-break:break-word}
+.warnnote{display:block;margin-top:.25rem;font-size:var(--t1);color:var(--warn);
+  line-height:1.5}
+
+/* the alignment arithmetic, which is the differentiator and gets the space */
+.align{border:1px solid var(--line);border-radius:14px;padding:var(--s4);
+  margin:var(--s5) 0;background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.align h3{margin:0 0 var(--s3);font-size:var(--t4)}
+table.arith{min-width:38rem;font-size:var(--t2)}
+table.arith td,table.arith th{padding:.5rem .6rem}
+table.arith .op{color:var(--ink-3);text-align:center;width:2rem}
+table.arith .pill{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.12rem .45rem;border-radius:100px;border:1px solid currentColor}
+table.arith tr.s-ok .pill{color:var(--ok)}
+table.arith tr.s-critical .pill{color:var(--bad)}
+table.arith tr.s-info .pill{color:var(--info)}
+table.arith tr.s-ok td:last-child{color:var(--ok)}
+table.arith tr.s-critical td:last-child{color:var(--bad)}
+
+.dispo{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:.55rem;margin-top:var(--s4)}
+.dispo div{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+  background:var(--bg)}
+.dispo b{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t2);
+  margin-bottom:.2rem}
+.dispo span{font-size:var(--t1);color:var(--ink-3);line-height:1.45}
+.dispo .s-ok b{color:var(--ok)} .dispo .s-warn b{color:var(--warn)}
+.dispo .s-critical b{color:var(--bad)}
+.dispo .s-critical{border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+
+/* the Authentication-Results stack, with the trust boundary drawn through it */
+.ar{border:1px solid var(--line);border-radius:12px;padding:var(--s3) var(--s4);
+  margin:0 0 .6rem;background:var(--surface)}
+.ar.trusted{border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%)}
+.ar.untrusted{opacity:.6;border-style:dashed}
+.ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
+  flex-wrap:wrap}
+.ar ul{list-style:none;padding:0;margin:0}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6}
+.ar li code{font-size:.72rem;color:var(--ink-3)}
+.ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
+.ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
+.ar li.s-warn .pill{color:var(--warn)} .ar li.s-info .pill{color:var(--info)}
+.badge.ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+
+/* the path */
+table.hops{min-width:34rem;font-size:var(--t2)}
+table.hops .ip{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.15rem}
+table.hops .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tls{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--ok);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.cleartext{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--warn);
+  border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.skew{color:var(--ink-3);font-style:italic;font-size:var(--t1)}
+.muted{color:var(--ink-3)}
+.rawhops{display:none;font-size:.7rem;max-height:22rem;overflow:auto}
+.rawhops.open{display:block}
+@media(max-width:40rem){
+  table.arith,table.hops{min-width:28rem}
+}
+
 /* ---- report table -------------------------------------------------------- */
 table.rua{min-width:46rem}
 @media(max-width:40rem){
@@ -756,7 +843,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 your browser: nothing you paste or upload is sent anywhere, and there is no account to
 make.</p>
 
-<div class="bento tools"><a class="card" href="/check/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span class="tag">DNS</span></div><h3>Domain check</h3><p class="q">Is this domain&#x27;s email authentication set up correctly?</p><p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open Domain check</span></a><a class="card" href="/bounce/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M8 17l-3-3 3-3"/><path d="M5 14h6"/></svg><span class="tag">Logs</span></div><h3>Bounce classifier</h3><p class="q">What is this bounce or deferral telling me?</p><p>Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.</p><p class="takes"><span>takes</span><code>550 5.7.1 Service unavailable...</code></p><span class="go">Open Bounce classifier</span></a><a class="card" href="/dmarc/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></svg><span class="tag">Reports</span></div><h3>DMARC report reader</h3><p class="q">Who is sending mail as my domain, and what is failing?</p><p>Drop in an aggregate (rua) report and read it: every source, what aligned, what did not, and which ones to fix first. The file is parsed in this tab and never uploaded.</p><p class="takes"><span>takes</span><code>report.xml.gz  ·  report.zip</code></p><span class="go">Open DMARC report reader</span></a><a class="card" href="/spf/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h3M10 12V6h7M10 12h7M10 12v6h7"/></svg><span class="tag">DNS</span></div><h3>SPF lookup counter</h3><p class="q">How close is this SPF record to the ten-lookup limit?</p><p>The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open SPF lookup counter</span></a></div>
+<div class="bento tools"><a class="card" href="/check/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span class="tag">DNS</span></div><h3>Domain check</h3><p class="q">Is this domain&#x27;s email authentication set up correctly?</p><p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open Domain check</span></a><a class="card" href="/bounce/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M8 17l-3-3 3-3"/><path d="M5 14h6"/></svg><span class="tag">Logs</span></div><h3>Bounce classifier</h3><p class="q">What is this bounce or deferral telling me?</p><p>Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.</p><p class="takes"><span>takes</span><code>550 5.7.1 Service unavailable...</code></p><span class="go">Open Bounce classifier</span></a><a class="card" href="/dmarc/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></svg><span class="tag">Reports</span></div><h3>DMARC report reader</h3><p class="q">Who is sending mail as my domain, and what is failing?</p><p>Drop in an aggregate (rua) report and read it: every source, what aligned, what did not, and which ones to fix first. The file is parsed in this tab and never uploaded.</p><p class="takes"><span>takes</span><code>report.xml.gz  ·  report.zip</code></p><span class="go">Open DMARC report reader</span></a><a class="card" href="/headers/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M3 9h18M3 13h7M3 17h7"/><circle cx="16" cy="16" r="4"/><path d="M19 19l2.5 2.5"/></svg><span class="tag">Messages</span></div><h3>Header analyser</h3><p class="q">What went wrong with this message, and whose problem is it?</p><p>Paste raw headers and get the issues, ranked, each one saying whether it is yours to fix, the receiver&#x27;s, or something a forwarder did in transit. Plus the DMARC arithmetic a receiver actually ran.</p><p class="takes"><span>takes</span><code>Received: from ...  (full header block)</code></p><span class="go">Open Header analyser</span></a><a class="card" href="/spf/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h3M10 12V6h7M10 12h7M10 12v6h7"/></svg><span class="tag">DNS</span></div><h3>SPF lookup counter</h3><p class="q">How close is this SPF record to the ten-lookup limit?</p><p>The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open SPF lookup counter</span></a></div>
 
 <div class="sechead r">
   <h2 class="r">On the command line</h2>
@@ -781,10 +868,6 @@ make.</p>
   demonstrable.</p>
 </div>
 <ul>
-  <li><strong>Header analyser</strong> &mdash; paste raw headers and get the issues, ranked,
-      each one saying whether it is yours to fix, the receiver's, or something a forwarder
-      did in transit. Plus what a p=reject receiver would have done with the message, with
-      the alignment arithmetic shown.</li>
   <li><strong>Warm-up planner</strong> &mdash; a ramp gated on reputation metrics rather
       than on days elapsed, split by mailbox provider, with a recovery path for the day it
       goes wrong.</li>
@@ -801,6 +884,7 @@ make.</p>
             <a href="../check/">Domain check</a>
       <a href="../bounce/">Bounce classifier</a>
       <a href="../dmarc/">DMARC report reader</a>
+      <a href="../headers/">Header analyser</a>
       <a href="../spf/">SPF lookup counter</a>
       <a href="../tools/">All tools</a>
     </div>
