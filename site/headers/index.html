@@ -450,15 +450,12 @@ table.rua tr.s-warn .pill{color:var(--warn)}
 table.rua tr.s-ok .pill{color:var(--ok)}
 table.rua tr.s-info .pill{color:var(--info)}
 
-/* ---- assurances: three trust signals, glanceable ------------------------- */
-.assure{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));
-  gap:var(--s2);list-style:none;padding:0;margin:var(--s4) 0 var(--s3)}
-.assure li{margin:0;border:1px solid var(--line);border-left:2px solid var(--accent);
-  border-radius:0 10px 10px 0;padding:.7rem .95rem;background:var(--surface)}
-.assure b{display:block;font-size:var(--t3);font-weight:650;color:var(--ink)}
-.assure span{display:block;font-size:var(--t1);color:var(--ink-3);margin-top:.15rem;
-  line-height:1.5}
-.byline{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s5)}
+/* A privacy claim sits beside the input it reassures you about, not in a banner
+   above it. Quiet, and only where somebody is about to hand over a file. */
+.drop em,.lbl-mi em{display:block;font-style:normal;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.35rem;letter-spacing:0;text-transform:none;
+  font-weight:400}
+.lbl-mi em{margin-top:.2rem}
 
 /* ---- cost table ---------------------------------------------------------- */
 table.cost td:first-child{white-space:nowrap}
@@ -844,15 +841,10 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 marked as yours to fix, the receiver's, or something an intermediary did in transit, plus
 the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
 
-<ul class="assure full">
-  <li><b>Nothing is uploaded</b><span>Parsed in this tab, like everything here</span></li>
-  <li><b>Findings, not a dump</b><span>Ranked, with the fix attached to each</span></li>
-  <li><b>Says what it cannot know</b><span>And there is a lot of it</span></li>
-</ul>
-
 <div class="tool">
   <form id="hdr-form" autocomplete="off">
-    <label class="lbl-mi" for="hdr-in">Raw headers</label>
+    <label class="lbl-mi" for="hdr-in">Raw headers
+      <em>Parsed in this tab. Nothing you paste reaches this server.</em></label>
     <textarea class="field tall" id="hdr-in" spellcheck="false"
       placeholder="Received: from mail.example.com ([192.0.2.1]) by mx.google.com with ESMTPS id ...&#10;Authentication-Results: mx.google.com; dkim=pass header.d=example.com; spf=pass ...&#10;DKIM-Signature: v=1; a=rsa-sha256; d=example.com; s=s1; ...&#10;From: Someone &lt;hello@example.com&gt;"></textarea>
     <div class="row-2">
