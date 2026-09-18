@@ -50,7 +50,10 @@ function init(root) {
     });
   }
   apply();
-  // Deep link: /smtp/?q=4.7.28
-  const q = new URLSearchParams(location.search).get('q');
+  // Deep link: ?f=tls. Deliberately not ?q=, which belongs to the lookup that
+  // sits above this filter on both pages that use it. Reading the same
+  // parameter meant /rfc/?q=821 quietly filtered the browse list to a number
+  // that is not in it, so clearing the search box revealed an empty list.
+  const q = new URLSearchParams(location.search).get('f');
   if (q && input) { input.value = q; apply(); }
 }

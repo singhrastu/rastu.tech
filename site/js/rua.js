@@ -88,7 +88,7 @@ const text = (el) => (el && el.textContent ? el.textContent.trim() : '');
 
 function kids(el, name) {
   if (!el) return [];
-  // Reporters emit xmlns and xsi attributes inconsistently, and RFC 7489 declares
+  // Reporters emit xmlns and xsi attributes inconsistently, and the schema declares
   // no target namespace, so match on localName rather than a namespaced lookup.
   return [...el.children].filter(c => c.localName === name);
 }
@@ -215,7 +215,8 @@ export const VERDICT = {
       + 'a public suffix outside the table shipped with this tool.'],
 };
 
-/* RFC 7489 policy override reasons split into two groups that mean opposite
+/* The policy override reasons, now defined in RFC 9990 where RFC 7489 used to
+   carry them, split into two groups that mean opposite
    things, and conflating them is how an unauthenticated source gets presented as
    fine. Only these three say "a forwarder broke SPF and that is expected": */
 const FORWARDING = ['forwarded', 'mailing_list', 'trusted_forwarder'];

@@ -10,6 +10,7 @@
   <url><loc>https://rastu.tech/headers/</loc></url>
   <url><loc>https://rastu.tech/smtp/</loc></url>
   <url><loc>https://rastu.tech/smtp/session/</loc></url>
+  <url><loc>https://rastu.tech/rfc/</loc></url>
   <url><loc>https://rastu.tech/smtp/gmail-4-7-28/</loc></url>
   <url><loc>https://rastu.tech/smtp/gmail-5-7-26/</loc></url>
   <url><loc>https://rastu.tech/smtp/gmail-5-7-1/</loc></url>
@@ -24,5 +25,104 @@
   <url><loc>https://rastu.tech/smtp/spamhaus/</loc></url>
   <url><loc>https://rastu.tech/smtp/4-4-1/</loc></url>
   <url><loc>https://rastu.tech/smtp/tls-handshake/</loc></url>
+  <url><loc>https://rastu.tech/rfc/1123/</loc></url>
+  <url><loc>https://rastu.tech/rfc/1870/</loc></url>
+  <url><loc>https://rastu.tech/rfc/1939/</loc></url>
+  <url><loc>https://rastu.tech/rfc/1957/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2034/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2045/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2046/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2047/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2049/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2142/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2181/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2183/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2231/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2369/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2387/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2392/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2449/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2557/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2919/</loc></url>
+  <url><loc>https://rastu.tech/rfc/2920/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3030/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3207/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3461/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3463/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3464/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3676/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3885/</loc></url>
+  <url><loc>https://rastu.tech/rfc/3886/</loc></url>
+  <url><loc>https://rastu.tech/rfc/4289/</loc></url>
+  <url><loc>https://rastu.tech/rfc/4468/</loc></url>
+  <url><loc>https://rastu.tech/rfc/4865/</loc></url>
+  <url><loc>https://rastu.tech/rfc/4954/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5068/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5147/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5248/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5321/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5322/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5536/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5537/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5598/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5782/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5863/</loc></url>
+  <url><loc>https://rastu.tech/rfc/5965/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6008/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6152/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6186/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6376/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6377/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6409/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6449/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6471/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6522/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6530/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6531/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6532/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6533/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6541/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6591/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6647/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6650/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6657/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6692/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6710/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6838/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6854/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6856/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6857/</loc></url>
+  <url><loc>https://rastu.tech/rfc/6858/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7208/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7372/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7504/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7505/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7672/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7766/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7817/</loc></url>
+  <url><loc>https://rastu.tech/rfc/7960/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8058/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8098/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8301/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8314/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8315/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8437/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8460/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8461/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8463/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8553/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8601/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8616/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8617/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8689/</loc></url>
+  <url><loc>https://rastu.tech/rfc/8997/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9051/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9057/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9210/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9694/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9755/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9989/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9990/</loc></url>
+  <url><loc>https://rastu.tech/rfc/9991/</loc></url>
   <url><loc>https://rastu.tech/research/</loc></url>
 </urlset>

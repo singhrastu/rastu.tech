@@ -13,9 +13,8 @@ set of both:
     IANA SMTP Enhanced
     Status Codes registry    the enhanced status codes       81 of them
 
-Neither is written from memory. Both are parsed from the published source and
-cached under build/sources/ so the build is reproducible offline and so the
-provenance of every line is checkable.
+Both are parsed from the published source and cached under build/sources/, so
+the build is reproducible offline and the provenance of every line is checkable.
 
 WHAT THIS ADDS TO THE SOURCE DATA
 The registries define what a code *means*. They say nothing about what to do,
@@ -29,9 +28,9 @@ Entries are marked with how much is known about them:
     written    a full page exists: real log samples, causes, remediation
     derived    the registry definition plus an action inferred from its class
 
-That distinction is published on the page. A derived action is a sound default
-and it is not the same thing as somebody having operated the failure, and the
-reference says which it is rather than letting the two read alike.
+That distinction is published on the page. A derived action is a sound default.
+An action I have worked myself is a tested one. The reference says which it is
+rather than letting the two read alike.
 """
 import argparse
 import csv

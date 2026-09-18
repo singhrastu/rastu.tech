@@ -181,13 +181,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 
 /* ---- card grid for the reference index -------------------------------- */
 .grid{display:grid;gap:.55rem;margin-top:1.2rem}
-.grid a{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
+.grid>a,.grid>.repo{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
         text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
-.grid a:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
-.grid a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.grid a strong{color:var(--ink);font-size:.97rem}
-.grid a .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
-.grid a span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
+.grid>a:hover,.grid>.repo:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid>a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid>a strong,.grid>.repo strong{color:var(--ink);font-size:.97rem}
+.grid>a .p,.grid>.repo .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
+.grid>a span.d,.grid>.repo span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
 
 /* ---- portrait --------------------------------------------------------- */
 .portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
@@ -549,14 +549,14 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 .chip.more{border-color:var(--accent-soft);color:var(--accent)}
 
 /* ---- reference index rows ------------------------------------------------ */
-.grid a{position:relative}
-.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+.grid>a,.grid>.repo{position:relative}
+.grid>a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
   text-transform:uppercase;font-weight:700;border:1px solid currentColor;
   border-radius:100px;padding:.14rem .5rem}
-.grid a .d{padding-right:5.5rem}
+.grid>a .d{padding-right:5.5rem}
 @media(max-width:34rem){
-  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
-  .grid a .d{padding-right:0}
+  .grid>a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid>a .d{padding-right:0}
 }
 
 /* ---- SPF include tree ---------------------------------------------------- */
@@ -848,11 +848,117 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   .term .cur{animation:none;opacity:0}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
-  .grid a:hover{transform:none}
+  .grid>a:hover,.grid>.repo:hover{transform:none}
 }
 @media(max-width:34rem){
   .portrait{max-width:38%;margin-left:1rem}
   h2{margin-top:2.3rem}
+}
+
+/* ---------------------------------------------------------------- RFC decoded */
+.rfc{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem;
+  border-left-color:var(--line)}
+.rfc.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  border-left-color:var(--accent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.rfc header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.rfc .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.rfc.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.rfc .cat,.rfc .yr{font-size:var(--t1);color:var(--ink-3)}
+.rfc .yr{margin-left:auto}
+.rfc h3{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.rfc.lead h3{font-size:1.2rem}
+.rfc h3 a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+.rfc h3 a:hover{border-bottom-color:var(--accent)}
+.rfc .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.rfc .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.rfc .lv{color:var(--ink-3)}
+.rfc .warn-line{margin:.3rem 0;font-size:var(--t1);color:var(--ink-2);line-height:1.6}
+.rfc .warn-line strong{color:var(--warn)}
+.rfc .warn-line a{margin-right:.4rem}
+
+/* The maturity label, which is the field people misread. Colour separates a
+   standards-track document from one that carries no standards weight. */
+.st{font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
+  padding:.16rem .45rem;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.st-std{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.st-bcp{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.st-info{color:var(--ink-3)}
+.st-exp{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.st-hist{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+
+/* The answer for somebody holding a dead number. */
+.redirect{border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+  background:color-mix(in srgb,var(--warn) 7%,transparent);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.redirect p{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.redirect p:last-child{margin:0}
+.redirect strong{color:var(--ink)}
+
+.warnbox{border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0;background:var(--surface);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.warnbox.s-info{border-left-color:var(--info)}
+.warnbox p{margin:0 0 .5rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.warnbox ul{margin:0;padding-left:1.1rem}
+.warnbox li{font-size:var(--t2);color:var(--ink-2);margin:.2rem 0}
+
+.rfc-cat{margin:0 0 var(--s4)}
+.rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
+.rfc-list{display:flex;flex-direction:column;gap:2px}
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+  align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
+  text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
+.rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.rfc-row code{color:var(--ink-3);font-size:var(--t1)}
+.rfc-row:hover code{color:var(--accent)}
+.rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
+
+.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+  font-size:var(--t2)}
+.meta dt{color:var(--ink-3);font-weight:600}
+.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+.hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
+
+.reqsec{margin:0 0 var(--s4)}
+.reqsec h3{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:0 0 .5rem;
+  padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.reqs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.reqs li{display:grid;grid-template-columns:5.4rem 1fr;gap:.7rem;align-items:start;
+  padding:.5rem .7rem;border-radius:8px;background:var(--surface);
+  border:1px solid var(--line);border-left-width:2px}
+.reqs li.lv-must{border-left-color:var(--bad)}
+.reqs li.lv-should{border-left-color:var(--warn)}
+.reqs li.lv-may{border-left-color:var(--info)}
+.kw{font-size:.62rem;letter-spacing:.06em;font-weight:700;text-transform:uppercase;
+  padding-top:.2rem;white-space:nowrap}
+.kw-must{color:var(--bad)} .kw-should{color:var(--warn)} .kw-may{color:var(--info)}
+.rq{font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+
+.repo .repo-t{text-decoration:none;border-bottom:1px solid transparent}
+.repo .repo-t:hover strong{color:var(--accent)}
+.repo span.d a{color:var(--ink-2);text-decoration:none;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.repo span.d a:hover{color:var(--accent)}
+#rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
+.pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.pagemeta .cat{font-size:var(--t1);color:var(--ink-3)}
+.ex{margin:.7rem 0 0;font-size:var(--t1);color:var(--ink-3);display:flex;
+  gap:.4rem;align-items:center;flex-wrap:wrap}
+.ex .dim{color:var(--ink-3);opacity:.8}
+@media(max-width:620px){
+  .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
+  .rfc-row .n{display:none}
+  .reqs li{grid-template-columns:1fr;gap:.25rem}
+  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  .meta dt{margin-top:.5rem}
 }
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Tools", "item": "https://rastu.tech/tools/"}, {"@type": "ListItem", "position": 3, "name": "Domain check"}]}, {"@type": "WebApplication", "name": "Email authentication checker", "url": "https://rastu.tech/check/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Audits a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI configuration in the browser, including the RFC 7208 ten-lookup limit and MTA-STS policy and MX consistency.", "author": {"@id": "https://rastu.tech/#person"}, "isBasedOn": "https://github.com/singhrastu/dmarcsight", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
@@ -864,6 +970,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   <a class="mark" href="../">rastu<span>.tech</span></a>
   <a href="../tools/" aria-current="page">Tools</a>
   <a href="../smtp/">SMTP responses</a>
+  <a href="../rfc/">RFC decoded</a>
   <a href="../research/">Research</a>
   <a href="../about/">About</a>
 </nav>

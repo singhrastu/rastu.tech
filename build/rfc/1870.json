@@ -1,0 +1,1 @@
+{"num":1870,"id":"RFC1870","uses_2119":false,"requirements":[{"section":"6","heading":"The extended MAIL command","level":"must","keyword":"MUST NOT","text":"NOTE: Servers MUST NOT use the SIZE parameter to determine end of content in the DATA command."}]}

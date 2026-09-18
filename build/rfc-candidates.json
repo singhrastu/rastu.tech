@@ -1,0 +1,2347 @@
+[
+  {
+    "id": "RFC10022",
+    "num": 10022,
+    "title": "IMAP UIDBATCHES Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2026"
+  },
+  {
+    "id": "RFC9979",
+    "num": 9979,
+    "title": "Registration of Further IMAP/JMAP Keywords and Mailbox Name Attributes",
+    "status": "INFORMATIONAL",
+    "published": "May 2026"
+  },
+  {
+    "id": "RFC9873",
+    "num": 9873,
+    "title": "Additional Email Address Extension for the Extensible Provisioning Protocol (EPP)",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2025"
+  },
+  {
+    "id": "RFC9816",
+    "num": 9816,
+    "title": "Usage and Applicability of BGP Link State (BGP-LS) Shortest Path First (SPF) Routing in Data Centers",
+    "status": "INFORMATIONAL",
+    "published": "July 2025"
+  },
+  {
+    "id": "RFC9815",
+    "num": 9815,
+    "title": "BGP Link State (BGP-LS) Shortest Path First (SPF) Routing",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2025"
+  },
+  {
+    "id": "RFC9788",
+    "num": 9788,
+    "title": "Header Protection for Cryptographically Protected Email",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2025"
+  },
+  {
+    "id": "RFC9787",
+    "num": 9787,
+    "title": "Guidance on End-to-End Email Security",
+    "status": "INFORMATIONAL",
+    "published": "August 2025"
+  },
+  {
+    "id": "RFC9738",
+    "num": 9738,
+    "title": "IMAP MESSAGELIMIT Extension",
+    "status": "EXPERIMENTAL",
+    "published": "March 2025"
+  },
+  {
+    "id": "RFC9698",
+    "num": 9698,
+    "title": "The JMAPACCESS Extension for IMAP",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2025"
+  },
+  {
+    "id": "RFC9671",
+    "num": 9671,
+    "title": "Sieve Email Filtering: Extension for Processing Calendar Attachments",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2024"
+  },
+  {
+    "id": "RFC9598",
+    "num": 9598,
+    "title": "Internationalized Email Addresses in X.509 Certificates",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2024"
+  },
+  {
+    "id": "RFC9590",
+    "num": 9590,
+    "title": "IMAP Extension for Returning Mailbox METADATA in Extended LIS",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2024"
+  },
+  {
+    "id": "RFC9586",
+    "num": 9586,
+    "title": "IMAP Extension for Using and Returning Unique Identifiers (UIDs) Only",
+    "status": "EXPERIMENTAL",
+    "published": "May 2024"
+  },
+  {
+    "id": "RFC9585",
+    "num": 9585,
+    "title": "IMAP Response Code for Command Progress Notifications",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2024"
+  },
+  {
+    "id": "RFC9549",
+    "num": 9549,
+    "title": "Internationalization Updates to RFC 5280",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2024"
+  },
+  {
+    "id": "RFC9500",
+    "num": 9500,
+    "title": "Standard Public Key Cryptography (PKC) Test Keys",
+    "status": "INFORMATIONAL",
+    "published": "December 2023"
+  },
+  {
+    "id": "RFC9495",
+    "num": 9495,
+    "title": "Certification Authority Authorization (CAA) Processing for Email Addresses",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2023"
+  },
+  {
+    "id": "RFC9477",
+    "num": 9477,
+    "title": "Complaint Feedback Loop Address Header",
+    "status": "EXPERIMENTAL",
+    "published": "September 2023"
+  },
+  {
+    "id": "RFC9422",
+    "num": 9422,
+    "title": "The LIMITS SMTP Service Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2024"
+  },
+  {
+    "id": "RFC9394",
+    "num": 9394,
+    "title": "IMAP PARTIAL Extension for Paged SEARCH and FETCH",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2023"
+  },
+  {
+    "id": "RFC9228",
+    "num": 9228,
+    "title": "Delivered-To Email Header Field",
+    "status": "EXPERIMENTAL",
+    "published": "April 2022"
+  },
+  {
+    "id": "RFC9219",
+    "num": 9219,
+    "title": "S/MIME Signature Verification Extension to the JSON Meta Application Protocol (JMAP)",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2022"
+  },
+  {
+    "id": "RFC9216",
+    "num": 9216,
+    "title": "S/MIME Example Keys and Certificates",
+    "status": "INFORMATIONAL",
+    "published": "April 2022"
+  },
+  {
+    "id": "RFC9208",
+    "num": 9208,
+    "title": "IMAP QUOTA Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2022"
+  },
+  {
+    "id": "RFC9122",
+    "num": 9122,
+    "title": "IANA Registry for Sieve Actions",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2023"
+  },
+  {
+    "id": "RFC9042",
+    "num": 9042,
+    "title": "Sieve Email Filtering: Delivery by MAILBOXID",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2021"
+  },
+  {
+    "id": "RFC8970",
+    "num": 8970,
+    "title": "IMAP4 Extension: Message Preview Generation",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2020"
+  },
+  {
+    "id": "RFC8904",
+    "num": 8904,
+    "title": "DNS Whitelist (DNSWL) Email Authentication Method Extension",
+    "status": "INFORMATIONAL",
+    "published": "September 2020"
+  },
+  {
+    "id": "RFC8878",
+    "num": 8878,
+    "title": "Zstandard Compression and the 'application/zstd' Media Type",
+    "status": "INFORMATIONAL",
+    "published": "February 2021"
+  },
+  {
+    "id": "RFC8823",
+    "num": 8823,
+    "title": "Extensions to Automatic Certificate Management Environment for End-User S/MIME Certificates",
+    "status": "INFORMATIONAL",
+    "published": "April 2021"
+  },
+  {
+    "id": "RFC8755",
+    "num": 8755,
+    "title": "Using Commercial National Security Algorithm Suite Algorithms in Secure/Multipurpose Internet Mail Extensions",
+    "status": "INFORMATIONAL",
+    "published": "March 2020"
+  },
+  {
+    "id": "RFC8621",
+    "num": 8621,
+    "title": "The JSON Meta Application Protocol (JMAP) for Mail",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2019"
+  },
+  {
+    "id": "RFC8591",
+    "num": 8591,
+    "title": "SIP-Based Messaging with S/MIME",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2019"
+  },
+  {
+    "id": "RFC8580",
+    "num": 8580,
+    "title": "Sieve Extension: File Carbon Copy (FCC)",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2019"
+  },
+  {
+    "id": "RFC8579",
+    "num": 8579,
+    "title": "Sieve Email Filtering: Delivering to Special-Use Mailboxes",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2019"
+  },
+  {
+    "id": "RFC8551",
+    "num": 8551,
+    "title": "Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Message Specification",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2019"
+  },
+  {
+    "id": "RFC8550",
+    "num": 8550,
+    "title": "Secure/Multipurpose Internet Mail Extensions (S/MIME) Version 4.0 Certificate Handling",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2019"
+  },
+  {
+    "id": "RFC8541",
+    "num": 8541,
+    "title": "Impact of Shortest Path First (SPF) Trigger and Delay Strategies on IGP Micro-loops",
+    "status": "INFORMATIONAL",
+    "published": "March 2019"
+  },
+  {
+    "id": "RFC8514",
+    "num": 8514,
+    "title": "Internet Message Access Protocol (IMAP) - SAVEDATE Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2019"
+  },
+  {
+    "id": "RFC8508",
+    "num": 8508,
+    "title": "IMAP REPLACE Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2019"
+  },
+  {
+    "id": "RFC8494",
+    "num": 8494,
+    "title": "Multicast Email (MULE) over Allied Communications Publication (ACP) 142",
+    "status": "INFORMATIONAL",
+    "published": "November 2018"
+  },
+  {
+    "id": "RFC8474",
+    "num": 8474,
+    "title": "IMAP Extension for Object Identifiers",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2018"
+  },
+  {
+    "id": "RFC8457",
+    "num": 8457,
+    "title": "IMAP \"$Important\" Keyword and \"\\Important\" Special-Use Attribute",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2018"
+  },
+  {
+    "id": "RFC8440",
+    "num": 8440,
+    "title": "IMAP4 Extension for Returning MYRIGHTS Information in Extended LIST",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2018"
+  },
+  {
+    "id": "RFC8438",
+    "num": 8438,
+    "title": "IMAP Extension for STATUS=SIZE",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2018"
+  },
+  {
+    "id": "RFC8411",
+    "num": 8411,
+    "title": "IANA Registration for the Cryptographic Algorithm Object Identifier Range",
+    "status": "INFORMATIONAL",
+    "published": "August 2018"
+  },
+  {
+    "id": "RFC8405",
+    "num": 8405,
+    "title": "Shortest Path First (SPF) Back-Off Delay Algorithm for Link-State IGPs",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2018"
+  },
+  {
+    "id": "RFC8255",
+    "num": 8255,
+    "title": "Multiple Language Content Type",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2017"
+  },
+  {
+    "id": "RFC8187",
+    "num": 8187,
+    "title": "Indicating Character Encoding and Language for HTTP Header Field Parameters",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2017"
+  },
+  {
+    "id": "RFC8162",
+    "num": 8162,
+    "title": "Using Secure DNS to Associate Certificates with Domain Names for S/MIME",
+    "status": "EXPERIMENTAL",
+    "published": "May 2017"
+  },
+  {
+    "id": "RFC8010",
+    "num": 8010,
+    "title": "Internet Printing Protocol/1.1: Encoding and Transport",
+    "status": "INTERNET STANDARD",
+    "published": "January 2017"
+  },
+  {
+    "id": "RFC7929",
+    "num": 7929,
+    "title": "DNS-Based Authentication of Named Entities (DANE) Bindings for OpenPGP",
+    "status": "EXPERIMENTAL",
+    "published": "August 2016"
+  },
+  {
+    "id": "RFC7912",
+    "num": 7912,
+    "title": "Message Authorizing Email Header Field and Its Use for the Draft and Release Procedure",
+    "status": "INFORMATIONAL",
+    "published": "June 2016"
+  },
+  {
+    "id": "RFC7889",
+    "num": 7889,
+    "title": "The IMAP APPENDLIMIT Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2016"
+  },
+  {
+    "id": "RFC7888",
+    "num": 7888,
+    "title": "IMAP4 Non-synchronizing Literals",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2016"
+  },
+  {
+    "id": "RFC7842",
+    "num": 7842,
+    "title": "Requirements for Improvements to the IETF Email List Archiving, Web-Based Browsing, and Search Tool",
+    "status": "INFORMATIONAL",
+    "published": "April 2016"
+  },
+  {
+    "id": "RFC7681",
+    "num": 7681,
+    "title": "Email Exchange of Secondary School Transcripts",
+    "status": "INFORMATIONAL",
+    "published": "October 2015"
+  },
+  {
+    "id": "RFC7508",
+    "num": 7508,
+    "title": "Securing Header Fields with S/MIME",
+    "status": "EXPERIMENTAL",
+    "published": "April 2015"
+  },
+  {
+    "id": "RFC7444",
+    "num": 7444,
+    "title": "Security Labels in Internet Email",
+    "status": "INFORMATIONAL",
+    "published": "February 2015"
+  },
+  {
+    "id": "RFC7377",
+    "num": 7377,
+    "title": "IMAP4 Multimailbox SEARCH Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2014"
+  },
+  {
+    "id": "RFC7352",
+    "num": 7352,
+    "title": "Sieve Email Filtering: Detecting Duplicate Deliveries",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2014"
+  },
+  {
+    "id": "RFC7293",
+    "num": 7293,
+    "title": "The Require-Recipient-Valid-Since Header Field and SMTP Service Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2014"
+  },
+  {
+    "id": "RFC7281",
+    "num": 7281,
+    "title": "Authentication-Results Registration for S/MIME Signature Verification",
+    "status": "INFORMATIONAL",
+    "published": "June 2014"
+  },
+  {
+    "id": "RFC7259",
+    "num": 7259,
+    "title": "The Jabber-ID Header Field",
+    "status": "INFORMATIONAL",
+    "published": "May 2014"
+  },
+  {
+    "id": "RFC7162",
+    "num": 7162,
+    "title": "IMAP Extensions: Quick Flag Changes Resynchronization (CONDSTORE) and Quick Mailbox Resynchronization (QRESYNC)",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2014"
+  },
+  {
+    "id": "RFC7114",
+    "num": 7114,
+    "title": "Creation of a Registry for smime-type Parameter Values",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2014"
+  },
+  {
+    "id": "RFC7111",
+    "num": 7111,
+    "title": "URI Fragment Identifiers for the text/csv Media Type",
+    "status": "INFORMATIONAL",
+    "published": "January 2014"
+  },
+  {
+    "id": "RFC7107",
+    "num": 7107,
+    "title": "Object Identifier Registry for the S/MIME Mail Security Working Group",
+    "status": "INFORMATIONAL",
+    "published": "January 2014"
+  },
+  {
+    "id": "RFC7095",
+    "num": 7095,
+    "title": "jCard: The JSON Format for vCard",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2014"
+  },
+  {
+    "id": "RFC7073",
+    "num": 7073,
+    "title": "A Reputation Response Set for Email Identifiers",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2013"
+  },
+  {
+    "id": "RFC7033",
+    "num": 7033,
+    "title": "WebFinger",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2013"
+  },
+  {
+    "id": "RFC7017",
+    "num": 7017,
+    "title": "IMAP Access to IETF Email List Archives",
+    "status": "INFORMATIONAL",
+    "published": "August 2013"
+  },
+  {
+    "id": "RFC6943",
+    "num": 6943,
+    "title": "Issues in Identifier Comparison for Security Purposes",
+    "status": "INFORMATIONAL",
+    "published": "May 2013"
+  },
+  {
+    "id": "RFC6884",
+    "num": 6884,
+    "title": "RTP Payload Format for the Enhanced Variable Rate Narrowband-Wideband Codec (EVRC-NW)",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2013"
+  },
+  {
+    "id": "RFC6851",
+    "num": 6851,
+    "title": "Internet Message Access Protocol (IMAP) - MOVE Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2013"
+  },
+  {
+    "id": "RFC6785",
+    "num": 6785,
+    "title": "Support for Internet Message Access Protocol (IMAP) Events in Sieve",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2012"
+  },
+  {
+    "id": "RFC6783",
+    "num": 6783,
+    "title": "Mailing Lists and Non-ASCII Addresses",
+    "status": "INFORMATIONAL",
+    "published": "November 2012"
+  },
+  {
+    "id": "RFC6778",
+    "num": 6778,
+    "title": "Requirements for Archiving IETF Email Lists and for Providing Web-Based Browsing and Searching",
+    "status": "INFORMATIONAL",
+    "published": "October 2012"
+  },
+  {
+    "id": "RFC6758",
+    "num": 6758,
+    "title": "Tunneling of SMTP Message Transfer Priorities",
+    "status": "INFORMATIONAL",
+    "published": "October 2012"
+  },
+  {
+    "id": "RFC6729",
+    "num": 6729,
+    "title": "Indicating Email Handling States in Trace Fields",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2012"
+  },
+  {
+    "id": "RFC6686",
+    "num": 6686,
+    "title": "Resolution of the Sender Policy Framework (SPF) and Sender ID Experiments",
+    "status": "INFORMATIONAL",
+    "published": "July 2012"
+  },
+  {
+    "id": "RFC6664",
+    "num": 6664,
+    "title": "S/MIME Capabilities for Public Key Definitions",
+    "status": "INFORMATIONAL",
+    "published": "July 2012"
+  },
+  {
+    "id": "RFC6652",
+    "num": 6652,
+    "title": "Sender Policy Framework (SPF) Authentication Failure Reporting Using the Abuse Reporting Format",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2012"
+  },
+  {
+    "id": "RFC6651",
+    "num": 6651,
+    "title": "Extensions to DomainKeys Identified Mail (DKIM) for Failure Reporting",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2012"
+  },
+  {
+    "id": "RFC6609",
+    "num": 6609,
+    "title": "Sieve Email Filtering: Include Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2012"
+  },
+  {
+    "id": "RFC6590",
+    "num": 6590,
+    "title": "Redaction of Potentially Sensitive Data from Mail Abuse Reports",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2012"
+  },
+  {
+    "id": "RFC6558",
+    "num": 6558,
+    "title": "Sieve Extension for Converting Messages before Delivery",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2012"
+  },
+  {
+    "id": "RFC6430",
+    "num": 6430,
+    "title": "Email Feedback Report Type Value: not-spam",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2011"
+  },
+  {
+    "id": "RFC6381",
+    "num": 6381,
+    "title": "The 'Codecs' and 'Profiles' Parameters for \"Bucket\" Media Types",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2011"
+  },
+  {
+    "id": "RFC6350",
+    "num": 6350,
+    "title": "vCard Format Specification",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2011"
+  },
+  {
+    "id": "RFC6318",
+    "num": 6318,
+    "title": "Suite B in Secure/Multipurpose Internet Mail Extensions (S/MIME)",
+    "status": "HISTORIC",
+    "published": "June 2011"
+  },
+  {
+    "id": "RFC6216",
+    "num": 6216,
+    "title": "Example Call Flows Using Session Initiation Protocol (SIP) Security Mechanisms",
+    "status": "INFORMATIONAL",
+    "published": "April 2011"
+  },
+  {
+    "id": "RFC6210",
+    "num": 6210,
+    "title": "Experiment: Hash Functions with Parameters in the Cryptographic Message Syntax (CMS) and S/MIME",
+    "status": "EXPERIMENTAL",
+    "published": "April 2011"
+  },
+  {
+    "id": "RFC6203",
+    "num": 6203,
+    "title": "IMAP4 Extension for Fuzzy Search",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2011"
+  },
+  {
+    "id": "RFC6154",
+    "num": 6154,
+    "title": "IMAP LIST Extension for Special-Use Mailboxes",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2011"
+  },
+  {
+    "id": "RFC6134",
+    "num": 6134,
+    "title": "Sieve Extension: Externally Stored Lists",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2011"
+  },
+  {
+    "id": "RFC6133",
+    "num": 6133,
+    "title": "Sieve Email Filtering: Use of Presence Information with Auto-Responder Functionality",
+    "status": "INFORMATIONAL",
+    "published": "July 2011"
+  },
+  {
+    "id": "RFC6047",
+    "num": 6047,
+    "title": "iCalendar Message-Based Interoperability Protocol (iMIP)",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2010"
+  },
+  {
+    "id": "RFC6009",
+    "num": 6009,
+    "title": "Sieve Email Filtering: Delivery Status Notifications and Deliver-By Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2010"
+  },
+  {
+    "id": "RFC5957",
+    "num": 5957,
+    "title": "Display-Based Address Sorting for the IMAP4 SORT Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2010"
+  },
+  {
+    "id": "RFC5911",
+    "num": 5911,
+    "title": "New ASN.1 Modules for Cryptographic Message Syntax (CMS) and S/MIME",
+    "status": "INFORMATIONAL",
+    "published": "June 2010"
+  },
+  {
+    "id": "RFC5896",
+    "num": 5896,
+    "title": "Generic Security Service Application Program Interface (GSS-API): Delegate if Approved by Policy",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2010"
+  },
+  {
+    "id": "RFC5877",
+    "num": 5877,
+    "title": "The application/pkix-attr-cert Media Type for Attribute Certificates",
+    "status": "INFORMATIONAL",
+    "published": "May 2010"
+  },
+  {
+    "id": "RFC5819",
+    "num": 5819,
+    "title": "IMAP4 Extension for Returning STATUS Information in Extended LIST",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2010"
+  },
+  {
+    "id": "RFC5804",
+    "num": 5804,
+    "title": "A Protocol for Remotely Managing Sieve Scripts",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2010"
+  },
+  {
+    "id": "RFC5788",
+    "num": 5788,
+    "title": "IMAP4 Keyword Registry",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2010"
+  },
+  {
+    "id": "RFC5784",
+    "num": 5784,
+    "title": "Sieve Email Filtering:  Sieves and Display Directives in XML",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2010"
+  },
+  {
+    "id": "RFC5703",
+    "num": 5703,
+    "title": "Sieve Email Filtering: MIME Part Tests, Iteration, Extraction, Replacement, and Enclosure",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2009"
+  },
+  {
+    "id": "RFC5688",
+    "num": 5688,
+    "title": "A Session Initiation Protocol (SIP) Media Feature Tag for MIME Application Subtypes",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2010"
+  },
+  {
+    "id": "RFC5621",
+    "num": 5621,
+    "title": "Message Body Handling in the Session Initiation Protocol (SIP)",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2009"
+  },
+  {
+    "id": "RFC5617",
+    "num": 5617,
+    "title": "DomainKeys Identified Mail (DKIM) Author Domain Signing Practices (ADSP)",
+    "status": "HISTORIC",
+    "published": "August 2009"
+  },
+  {
+    "id": "RFC5616",
+    "num": 5616,
+    "title": "Streaming Internet Messaging Attachments",
+    "status": "INFORMATIONAL",
+    "published": "August 2009"
+  },
+  {
+    "id": "RFC5593",
+    "num": 5593,
+    "title": "Internet Message Access Protocol (IMAP) - URL Access Identifier Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2009"
+  },
+  {
+    "id": "RFC5585",
+    "num": 5585,
+    "title": "DomainKeys Identified Mail (DKIM) Service Overview",
+    "status": "INFORMATIONAL",
+    "published": "July 2009"
+  },
+  {
+    "id": "RFC5551",
+    "num": 5551,
+    "title": "Lemonade Notifications Architecture",
+    "status": "INFORMATIONAL",
+    "published": "August 2009"
+  },
+  {
+    "id": "RFC5550",
+    "num": 5550,
+    "title": "The Internet Email to Support Diverse Service Environments (Lemonade) Profile",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2009"
+  },
+  {
+    "id": "RFC5530",
+    "num": 5530,
+    "title": "IMAP Response Codes",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2009"
+  },
+  {
+    "id": "RFC5518",
+    "num": 5518,
+    "title": "Vouch By Reference",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2009"
+  },
+  {
+    "id": "RFC5490",
+    "num": 5490,
+    "title": "The Sieve Mail-Filtering Language -- Extensions for Checking Mailbox Status and Accessing Mailbox Metadata",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2009"
+  },
+  {
+    "id": "RFC5466",
+    "num": 5466,
+    "title": "IMAP4 Extension for Named Searches (Filters)",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2009"
+  },
+  {
+    "id": "RFC5465",
+    "num": 5465,
+    "title": "The IMAP NOTIFY Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2009"
+  },
+  {
+    "id": "RFC5464",
+    "num": 5464,
+    "title": "The IMAP METADATA Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2009"
+  },
+  {
+    "id": "RFC5463",
+    "num": 5463,
+    "title": "Sieve Email Filtering:  Ihave Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2009"
+  },
+  {
+    "id": "RFC5442",
+    "num": 5442,
+    "title": "LEMONADE Architecture - Supporting Open Mobile Alliance (OMA) Mobile Email (MEM) Using Internet Mail",
+    "status": "INFORMATIONAL",
+    "published": "March 2009"
+  },
+  {
+    "id": "RFC5435",
+    "num": 5435,
+    "title": "Sieve Email Filtering: Extension for Notifications",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2009"
+  },
+  {
+    "id": "RFC5429",
+    "num": 5429,
+    "title": "Sieve Email Filtering: Reject and Extended Reject Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2009"
+  },
+  {
+    "id": "RFC5383",
+    "num": 5383,
+    "title": "Deployment Considerations for Lemonade-Compliant Mobile Email",
+    "status": "BEST CURRENT PRACTICE",
+    "published": "October 2008"
+  },
+  {
+    "id": "RFC5340",
+    "num": 5340,
+    "title": "OSPF for IPv6",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2008"
+  },
+  {
+    "id": "RFC5293",
+    "num": 5293,
+    "title": "Sieve Email Filtering: Editheader Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2008"
+  },
+  {
+    "id": "RFC5260",
+    "num": 5260,
+    "title": "Sieve Email Filtering: Date and Index Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2008"
+  },
+  {
+    "id": "RFC5259",
+    "num": 5259,
+    "title": "Internet Message Access Protocol - CONVERT Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2008"
+  },
+  {
+    "id": "RFC5258",
+    "num": 5258,
+    "title": "Internet Message Access Protocol version 4 - LIST Command Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2008"
+  },
+  {
+    "id": "RFC5257",
+    "num": 5257,
+    "title": "Internet Message Access Protocol - ANNOTATE Extension",
+    "status": "EXPERIMENTAL",
+    "published": "June 2008"
+  },
+  {
+    "id": "RFC5256",
+    "num": 5256,
+    "title": "Internet Message Access Protocol - SORT and THREAD Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2008"
+  },
+  {
+    "id": "RFC5255",
+    "num": 5255,
+    "title": "Internet Message Access Protocol Internationalization",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2008"
+  },
+  {
+    "id": "RFC5235",
+    "num": 5235,
+    "title": "Sieve Email Filtering: Spamtest and Virustest Extensions",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5233",
+    "num": 5233,
+    "title": "Sieve Email Filtering: Subaddress Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5232",
+    "num": 5232,
+    "title": "Sieve Email Filtering: Imap4flags Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5231",
+    "num": 5231,
+    "title": "Sieve Email Filtering: Relational Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5230",
+    "num": 5230,
+    "title": "Sieve Email Filtering: Vacation Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5229",
+    "num": 5229,
+    "title": "Sieve Email Filtering: Variables Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5228",
+    "num": 5228,
+    "title": "Sieve: An Email Filtering Language",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5188",
+    "num": 5188,
+    "title": "RTP Payload Format for the Enhanced Variable Rate Wideband Codec (EVRC-WB) and the Media Subtype Updates for EVRC-B Codec",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2008"
+  },
+  {
+    "id": "RFC5183",
+    "num": 5183,
+    "title": "Sieve Email Filtering: Environment Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2008"
+  },
+  {
+    "id": "RFC5182",
+    "num": 5182,
+    "title": "IMAP Extension for Referencing the Last SEARCH Result",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2008"
+  },
+  {
+    "id": "RFC5173",
+    "num": 5173,
+    "title": "Sieve Email Filtering: Body Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2008"
+  },
+  {
+    "id": "RFC5161",
+    "num": 5161,
+    "title": "The IMAP ENABLE Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2008"
+  },
+  {
+    "id": "RFC5092",
+    "num": 5092,
+    "title": "IMAP URL Scheme",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2007"
+  },
+  {
+    "id": "RFC5064",
+    "num": 5064,
+    "title": "The Archived-At Message Header Field",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2007"
+  },
+  {
+    "id": "RFC5039",
+    "num": 5039,
+    "title": "The Session Initiation Protocol (SIP) and Spam",
+    "status": "INFORMATIONAL",
+    "published": "January 2008"
+  },
+  {
+    "id": "RFC5035",
+    "num": 5035,
+    "title": "Enhanced Security Services (ESS) Update: Adding CertID Algorithm Agility",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2007"
+  },
+  {
+    "id": "RFC5034",
+    "num": 5034,
+    "title": "The Post Office Protocol (POP3) Simple Authentication and Security Layer (SASL) Authentication Mechanism",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2007"
+  },
+  {
+    "id": "RFC5032",
+    "num": 5032,
+    "title": "WITHIN Search Extension to the IMAP Protocol",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2007"
+  },
+  {
+    "id": "RFC5016",
+    "num": 5016,
+    "title": "Requirements for a DomainKeys Identified Mail (DKIM) Signing Practices Protocol",
+    "status": "INFORMATIONAL",
+    "published": "October 2007"
+  },
+  {
+    "id": "RFC4978",
+    "num": 4978,
+    "title": "The IMAP COMPRESS Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2007"
+  },
+  {
+    "id": "RFC4959",
+    "num": 4959,
+    "title": "IMAP Extension for Simple Authentication and Security Layer (SASL) Initial Client Response",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2007"
+  },
+  {
+    "id": "RFC4902",
+    "num": 4902,
+    "title": "Integrity, Privacy, and Security in Open Pluggable Edge Services (OPES) for SMTP",
+    "status": "INFORMATIONAL",
+    "published": "May 2007"
+  },
+  {
+    "id": "RFC4823",
+    "num": 4823,
+    "title": "FTP Transport for Secure Peer-to-Peer Business Data Interchange over the Internet",
+    "status": "INFORMATIONAL",
+    "published": "April 2007"
+  },
+  {
+    "id": "RFC4731",
+    "num": 4731,
+    "title": "IMAP4 Extension to SEARCH Command for Controlling What Kind of Information Is Returned",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2006"
+  },
+  {
+    "id": "RFC4723",
+    "num": 4723,
+    "title": "Registration of Media Type audio/mobile-xmf",
+    "status": "INFORMATIONAL",
+    "published": "December 2006"
+  },
+  {
+    "id": "RFC4686",
+    "num": 4686,
+    "title": "Analysis of Threats Motivating DomainKeys Identified Mail (DKIM)",
+    "status": "INFORMATIONAL",
+    "published": "September 2006"
+  },
+  {
+    "id": "RFC4682",
+    "num": 4682,
+    "title": "Multimedia Terminal Adapter (MTA) Management Information Base for PacketCable- and IPCablecom-Compliant Devices",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2006"
+  },
+  {
+    "id": "RFC4612",
+    "num": 4612,
+    "title": "Real-Time Facsimile (T.38) - audio/t38 MIME Sub-type Registration",
+    "status": "HISTORIC",
+    "published": "August 2006"
+  },
+  {
+    "id": "RFC4573",
+    "num": 4573,
+    "title": "MIME Type Registration for RTP Payload Format for H.224",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2006"
+  },
+  {
+    "id": "RFC4505",
+    "num": 4505,
+    "title": "Anonymous Simple Authentication and Security Layer (SASL) Mechanism",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2006"
+  },
+  {
+    "id": "RFC4496",
+    "num": 4496,
+    "title": "Open Pluggable Edge Services (OPES) SMTP Use Cases",
+    "status": "INFORMATIONAL",
+    "published": "May 2006"
+  },
+  {
+    "id": "RFC4483",
+    "num": 4483,
+    "title": "A Mechanism for Content Indirection in Session Initiation Protocol (SIP) Messages",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2006"
+  },
+  {
+    "id": "RFC4469",
+    "num": 4469,
+    "title": "Internet Message Access Protocol (IMAP) CATENATE Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2006"
+  },
+  {
+    "id": "RFC4467",
+    "num": 4467,
+    "title": "Internet Message Access Protocol (IMAP) - URLAUTH Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2006"
+  },
+  {
+    "id": "RFC4466",
+    "num": 4466,
+    "title": "Collected Extensions to IMAP4 ABNF",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2006"
+  },
+  {
+    "id": "RFC4416",
+    "num": 4416,
+    "title": "Goals for Internet Messaging to Support Diverse Service Environments",
+    "status": "INFORMATIONAL",
+    "published": "February 2006"
+  },
+  {
+    "id": "RFC4407",
+    "num": 4407,
+    "title": "Purported Responsible Address in E-Mail Messages",
+    "status": "HISTORIC",
+    "published": "April 2006"
+  },
+  {
+    "id": "RFC4406",
+    "num": 4406,
+    "title": "Sender ID: Authenticating E-Mail",
+    "status": "HISTORIC",
+    "published": "April 2006"
+  },
+  {
+    "id": "RFC4405",
+    "num": 4405,
+    "title": "SMTP Service Extension for Indicating the Responsible Submitter of an E-Mail Message",
+    "status": "HISTORIC",
+    "published": "April 2006"
+  },
+  {
+    "id": "RFC4393",
+    "num": 4393,
+    "title": "MIME Type Registrations for 3GPP2 Multimedia Files",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2006"
+  },
+  {
+    "id": "RFC4374",
+    "num": 4374,
+    "title": "The application/xv+xml Media Type",
+    "status": "INFORMATIONAL",
+    "published": "January 2006"
+  },
+  {
+    "id": "RFC4367",
+    "num": 4367,
+    "title": "What's in a Name: False Assumptions about DNS Names",
+    "status": "INFORMATIONAL",
+    "published": "February 2006"
+  },
+  {
+    "id": "RFC4355",
+    "num": 4355,
+    "title": "IANA Registration for Enumservices email, fax, mms, ems, and sms",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2006"
+  },
+  {
+    "id": "RFC4337",
+    "num": 4337,
+    "title": "MIME Type Registration for MPEG-4",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2006"
+  },
+  {
+    "id": "RFC4315",
+    "num": 4315,
+    "title": "Internet Message Access Protocol (IMAP) - UIDPLUS extension",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2005"
+  },
+  {
+    "id": "RFC4314",
+    "num": 4314,
+    "title": "IMAP4 Access Control List (ACL) Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2005"
+  },
+  {
+    "id": "RFC4298",
+    "num": 4298,
+    "title": "RTP Payload Format for BroadVoice Speech Codecs",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2005"
+  },
+  {
+    "id": "RFC4262",
+    "num": 4262,
+    "title": "X.509 Certificate Extension for Secure/Multipurpose Internet Mail Extensions (S/MIME) Capabilities",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2005"
+  },
+  {
+    "id": "RFC4249",
+    "num": 4249,
+    "title": "Implementer-Friendly Specification of Message and MIME-Part Header Fields and Field Components",
+    "status": "INFORMATIONAL",
+    "published": "January 2006"
+  },
+  {
+    "id": "RFC4238",
+    "num": 4238,
+    "title": "Voice Message Routing Service",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2005"
+  },
+  {
+    "id": "RFC4237",
+    "num": 4237,
+    "title": "Voice Messaging Directory Service",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2005"
+  },
+  {
+    "id": "RFC4180",
+    "num": 4180,
+    "title": "Common Format and MIME Type for Comma-Separated Values (CSV) Files",
+    "status": "INFORMATIONAL",
+    "published": "October 2005"
+  },
+  {
+    "id": "RFC4161",
+    "num": 4161,
+    "title": "Guidelines for Optional Services for Internet Fax Gateways",
+    "status": "INFORMATIONAL",
+    "published": "September 2005"
+  },
+  {
+    "id": "RFC4160",
+    "num": 4160,
+    "title": "Internet Fax Gateway Requirements",
+    "status": "INFORMATIONAL",
+    "published": "September 2005"
+  },
+  {
+    "id": "RFC4146",
+    "num": 4146,
+    "title": "Simple New Mail Notification",
+    "status": "INFORMATIONAL",
+    "published": "August 2005"
+  },
+  {
+    "id": "RFC4143",
+    "num": 4143,
+    "title": "Facsimile Using Internet Mail (IFAX) Service of ENUM",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2005"
+  },
+  {
+    "id": "RFC4141",
+    "num": 4141,
+    "title": "SMTP and MIME Extensions for Content Conversion",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2005"
+  },
+  {
+    "id": "RFC4134",
+    "num": 4134,
+    "title": "Examples of S/MIME Messages",
+    "status": "INFORMATIONAL",
+    "published": "July 2005"
+  },
+  {
+    "id": "RFC4130",
+    "num": 4130,
+    "title": "MIME-Based Secure Peer-to-Peer Business Data Interchange Using HTTP, Applicability Statement 2 (AS2)",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2005"
+  },
+  {
+    "id": "RFC4102",
+    "num": 4102,
+    "title": "Registration of the text/red MIME Sub-Type",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2005"
+  },
+  {
+    "id": "RFC4096",
+    "num": 4096,
+    "title": "Policy-Mandated Labels Such as \"Adv:\" in Email Subject Headers Considered Ineffective At Best",
+    "status": "INFORMATIONAL",
+    "published": "May 2005"
+  },
+  {
+    "id": "RFC4095",
+    "num": 4095,
+    "title": "Attaching Meaning to Solicitation Class Keywords",
+    "status": "PROPOSED STANDARD",
+    "published": "May 2005"
+  },
+  {
+    "id": "RFC4047",
+    "num": 4047,
+    "title": "MIME Sub-type Registrations for Flexible Image Transport System (FITS)",
+    "status": "INFORMATIONAL",
+    "published": "April 2005"
+  },
+  {
+    "id": "RFC4040",
+    "num": 4040,
+    "title": "RTP Payload Format for a 64 kbit/s Transparent Call",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2005"
+  },
+  {
+    "id": "RFC4021",
+    "num": 4021,
+    "title": "Registration of Mail and MIME Header Fields",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2005"
+  },
+  {
+    "id": "RFC3974",
+    "num": 3974,
+    "title": "SMTP Operational Experience in Mixed IPv4/v6 Environments",
+    "status": "INFORMATIONAL",
+    "published": "January 2005"
+  },
+  {
+    "id": "RFC3965",
+    "num": 3965,
+    "title": "A Simple Mode of Facsimile Using Internet Mail",
+    "status": "DRAFT STANDARD",
+    "published": "December 2004"
+  },
+  {
+    "id": "RFC3952",
+    "num": 3952,
+    "title": "Real-time Transport Protocol (RTP) Payload Format for internet Low Bit Rate Codec (iLBC) Speech",
+    "status": "EXPERIMENTAL",
+    "published": "December 2004"
+  },
+  {
+    "id": "RFC3950",
+    "num": 3950,
+    "title": "Tag Image File Format Fax eXtended (TIFF-FX) - image/tiff-fx MIME Sub-type Registration",
+    "status": "DRAFT STANDARD",
+    "published": "February 2005"
+  },
+  {
+    "id": "RFC3906",
+    "num": 3906,
+    "title": "Calculating Interior Gateway Protocol (IGP) Routes Over Traffic Engineering Tunnels",
+    "status": "INFORMATIONAL",
+    "published": "October 2004"
+  },
+  {
+    "id": "RFC3894",
+    "num": 3894,
+    "title": "Sieve Extension: Copying Without Side Effects",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2004"
+  },
+  {
+    "id": "RFC3893",
+    "num": 3893,
+    "title": "Session Initiation Protocol (SIP) Authenticated Identity Body (AIB) Format",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2004"
+  },
+  {
+    "id": "RFC3865",
+    "num": 3865,
+    "title": "A No Soliciting Simple Mail Transfer Protocol (SMTP) Service Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2004"
+  },
+  {
+    "id": "RFC3863",
+    "num": 3863,
+    "title": "Presence Information Data Format (PIDF)",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2004"
+  },
+  {
+    "id": "RFC3862",
+    "num": 3862,
+    "title": "Common Presence and Instant Messaging (CPIM): Message Format",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2004"
+  },
+  {
+    "id": "RFC3855",
+    "num": 3855,
+    "title": "Transporting Secure/Multipurpose Internet Mail Extensions (S/MIME) Objects in X.400",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2004"
+  },
+  {
+    "id": "RFC3854",
+    "num": 3854,
+    "title": "Securing X.400 Content with Secure/Multipurpose Internet Mail Extensions (S/MIME)",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2004"
+  },
+  {
+    "id": "RFC3853",
+    "num": 3853,
+    "title": "S/MIME Advanced Encryption Standard (AES) Requirement for the Session Initiation Protocol (SIP)",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2004"
+  },
+  {
+    "id": "RFC3839",
+    "num": 3839,
+    "title": "MIME Type Registrations for 3rd Generation Partnership Project (3GPP) Multimedia files",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2004"
+  },
+  {
+    "id": "RFC3834",
+    "num": 3834,
+    "title": "Recommendations for Automatic Responses to Electronic Mail",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2004"
+  },
+  {
+    "id": "RFC3823",
+    "num": 3823,
+    "title": "MIME Media Type for the Systems Biology Markup Language (SBML)",
+    "status": "INFORMATIONAL",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3804",
+    "num": 3804,
+    "title": "Voice Profile for Internet Mail (VPIM) Addressing",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3803",
+    "num": 3803,
+    "title": "Content Duration MIME Header Definition",
+    "status": "DRAFT STANDARD",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3802",
+    "num": 3802,
+    "title": "Toll Quality Voice - 32 kbit/s Adaptive Differential Pulse Code Modulation (ADPCM) MIME Sub-type Registration",
+    "status": "DRAFT STANDARD",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3801",
+    "num": 3801,
+    "title": "Voice Profile for Internet Mail - version 2 (VPIMv2)",
+    "status": "DRAFT STANDARD",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3773",
+    "num": 3773,
+    "title": "High-Level Requirements for Internet Voice Mail",
+    "status": "INFORMATIONAL",
+    "published": "June 2004"
+  },
+  {
+    "id": "RFC3745",
+    "num": 3745,
+    "title": "MIME Type Registrations for JPEG 2000 (ISO/IEC 15444)",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2004"
+  },
+  {
+    "id": "RFC3691",
+    "num": 3691,
+    "title": "Internet Message Access Protocol (IMAP) UNSELECT command",
+    "status": "PROPOSED STANDARD",
+    "published": "February 2004"
+  },
+  {
+    "id": "RFC3656",
+    "num": 3656,
+    "title": "The Mailbox Update (MUPDATE) Distributed Mailbox Database Protocol",
+    "status": "EXPERIMENTAL",
+    "published": "December 2003"
+  },
+  {
+    "id": "RFC3516",
+    "num": 3516,
+    "title": "IMAP4 Binary Content Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "April 2003"
+  },
+  {
+    "id": "RFC3503",
+    "num": 3503,
+    "title": "Message Disposition Notification (MDN) profile for Internet Message Access Protocol (IMAP)",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2003"
+  },
+  {
+    "id": "RFC3502",
+    "num": 3502,
+    "title": "Internet Message Access Protocol (IMAP) - MULTIAPPEND Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2003"
+  },
+  {
+    "id": "RFC3495",
+    "num": 3495,
+    "title": "Dynamic Host Configuration Protocol (DHCP) Option for CableLabs Client Configuration",
+    "status": "PROPOSED STANDARD",
+    "published": "March 2003"
+  },
+  {
+    "id": "RFC3459",
+    "num": 3459,
+    "title": "Critical Content Multi-purpose Internet Mail Extensions (MIME) Parameter",
+    "status": "PROPOSED STANDARD",
+    "published": "January 2003"
+  },
+  {
+    "id": "RFC3420",
+    "num": 3420,
+    "title": "Internet Media Type message/sipfrag",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2002"
+  },
+  {
+    "id": "RFC3391",
+    "num": 3391,
+    "title": "The MIME Application/Vnd.pwg-multiplexed Content-Type",
+    "status": "INFORMATIONAL",
+    "published": "December 2002"
+  },
+  {
+    "id": "RFC3362",
+    "num": 3362,
+    "title": "Real-time Facsimile (T.38) - image/t38 MIME Sub-type Registration",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2002"
+  },
+  {
+    "id": "RFC3348",
+    "num": 3348,
+    "title": "The Internet Message Action Protocol (IMAP4) Child Mailbox Extension",
+    "status": "INFORMATIONAL",
+    "published": "July 2002"
+  },
+  {
+    "id": "RFC3335",
+    "num": 3335,
+    "title": "MIME-based Secure Peer-to-Peer Business Data Interchange over the Internet",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2002"
+  },
+  {
+    "id": "RFC3302",
+    "num": 3302,
+    "title": "Tag Image File Format (TIFF) - image/tiff MIME Sub-type Registration",
+    "status": "DRAFT STANDARD",
+    "published": "September 2002"
+  },
+  {
+    "id": "RFC3297",
+    "num": 3297,
+    "title": "Content Negotiation for Messaging Services based on Email",
+    "status": "PROPOSED STANDARD",
+    "published": "July 2002"
+  },
+  {
+    "id": "RFC3282",
+    "num": 3282,
+    "title": "Content Language Headers",
+    "status": "DRAFT STANDARD",
+    "published": "May 2002"
+  },
+  {
+    "id": "RFC3249",
+    "num": 3249,
+    "title": "Implementers Guide for Facsimile Using Internet Mail",
+    "status": "INFORMATIONAL",
+    "published": "September 2002"
+  },
+  {
+    "id": "RFC3240",
+    "num": 3240,
+    "title": "Digital Imaging and Communications in Medicine (DICOM) - Application/dicom MIME Sub-type Registration",
+    "status": "INFORMATIONAL",
+    "published": "February 2002"
+  },
+  {
+    "id": "RFC3236",
+    "num": 3236,
+    "title": "The 'application/xhtml+xml' Media Type",
+    "status": "INFORMATIONAL",
+    "published": "January 2002"
+  },
+  {
+    "id": "RFC3204",
+    "num": 3204,
+    "title": "MIME media types for ISUP and QSIG Objects",
+    "status": "PROPOSED STANDARD",
+    "published": "December 2001"
+  },
+  {
+    "id": "RFC3192",
+    "num": 3192,
+    "title": "Minimal FAX address format in Internet Mail",
+    "status": "DRAFT STANDARD",
+    "published": "October 2001"
+  },
+  {
+    "id": "RFC3191",
+    "num": 3191,
+    "title": "Minimal GSTN address format in Internet Mail",
+    "status": "DRAFT STANDARD",
+    "published": "October 2001"
+  },
+  {
+    "id": "RFC3183",
+    "num": 3183,
+    "title": "Domain Security Services using S/MIME",
+    "status": "EXPERIMENTAL",
+    "published": "October 2001"
+  },
+  {
+    "id": "RFC3156",
+    "num": 3156,
+    "title": "MIME Security with OpenPGP",
+    "status": "PROPOSED STANDARD",
+    "published": "August 2001"
+  },
+  {
+    "id": "RFC3114",
+    "num": 3114,
+    "title": "Implementing Company Classification Policy with the S/MIME Security Label",
+    "status": "INFORMATIONAL",
+    "published": "May 2002"
+  },
+  {
+    "id": "RFC3098",
+    "num": 3098,
+    "title": "How to Advertise Responsibly Using E-Mail and Newsgroups or - how NOT to $$$$$  MAKE ENEMIES FAST!  $$$$$",
+    "status": "INFORMATIONAL",
+    "published": "April 2001"
+  },
+  {
+    "id": "RFC3073",
+    "num": 3073,
+    "title": "Portable Font Resource (PFR) - application/font-tdpfr MIME Sub-type Registration",
+    "status": "INFORMATIONAL",
+    "published": "March 2001"
+  },
+  {
+    "id": "RFC3058",
+    "num": 3058,
+    "title": "Use of the IDEA Encryption Algorithm in CMS",
+    "status": "INFORMATIONAL",
+    "published": "February 2001"
+  },
+  {
+    "id": "RFC3003",
+    "num": 3003,
+    "title": "The audio/mpeg Media Type",
+    "status": "PROPOSED STANDARD",
+    "published": "November 2000"
+  },
+  {
+    "id": "RFC2984",
+    "num": 2984,
+    "title": "Use of the CAST-128 Encryption Algorithm in CMS",
+    "status": "PROPOSED STANDARD",
+    "published": "October 2000"
+  },
+  {
+    "id": "RFC2978",
+    "num": 2978,
+    "title": "IANA Charset Registration Procedures",
+    "status": "BEST CURRENT PRACTICE",
+    "published": "October 2000"
+  },
+  {
+    "id": "RFC2958",
+    "num": 2958,
+    "title": "The application/whoispp-response Content-type",
+    "status": "INFORMATIONAL",
+    "published": "October 2000"
+  },
+  {
+    "id": "RFC2957",
+    "num": 2957,
+    "title": "The application/whoispp-query Content-Type",
+    "status": "INFORMATIONAL",
+    "published": "October 2000"
+  },
+  {
+    "id": "RFC2936",
+    "num": 2936,
+    "title": "HTTP MIME Type Handler Detection",
+    "status": "INFORMATIONAL",
+    "published": "September 2000"
+  },
+  {
+    "id": "RFC2927",
+    "num": 2927,
+    "title": "MIME Directory Profile for LDAP Schema",
+    "status": "INFORMATIONAL",
+    "published": "September 2000"
+  },
+  {
+    "id": "RFC2913",
+    "num": 2913,
+    "title": "MIME Content Types in Media Feature Expressions",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2000"
+  },
+  {
+    "id": "RFC2912",
+    "num": 2912,
+    "title": "Indicating Media Features for MIME Content",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2000"
+  },
+  {
+    "id": "RFC2854",
+    "num": 2854,
+    "title": "The 'text/html' Media Type",
+    "status": "INFORMATIONAL",
+    "published": "June 2000"
+  },
+  {
+    "id": "RFC2852",
+    "num": 2852,
+    "title": "Deliver By SMTP Service Extension",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2000"
+  },
+  {
+    "id": "RFC2846",
+    "num": 2846,
+    "title": "GSTN Address Element Extensions in E-mail Services",
+    "status": "PROPOSED STANDARD",
+    "published": "June 2000"
+  },
+  {
+    "id": "RFC2785",
+    "num": 2785,
+    "title": "Methods for Avoiding the \"Small-Subgroup\" Attacks on the Diffie-Hellman Key Agreement Method for S/MIME",
+    "status": "INFORMATIONAL",
+    "published": "March 2000"
+  },
+  {
+    "id": "RFC2781",
+    "num": 2781,
+    "title": "UTF-16, an encoding of ISO 10646",
+    "status": "INFORMATIONAL",
+    "published": "February 2000"
+  },
+  {
+    "id": "RFC2652",
+    "num": 2652,
+    "title": "MIME Object Definitions for the Common Indexing Protocol (CIP)",
+    "status": "PROPOSED STANDARD",
+    "published": "August 1999"
+  },
+  {
+    "id": "RFC2645",
+    "num": 2645,
+    "title": "ON-DEMAND MAIL RELAY (ODMR) SMTP with Dynamic IP Addresses",
+    "status": "PROPOSED STANDARD",
+    "published": "August 1999"
+  },
+  {
+    "id": "RFC2634",
+    "num": 2634,
+    "title": "Enhanced Security Services for S/MIME",
+    "status": "PROPOSED STANDARD",
+    "published": "June 1999"
+  },
+  {
+    "id": "RFC2595",
+    "num": 2595,
+    "title": "Using TLS with IMAP, POP3 and ACAP",
+    "status": "PROPOSED STANDARD",
+    "published": "June 1999"
+  },
+  {
+    "id": "RFC2586",
+    "num": 2586,
+    "title": "The Audio/L16 MIME content type",
+    "status": "INFORMATIONAL",
+    "published": "May 1999"
+  },
+  {
+    "id": "RFC2524",
+    "num": 2524,
+    "title": "Neda's Efficient Mail Submission and Delivery (EMSD) Protocol Specification Version 1.3",
+    "status": "INFORMATIONAL",
+    "published": "February 1999"
+  },
+  {
+    "id": "RFC2505",
+    "num": 2505,
+    "title": "Anti-Spam Recommendations for SMTP MTAs",
+    "status": "BEST CURRENT PRACTICE",
+    "published": "February 1999"
+  },
+  {
+    "id": "RFC2503",
+    "num": 2503,
+    "title": "MIME Types for Use with the ISO ILL Protocol",
+    "status": "INFORMATIONAL",
+    "published": "February 1999"
+  },
+  {
+    "id": "RFC2480",
+    "num": 2480,
+    "title": "Gateways and MIME Security Multiparts",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1999"
+  },
+  {
+    "id": "RFC2442",
+    "num": 2442,
+    "title": "The Batch SMTP Media Type",
+    "status": "INFORMATIONAL",
+    "published": "November 1998"
+  },
+  {
+    "id": "RFC2384",
+    "num": 2384,
+    "title": "POP URL Scheme",
+    "status": "PROPOSED STANDARD",
+    "published": "August 1998"
+  },
+  {
+    "id": "RFC2346",
+    "num": 2346,
+    "title": "Making Postscript and PDF International",
+    "status": "INFORMATIONAL",
+    "published": "May 1998"
+  },
+  {
+    "id": "RFC2312",
+    "num": 2312,
+    "title": "S/MIME Version 2 Certificate Handling",
+    "status": "HISTORIC",
+    "published": "March 1998"
+  },
+  {
+    "id": "RFC2311",
+    "num": 2311,
+    "title": "S/MIME Version 2 Message Specification",
+    "status": "HISTORIC",
+    "published": "March 1998"
+  },
+  {
+    "id": "RFC2195",
+    "num": 2195,
+    "title": "IMAP/POP AUTHorize Extension for Simple Challenge/Response",
+    "status": "PROPOSED STANDARD",
+    "published": "September 1997"
+  },
+  {
+    "id": "RFC2193",
+    "num": 2193,
+    "title": "IMAP4 Mailbox Referrals",
+    "status": "PROPOSED STANDARD",
+    "published": "September 1997"
+  },
+  {
+    "id": "RFC2180",
+    "num": 2180,
+    "title": "IMAP4 Multi-Accessed Mailbox Practice",
+    "status": "INFORMATIONAL",
+    "published": "July 1997"
+  },
+  {
+    "id": "RFC2163",
+    "num": 2163,
+    "title": "Using the Internet DNS to Distribute MIXER Conformant Global Address Mapping (MCGAM)",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2161",
+    "num": 2161,
+    "title": "A MIME Body Part for ODA",
+    "status": "EXPERIMENTAL",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2160",
+    "num": 2160,
+    "title": "Carrying PostScript in X.400 and MIME",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2159",
+    "num": 2159,
+    "title": "A MIME Body Part for FAX",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2158",
+    "num": 2158,
+    "title": "X.400 Image Body Parts",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2157",
+    "num": 2157,
+    "title": "Mapping between X.400 and RFC-822/MIME Message Bodies",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2156",
+    "num": 2156,
+    "title": "MIXER (Mime Internet X.400 Enhanced Relay): Mapping between X.400 and RFC 822/MIME",
+    "status": "PROPOSED STANDARD",
+    "published": "January 1998"
+  },
+  {
+    "id": "RFC2152",
+    "num": 2152,
+    "title": "UTF-7 A Mail-Safe Transformation Format of Unicode",
+    "status": "INFORMATIONAL",
+    "published": "May 1997"
+  },
+  {
+    "id": "RFC2130",
+    "num": 2130,
+    "title": "The Report of the IAB Character Set Workshop held 29 February - 1 March, 1996",
+    "status": "INFORMATIONAL",
+    "published": "April 1997"
+  },
+  {
+    "id": "RFC2076",
+    "num": 2076,
+    "title": "Common Internet Message Headers",
+    "status": "INFORMATIONAL",
+    "published": "February 1997"
+  },
+  {
+    "id": "RFC2033",
+    "num": 2033,
+    "title": "Local Mail Transfer Protocol",
+    "status": "INFORMATIONAL",
+    "published": "October 1996"
+  },
+  {
+    "id": "RFC2017",
+    "num": 2017,
+    "title": "Definition of the URL MIME External-Body Access-Type",
+    "status": "PROPOSED STANDARD",
+    "published": "October 1996"
+  },
+  {
+    "id": "RFC2015",
+    "num": 2015,
+    "title": "MIME Security with Pretty Good Privacy (PGP)",
+    "status": "PROPOSED STANDARD",
+    "published": "October 1996"
+  },
+  {
+    "id": "RFC1985",
+    "num": 1985,
+    "title": "SMTP Service Extension for Remote Message Queue Starting",
+    "status": "PROPOSED STANDARD",
+    "published": "August 1996"
+  },
+  {
+    "id": "RFC1927",
+    "num": 1927,
+    "title": "Suggested Additional MIME Types for Associating Documents",
+    "status": "INFORMATIONAL",
+    "published": "April 1996"
+  },
+  {
+    "id": "RFC1896",
+    "num": 1896,
+    "title": "The text/enriched MIME Content-type",
+    "status": "INFORMATIONAL",
+    "published": "February 1996"
+  },
+  {
+    "id": "RFC1873",
+    "num": 1873,
+    "title": "Message/External-Body Content-ID Access Type",
+    "status": "EXPERIMENTAL",
+    "published": "December 1995"
+  },
+  {
+    "id": "RFC1864",
+    "num": 1864,
+    "title": "The Content-MD5 Header Field",
+    "status": "DRAFT STANDARD",
+    "published": "October 1995"
+  },
+  {
+    "id": "RFC1848",
+    "num": 1848,
+    "title": "MIME Object Security Services",
+    "status": "HISTORIC",
+    "published": "October 1995"
+  },
+  {
+    "id": "RFC1847",
+    "num": 1847,
+    "title": "Security Multiparts for MIME: Multipart/Signed and Multipart/Encrypted",
+    "status": "PROPOSED STANDARD",
+    "published": "October 1995"
+  },
+  {
+    "id": "RFC1846",
+    "num": 1846,
+    "title": "SMTP 521 Reply Code",
+    "status": "EXPERIMENTAL",
+    "published": "September 1995"
+  },
+  {
+    "id": "RFC1845",
+    "num": 1845,
+    "title": "SMTP Service Extension for Checkpoint/Restart",
+    "status": "EXPERIMENTAL",
+    "published": "September 1995"
+  },
+  {
+    "id": "RFC1844",
+    "num": 1844,
+    "title": "Multimedia E-mail (MIME) User Agent Checklist",
+    "status": "INFORMATIONAL",
+    "published": "August 1995"
+  },
+  {
+    "id": "RFC1801",
+    "num": 1801,
+    "title": "MHS use of the X.500 Directory to support MHS Routing",
+    "status": "EXPERIMENTAL",
+    "published": "June 1995"
+  },
+  {
+    "id": "RFC1767",
+    "num": 1767,
+    "title": "MIME Encapsulation of EDI Objects",
+    "status": "PROPOSED STANDARD",
+    "published": "March 1995"
+  },
+  {
+    "id": "RFC1741",
+    "num": 1741,
+    "title": "MIME Content Type for BinHex Encoded Files",
+    "status": "INFORMATIONAL",
+    "published": "December 1994"
+  },
+  {
+    "id": "RFC1740",
+    "num": 1740,
+    "title": "MIME Encapsulation of Macintosh Files - MacMIME",
+    "status": "PROPOSED STANDARD",
+    "published": "December 1994"
+  },
+  {
+    "id": "RFC1733",
+    "num": 1733,
+    "title": "Distributed Electronic Mail Models in IMAP4",
+    "status": "INFORMATIONAL",
+    "published": "December 1994"
+  },
+  {
+    "id": "RFC1711",
+    "num": 1711,
+    "title": "Classifications in E-mail Routing",
+    "status": "INFORMATIONAL",
+    "published": "October 1994"
+  },
+  {
+    "id": "RFC1641",
+    "num": 1641,
+    "title": "Using Unicode with MIME",
+    "status": "EXPERIMENTAL",
+    "published": "July 1994"
+  },
+  {
+    "id": "RFC1556",
+    "num": 1556,
+    "title": "Handling of Bi-directional Texts in MIME",
+    "status": "INFORMATIONAL",
+    "published": "December 1993"
+  },
+  {
+    "id": "RFC1555",
+    "num": 1555,
+    "title": "Hebrew Character Encoding for Internet Messages",
+    "status": "INFORMATIONAL",
+    "published": "December 1993"
+  },
+  {
+    "id": "RFC1496",
+    "num": 1496,
+    "title": "Rules for downgrading messages from X.400/88 to X.400/84 when MIME content-types are present in the messages",
+    "status": "HISTORIC",
+    "published": "August 1993"
+  },
+  {
+    "id": "RFC1494",
+    "num": 1494,
+    "title": "Equivalences between 1988 X.400 and RFC-822 Message Bodies",
+    "status": "HISTORIC",
+    "published": "August 1993"
+  },
+  {
+    "id": "RFC1437",
+    "num": 1437,
+    "title": "The Extension of MIME Content-Types to a New Medium",
+    "status": "INFORMATIONAL",
+    "published": "April 1993"
+  },
+  {
+    "id": "RFC1428",
+    "num": 1428,
+    "title": "Transition of Internet Mail from Just-Send-8 to 8bit-SMTP/MIME",
+    "status": "INFORMATIONAL",
+    "published": "February 1993"
+  },
+  {
+    "id": "RFC1421",
+    "num": 1421,
+    "title": "Privacy Enhancement for Internet Electronic Mail: Part I: Message Encryption and Authentication Procedures",
+    "status": "HISTORIC",
+    "published": "February 1993"
+  },
+  {
+    "id": "RFC1394",
+    "num": 1394,
+    "title": "Relationship of Telex Answerback Codes to Internet Domains",
+    "status": "INFORMATIONAL",
+    "published": "January 1993"
+  },
+  {
+    "id": "RFC1344",
+    "num": 1344,
+    "title": "Implications of MIME for Internet Mail Gateways",
+    "status": "INFORMATIONAL",
+    "published": "June 1992"
+  },
+  {
+    "id": "RFC1203",
+    "num": 1203,
+    "title": "Interactive Mail Access Protocol: Version 3",
+    "status": "HISTORIC",
+    "published": "February 1991"
+  },
+  {
+    "id": "RFC1176",
+    "num": 1176,
+    "title": "Interactive Mail Access Protocol: Version 2",
+    "status": "EXPERIMENTAL",
+    "published": "August 1990"
+  },
+  {
+    "id": "RFC1090",
+    "num": 1090,
+    "title": "SMTP on X.25",
+    "status": "UNKNOWN",
+    "published": "February 1989"
+  },
+  {
+    "id": "RFC1082",
+    "num": 1082,
+    "title": "Post Office Protocol: Version 3: Extended service offerings",
+    "status": "UNKNOWN",
+    "published": "November 1988"
+  },
+  {
+    "id": "RFC1074",
+    "num": 1074,
+    "title": "NSFNET backbone SPF based Interior Gateway Protocol",
+    "status": "UNKNOWN",
+    "published": "October 1988"
+  },
+  {
+    "id": "RFC1047",
+    "num": 1047,
+    "title": "Duplicate messages and SMTP",
+    "status": "UNKNOWN",
+    "published": "February 1988"
+  },
+  {
+    "id": "RFC937",
+    "num": 937,
+    "title": "Post Office Protocol: Version 2",
+    "status": "HISTORIC",
+    "published": "February 1985"
+  },
+  {
+    "id": "RFC915",
+    "num": 915,
+    "title": "Network mail path service",
+    "status": "UNKNOWN",
+    "published": "December 1984"
+  },
+  {
+    "id": "RFC876",
+    "num": 876,
+    "title": "Survey of SMTP implementations",
+    "status": "UNKNOWN",
+    "published": "September 1983"
+  },
+  {
+    "id": "RFC847",
+    "num": 847,
+    "title": "Summary of Smallberg surveys",
+    "status": "UNKNOWN",
+    "published": "February 1983"
+  },
+  {
+    "id": "RFC805",
+    "num": 805,
+    "title": "Computer mail meeting notes",
+    "status": "UNKNOWN",
+    "published": "February 1982"
+  },
+  {
+    "id": "RFC786",
+    "num": 786,
+    "title": "Mail Transfer Protocol: ISI TOPS20 MTP-NIMAIL interface",
+    "status": "UNKNOWN",
+    "published": "July 1981"
+  },
+  {
+    "id": "RFC785",
+    "num": 785,
+    "title": "Mail Transfer Protocol: ISI TOPS20 file definitions",
+    "status": "UNKNOWN",
+    "published": "July 1981"
+  },
+  {
+    "id": "RFC784",
+    "num": 784,
+    "title": "Mail Transfer Protocol: ISI TOPS20 implementation",
+    "status": "UNKNOWN",
+    "published": "July 1981"
+  },
+  {
+    "id": "RFC510",
+    "num": 510,
+    "title": "Request for network mailbox addresses",
+    "status": "UNKNOWN",
+    "published": "May 1973"
+  },
+  {
+    "id": "RFC224",
+    "num": 224,
+    "title": "Comments on Mailbox Protocol",
+    "status": "UNKNOWN",
+    "published": "September 1971"
+  }
+]

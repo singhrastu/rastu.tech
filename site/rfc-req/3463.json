@@ -1,0 +1,1 @@
+{"num":3463,"id":"RFC3463","uses_2119":true,"requirements":[{"section":"2","heading":"Status Code Structure","level":"must","keyword":"MUST","text":"Each numeric sub-code within the status-code MUST be expressed without leading zero digits."}]}

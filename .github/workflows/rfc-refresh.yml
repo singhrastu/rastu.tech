@@ -1,0 +1,81 @@
+# The RFC index has to stay current on its own.
+#
+# An RFC being replaced is not an event anybody gets told about. DMARC moved
+# from RFC 7489 to 9989, 9990 and 9991 and nothing anywhere announced it; the
+# site was still citing 7489 until a build happened to notice. So the index is
+# rebuilt from the RFC Editor's own index every week, and anything that changed
+# is committed with a message saying what.
+#
+# This runs on GitHub, not on Cloudflare. Cloudflare Cron Triggers would put a
+# scheduled job on the account that has to stay free.
+name: Refresh the RFC index
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'        # Mondays, 06:17 UTC
+  workflow_dispatch:            # and on demand
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rfc-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Keep the previous index for comparison
+        run: cp build/rfcs.json /tmp/rfcs-before.json
+
+      - name: Rebuild from the RFC Editor index
+        run: python3 build/export_rfcs.py --fetch-texts
+
+      - name: Work out what changed
+        id: diff
+        run: |
+          python3 build/rfc_diff.py /tmp/rfcs-before.json build/rfcs.json \
+            | tee /tmp/summary.txt
+
+      - name: Rebuild the site
+        # The build gate runs every test suite. If new data breaks an assertion
+        # this job fails and a person looks at it, which is the intended
+        # behaviour: silent drift in a reference is worse than a red run.
+        run: python3 build/build_site.py
+
+      - name: Commit if anything moved
+        run: |
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "Nothing changed."
+            exit 0
+          fi
+          git config user.name  "rastu.tech index"
+          git config user.email "singhrastu@gmail.com"
+          git add -A
+          {
+            echo "Refresh the RFC index"
+            echo
+            cat /tmp/summary.txt
+            echo
+            echo "Rebuilt from https://www.rfc-editor.org/rfc-index.xml"
+          } > /tmp/msg.txt
+          git commit -F /tmp/msg.txt
+          git push
+
+      - name: Report new discovery candidates
+        # Never auto-published. A keyword sweep of nine thousand documents finds
+        # routing and process RFCs that merely mention mail, so a person decides.
+        run: |
+          n=$(python3 -c "import json;print(len(json.load(open('build/rfc-candidates.json'))))")
+          echo "::notice::$n email-looking RFCs are outside the index; see build/rfc-candidates.json"

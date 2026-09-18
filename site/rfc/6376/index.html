@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RFC 6376: DomainKeys Identified Mail (DKIM) Signatures explained</title>
+<meta name="description" content="RFC 6376, Internet Standard. DomainKeys Identified Mail (DKIM) permits a person, role, or organization that owns the signing domain to claim some responsibility for a message by a">
+<meta name="author" content="Rastu Singh">
+<link rel="canonical" href="https://rastu.tech/rfc/6376/">
+<meta property="og:title" content="RFC 6376: DomainKeys Identified Mail (DKIM) Signatures explained">
+<meta property="og:description" content="RFC 6376, Internet Standard. DomainKeys Identified Mail (DKIM) permits a person, role, or organization that owns the signing domain to claim some responsibility for a message by a">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/rfc/6376/">
+<meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+<meta property="og:site_name" content="Rastu Singh">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rastu.tech/rastu-singh.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0e0d'/%3E%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11z' fill='none' stroke='%233ddc84' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%233ddc84'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/rastu-singh-180.jpg">
+<meta name="theme-color" content="#0a0e0d">
+<style>
+/* Design tokens.
+
+   Dark is the base here rather than an alternative. A near-black surface with a
+   terminal green is what a mail log looks like, and this site is about mail
+   logs; the honeycomb drifting behind it is the routing metaphor made literal.
+
+   The status colours are reserved for state (suppress, throttle, retry) and are
+   deliberately not green, because green is the accent and a status must never
+   read as branding. Each one ships with its word, so state is never carried by
+   colour alone either. */
+:root{
+  --ink:#e7eeea; --ink-2:#a8b6af; --ink-3:#77867f;
+  --line:#1f2926; --line-2:#161e1b;
+  --bg:#0a0e0d; --surface:#111816; --code:#0d1412;
+  --accent:#3ddc84; --accent-2:#74f0ac; --accent-soft:#0f2019;
+  --hex:#3ddc84;
+  --ok:#3ddc84; --warn:#e6b25c; --bad:#ff7a7a; --info:#5db8ff;
+  --radius:10px;
+  --measure:44rem;
+  /* The readable band is 45-75 characters a line. Before this, list items on the
+     wide pages ran to 115 and headings to 93, which is where a reader starts
+     losing their place on the return sweep. Tools, tables and card grids opt out
+     and use the full container. */
+  --measure-text:42rem;
+  /* Spacing and type scales. Before these, every size in the sheet was a bare
+     rem literal, which is survivable at six pages and is not at fifteen. */
+  --s1:.25rem; --s2:.5rem; --s3:.85rem; --s4:1.3rem; --s5:2.2rem; --s6:3.6rem;
+  --t0:.72rem; --t1:.8rem; --t2:.885rem; --t3:.95rem; --t4:1.14rem;
+  --t5:1.5rem; --t6:2.4rem;
+}
+::selection{background:var(--accent-soft);color:var(--accent-2)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:17px/1.72 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---- honeycomb field -------------------------------------------------
+   Fixed behind everything, drifting slowly as the page scrolls. Pure CSS
+   background + one transform driven by a custom property, so it costs one
+   compositor layer and no layout. Hidden entirely under reduced-motion. */
+#hexcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.hexveil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(120% 85% at 50% 0%,transparent 0%,
+    color-mix(in srgb,var(--bg) 72%,transparent) 58%,
+    color-mix(in srgb,var(--bg) 92%,transparent) 100%)}
+
+.wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
+.wrap.wide{max-width:64rem}
+/* Prose gets the readable measure; anything that is a layout opts out by not
+   being in this list. */
+.wrap.wide main > p,
+.wrap.wide main > ul,
+.wrap.wide main > ol,
+.wrap.wide main > dl,
+.wrap.wide main > h2,
+.wrap.wide main > h3,
+.wrap.wide main > pre,
+.wrap.wide main > .callout,
+.wrap.wide main > .sechead{max-width:var(--measure-text)}
+.wrap.wide main > .full{max-width:none}
+.wrap.wide main > h2{margin-top:var(--s6)}
+
+/* ---- nav ---------------------------------------------------------------- */
+.skip{position:absolute;left:-9999px;top:0;z-index:9;background:var(--accent);
+  color:#08140d;padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:650}
+.skip:focus{left:0}
+nav.top{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
+  padding:1.25rem 0 var(--s5);font-size:1.02rem}
+nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:500;
+  padding:.5rem .85rem;border-radius:9px;border:1px solid transparent;
+  transition:color .18s,background .18s,border-color .18s,transform .18s}
+nav.top a:hover{color:var(--ink);background:var(--surface);border-color:var(--line);
+  transform:translateY(-2px)}
+nav.top a:active{transform:translateY(0)}
+nav.top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* The page you are on, and the one you just clicked, both read as accent. */
+nav.top a[aria-current]{color:var(--accent);background:var(--accent-soft);
+  border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:650}
+nav.top a[aria-current]:hover{color:var(--accent-2);transform:translateY(-2px)}
+nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-weight:700;color:var(--ink);font-size:1.12rem;letter-spacing:-.02em;
+  padding-left:0;border:0}
+nav.top .mark span{color:var(--accent)}
+nav.top .mark:hover{background:none;border-color:transparent;color:var(--accent-2)}
+
+@media(max-width:34rem){
+  nav.top{gap:.25rem;padding-bottom:var(--s4);font-size:.95rem}
+  nav.top .mark{margin-right:0;width:100%;margin-bottom:.4rem}
+  nav.top a{padding:.45rem .7rem}
+}
+
+/* ---- type ------------------------------------------------------------- */
+a{color:var(--accent);text-underline-offset:2px}
+h1{font-size:clamp(1.9rem,4.5vw,2.5rem);line-height:1.16;letter-spacing:-.021em;margin:.3rem 0 .7rem;font-weight:680}
+h2{font-size:1.3rem;letter-spacing:-.012em;margin:3rem 0 1rem;padding-bottom:.5rem;
+   border-bottom:1px solid var(--line);font-weight:650;line-height:1.3}
+h3{font-size:1.06rem;margin:2.1rem 0 .55rem;font-weight:650;line-height:1.4}
+p{margin:0 0 1.15rem}
+.kicker{color:var(--ink-3);font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .2rem;font-weight:600}
+.lede{font-size:1.14rem;line-height:1.6;color:var(--ink);margin-bottom:1.3rem}
+.meta{color:var(--ink-3);font-size:.9rem}
+ul,ol{padding-left:1.3rem}
+li{margin:.55rem 0;line-height:1.7}
+li::marker{color:var(--ink-3)}
+main ul li strong:first-child{color:var(--ink)}
+strong{font-weight:650}
+
+/* ---- code ------------------------------------------------------------- */
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.9rem 1.05rem;border-radius:var(--radius);overflow-x:auto;
+    font-size:.845rem;line-height:1.55;border:1px solid var(--line);margin:.9rem 0}
+code{background:var(--code);padding:.12rem .38rem;border-radius:5px;font-size:.88em}
+pre code{background:none;padding:0}
+
+/* ---- badges ----------------------------------------------------------- */
+.badge{display:inline-block;background:var(--surface);border:1px solid var(--line);
+       border-radius:100px;padding:.2rem .68rem;font-size:.775rem;color:var(--ink-2);
+       margin:0 .4rem .4rem 0;font-weight:500}
+
+/* ---- callout ---------------------------------------------------------- */
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);
+         padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;
+         color:var(--ink-2);font-size:.96rem}
+.callout p{margin:0}
+
+/* ---- tables ----------------------------------------------------------- */
+.scroll-x{overflow-x:auto;margin:1.1rem 0;-webkit-overflow-scrolling:touch}
+.scroll-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:30rem}
+@media(max-width:34rem){table{min-width:26rem;font-size:.87rem}}
+th,td{text-align:left;padding:.58rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-3);font-weight:600;font-size:.79rem;letter-spacing:.045em;
+   text-transform:uppercase;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:var(--surface)}
+td:not(:first-child){font-variant-numeric:tabular-nums}
+
+/* ---- stat tiles: the right form for a single headline number ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem;margin:1.4rem 0 1.8rem}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.05rem}
+.stat .n{font-size:1.85rem;line-height:1.1;font-weight:680;letter-spacing:-.025em;
+         font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat .l{font-size:.815rem;color:var(--ink-3);margin-top:.3rem;line-height:1.35}
+
+/* ---- single-series magnitude bars ------------------------------------- */
+.bars{margin:1.3rem 0 1.8rem}
+.bar-row{display:grid;grid-template-columns:1fr 3.2rem;gap:.85rem;align-items:center;margin:.55rem 0}
+.bar-label{font-size:.885rem;color:var(--ink-2);line-height:1.35}
+.bar-track{grid-column:1/-1;height:7px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:4px;
+          width:0;transition:width .9s cubic-bezier(.22,.7,.3,1)}
+.reveal .bar-fill{width:var(--w)}
+.bar-val{font-size:.885rem;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+
+/* ---- card grid for the reference index -------------------------------- */
+.grid{display:grid;gap:.55rem;margin-top:1.2rem}
+.grid>a,.grid>.repo{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
+        text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
+.grid>a:hover,.grid>.repo:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid>a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid>a strong,.grid>.repo strong{color:var(--ink);font-size:.97rem}
+.grid>a .p,.grid>.repo .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
+.grid>a span.d,.grid>.repo span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
+
+/* ---- portrait --------------------------------------------------------- */
+.portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
+          max-width:32%;border:1px solid var(--line)}
+
+/* ---- hero -------------------------------------------------------------- */
+.hero{display:grid;grid-template-columns:1fr auto;gap:2.2rem;align-items:start;padding:.4rem 0}
+.hero-copy{min-width:0}
+.hero img{width:152px;height:152px;border-radius:14px;border:1px solid var(--line);
+          box-shadow:0 12px 36px -14px rgba(0,0,0,.5);display:block}
+@media(max-width:44rem){.hero{grid-template-columns:1fr;gap:1.1rem}
+  .hero img{width:104px;height:104px}}
+
+/* ---- credential strip -------------------------------------------------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.55rem;margin:1.7rem 0 1.4rem}
+.strip div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+           padding:.82rem .9rem;transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s}
+.strip div:hover{transform:translateY(-3px);border-color:var(--accent)}
+.strip b{display:block;font-size:1.34rem;font-weight:680;letter-spacing:-.022em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+.strip span{display:block;font-size:.755rem;color:var(--ink-3);margin-top:.22rem;line-height:1.3}
+
+/* ---- bento ------------------------------------------------------------- */
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0}
+@media(min-width:56rem){
+  .bento{grid-template-columns:repeat(8,1fr)}
+  .bento .card:nth-child(1){grid-column:span 5}
+  .bento .card:nth-child(2){grid-column:span 3}
+  .bento .card:nth-child(n+3){grid-column:span 2}
+  .bento .card:nth-child(1) h3{font-size:1.2rem}
+  .bento .card:nth-child(1) p{font-size:.93rem}
+  .bento .card:nth-child(n+3) p{font-size:.845rem}
+}
+.bento .card{position:relative;overflow:hidden;background:var(--surface);
+     border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
+     text-decoration:none;color:inherit;display:block;
+     transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s,box-shadow .3s}
+.bento .card:hover{transform:translateY(-4px);border-color:var(--accent);
+     box-shadow:0 16px 38px -20px rgba(0,0,0,.5)}
+.bento .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.bento .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+     background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.bento .card:hover::before{opacity:1}
+.bento h3{margin:.1rem 0 .4rem;font-size:1.05rem;color:var(--ink)}
+.bento p{margin:0;font-size:.885rem;color:var(--ink-3);line-height:1.52}
+.bento .tag{display:inline-block;font-size:.695rem;letter-spacing:.09em;text-transform:uppercase;
+     color:var(--accent);font-weight:650;margin-bottom:.35rem}
+.bento .go{display:inline-block;margin-top:.75rem;font-size:.85rem;color:var(--accent);font-weight:600}
+
+.bento .codes{display:flex;flex-wrap:wrap;gap:.3rem;margin:.85rem 0 0}
+.bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
+  font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
+.bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
+/* ---- the p=reject simulation, the headline answer ------------------------- */
+.sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
+  background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.sim.s-fail{border-color:color-mix(in srgb,var(--bad) 45%,transparent);
+  background:linear-gradient(140deg,color-mix(in srgb,var(--bad) 8%,transparent),transparent 80%)}
+.sim.s-warn{border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.sim.s-ok{border-color:color-mix(in srgb,var(--ok) 40%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 80%)}
+.sim h3{margin:0 0 .6rem;font-size:var(--t4);font-weight:680;color:var(--ink)}
+.sim p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.65;max-width:44rem}
+.sim-nums{display:flex;gap:var(--s5);flex-wrap:wrap;margin:var(--s3) 0}
+.sim-nums div b{display:block;font-size:2.4rem;line-height:1;font-weight:700;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--bad)}
+.sim.s-warn .sim-nums div b{color:var(--warn)}
+.sim-nums div.soft b{color:var(--ink-3)}
+.sim-nums div span{display:block;font-size:var(--t1);color:var(--ink-3);margin-top:.35rem;
+  line-height:1.45}
+.sim-note{margin-top:var(--s3)!important;font-size:var(--t1)!important;opacity:.85}
+@media(max-width:34rem){.sim-nums{gap:var(--s4)}.sim-nums div b{font-size:1.9rem}}
+
+/* a toggle button that stays on, for marking a source as yours */
+.btn.ghost.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);
+  font-weight:650}
+
+/* ---- findings: the shared result shape every tool emits -------------------- */
+.findings{display:grid;gap:var(--s2);margin:var(--s3) 0 0}
+.fnd{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem}
+.fnd.s-critical{border-left-color:var(--bad)}
+.fnd.s-warn{border-left-color:var(--warn)}
+.fnd.s-info{border-left-color:var(--info)}
+.fnd.s-ok{border-left-color:var(--ok)}
+.fnd header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.4rem}
+.fnd .pill{font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.14rem .5rem;border-radius:100px;border:1px solid currentColor}
+.fnd.s-critical .pill{color:var(--bad)}
+.fnd.s-warn .pill{color:var(--warn)}
+.fnd.s-info .pill{color:var(--info)}
+.fnd.s-ok .pill{color:var(--ok)}
+.fnd .scope{font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);color:var(--ink-3)}
+/* Ownership is the thing no other tool in this category tells you, so it gets
+   its own visual slot rather than being buried in the prose. */
+.fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
+  font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
+  background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
+.fnd.o-you .owner{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.fnd h4{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;color:var(--ink);line-height:1.45}
+.fnd .d{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6;max-width:44rem}
+.fnd .fix{margin:.55rem 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:44rem}
+.fnd .fix b{color:var(--accent);font-weight:650;margin-right:.35rem;
+  font-size:.66rem;letter-spacing:.09em;text-transform:uppercase}
+.fnd .ev{display:block;margin:.55rem 0 0;font-size:.72rem;color:var(--ink-3);
+  background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.4rem .55rem;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.fnd .ref{margin:.5rem 0 0;font-size:var(--t1)}
+
+/* ---- fix these first ------------------------------------------------------ */
+.shortlist{counter-reset:fx;list-style:none;padding:0;margin:var(--s2) 0 var(--s4);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%);
+  padding:var(--s3) var(--s4)}
+.shortlist li{counter-increment:fx;position:relative;padding-left:1.9rem;margin:.55rem 0;
+  font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.shortlist li::before{content:counter(fx);position:absolute;left:0;top:.05rem;
+  width:1.35rem;height:1.35rem;border-radius:50%;background:var(--accent);color:#08140d;
+  font-size:.72rem;font-weight:700;display:grid;place-items:center}
+.shortlist li strong{color:var(--ink);display:block;margin-bottom:.1rem}
+
+/* ---- drop zone ----------------------------------------------------------- */
+.drop{display:block;position:relative;border:1.5px dashed var(--line);border-radius:12px;
+  padding:var(--s5) var(--s4);text-align:center;cursor:pointer;background:var(--bg);
+  transition:border-color .2s,background .2s,transform .2s}
+.drop:hover{border-color:var(--accent);background:var(--accent-soft)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.005)}
+.drop:focus-within{border-color:var(--accent);background:var(--accent-soft);
+  outline:2px solid var(--accent);outline-offset:2px}
+.drop b{display:block;font-size:var(--t4);color:var(--ink);margin-bottom:.3rem}
+.drop span{display:block;font-size:var(--t2);color:var(--ink-3)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.paste{margin-top:var(--s3)}
+.paste summary{cursor:pointer;font-size:var(--t2);color:var(--ink-3);
+  list-style:none;display:inline-block;padding:.25rem 0}
+.paste summary::-webkit-details-marker{display:none}
+.paste summary::before{content:"+ ";color:var(--accent)}
+.paste[open] summary::before{content:"- "}
+.paste summary:hover{color:var(--accent)}
+.paste textarea{margin:.6rem 0;min-height:8rem}
+
+/* ---- header analyser ------------------------------------------------------ */
+textarea.field.tall{min-height:13rem}
+.tool .row-2{display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+  align-items:start;margin-top:var(--s3)}
+.tool .row-2 .actions{display:flex;gap:.5rem;align-items:center;padding-top:1.45rem}
+.hint-text{margin:.4rem 0 0;font-size:var(--t1);color:var(--ink-3);line-height:1.5;
+  max-width:30rem}
+@media(max-width:44rem){
+  .tool .row-2{grid-template-columns:1fr}
+  .tool .row-2 .actions{padding-top:0}
+}
+
+/* key/value summary of the message */
+table.kv{min-width:0;margin:var(--s3) 0}
+table.kv th{width:9rem;text-align:left;vertical-align:top;color:var(--ink-3);
+  font-size:var(--t1);text-transform:none;letter-spacing:0;font-weight:600;
+  white-space:nowrap}
+table.kv td{font-size:var(--t2);word-break:break-word}
+.warnnote{display:block;margin-top:.25rem;font-size:var(--t1);color:var(--warn);
+  line-height:1.5}
+
+/* the alignment arithmetic, which is the differentiator and gets the space */
+.align{border:1px solid var(--line);border-radius:14px;padding:var(--s4);
+  margin:var(--s5) 0;background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.align h3{margin:0 0 var(--s3);font-size:var(--t4)}
+table.arith{min-width:38rem;font-size:var(--t2)}
+table.arith td,table.arith th{padding:.5rem .6rem}
+table.arith .op{color:var(--ink-3);text-align:center;width:2rem}
+table.arith .pill{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.12rem .45rem;border-radius:100px;border:1px solid currentColor}
+table.arith tr.s-ok .pill{color:var(--ok)}
+table.arith tr.s-critical .pill{color:var(--bad)}
+table.arith tr.s-info .pill{color:var(--info)}
+table.arith tr.s-ok td:last-child{color:var(--ok)}
+table.arith tr.s-critical td:last-child{color:var(--bad)}
+
+.dispo{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:.55rem;margin-top:var(--s4)}
+.dispo div{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+  background:var(--bg)}
+.dispo b{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t2);
+  margin-bottom:.2rem}
+.dispo span{font-size:var(--t1);color:var(--ink-3);line-height:1.45}
+.dispo .s-ok b{color:var(--ok)} .dispo .s-warn b{color:var(--warn)}
+.dispo .s-critical b{color:var(--bad)}
+.dispo .s-critical{border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+
+/* the Authentication-Results stack, with the trust boundary drawn through it */
+.ar{border:1px solid var(--line);border-radius:12px;padding:var(--s3) var(--s4);
+  margin:0 0 .6rem;background:var(--surface)}
+.ar.trusted{border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%)}
+.ar.untrusted{opacity:.6;border-style:dashed}
+.ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
+  flex-wrap:wrap}
+.ar ul{list-style:none;padding:0;margin:0}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6;word-break:break-word}
+.ar li code{font-size:.72rem;color:var(--ink-3);word-break:break-all}
+.ar ul{min-width:0}
+.ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
+.ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
+.ar li.s-warn .pill{color:var(--warn)} .ar li.s-info .pill{color:var(--info)}
+.badge.ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+
+/* the path */
+table.hops{min-width:34rem;font-size:var(--t2)}
+table.hops .ip{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.15rem}
+table.hops .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tls{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--ok);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.cleartext{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--warn);
+  border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.skew{color:var(--ink-3);font-style:italic;font-size:var(--t1)}
+.muted{color:var(--ink-3)}
+.rawhops{display:none;font-size:.7rem;max-height:22rem;overflow:auto}
+.rawhops.open{display:block}
+@media(max-width:40rem){
+  table.arith,table.hops{min-width:28rem}
+}
+
+/* ---- report table -------------------------------------------------------- */
+table.rua{min-width:46rem}
+@media(max-width:40rem){
+  /* Below this the table is a scroller you have to drag 400px to reach the
+     verdict in. Stacked cards put the answer next to the question. */
+  table.rua,table.rua tbody,table.rua tr,table.rua td{display:block;width:100%;min-width:0}
+  table.rua thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  table.rua tr{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;
+    margin:0 0 .55rem;background:var(--surface)}
+  table.rua td{border:0;padding:.15rem 0}
+  table.rua td.num{text-align:left}
+  table.rua td.num::before{content:"Messages: ";color:var(--ink-3);font-size:var(--t1)}
+  table.rua .why{max-width:none}
+}
+table.rua td{vertical-align:top}
+table.rua .ip{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:var(--t1);color:var(--ink-3);margin-top:.15rem}
+table.rua .ptr{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:.72rem;color:var(--ink-3);opacity:.7;word-break:break-all;margin-top:.1rem}
+table.rua .ptr em{font-style:normal;color:var(--warn)}
+table.rua .unk{color:var(--ink-3);font-weight:500}
+table.rua .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.rua .why{color:var(--ink-3);font-size:var(--t2);max-width:22rem}
+table.rua .tags{display:block;margin-top:.3rem}
+table.rua .tags code{font-size:.68rem;margin-right:.25rem}
+table.rua tr.s-fail .pill{color:var(--bad)}
+table.rua tr.s-warn .pill{color:var(--warn)}
+table.rua tr.s-ok .pill{color:var(--ok)}
+table.rua tr.s-info .pill{color:var(--info)}
+
+/* A privacy claim sits beside the input it reassures you about, not in a banner
+   above it. Quiet, and only where somebody is about to hand over a file. */
+.drop em,.lbl-mi em{display:block;font-style:normal;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.35rem;letter-spacing:0;text-transform:none;
+  font-weight:400}
+.lbl-mi em{margin-top:.2rem}
+
+/* ---- cost table ---------------------------------------------------------- */
+table.cost td:first-child{white-space:nowrap}
+table.cost .num{text-align:right;white-space:nowrap;color:var(--ink);font-weight:600}
+table.cost tr.s-ok .num{color:var(--ok)}
+table.cost tr.s-warn .num{color:var(--warn)}
+table.cost tr.s-fail .num{color:var(--bad)}
+table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
+
+/* ---- tool cards ----------------------------------------------------------
+   A card has to read as an instrument, not as an article about one. The icon
+   anchors it, the input example says what you feed it, and the call to action
+   is shaped like a button rather than a link. */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+.bento.tools .card{display:flex;flex-direction:column;padding:1.35rem 1.4rem 1.25rem}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+
+.card-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.9rem}
+.card .ico{width:44px;height:44px;padding:10px;border-radius:11px;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);
+  transition:background .3s,color .3s,transform .3s,border-color .3s}
+.bento .card:hover .ico{background:var(--accent);color:#08140d;transform:scale(1.06);
+  border-color:var(--accent)}
+.bento .card .tag{margin:0}
+
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* What you give it. Nothing else on a card conveys "usable" this cheaply. */
+.card .takes{display:flex;align-items:center;gap:.5rem;margin:.9rem 0 0;
+  padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
+  background:var(--code);min-width:0}
+.card .takes span{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;flex:none}
+.card .takes code{background:none;padding:0;font-size:.74rem;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.bento .card .go{display:inline-flex;align-items:center;gap:.55rem;margin-top:auto;
+  padding-top:1.1rem;font-size:var(--t2);color:var(--accent);font-weight:650}
+/* A bordered square with an arrow in it, rather than two crossed gradients
+   pretending to be one. */
+.bento .card .go::after{content:"→";display:grid;place-items:center;
+  width:1.7rem;height:1.7rem;border-radius:7px;font-size:.9rem;line-height:1;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 32%,transparent);
+  transition:background .25s,color .25s,transform .25s}
+.bento .card:hover .go::after{background:var(--accent);color:#08140d;
+  transform:translateX(3px)}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid>a,.grid>.repo{position:relative}
+.grid>a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid>a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid>a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid>a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(2.6rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.28rem;width:1.7rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem;
+  border-right:1px solid var(--line);padding-right:.4rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.55;font-size:.74rem}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- steps under the session -------------------------------------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));
+  gap:var(--s3);margin:var(--s4) 0}
+.steps .step{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:var(--s3) 1rem;transition:border-color .25s}
+.steps .step:hover{border-color:var(--accent)}
+.steps .step h3{margin:0 0 .4rem;font-size:var(--t3)}
+.steps .step code{display:block;background:var(--code);border:1px solid var(--line);
+  border-radius:6px;padding:.4rem .55rem;font-size:.72rem;color:var(--ink-2);
+  margin-bottom:.55rem;white-space:pre-wrap;word-break:break-word}
+.steps .step p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6}
+.term .bar em{margin-left:auto;font-style:normal;font-size:.7rem;color:var(--ink-3);
+  opacity:.6;transition:opacity .2s}
+.term:hover .bar em{opacity:1;color:var(--accent)}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
+
+/* ---- highlight panel --------------------------------------------------- */
+.panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
+   background:linear-gradient(140deg,var(--accent-soft),transparent 72%)}
+.panel h3{margin:0 0 .45rem;font-size:1.06rem}
+.panel p{margin:0 0 .55rem;font-size:.93rem;color:var(--ink-2)}
+.panel .doi{font-family:ui-monospace,Menlo,monospace;font-size:.805rem;color:var(--ink-3)}
+
+/* ---- stack chips ------------------------------------------------------- */
+.stack .row{display:flex;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 1rem}
+.stack .lbl{font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+   font-weight:650;width:100%;margin-bottom:.15rem}
+.chip{font-size:.815rem;padding:.4rem .85rem;line-height:1.3;border:1px solid var(--line);
+   border-radius:7px;background:var(--bg);color:var(--ink-2);min-height:44px;
+   display:inline-flex;align-items:center;
+   transition:border-color .22s,color .22s,transform .22s}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+/* ---- timeline, as disclosures ------------------------------------------ */
+.tl{position:relative;margin:1.2rem 0;padding-left:1.55rem}
+.tl::before{content:"";position:absolute;left:5px;top:.9rem;bottom:.9rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.15rem 0 .35rem;border-bottom:1px solid var(--line-2)}
+.tl .e:last-child{border-bottom:0}
+.tl .e::before{content:"";position:absolute;left:-1.55rem;top:1.05rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);
+   transition:border-color .25s,background .25s;z-index:1}
+.tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
+.tl .e[open]::before,.tl .e:hover::before{border-color:var(--accent)}
+.tl summary{list-style:none;cursor:pointer;padding:.55rem 1.6rem .55rem 0;position:relative;
+   border-radius:8px;transition:background .2s}
+.tl summary::-webkit-details-marker{display:none}
+.tl summary:hover{background:var(--surface)}
+.tl summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl summary::after{content:"";position:absolute;right:.45rem;top:1.15rem;width:7px;height:7px;
+   border-right:1.6px solid var(--ink-3);border-bottom:1.6px solid var(--ink-3);
+   transform:rotate(45deg);transition:transform .25s,border-color .25s}
+.tl .e[open] summary::after{transform:rotate(-135deg);border-color:var(--accent)}
+.tl .role{display:block;font-weight:650;font-size:.97rem;color:var(--ink)}
+.tl .org{display:block;color:var(--ink-2);font-size:.895rem}
+.tl .yr{display:block;color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .yr .n{margin-left:.6rem;color:var(--accent);opacity:.75;font-variant-numeric:normal}
+.tl .e[open] .yr .n{opacity:0}
+.tl .ach{margin:.2rem 0 .95rem;padding-left:1.05rem}
+.tl .ach li{margin:.42rem 0;font-size:.915rem;line-height:1.6;color:var(--ink-2)}
+.tl .ach li::marker{color:var(--accent)}
+.tl .e[open] .ach li{animation:rise .5s cubic-bezier(.22,.8,.3,1) both}
+.tl .e[open] .ach li:nth-child(2){animation-delay:.03s}
+.tl .e[open] .ach li:nth-child(3){animation-delay:.06s}
+.tl .e[open] .ach li:nth-child(4){animation-delay:.09s}
+.tl .e[open] .ach li:nth-child(n+5){animation-delay:.12s}
+
+/* ---- section heading with a lede --------------------------------------- */
+.sechead{margin:3.4rem 0 1rem}
+.sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
+.sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
+.sechead.reveal h2.r{opacity:1;transform:none}
+
+/* ---- SMTP session panel ------------------------------------------------
+   A real handshake, typed out. It is the one thing on the page that says what
+   this work actually is without a sentence of explanation. */
+.term{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  overflow:hidden;margin:1.2rem 0 0;box-shadow:0 18px 44px -28px rgba(0,0,0,.55)}
+.term .bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;
+  border-bottom:1px solid var(--line);background:var(--surface)}
+.term .bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.term .bar span{margin-left:.5rem;font-size:.74rem;color:var(--ink-3);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.term pre{margin:0;border:0;border-radius:0;background:none;padding:1rem 1.1rem 1.15rem;
+  font-size:.795rem;line-height:1.72;height:23rem;overflow-y:auto;overscroll-behavior:contain;
+  white-space:pre-wrap;word-break:break-word;scrollbar-width:thin}
+.term .c{color:var(--ink)}                       /* what we send */
+.term .s{color:var(--ink-3)}                     /* what the server says */
+.term .ok{color:var(--ok);font-weight:600}       /* a 2xx */
+.term .cmd{color:var(--accent);font-weight:600}  /* the shell line */
+.term .info{color:var(--ink-3);opacity:.8}       /* swaks talking, not the server */
+.term .cur{display:inline-block;width:.5em;height:1.05em;vertical-align:-.16em;
+  background:var(--accent);animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media(max-width:34rem){.term pre{font-size:.695rem;height:19rem}}
+
+/* ---- buttons: one definition, three sizes -------------------------------- */
+.btn{font:inherit;font-size:var(--t3);font-weight:650;cursor:pointer;
+  padding:.72rem 1.4rem;min-height:44px;border-radius:10px;border:1px solid var(--accent);
+  background:var(--accent);color:#08140d;
+  transition:transform .2s,opacity .2s,border-color .2s,color .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:progress;transform:none}
+.btn.ghost{background:var(--bg);color:var(--ink-2);border-color:var(--line);font-weight:500}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn.sm{font-size:var(--t1);padding:.4rem .85rem;border-radius:7px;line-height:1.3;
+  min-height:44px}
+
+/* ---- fields: one definition, one focus ring ------------------------------ */
+.field{width:100%;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1rem;
+  line-height:1.55;transition:border-color .2s,box-shadow .2s}
+.field:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+/* 16px is the floor: below it iOS Safari zooms the viewport on focus and the
+   user is left scrolled sideways on a page that was fine a moment ago. */
+textarea.field{min-height:5.2rem;resize:vertical;font-size:1rem}
+.lbl-mi{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;margin-bottom:var(--s2)}
+
+/* ---- tool panel: the shell every tool sits in ---------------------------- */
+.tool{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:var(--s4) var(--s4) 1.35rem;margin:var(--s4) 0 0;position:relative;overflow:hidden}
+.tool::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.tool .row{display:flex;gap:var(--s2);flex-wrap:wrap}
+.tool .row .field{flex:1 1 16rem;min-width:0;width:auto}
+.tool .hint{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0 0;
+  font-size:var(--t1);color:var(--ink-3);align-items:center}
+.tool .hint a,.tool .hint button{font:inherit;font-size:var(--t1);cursor:pointer;
+  color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
+  border-radius:7px;padding:.4rem .8rem;background:var(--bg);line-height:1.3;
+  min-height:44px;display:inline-flex;align-items:center;
+  transition:border-color .2s,color .2s}
+.tool .hint a:focus-visible,.tool .hint button:focus-visible{outline:2px solid var(--accent);
+  outline-offset:2px}
+.tool .hint a:hover,.tool .hint button:hover{border-color:var(--accent);color:var(--accent)}
+.empty{color:var(--ink-3);font-size:var(--t2);line-height:1.6;margin:var(--s3) 0 0}
+
+/* ---- filter: search field + chip row for the reference ------------------- */
+.filter{margin:var(--s4) 0 var(--s3)}
+.filter input{margin-bottom:.7rem}
+.filter .chips{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.filter .count{font-size:var(--t1);color:var(--ink-3);margin-left:auto;
+  font-variant-numeric:tabular-nums}
+button.chip{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---- breadcrumbs --------------------------------------------------------- */
+.crumb{font-size:var(--t1);color:var(--ink-3);margin:0 0 var(--s3);display:flex;
+  gap:.45rem;flex-wrap:wrap;align-items:center}
+.crumb a{color:var(--ink-3);text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.crumb span{opacity:.5}
+
+/* ---- classifier verdict --------------------------------------------------- */
+.verdict{margin-top:1rem;border-top:1px solid var(--line);padding-top:1rem;
+  opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.verdict.on{opacity:1;transform:none}
+.verdict .head{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
+.verdict .act{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.24rem .6rem;border-radius:100px;border:1px solid currentColor}
+.verdict .cat{font-weight:680;font-size:1.06rem;letter-spacing:-.012em}
+.verdict .prov{font-size:.78rem;color:var(--ink-3)}
+.verdict .why{margin:.6rem 0 0;font-size:.93rem;color:var(--ink-2)}
+.verdict .lnk{margin:.7rem 0 0;font-size:.875rem}
+/* Action colours are a status palette, reserved for state and never reused as
+   series colours. Each ships with its word, so it is never colour alone. */
+.a-suppress,.a-pause{color:var(--bad)}
+.a-throttle,.a-review,.a-fix_config{color:var(--warn)}
+.a-retry{color:var(--info)}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ---- tool result surfaces ------------------------------------------------ */
+.report{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;margin-top:1.6rem}
+.report.on{opacity:1;transform:none}
+.report .head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.report h2{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.15rem;
+  border:0;padding:0;margin:0}
+.report .verdict-line{margin:.7rem 0 0;font-size:.97rem;font-weight:600}
+.report .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0 1.6rem}
+.report .t{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:.7rem .8rem;text-align:center}
+.report .t b{display:block;font-size:1.5rem;font-weight:680;font-variant-numeric:tabular-nums;line-height:1.1}
+.report .t span{display:block;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:.2rem}
+.report .grp{margin:0 0 1.5rem}
+.report .grp h3{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 .5rem;font-weight:650}
+.report .grp ul{list-style:none;padding:0;margin:0}
+.report .grp li{border-left:2px solid var(--line);padding:.5rem 0 .6rem .85rem;margin:0 0 .45rem}
+.report .pill{display:inline-block;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .5rem;border-radius:100px;border:1px solid currentColor;
+  margin-right:.5rem;vertical-align:1px}
+.report .f{font-size:.95rem;color:var(--ink)}
+.report .rem{display:block;font-size:.875rem;color:var(--ink-3);margin-top:.3rem;line-height:1.55}
+.report .det{display:block;font-size:.76rem;color:var(--ink-3);margin-top:.35rem;
+  background:var(--code);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;
+  overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.report .note{font-size:.855rem;color:var(--ink-3);line-height:1.6;margin:1.4rem 0 0;
+  border-top:1px solid var(--line);padding-top:1rem}
+/* Severity is a reserved status palette, never reused for anything decorative,
+   and every one of them ships with its word so it is never colour alone. */
+.s-critical{color:var(--bad)} .s-fail{color:var(--bad)} .s-warn{color:var(--warn)}
+.s-info{color:var(--info)} .s-ok{color:var(--ok)}
+.report .t.s-critical b{color:var(--bad)}
+.report .grp li.s-critical{border-left-color:var(--bad)}
+.report .grp li.s-fail{border-left-color:var(--bad)}
+.report .grp li.s-warn{border-left-color:var(--warn)}
+.report .grp li.s-ok{border-left-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.report .t.s-fail b{color:var(--bad)} .report .t.s-warn b{color:var(--warn)}
+.report .t.s-info b{color:var(--info)} .report .t.s-ok b{color:var(--ok)}
+@media(max-width:34rem){.report .tiles{grid-template-columns:repeat(2,1fr)}}
+
+/* ---- footer -------------------------------------------------------------- */
+footer{margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:var(--t2)}
+footer .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+  gap:var(--s4) var(--s3);margin-bottom:var(--s4)}
+footer h2{font-size:var(--t0);letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .55rem;padding:0;border:0;font-weight:650}
+footer .cols a{display:flex;align-items:center;color:var(--ink-2);text-decoration:none;
+  min-height:44px;font-size:var(--t2);line-height:1.4;transition:color .16s}
+footer .cols a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer .cols a:hover{color:var(--accent)}
+footer .by{margin:0;line-height:1.6;max-width:44rem}
+
+/* ---- scroll reveal ---------------------------------------------------- */
+.r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
+.r.reveal{opacity:1;transform:none}
+.strip.reveal div,.bento.reveal .card{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
+.strip.reveal div:nth-child(2),.bento.reveal .card:nth-child(2){animation-delay:.07s}
+.strip.reveal div:nth-child(3),.bento.reveal .card:nth-child(3){animation-delay:.14s}
+.strip.reveal div:nth-child(4),.bento.reveal .card:nth-child(4){animation-delay:.21s}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
+.lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
+.hero img{animation:rise .85s cubic-bezier(.22,.8,.3,1) .18s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  #hexcanvas{display:none}
+  h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
+  .verdict{transition:none}
+  .tl .e[open] .ach li{animation:none}
+  .term .cur{animation:none;opacity:0}
+  .r{opacity:1;transform:none;transition:none}
+  .bar-fill{transition:none;width:var(--w)}
+  .grid>a:hover,.grid>.repo:hover{transform:none}
+}
+@media(max-width:34rem){
+  .portrait{max-width:38%;margin-left:1rem}
+  h2{margin-top:2.3rem}
+}
+
+/* ---------------------------------------------------------------- RFC decoded */
+.rfc{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem;
+  border-left-color:var(--line)}
+.rfc.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  border-left-color:var(--accent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.rfc header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.rfc .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.rfc.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.rfc .cat,.rfc .yr{font-size:var(--t1);color:var(--ink-3)}
+.rfc .yr{margin-left:auto}
+.rfc h3{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.rfc.lead h3{font-size:1.2rem}
+.rfc h3 a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+.rfc h3 a:hover{border-bottom-color:var(--accent)}
+.rfc .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.rfc .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.rfc .lv{color:var(--ink-3)}
+.rfc .warn-line{margin:.3rem 0;font-size:var(--t1);color:var(--ink-2);line-height:1.6}
+.rfc .warn-line strong{color:var(--warn)}
+.rfc .warn-line a{margin-right:.4rem}
+
+/* The maturity label, which is the field people misread. Colour separates a
+   standards-track document from one that carries no standards weight. */
+.st{font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
+  padding:.16rem .45rem;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.st-std{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.st-bcp{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.st-info{color:var(--ink-3)}
+.st-exp{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.st-hist{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+
+/* The answer for somebody holding a dead number. */
+.redirect{border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+  background:color-mix(in srgb,var(--warn) 7%,transparent);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.redirect p{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.redirect p:last-child{margin:0}
+.redirect strong{color:var(--ink)}
+
+.warnbox{border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0;background:var(--surface);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.warnbox.s-info{border-left-color:var(--info)}
+.warnbox p{margin:0 0 .5rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.warnbox ul{margin:0;padding-left:1.1rem}
+.warnbox li{font-size:var(--t2);color:var(--ink-2);margin:.2rem 0}
+
+.rfc-cat{margin:0 0 var(--s4)}
+.rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
+.rfc-list{display:flex;flex-direction:column;gap:2px}
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+  align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
+  text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
+.rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.rfc-row code{color:var(--ink-3);font-size:var(--t1)}
+.rfc-row:hover code{color:var(--accent)}
+.rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
+
+.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+  font-size:var(--t2)}
+.meta dt{color:var(--ink-3);font-weight:600}
+.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+.hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
+
+.reqsec{margin:0 0 var(--s4)}
+.reqsec h3{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:0 0 .5rem;
+  padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.reqs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.reqs li{display:grid;grid-template-columns:5.4rem 1fr;gap:.7rem;align-items:start;
+  padding:.5rem .7rem;border-radius:8px;background:var(--surface);
+  border:1px solid var(--line);border-left-width:2px}
+.reqs li.lv-must{border-left-color:var(--bad)}
+.reqs li.lv-should{border-left-color:var(--warn)}
+.reqs li.lv-may{border-left-color:var(--info)}
+.kw{font-size:.62rem;letter-spacing:.06em;font-weight:700;text-transform:uppercase;
+  padding-top:.2rem;white-space:nowrap}
+.kw-must{color:var(--bad)} .kw-should{color:var(--warn)} .kw-may{color:var(--info)}
+.rq{font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+
+.repo .repo-t{text-decoration:none;border-bottom:1px solid transparent}
+.repo .repo-t:hover strong{color:var(--accent)}
+.repo span.d a{color:var(--ink-2);text-decoration:none;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.repo span.d a:hover{color:var(--accent)}
+#rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
+.pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.pagemeta .cat{font-size:var(--t1);color:var(--ink-3)}
+.ex{margin:.7rem 0 0;font-size:var(--t1);color:var(--ink-3);display:flex;
+  gap:.4rem;align-items:center;flex-wrap:wrap}
+.ex .dim{color:var(--ink-3);opacity:.8}
+@media(max-width:620px){
+  .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
+  .rfc-row .n{display:none}
+  .reqs li{grid-template-columns:1fr;gap:.25rem}
+  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  .meta dt{margin-top:.5rem}
+}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "RFC decoded", "item": "https://rastu.tech//rfc/"}, {"@type": "ListItem", "position": 3, "name": "RFC 6376"}]}, {"@type": "TechArticle", "headline": "RFC 6376: DomainKeys Identified Mail (DKIM) Signatures", "url": "https://rastu.tech/rfc/6376/", "author": {"@id": "https://rastu.tech/#person"}, "about": "DomainKeys Identified Mail (DKIM) Signatures", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+</head>
+<body>
+<div class="wrap wide">
+<a class="skip" href="#main">Skip to content</a>
+<nav class="top" aria-label="Primary">
+  <a class="mark" href="../../">rastu<span>.tech</span></a>
+  <a href="../../tools/">Tools</a>
+  <a href="../../smtp/">SMTP responses</a>
+  <a href="../../rfc/" aria-current="page">RFC decoded</a>
+  <a href="../../research/">Research</a>
+  <a href="../../about/">About</a>
+</nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../..//rfc/">RFC decoded</a><span>/</span>RFC 6376</nav>
+<main id="main">
+
+<div class="sechead">
+  <p class="pagemeta"><code>RFC 6376</code> <span class="st st-std">Internet Standard</span>
+     <span class="cat">Authentication</span></p>
+  <h1 data-quoted>DomainKeys Identified Mail (DKIM) Signatures</h1>
+  <p class="lede" data-quoted>DomainKeys Identified Mail (DKIM) permits a person, role, or organization that owns the signing domain to claim some responsibility for a message by associating the domain with the message. This can be an author&#x27;s organization, an operational relay, or one of their agents. DKIM separates the question of the identity of the Signer of the message from the purported author of the message. Assertion of responsibility is validated through a cryptographic signature and by querying the Signer&#x27;s domain directly to retrieve</p>
+</div>
+
+<div class="panel r">
+  <dl class="meta">
+    <dt>Status</dt><dd>Internet Standard. The top of the standards track. An old document can hold this label while the document that replaced it holds a lower one, which is the single most misleading thing about RFC status.</dd>
+    <dt>Published</dt><dd>September 2011</dd>
+    <dt>Authors</dt><dd>D. Crocker, T. Hansen, M. Kucherawy</dd>
+    <dt>Read it</dt><dd>
+      <a href="https://www.rfc-editor.org/rfc/rfc6376.html">rfc-editor.org</a>
+       &middot; <a href="https://www.rfc-editor.org/errata/rfc6376">errata</a>
+       &middot; <a href="https://doi.org/10.17487/RFC6376">DOI</a>
+    </dd>
+  </dl>
+  <p class="hist"><strong>Replaces</strong> <a href="https://www.rfc-editor.org/rfc/rfc4870.html">RFC 4870: Domain-Based Email Authentication Using Public Keys Advertised in the DNS (DomainKeys)</a>, <a href="https://www.rfc-editor.org/rfc/rfc4871.html">RFC 4871: DomainKeys Identified Mail (DKIM) Signatures</a>, <a href="https://www.rfc-editor.org/rfc/rfc5672.html">RFC 5672: RFC 4871 DomainKeys Identified Mail (DKIM) Signatures -- Update</a>.</p>
+</div>
+
+<div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 4 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/8301/">RFC 8301: Cryptographic Algorithm and Key Usage Update to DomainKeys Identified Mail (DKIM)</a></li><li><a href="/rfc/8463/">RFC 8463: A New Cryptographic Signature Method for DomainKeys Identified Mail (DKIM)</a></li><li><a href="/rfc/8553/">RFC 8553: DNS Attrleaf Changes: Fixing Specifications That Use Underscored Node Names</a></li><li><a href="/rfc/8616/">RFC 8616: Email Authentication for Internationalized Mail</a></li></ul></div>
+
+<div class="sechead r">
+  <h2 class="r">Normative requirements</h2>
+  <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
+  came from. 125 must, 34 should, 58 may.</p>
+</div>
+<div class="filter r" data-filter>
+  <div class="chips">
+    <button class="chip on" data-group="all" type="button">All</button>
+    <button class="chip" data-group="must" type="button">Must</button>
+    <button class="chip" data-group="should" type="button">Should</button>
+    <button class="chip" data-group="may" type="button">May</button>
+    <span class="count" role="status" aria-live="polite"></span>
+  </div>
+  <label class="lbl-mi" for="rq-f">Filter the requirements</label>
+  <input class="field" id="rq-f" type="search" placeholder="Filter by wording" autocomplete="off">
+  <section class="reqsec" id="s2-11"><h3>2.11 DKIM-Quoted-Printable</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="the dkim-quoted-printable encoding syntax resembles that described in quoted-printable [rfc2045], section 6.7: any character may be encoded as an &quot;=&quot; followed by two hexadecimal digits from the alphabet &quot;0123456789abcdef&quot; (no lowercase characters permitted) representing the hexadecimal-encoded integer value of that character."><span class="kw kw-may">MAY</span><span class="rq">The DKIM-Quoted-Printable encoding syntax resembles that described in Quoted-Printable [RFC2045], Section 6.7: any character MAY be encoded as an &quot;=&quot; followed by two hexadecimal digits from the alphabet &quot;0123456789ABCDEF&quot; (no lowercase characters permitted) representing the hexadecimal-encoded integer value of that character.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="all control characters (those with values &lt; %x20), 8-bit characters (values &gt; %x7f), and the characters del (%x7f), space (%x20), and semicolon (&quot;;&quot;, %x3b) must be encoded."><span class="kw kw-must">MUST</span><span class="rq">All control characters (those with values &lt; %x20), 8-bit characters (values &gt; %x7F), and the characters DEL (%x7F), SPACE (%x20), and semicolon (&quot;;&quot;, %x3B) MUST be encoded.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="note that all whitespace, including space, cr, and lf characters, must be encoded."><span class="kw kw-must">MUST</span><span class="rq">Note that all whitespace, including SPACE, CR, and LF characters, MUST be encoded.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="after encoding, fws may be added at arbitrary locations in order to avoid excessively long lines; such whitespace is not part of the value, and must be removed before decoding."><span class="kw kw-may">MAY</span><span class="rq">After encoding, FWS MAY be added at arbitrary locations in order to avoid excessively long lines; such whitespace is NOT part of the value, and MUST be removed before decoding.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="use of characters not listed as &quot;mail-safe&quot; in [rfc2049] is not recommended."><span class="kw kw-should">NOT RECOMMENDED</span><span class="rq">Use of characters not listed as &quot;mail-safe&quot; in [RFC2049] is NOT RECOMMENDED.</span></li></ul></section><section class="reqsec" id="s3-2"><h3>3.2 Tag=Value Lists</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="unencoded semicolon (&quot;;&quot;) characters must not occur in the tag value, since that separates tag-specs."><span class="kw kw-must">MUST NOT</span><span class="rq">Unencoded semicolon (&quot;;&quot;) characters MUST NOT occur in the tag value, since that separates tag-specs.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="tags must be interpreted in a case-sensitive manner."><span class="kw kw-must">MUST</span><span class="rq">Tags MUST be interpreted in a case-sensitive manner.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="values must be processed as case sensitive unless the specific tag description of semantics specifies case insensitivity."><span class="kw kw-must">MUST</span><span class="rq">Values MUST be processed as case sensitive unless the specific tag description of semantics specifies case insensitivity.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="tags with duplicate names must not occur within a single tag-list; if a tag name does occur more than once, the entire tag-list is invalid."><span class="kw kw-must">MUST NOT</span><span class="rq">Tags with duplicate names MUST NOT occur within a single tag-list; if a tag name does occur more than once, the entire tag-list is invalid.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="whitespace within a value must be retained unless explicitly excluded by the specific tag description."><span class="kw kw-must">MUST</span><span class="rq">Whitespace within a value MUST be retained unless explicitly excluded by the specific tag description.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="tag=value pairs that represent the default value may be included to aid legibility."><span class="kw kw-may">MAY</span><span class="rq">Tag=value pairs that represent the default value MAY be included to aid legibility.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unrecognized tags must be ignored."><span class="kw kw-must">MUST</span><span class="rq">Unrecognized tags MUST be ignored.</span></li></ul></section><section class="reqsec" id="s3-3"><h3>3.3 Signing and Verification Algorithms</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="signers must implement and should sign using rsa-sha256."><span class="kw kw-must">MUST</span><span class="rq">Signers MUST implement and SHOULD sign using rsa-sha256.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must implement both rsa-sha1 and rsa-sha256."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST implement both rsa-sha1 and rsa-sha256.</span></li></ul></section><section class="reqsec" id="s3-3-1"><h3>3.3.1 The rsa-sha1 Signing Algorithm</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the hash must not be truncated or converted into any form other than the native binary form before being signed."><span class="kw kw-must">MUST NOT</span><span class="rq">The hash MUST NOT be truncated or converted into any form other than the native binary form before being signed.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the signing algorithm should use a public exponent of 65537."><span class="kw kw-should">SHOULD</span><span class="rq">The signing algorithm SHOULD use a public exponent of 65537.</span></li></ul></section><section class="reqsec" id="s3-3-3"><h3>3.3.3 Key Sizes</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="since short rsa keys more easily succumb to off-line attacks, signers must use rsa keys of at least 1024 bits for long-lived keys."><span class="kw kw-must">MUST</span><span class="rq">Since short RSA keys more easily succumb to off-line attacks, Signers MUST use RSA keys of at least 1024 bits for long-lived keys.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must be able to validate signatures with keys ranging from 512 bits to 2048 bits, and they may be able to validate signatures with larger keys."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST be able to validate signatures with keys ranging from 512 bits to 2048 bits, and they MAY be able to validate signatures with larger keys.</span></li></ul></section><section class="reqsec" id="s3-3-4"><h3>3.3.4 Other Algorithms</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="other algorithms may be defined in the future."><span class="kw kw-may">MAY</span><span class="rq">Other algorithms MAY be defined in the future.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must ignore any signatures using algorithms that they do not implement."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST ignore any signatures using algorithms that they do not implement.</span></li></ul></section><section class="reqsec" id="s3-4"><h3>3.4 Canonicalization</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="a signer may specify either algorithm for header or body when signing an email."><span class="kw kw-may">MAY</span><span class="rq">A Signer MAY specify either algorithm for header or body when signing an email.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must implement both canonicalization algorithms."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST implement both canonicalization algorithms.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="further canonicalization algorithms may be defined in the future; verifiers must ignore any signatures that use unrecognized canonicalization algorithms."><span class="kw kw-may">MAY</span><span class="rq">Further canonicalization algorithms MAY be defined in the future; Verifiers MUST ignore any signatures that use unrecognized canonicalization algorithms.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must not change the transmitted data in any way."><span class="kw kw-must">MUST NOT</span><span class="rq">It MUST NOT change the transmitted data in any way.</span></li></ul></section><section class="reqsec" id="s3-4-1"><h3>3.4.1 The &quot;simple&quot; Header Canonicalization Algorithm</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="header fields must be presented to the signing or verification algorithm exactly as they are in the message being signed or verified."><span class="kw kw-must">MUST</span><span class="rq">Header fields MUST be presented to the signing or verification algorithm exactly as they are in the message being signed or verified.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in particular, header field names must not be case folded and whitespace must not be changed."><span class="kw kw-must">MUST NOT</span><span class="rq">In particular, header field names MUST NOT be case folded and whitespace MUST NOT be changed.</span></li></ul></section><section class="reqsec" id="s3-4-2"><h3>3.4.2 The &quot;relaxed&quot; Header Canonicalization Algorithm</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the &quot;relaxed&quot; header canonicalization algorithm must apply the following steps in order:"><span class="kw kw-must">MUST</span><span class="rq">The &quot;relaxed&quot; header canonicalization algorithm MUST apply the following steps in order:</span></li><li class="lv-must" data-group="must" data-quoted data-terms="o unfold all header field continuation lines as described in [rfc5322]; in particular, lines with terminators embedded in continued header field values (that is, crlf sequences followed by wsp) must be interpreted without the crlf."><span class="kw kw-must">MUST</span><span class="rq">o Unfold all header field continuation lines as described in [RFC5322]; in particular, lines with terminators embedded in continued header field values (that is, CRLF sequences followed by WSP) MUST be interpreted without the CRLF.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="implementations must not remove the crlf at the end of the header field value."><span class="kw kw-must">MUST NOT</span><span class="rq">Implementations MUST NOT remove the CRLF at the end of the header field value.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the colon separator must be retained."><span class="kw kw-must">MUST</span><span class="rq">The colon separator MUST be retained.</span></li></ul></section><section class="reqsec" id="s3-4-4"><h3>3.4.4 The &quot;relaxed&quot; Body Canonicalization Algorithm</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the &quot;relaxed&quot; body canonicalization algorithm must apply the following steps (a) and (b) in order:"><span class="kw kw-must">MUST</span><span class="rq">The &quot;relaxed&quot; body canonicalization algorithm MUST apply the following steps (a) and (b) in order:</span></li><li class="lv-must" data-group="must" data-quoted data-terms="implementations must not remove the crlf at the end of the line."><span class="kw kw-must">MUST NOT</span><span class="rq">Implementations MUST NOT remove the CRLF at the end of the line.</span></li></ul></section><section class="reqsec" id="s3-5"><h3>3.5 The DKIM-Signature Header Field</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="the dkim-signature header field should be treated as though it were a trace header field as defined in section 3.6 of [rfc5322] and hence should not be reordered and should be prepended to the message."><span class="kw kw-should">SHOULD</span><span class="rq">The DKIM-Signature header field SHOULD be treated as though it were a trace header field as defined in Section 3.6 of [RFC5322] and hence SHOULD NOT be reordered and SHOULD be prepended to the message.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the dkim-signature header field being created or verified is always included in the signature calculation, after the rest of the header fields being signed; however, when calculating or verifying the signature, the value of the &quot;b=&quot; tag (signature value) of that dkim- signature header field must be treated as though it were an empty string."><span class="kw kw-must">MUST</span><span class="rq">The DKIM-Signature header field being created or verified is always included in the signature calculation, after the rest of the header fields being signed; however, when calculating or verifying the signature, the value of the &quot;b=&quot; tag (signature value) of that DKIM- Signature header field MUST be treated as though it were an empty string.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unknown tags in the dkim-signature header field must be included in the signature calculation but must be otherwise ignored by verifiers."><span class="kw kw-must">MUST</span><span class="rq">Unknown tags in the DKIM-Signature header field MUST be included in the signature calculation but MUST be otherwise ignored by Verifiers.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="v= version (plain-text; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">v= Version (plain-text; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must have the value &quot;1&quot; for implementations compliant with this version of dkim."><span class="kw kw-must">MUST</span><span class="rq">It MUST have the value &quot;1&quot; for implementations compliant with this version of DKIM.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="a= the algorithm used to generate the signature (plain-text; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">a= The algorithm used to generate the signature (plain-text; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must support &quot;rsa-sha1&quot; and &quot;rsa-sha256&quot;; signers should sign using &quot;rsa-sha256&quot;."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST support &quot;rsa-sha1&quot; and &quot;rsa-sha256&quot;; Signers SHOULD sign using &quot;rsa-sha256&quot;.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="b= the signature data (base64; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">b= The signature data (base64; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="whitespace is ignored in this value and must be ignored when reassembling the original signature."><span class="kw kw-must">MUST</span><span class="rq">Whitespace is ignored in this value and MUST be ignored when reassembling the original signature.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="bh= the hash of the canonicalized body part of the message as limited by the &quot;l=&quot; tag (base64; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">bh= The hash of the canonicalized body part of the message as limited by the &quot;l=&quot; tag (base64; REQUIRED).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="c= message canonicalization (plain-text; optional, default is &quot;simple/simple&quot;)."><span class="kw kw-may">OPTIONAL</span><span class="rq">c= Message canonicalization (plain-text; OPTIONAL, default is &quot;simple/simple&quot;).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="d= the sdid claiming responsibility for an introduction of a message into the mail stream (plain-text; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">d= The SDID claiming responsibility for an introduction of a message into the mail stream (plain-text; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the sdid must correspond to a valid dns name under which the dkim key record is published."><span class="kw kw-must">MUST</span><span class="rq">The SDID MUST correspond to a valid DNS name under which the DKIM key record is published.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="when presented with a signature that does not meet these requirements, verifiers must consider the signature invalid."><span class="kw kw-must">MUST</span><span class="rq">When presented with a signature that does not meet these requirements, Verifiers MUST consider the signature invalid.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="internationalized domain names must be encoded as a-labels, as described in section 2.3 of [rfc5890]."><span class="kw kw-must">MUST</span><span class="rq">Internationalized domain names MUST be encoded as A-labels, as described in Section 2.3 of [RFC5890].</span></li><li class="lv-must" data-group="must" data-quoted data-terms="h= signed header fields (plain-text, but see description; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">h= Signed header fields (plain-text, but see description; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the field must contain the complete list of header fields in the order presented to the signing algorithm."><span class="kw kw-must">MUST</span><span class="rq">The field MUST contain the complete list of header fields in the order presented to the signing algorithm.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the field may contain names of header fields that do not exist when signed; nonexistent header fields do not contribute to the signature computation (that is, they are treated as the null input, including the header field name, the separating colon, the header field value, and any crlf terminator)."><span class="kw kw-may">MAY</span><span class="rq">The field MAY contain names of header fields that do not exist when signed; nonexistent header fields do not contribute to the signature computation (that is, they are treated as the null input, including the header field name, the separating colon, the header field value, and any CRLF terminator).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the field may contain multiple instances of a header field name, meaning multiple occurrences of the corresponding header field are included in the header hash."><span class="kw kw-may">MAY</span><span class="rq">The field MAY contain multiple instances of a header field name, meaning multiple occurrences of the corresponding header field are included in the header hash.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the field must not include the dkim-signature header field that is being created or verified but may include others."><span class="kw kw-must">MUST NOT</span><span class="rq">The field MUST NOT include the DKIM-Signature header field that is being created or verified but may include others.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="folding whitespace (fws) may be included on either side of the colon separator."><span class="kw kw-may">MAY</span><span class="rq">Folding whitespace (FWS) MAY be included on either side of the colon separator.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="header field names must be compared against actual header field names in a case-insensitive manner."><span class="kw kw-must">MUST</span><span class="rq">Header field names MUST be compared against actual header field names in a case-insensitive manner.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="this list must not be empty."><span class="kw kw-must">MUST NOT</span><span class="rq">This list MUST NOT be empty.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="i= the agent or user identifier (auid) on behalf of which the sdid is taking responsibility (dkim-quoted-printable; optional, default is an empty local-part followed by an &quot;@&quot; followed by the domain from the &quot;d=&quot; tag)."><span class="kw kw-may">OPTIONAL</span><span class="rq">i= The Agent or User Identifier (AUID) on behalf of which the SDID is taking responsibility (dkim-quoted-printable; OPTIONAL, default is an empty local-part followed by an &quot;@&quot; followed by the domain from the &quot;d=&quot; tag).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the syntax is a standard email address where the local-part may be omitted."><span class="kw kw-may">MAY</span><span class="rq">The syntax is a standard email address where the local-part MAY be omitted.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the domain part of the address must be the same as, or a subdomain of, the value of the &quot;d=&quot; tag."><span class="kw kw-must">MUST</span><span class="rq">The domain part of the address MUST be the same as, or a subdomain of, the value of the &quot;d=&quot; tag.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="notably, the domain name need not be registered in the dns -- so it might not resolve in a query -- and the local-part may be drawn from a namespace unrelated to any mailbox."><span class="kw kw-may">MAY</span><span class="rq">Notably, the domain name need not be registered in the DNS -- so it might not resolve in a query -- and the local-part MAY be drawn from a namespace unrelated to any mailbox.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the signer may choose to use the same namespace for its auids as its users&#x27; email addresses or may choose other means of representing its users."><span class="kw kw-may">MAY</span><span class="rq">The Signer MAY choose to use the same namespace for its AUIDs as its users&#x27; email addresses or MAY choose other means of representing its users.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="however, the signer should use the same auid for each message intended to be evaluated as being within the same sphere of responsibility, if it wishes to offer receivers the option of using the auid as a stable identifier that is finer grained than the sdid."><span class="kw kw-should">SHOULD</span><span class="rq">However, the Signer SHOULD use the same AUID for each message intended to be evaluated as being within the same sphere of responsibility, if it wishes to offer receivers the option of using the AUID as a stable identifier that is finer grained than the SDID.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="l= body length count (plain-text unsigned decimal integer; optional, default is entire body)."><span class="kw kw-may">OPTIONAL</span><span class="rq">l= Body length count (plain-text unsigned decimal integer; OPTIONAL, default is entire body).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="this value must not be larger than the actual number of octets in the canonicalized message body."><span class="kw kw-must">MUST NOT</span><span class="rq">This value MUST NOT be larger than the actual number of octets in the canonicalized message body.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="q= a colon-separated list of query methods used to retrieve the public key (plain-text; optional, default is &quot;dns/txt&quot;)."><span class="kw kw-may">OPTIONAL</span><span class="rq">q= A colon-separated list of query methods used to retrieve the public key (plain-text; OPTIONAL, default is &quot;dns/txt&quot;).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if there are multiple query mechanisms listed, the choice of query mechanism must not change the interpretation of the signature."><span class="kw kw-must">MUST NOT</span><span class="rq">If there are multiple query mechanisms listed, the choice of query mechanism MUST NOT change the interpretation of the signature.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="implementations must use the recognized query mechanisms in the order presented."><span class="kw kw-must">MUST</span><span class="rq">Implementations MUST use the recognized query mechanisms in the order presented.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unrecognized query mechanisms must be ignored."><span class="kw kw-must">MUST</span><span class="rq">Unrecognized query mechanisms MUST be ignored.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the only option defined for the &quot;dns&quot; query type is &quot;txt&quot;, which must be included."><span class="kw kw-must">MUST</span><span class="rq">The only option defined for the &quot;dns&quot; query type is &quot;txt&quot;, which MUST be included.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers and signers must support &quot;dns/txt&quot;."><span class="kw kw-must">MUST</span><span class="rq">Verifiers and Signers MUST support &quot;dns/txt&quot;.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="s= the selector subdividing the namespace for the &quot;d=&quot; (domain) tag (plain-text; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">s= The selector subdividing the namespace for the &quot;d=&quot; (domain) tag (plain-text; REQUIRED).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="internationalized selector names must be encoded as a-labels, as described in section 2.3 of [rfc5890]."><span class="kw kw-must">MUST</span><span class="rq">Internationalized selector names MUST be encoded as A-labels, as described in Section 2.3 of [RFC5890].</span></li><li class="lv-should" data-group="should" data-quoted data-terms="t= signature timestamp (plain-text unsigned decimal integer; recommended, default is an unknown creation time)."><span class="kw kw-should">RECOMMENDED</span><span class="rq">t= Signature Timestamp (plain-text unsigned decimal integer; RECOMMENDED, default is an unknown creation time).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="implementations should be prepared to handle values up to at least 10^12 (until approximately ad 200,000; this fits into 40 bits)."><span class="kw kw-should">SHOULD</span><span class="rq">Implementations SHOULD be prepared to handle values up to at least 10^12 (until approximately AD 200,000; this fits into 40 bits).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="to avoid denial-of-service attacks, implementations may consider any value longer than 12 digits to be infinite."><span class="kw kw-may">MAY</span><span class="rq">To avoid denial-of-service attacks, implementations MAY consider any value longer than 12 digits to be infinite.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="implementations may ignore signatures that have a timestamp in the future."><span class="kw kw-may">MAY</span><span class="rq">Implementations MAY ignore signatures that have a timestamp in the future.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="x= signature expiration (plain-text unsigned decimal integer; recommended, default is no expiration)."><span class="kw kw-should">RECOMMENDED</span><span class="rq">x= Signature Expiration (plain-text unsigned decimal integer; RECOMMENDED, default is no expiration).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="signatures may be considered invalid if the verification time at the verifier is past the expiration date."><span class="kw kw-may">MAY</span><span class="rq">Signatures MAY be considered invalid if the verification time at the Verifier is past the expiration date.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the value of the &quot;x=&quot; tag must be greater than the value of the &quot;t=&quot; tag if both are present."><span class="kw kw-must">MUST</span><span class="rq">The value of the &quot;x=&quot; tag MUST be greater than the value of the &quot;t=&quot; tag if both are present.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="receivers may add a &#x27;fudge factor&#x27; to allow for such possible drift."><span class="kw kw-may">MAY</span><span class="rq">Receivers MAY add a &#x27;fudge factor&#x27; to allow for such possible drift.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="z= copied header fields (dkim-quoted-printable, but see description; optional, default is null)."><span class="kw kw-may">OPTIONAL</span><span class="rq">z= Copied header fields (dkim-quoted-printable, but see description; OPTIONAL, default is null).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="after encoding, fws may be added at arbitrary locations in order to avoid excessively long lines; such whitespace is not part of the value of the header field and must be removed before decoding."><span class="kw kw-may">MAY</span><span class="rq">After encoding, FWS MAY be added at arbitrary locations in order to avoid excessively long lines; such whitespace is NOT part of the value of the header field and MUST be removed before decoding.</span></li></ul></section><section class="reqsec" id="s3-6-1"><h3>3.6.1 Textual Representation</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the following definition must be used for any dkim key represented in an otherwise unstructured textual form."><span class="kw kw-must">MUST</span><span class="rq">The following definition MUST be used for any DKIM key represented in an otherwise unstructured textual form.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="other tags may be present and must be ignored by any implementation that does not understand them."><span class="kw kw-may">MAY</span><span class="rq">Other tags MAY be present and MUST be ignored by any implementation that does not understand them.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="v= version of the dkim key record (plain-text; recommended, default is &quot;dkim1&quot;)."><span class="kw kw-should">RECOMMENDED</span><span class="rq">v= Version of the DKIM key record (plain-text; RECOMMENDED, default is &quot;DKIM1&quot;).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if specified, this tag must be set to &quot;dkim1&quot; (without the quotes)."><span class="kw kw-must">MUST</span><span class="rq">If specified, this tag MUST be set to &quot;DKIM1&quot; (without the quotes).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="this tag must be the first tag in the record."><span class="kw kw-must">MUST</span><span class="rq">This tag MUST be the first tag in the record.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="records beginning with a &quot;v=&quot; tag with any other value must be discarded."><span class="kw kw-must">MUST</span><span class="rq">Records beginning with a &quot;v=&quot; tag with any other value MUST be discarded.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="h= acceptable hash algorithms (plain-text; optional, defaults to allowing all algorithms)."><span class="kw kw-may">OPTIONAL</span><span class="rq">h= Acceptable hash algorithms (plain-text; OPTIONAL, defaults to allowing all algorithms).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unrecognized algorithms must be ignored."><span class="kw kw-must">MUST</span><span class="rq">Unrecognized algorithms MUST be ignored.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="k= key type (plain-text; optional, default is &quot;rsa&quot;)."><span class="kw kw-may">OPTIONAL</span><span class="rq">k= Key type (plain-text; OPTIONAL, default is &quot;rsa&quot;).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="signers and verifiers must support the &quot;rsa&quot; key type."><span class="kw kw-must">MUST</span><span class="rq">Signers and Verifiers MUST support the &quot;rsa&quot; key type.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="(note: the &quot;p=&quot; tag further encodes the value using the base64 algorithm.) unrecognized key types must be ignored."><span class="kw kw-must">MUST</span><span class="rq">(Note: the &quot;p=&quot; tag further encodes the value using the base64 algorithm.) Unrecognized key types MUST be ignored.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="n= notes that might be of interest to a human (qp-section; optional, default is empty)."><span class="kw kw-may">OPTIONAL</span><span class="rq">n= Notes that might be of interest to a human (qp-section; OPTIONAL, default is empty).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="p= public-key data (base64; required)."><span class="kw kw-must">REQUIRED</span><span class="rq">p= Public-key data (base64; REQUIRED).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="verifiers should return an error code for any dkim-signature header field with a selector referencing a revoked key."><span class="kw kw-should">SHOULD</span><span class="rq">Verifiers SHOULD return an error code for any DKIM-Signature header field with a selector referencing a revoked key.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="s= service type (plain-text; optional; default is &quot;*&quot;)."><span class="kw kw-may">OPTIONAL</span><span class="rq">s= Service Type (plain-text; OPTIONAL; default is &quot;*&quot;).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers for a given service type must ignore this record if the appropriate type is not listed."><span class="kw kw-must">MUST</span><span class="rq">Verifiers for a given service type MUST ignore this record if the appropriate type is not listed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unrecognized service types must be ignored."><span class="kw kw-must">MUST</span><span class="rq">Unrecognized service types MUST be ignored.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="t= flags, represented as a colon-separated list of names (plain- text; optional, default is no flags set)."><span class="kw kw-may">OPTIONAL</span><span class="rq">t= Flags, represented as a colon-separated list of names (plain- text; OPTIONAL, default is no flags set).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unrecognized flags must be ignored."><span class="kw kw-must">MUST</span><span class="rq">Unrecognized flags MUST be ignored.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must not treat messages from signers in testing mode differently from unsigned email, even should the signature fail to verify."><span class="kw kw-must">MUST NOT</span><span class="rq">Verifiers MUST NOT treat messages from Signers in testing mode differently from unsigned email, even should the signature fail to verify.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may wish to track testing mode results to assist the signer."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY wish to track testing mode results to assist the Signer.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="s any dkim-signature header fields using the &quot;i=&quot; tag must have the same domain value on the right-hand side of the &quot;@&quot; in the &quot;i=&quot; tag and the value of the &quot;d=&quot; tag."><span class="kw kw-must">MUST</span><span class="rq">s Any DKIM-Signature header fields using the &quot;i=&quot; tag MUST have the same domain value on the right-hand side of the &quot;@&quot; in the &quot;i=&quot; tag and the value of the &quot;d=&quot; tag.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="that is, the &quot;i=&quot; domain must not be a subdomain of &quot;d=&quot;."><span class="kw kw-must">MUST NOT</span><span class="rq">That is, the &quot;i=&quot; domain MUST NOT be a subdomain of &quot;d=&quot;.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="use of this flag is recommended unless subdomaining is required."><span class="kw kw-should">RECOMMENDED</span><span class="rq">Use of this flag is RECOMMENDED unless subdomaining is required.</span></li></ul></section><section class="reqsec" id="s3-6-2"><h3>3.6.2 DNS Binding</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="all implementations must support this binding."><span class="kw kw-must">MUST</span><span class="rq">All implementations MUST support this binding.</span></li></ul></section><section class="reqsec" id="s3-6-2-2"><h3>3.6.2.2 Resource Record Types for Key Storage</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="strings in a txt rr must be concatenated together before use with no intervening whitespace."><span class="kw kw-must">MUST</span><span class="rq">Strings in a TXT RR MUST be concatenated together before use with no intervening whitespace.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="txt rrs must be unique for a particular selector name; that is, if there are multiple records in an rrset, the results are undefined."><span class="kw kw-must">MUST</span><span class="rq">TXT RRs MUST be unique for a particular selector name; that is, if there are multiple records in an RRset, the results are undefined.</span></li></ul></section><section class="reqsec" id="s3-7"><h3>3.7 Computing the Message Hashes</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the signer/verifier must compute two hashes: one over the body of the message and one over the selected header fields of the message."><span class="kw kw-must">MUST</span><span class="rq">The Signer/Verifier MUST compute two hashes: one over the body of the message and one over the selected header fields of the message.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="signers must compute them in the order shown."><span class="kw kw-must">MUST</span><span class="rq">Signers MUST compute them in the order shown.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may compute them in any order convenient to the verifier, provided that the result is semantically identical to the semantics that would be the case had they been computed in this order."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY compute them in any order convenient to the Verifier, provided that the result is semantically identical to the semantics that would be the case had they been computed in this order.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in hash step 1, the signer/verifier must hash the message body, canonicalized using the body canonicalization algorithm specified in the &quot;c=&quot; tag and then truncated to the length specified in the &quot;l=&quot; tag."><span class="kw kw-must">MUST</span><span class="rq">In hash step 1, the Signer/Verifier MUST hash the message body, canonicalized using the body canonicalization algorithm specified in the &quot;c=&quot; tag and then truncated to the length specified in the &quot;l=&quot; tag.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in hash step 2, the signer/verifier must pass the following to the hash algorithm in the indicated order."><span class="kw kw-must">MUST</span><span class="rq">In hash step 2, the Signer/Verifier MUST pass the following to the hash algorithm in the indicated order.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="each header field must be terminated with a single crlf."><span class="kw kw-must">MUST</span><span class="rq">Each header field MUST be terminated with a single CRLF.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="all tags and their values in the dkim-signature header field are included in the cryptographic hash with the sole exception of the value portion of the &quot;b=&quot; (signature) tag, which must be treated as the null string."><span class="kw kw-must">MUST</span><span class="rq">All tags and their values in the DKIM-Signature header field are included in the cryptographic hash with the sole exception of the value portion of the &quot;b=&quot; (signature) tag, which MUST be treated as the null string.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="all tags must be included even if they might not be understood by the verifier."><span class="kw kw-must">MUST</span><span class="rq">All tags MUST be included even if they might not be understood by the Verifier.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the header field must be presented to the hash algorithm after the body of the message rather than with the rest of the header fields and must be canonicalized as specified in the &quot;c=&quot; (canonicalization) tag."><span class="kw kw-must">MUST</span><span class="rq">The header field MUST be presented to the hash algorithm after the body of the message rather than with the rest of the header fields and MUST be canonicalized as specified in the &quot;c=&quot; (canonicalization) tag.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the dkim-signature header field must not be included in its own &quot;h=&quot; tag, although other dkim- signature header fields may be signed (see section 4)."><span class="kw kw-must">MUST NOT</span><span class="rq">The DKIM-Signature header field MUST NOT be included in its own &quot;h=&quot; tag, although other DKIM- Signature header fields MAY be signed (see Section 4).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="when calculating the hash on messages that will be transmitted using base64 or quoted-printable encoding, signers must compute the hash after the encoding."><span class="kw kw-must">MUST</span><span class="rq">When calculating the hash on messages that will be transmitted using base64 or quoted-printable encoding, Signers MUST compute the hash after the encoding.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="likewise, the verifier must incorporate the"><span class="kw kw-must">MUST</span><span class="rq">Likewise, the Verifier MUST incorporate the</span></li><li class="lv-must" data-group="must" data-quoted data-terms="however, the hash must be computed before transport-level encodings such as smtp &quot;dot-stuffing&quot; (the modification of lines beginning with a &quot;.&quot; to avoid confusion with the smtp end-of-message marker, as specified in [rfc5321])."><span class="kw kw-must">MUST</span><span class="rq">However, the hash MUST be computed before transport-level encodings such as SMTP &quot;dot-stuffing&quot; (the modification of lines beginning with a &quot;.&quot; to avoid confusion with the SMTP end-of-message marker, as specified in [RFC5321]).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="dkim messages may be either in plain-text or in mime format; no special treatment is afforded to mime content."><span class="kw kw-may">MAY</span><span class="rq">DKIM messages MAY be either in plain-text or in MIME format; no special treatment is afforded to MIME content.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="message attachments in mime format must be included in the content that is signed."><span class="kw kw-must">MUST</span><span class="rq">Message attachments in MIME format MUST be included in the content that is signed.</span></li></ul></section><section class="reqsec" id="s3-8"><h3>3.8 Input Requirements</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="therefore, signers and verifiers should take reasonable steps to ensure that the messages they are processing are valid according to [rfc5322], [rfc2045], and any other relevant message format standards."><span class="kw kw-should">SHOULD</span><span class="rq">Therefore, Signers and Verifiers SHOULD take reasonable steps to ensure that the messages they are processing are valid according to [RFC5322], [RFC2045], and any other relevant message format standards.</span></li></ul></section><section class="reqsec" id="s3-9"><h3>3.9 Output Requirements</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="for each signature that verifies successfully or produces a tempfail result, output of the dkim algorithm must include the set of:"><span class="kw kw-must">MUST</span><span class="rq">For each signature that verifies successfully or produces a TEMPFAIL result, output of the DKIM algorithm MUST include the set of:</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the output may include other signature properties or result meta- data, including permfailed or otherwise ignored signatures, for use by modules that consume those results."><span class="kw kw-may">MAY</span><span class="rq">The output MAY include other signature properties or result meta- data, including PERMFAILed or otherwise ignored signatures, for use by modules that consume those results.</span></li></ul></section><section class="reqsec" id="s3-10"><h3>3.10 Signing by Parent Domains</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="in order to limit the capability of such keys when this is not intended, the &quot;s&quot; flag may be set in the &quot;t=&quot; tag of the key record, to constrain the validity of the domain of the auid."><span class="kw kw-may">MAY</span><span class="rq">In order to limit the capability of such keys when this is not intended, the &quot;s&quot; flag MAY be set in the &quot;t=&quot; tag of the key record, to constrain the validity of the domain of the AUID.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the referenced key record contains the &quot;s&quot; flag as part of the &quot;t=&quot; tag, the domain of the auid (&quot;i=&quot; flag) must be the same as that of the sdid (d=) domain."><span class="kw kw-must">MUST</span><span class="rq">If the referenced key record contains the &quot;s&quot; flag as part of the &quot;t=&quot; tag, the domain of the AUID (&quot;i=&quot; flag) MUST be the same as that of the SDID (d=) domain.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if this flag is absent, the domain of the auid must be the same as, or a subdomain of, the sdid."><span class="kw kw-must">MUST</span><span class="rq">If this flag is absent, the domain of the AUID MUST be the same as, or a subdomain of, the SDID.</span></li></ul></section><section class="reqsec" id="s3-11"><h3>3.11 Relationship between SDID and AUID</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="dkim may optionally provide a single responsible agent or user identifier (auid)."><span class="kw kw-may">MAY</span><span class="rq">DKIM MAY optionally provide a single responsible Agent or User Identifier (AUID).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="upon successfully verifying the signature, a receive-side dkim verifier must communicate the signing domain identifier (d=) to a consuming identity assessor module and may communicate the agent or user identifier (i=) if present."><span class="kw kw-must">MUST</span><span class="rq">Upon successfully verifying the signature, a receive-side DKIM Verifier MUST communicate the Signing Domain Identifier (d=) to a consuming Identity Assessor module and MAY communicate the Agent or User Identifier (i=) if present.</span></li></ul></section><section class="reqsec" id="s4-2"><h3>4.2 Interpretation</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="a signer may sign previously existing dkim-signature header fields using the method described in section 5.4 to sign trace header fields."><span class="kw kw-may">MAY</span><span class="rq">A Signer MAY sign previously existing DKIM-Signature header fields using the method described in Section 5.4 to sign trace header fields.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a signer may add more than one dkim-signature header field using different parameters."><span class="kw kw-may">MAY</span><span class="rq">A Signer MAY add more than one DKIM-Signature header field using different parameters.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="signers should not remove any dkim-signature header fields from messages they are signing, even if they know that the signatures cannot be verified."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Signers SHOULD NOT remove any DKIM-Signature header fields from messages they are signing, even if they know that the signatures cannot be verified.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="when evaluating a message with multiple signatures, a verifier should evaluate signatures independently and on their own merits."><span class="kw kw-should">SHOULD</span><span class="rq">When evaluating a message with multiple signatures, a Verifier SHOULD evaluate signatures independently and on their own merits.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may process signatures in any order of their choice; for example, some verifiers might choose to process signatures corresponding to the from field in the message header before other signatures."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY process signatures in any order of their choice; for example, some Verifiers might choose to process signatures corresponding to the From field in the message header before other signatures.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="verifiers should continue to check signatures until a signature successfully verifies to the satisfaction of the verifier."><span class="kw kw-should">SHOULD</span><span class="rq">Verifiers SHOULD continue to check signatures until a signature successfully verifies to the satisfaction of the Verifier.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="to limit potential denial-of-service attacks, verifiers may limit the total number of signatures they will attempt to verify."><span class="kw kw-may">MAY</span><span class="rq">To limit potential denial-of-service attacks, Verifiers MAY limit the total number of signatures they will attempt to verify.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if a verifier module reports signatures whose evaluations produced permfail results, identity assessors should ignore those signatures (see section 6.1), acting as though they were not present in the message."><span class="kw kw-should">SHOULD</span><span class="rq">If a Verifier module reports signatures whose evaluations produced PERMFAIL results, Identity Assessors SHOULD ignore those signatures (see Section 6.1), acting as though they were not present in the message.</span></li></ul></section><section class="reqsec" id="s5-3"><h3>5.3 Normalize the Message to Prevent Transport Conversions</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="in order to minimize the chances of such breakage, signers should convert the message to a suitable mime content-transfer encoding such as quoted-printable or base64 as described in [rfc2045] before signing."><span class="kw kw-should">SHOULD</span><span class="rq">In order to minimize the chances of such breakage, Signers SHOULD convert the message to a suitable MIME content-transfer encoding such as quoted-printable or base64 as described in [RFC2045] before signing.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="such conversion is outside the scope of dkim; the actual message should be converted to 7-bit mime by an mua or msa prior to presentation to the dkim algorithm."><span class="kw kw-should">SHOULD</span><span class="rq">Such conversion is outside the scope of DKIM; the actual message SHOULD be converted to 7-bit MIME by an MUA or MSA prior to presentation to the DKIM algorithm.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the message is submitted to the signer with any local encoding that will be modified before transmission, that modification to canonical [rfc5322] form must be done before signing."><span class="kw kw-must">MUST</span><span class="rq">If the message is submitted to the Signer with any local encoding that will be modified before transmission, that modification to canonical [RFC5322] form MUST be done before signing.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="separator convention) must be converted to the smtp-standard crlf sequence before the message is signed."><span class="kw kw-must">MUST</span><span class="rq">separator convention) MUST be converted to the SMTP-standard CRLF sequence before the message is signed.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="any conversion of this sort should be applied to the message actually sent to the recipient(s), not just to the version presented to the signing algorithm."><span class="kw kw-should">SHOULD</span><span class="rq">Any conversion of this sort SHOULD be applied to the message actually sent to the recipient(s), not just to the version presented to the signing algorithm.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="more generally, the signer must sign the message as it is expected to be received by the verifier rather than in some local or internal form."><span class="kw kw-must">MUST</span><span class="rq">More generally, the Signer MUST sign the message as it is expected to be received by the Verifier rather than in some local or internal form.</span></li></ul></section><section class="reqsec" id="s5-3-1"><h3>5.3.1 Body Length Limits</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="a body length count may be specified to limit the signature calculation to an initial prefix of the body text, measured in octets."><span class="kw kw-may">MAY</span><span class="rq">A body length count MAY be specified to limit the signature calculation to an initial prefix of the body text, measured in octets.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the body length count must be calculated following the canonicalization algorithm; for example, any whitespace ignored by a canonicalization algorithm is not included as part of the body length count."><span class="kw kw-must">MUST</span><span class="rq">The body length count MUST be calculated following the canonicalization algorithm; for example, any whitespace ignored by a canonicalization algorithm is not included as part of the body length count.</span></li></ul></section><section class="reqsec" id="s5-4"><h3>5.4 Determine the Header Fields to Sign</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the from header field must be signed (that is, included in the &quot;h=&quot; tag of the resulting dkim-signature header field)."><span class="kw kw-must">MUST</span><span class="rq">The From header field MUST be signed (that is, included in the &quot;h=&quot; tag of the resulting DKIM-Signature header field).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="signers should not sign an existing header field likely to be legitimately modified or removed in transit."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Signers SHOULD NOT sign an existing header field likely to be legitimately modified or removed in transit.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="signers may include any other header fields present at the time of signing at the discretion of the signer."><span class="kw kw-may">MAY</span><span class="rq">Signers MAY include any other header fields present at the time of signing at the discretion of the Signer.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the dkim-signature header field is always implicitly signed and must not be included in the &quot;h=&quot; tag except to indicate that other preexisting signatures are also signed."><span class="kw kw-must">MUST NOT</span><span class="rq">The DKIM-Signature header field is always implicitly signed and MUST NOT be included in the &quot;h=&quot; tag except to indicate that other preexisting signatures are also signed.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="signers may claim to have signed header fields that do not exist (that is, signers may include the header field name in the &quot;h=&quot; tag even if that header field does not exist in the message)."><span class="kw kw-may">MAY</span><span class="rq">Signers MAY claim to have signed header fields that do not exist (that is, Signers MAY include the header field name in the &quot;h=&quot; tag even if that header field does not exist in the message).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="when computing the signature, the nonexisting header field must be treated as the null string (including the header field name, header field value, all punctuation, and the trailing crlf)."><span class="kw kw-must">MUST</span><span class="rq">When computing the signature, the nonexisting header field MUST be treated as the null string (including the header field name, header field value, all punctuation, and the trailing CRLF).</span></li></ul></section><section class="reqsec" id="s5-4-1"><h3>5.4.1 Recommended Signature Content</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="o from (required; see section 5.4)"><span class="kw kw-must">REQUIRED</span><span class="rq">o From (REQUIRED; see Section 5.4)</span></li><li class="lv-should" data-group="should" data-quoted data-terms="signers should choose canonicalization algorithms based on the types of messages they process and their aversion to risk."><span class="kw kw-should">SHOULD</span><span class="rq">Signers SHOULD choose canonicalization algorithms based on the types of messages they process and their aversion to risk.</span></li></ul></section><section class="reqsec" id="s5-4-2"><h3>5.4.2 Signatures Involving Multiple Instances of a Field</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="signers choosing to sign an existing header field that occurs more than once in the message (such as received) must sign the physically last instance of that header field in the header block."><span class="kw kw-must">MUST</span><span class="rq">Signers choosing to sign an existing header field that occurs more than once in the message (such as Received) MUST sign the physically last instance of that header field in the header block.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="signers wishing to sign multiple instances of such a header field must include the header field name multiple times in the &quot;h=&quot; tag of the dkim-signature header field and must sign such header fields in order from the bottom of the header field block to the top."><span class="kw kw-must">MUST</span><span class="rq">Signers wishing to sign multiple instances of such a header field MUST include the header field name multiple times in the &quot;h=&quot; tag of the DKIM-Signature header field and MUST sign such header fields in order from the bottom of the header field block to the top.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the signer may include more instances of a header field name in &quot;h=&quot; than there are actual corresponding header fields so that the signature will not verify if additional header fields of that name are added."><span class="kw kw-may">MAY</span><span class="rq">The Signer MAY include more instances of a header field name in &quot;h=&quot; than there are actual corresponding header fields so that the signature will not verify if additional header fields of that name are added.</span></li></ul></section><section class="reqsec" id="s5-5"><h3>5.5 Compute the Message Hash and Signature</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the signer must compute the message hash as described in section 3.7 and then sign it using the selected public-key algorithm."><span class="kw kw-must">MUST</span><span class="rq">The Signer MUST compute the message hash as described in Section 3.7 and then sign it using the selected public-key algorithm.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="entities such as mailing list managers that implement dkim and that modify the message or a header field (for example, inserting unsubscribe information) before retransmitting the message should check any existing signature on input and must make such modifications before re-signing the message."><span class="kw kw-should">SHOULD</span><span class="rq">Entities such as mailing list managers that implement DKIM and that modify the message or a header field (for example, inserting unsubscribe information) before retransmitting the message SHOULD check any existing signature on input and MUST make such modifications before re-signing the message.</span></li></ul></section><section class="reqsec" id="s5-6"><h3>5.6 Insert the DKIM-Signature Header Field</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="finally, the signer must insert the dkim-signature header field created in the previous step prior to transmitting the email."><span class="kw kw-must">MUST</span><span class="rq">Finally, the Signer MUST insert the DKIM-Signature header field created in the previous step prior to transmitting the email.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the dkim-signature header field must be the same as used to compute the hash as described above, except that the value of the &quot;b=&quot; tag must be the appropriately signed hash computed in the previous step, signed using the algorithm specified in the &quot;a=&quot; tag of the dkim- signature header field and using the private key corresponding to the selector given in the &quot;s=&quot; tag of the dkim-signature header field, as chosen above in section 5.2."><span class="kw kw-must">MUST</span><span class="rq">The DKIM-Signature header field MUST be the same as used to compute the hash as described above, except that the value of the &quot;b=&quot; tag MUST be the appropriately signed hash computed in the previous step, signed using the algorithm specified in the &quot;a=&quot; tag of the DKIM- Signature header field and using the private key corresponding to the selector given in the &quot;s=&quot; tag of the DKIM-Signature header field, as chosen above in Section 5.2.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the dkim-signature header field must be inserted before any other dkim-signature fields in the header block."><span class="kw kw-must">MUST</span><span class="rq">The DKIM-Signature header field MUST be inserted before any other DKIM-Signature fields in the header block.</span></li></ul></section><section class="reqsec" id="s6"><h3>6 Verifier Actions</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="since a signer may remove or revoke a public key at any time, it is advised that verification occur in a timely manner."><span class="kw kw-may">MAY</span><span class="rq">Since a Signer MAY remove or revoke a public key at any time, it is advised that verification occur in a timely manner.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a border or intermediate mta may verify the message signature(s)."><span class="kw kw-may">MAY</span><span class="rq">A border or intermediate MTA MAY verify the message signature(s).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="an mta who has performed verification may communicate the result of that verification by adding a verification header field to incoming messages."><span class="kw kw-may">MAY</span><span class="rq">An MTA who has performed verification MAY communicate the result of that verification by adding a verification header field to incoming messages.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a verifying mta may implement a policy with respect to unverifiable mail, regardless of whether or not it applies the verification header field to signed messages."><span class="kw kw-may">MAY</span><span class="rq">A verifying MTA MAY implement a policy with respect to unverifiable mail, regardless of whether or not it applies the verification header field to signed messages.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must produce a result that is semantically equivalent to applying the steps listed in sections 6.1, 6.1.1, and 6.1.2 in order."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST produce a result that is semantically equivalent to applying the steps listed in Sections 6.1, 6.1.1, and 6.1.2 in order.</span></li></ul></section><section class="reqsec" id="s6-1"><h3>6.1 Extract Signatures from the Message</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="the order in which verifiers try dkim-signature header fields is not defined; verifiers may try signatures in any order they like."><span class="kw kw-may">MAY</span><span class="rq">The order in which Verifiers try DKIM-Signature header fields is not defined; Verifiers MAY try signatures in any order they like.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must not attribute ultimate meaning to the order of multiple dkim-signature header fields."><span class="kw kw-must">MUST NOT</span><span class="rq">Verifiers MUST NOT attribute ultimate meaning to the order of multiple DKIM-Signature header fields.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="therefore, a verifier should not treat a message that has one or more bad signatures and no good signatures differently from a message with no signature at all."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Therefore, a Verifier SHOULD NOT treat a message that has one or more bad signatures and no good signatures differently from a message with no signature at all.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a verifier may limit the number of signatures it tries, in order to avoid denial-of-service attacks (see section 8.4 for further discussion)."><span class="kw kw-may">MAY</span><span class="rq">A Verifier MAY limit the number of signatures it tries, in order to avoid denial-of-service attacks (see Section 8.4 for further discussion).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in the following description, text reading &quot;return status (explanation)&quot; (where &quot;status&quot; is one of &quot;permfail&quot; or &quot;tempfail&quot;) means that the verifier must immediately cease processing that signature."><span class="kw kw-must">MUST</span><span class="rq">In the following description, text reading &quot;return status (explanation)&quot; (where &quot;status&quot; is one of &quot;PERMFAIL&quot; or &quot;TEMPFAIL&quot;) means that the Verifier MUST immediately cease processing that signature.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the verifier should proceed to the next signature, if one"><span class="kw kw-should">SHOULD</span><span class="rq">The Verifier SHOULD proceed to the next signature, if one</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a verifier may either arrange to defer the message for later processing or try another signature; if no good signature is found and any of the signatures resulted in a tempfail status, the verifier may arrange to defer the message for later processing."><span class="kw kw-may">MAY</span><span class="rq">A Verifier MAY either arrange to defer the message for later processing or try another signature; if no good signature is found and any of the signatures resulted in a TEMPFAIL status, the Verifier MAY arrange to defer the message for later processing.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="verifiers that are prepared to validate multiple signature header fields should proceed to the next signature header field, if one exists."><span class="kw kw-should">SHOULD</span><span class="rq">Verifiers that are prepared to validate multiple signature header fields SHOULD proceed to the next signature header field, if one exists.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="however, verifiers may make note of the fact that an invalid signature was present for consideration at a later step."><span class="kw kw-may">MAY</span><span class="rq">However, Verifiers MAY make note of the fact that an invalid signature was present for consideration at a later step.</span></li></ul></section><section class="reqsec" id="s6-1-1"><h3>6.1.1 Validate the Signature Header Field</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="implementers must meticulously validate the format and values in the dkim-signature header field; any inconsistency or unexpected values must cause the header field to be completely ignored and the verifier to return permfail (signature syntax error)."><span class="kw kw-must">MUST</span><span class="rq">Implementers MUST meticulously validate the format and values in the DKIM-Signature header field; any inconsistency or unexpected values MUST cause the header field to be completely ignored and the Verifier to return PERMFAIL (signature syntax error).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must return permfail (incompatible version) when presented a dkim-signature header field with a &quot;v=&quot; tag that is inconsistent with this specification."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST return PERMFAIL (incompatible version) when presented a DKIM-Signature header field with a &quot;v=&quot; tag that is inconsistent with this specification.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if any tag listed as &quot;required&quot; in section 3.5 is omitted from the dkim-signature header field, the verifier must ignore the dkim- signature header field and return permfail (signature missing required tag)."><span class="kw kw-must">MUST</span><span class="rq">If any tag listed as &quot;required&quot; in Section 3.5 is omitted from the DKIM-Signature header field, the Verifier MUST ignore the DKIM- Signature header field and return PERMFAIL (signature missing required tag).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the dkim-signature header field does not contain the &quot;i=&quot; tag, the verifier must behave as though the value of that tag were &quot;@d&quot;, where &quot;d&quot; is the value from the &quot;d=&quot; tag."><span class="kw kw-must">MUST</span><span class="rq">If the DKIM-Signature header field does not contain the &quot;i=&quot; tag, the Verifier MUST behave as though the value of that tag were &quot;@d&quot;, where &quot;d&quot; is the value from the &quot;d=&quot; tag.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must confirm that the domain specified in the &quot;d=&quot; tag is the same as or a parent domain of the domain part of the &quot;i=&quot; tag."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST confirm that the domain specified in the &quot;d=&quot; tag is the same as or a parent domain of the domain part of the &quot;i=&quot; tag.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if not, the dkim-signature header field must be ignored, and the verifier should return permfail (domain mismatch)."><span class="kw kw-must">MUST</span><span class="rq">If not, the DKIM-Signature header field MUST be ignored, and the Verifier should return PERMFAIL (domain mismatch).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the &quot;h=&quot; tag does not include the from header field, the verifier must ignore the dkim-signature header field and return permfail (from field not signed)."><span class="kw kw-must">MUST</span><span class="rq">If the &quot;h=&quot; tag does not include the From header field, the Verifier MUST ignore the DKIM-Signature header field and return PERMFAIL (From field not signed).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may ignore the dkim-signature header field and return permfail (signature expired) if it contains an &quot;x=&quot; tag and the signature has expired."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY ignore the DKIM-Signature header field and return PERMFAIL (signature expired) if it contains an &quot;x=&quot; tag and the signature has expired.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may ignore the dkim-signature header field if the domain used by the signer in the &quot;d=&quot; tag is not associated with a valid signing entity."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY ignore the DKIM-Signature header field if the domain used by the Signer in the &quot;d=&quot; tag is not associated with a valid signing entity.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the list of unacceptable domains should be configurable."><span class="kw kw-should">SHOULD</span><span class="rq">The list of unacceptable domains SHOULD be configurable.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="verifiers may ignore the dkim-signature header field and return permfail (unacceptable signature header) for any other reason, for example, if the signature does not sign header fields that the verifier views to be essential."><span class="kw kw-may">MAY</span><span class="rq">Verifiers MAY ignore the DKIM-Signature header field and return PERMFAIL (unacceptable signature header) for any other reason, for example, if the signature does not sign header fields that the Verifier views to be essential.</span></li></ul></section><section class="reqsec" id="s6-1-2"><h3>6.1.2 Get the Public Key</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the verifier must validate the key record and must ignore any public-key records that are malformed."><span class="kw kw-must">MUST</span><span class="rq">The Verifier MUST validate the key record and MUST ignore any public-key records that are malformed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="when validating a message, a verifier must perform the following steps in a manner that is semantically the same as performing them in the order indicated; in some cases, the implementation may parallelize or reorder these steps, as long as the semantics remain unchanged:"><span class="kw kw-must">MUST</span><span class="rq">When validating a message, a Verifier MUST perform the following steps in a manner that is semantically the same as performing them in the order indicated; in some cases, the implementation may parallelize or reorder these steps, as long as the semantics remain unchanged:</span></li><li class="lv-may" data-group="may" data-quoted data-terms="if the query for the public key fails to respond, the verifier may seek a later verification attempt by returning tempfail (key unavailable)."><span class="kw kw-may">MAY</span><span class="rq">If the query for the public key fails to respond, the Verifier MAY seek a later verification attempt by returning TEMPFAIL (key unavailable).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the query for the public key fails because the corresponding key record does not exist, the verifier must immediately return permfail (no key for signature)."><span class="kw kw-must">MUST</span><span class="rq">If the query for the public key fails because the corresponding key record does not exist, the Verifier MUST immediately return PERMFAIL (no key for signature).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the result returned from the query does not adhere to the format defined in this specification, the verifier must ignore the key record and return permfail (key syntax error)."><span class="kw kw-must">MUST</span><span class="rq">If the result returned from the query does not adhere to the format defined in this specification, the Verifier MUST ignore the key record and return PERMFAIL (key syntax error).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in particular, the verifier must ignore keys with a version code (&quot;v=&quot; tag) that they do not implement."><span class="kw kw-must">MUST</span><span class="rq">In particular, the Verifier MUST ignore keys with a version code (&quot;v=&quot; tag) that they do not implement.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the &quot;h=&quot; tag exists in the public-key record and the hash algorithm implied by the &quot;a=&quot; tag in the dkim-signature header field is not included in the contents of the &quot;h=&quot; tag, the verifier must ignore the key record and return permfail (inappropriate hash algorithm)."><span class="kw kw-must">MUST</span><span class="rq">If the &quot;h=&quot; tag exists in the public-key record and the hash algorithm implied by the &quot;a=&quot; tag in the DKIM-Signature header field is not included in the contents of the &quot;h=&quot; tag, the Verifier MUST ignore the key record and return PERMFAIL (inappropriate hash algorithm).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the public-key data (the &quot;p=&quot; tag) is empty, then this key has been revoked and the verifier must treat this as a failed signature check and return permfail (key revoked)."><span class="kw kw-must">MUST</span><span class="rq">If the public-key data (the &quot;p=&quot; tag) is empty, then this key has been revoked and the Verifier MUST treat this as a failed signature check and return PERMFAIL (key revoked).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the public-key data is not suitable for use with the algorithm and key types defined by the &quot;a=&quot; and &quot;k=&quot; tags in the dkim- signature header field, the verifier must immediately return permfail (inappropriate key algorithm)."><span class="kw kw-must">MUST</span><span class="rq">If the public-key data is not suitable for use with the algorithm and key types defined by the &quot;a=&quot; and &quot;k=&quot; tags in the DKIM- Signature header field, the Verifier MUST immediately return PERMFAIL (inappropriate key algorithm).</span></li></ul></section><section class="reqsec" id="s6-1-3"><h3>6.1.3 Compute the Verification</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="when matching header field names in the &quot;h=&quot; tag against the actual message header field, comparisons must be case-insensitive."><span class="kw kw-must">MUST</span><span class="rq">When matching header field names in the &quot;h=&quot; tag against the actual message header field, comparisons MUST be case-insensitive.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the hash does not match, the verifier should ignore the signature and return permfail (body hash did not verify)."><span class="kw kw-should">SHOULD</span><span class="rq">If the hash does not match, the Verifier SHOULD ignore the signature and return PERMFAIL (body hash did not verify).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the signature does not validate, the verifier should ignore the signature and return permfail (signature did not verify)."><span class="kw kw-should">SHOULD</span><span class="rq">If the signature does not validate, the Verifier SHOULD ignore the signature and return PERMFAIL (signature did not verify).</span></li></ul></section><section class="reqsec" id="s6-2"><h3>6.2 Communicate Verification Results</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="any such header field should be inserted before any existing dkim-signature or preexisting authentication status header fields in the header field block."><span class="kw kw-should">SHOULD</span><span class="rq">Any such header field SHOULD be inserted before any existing DKIM-Signature or preexisting authentication status header fields in the header field block.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the authentication-results: header field ([rfc5451]) may be used for this purpose."><span class="kw kw-may">MAY</span><span class="rq">The Authentication-Results: header field ([RFC5451]) MAY be used for this purpose.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="to circumvent this attack, verifiers may wish to request deletion of existing results header fields after verification and before arranging to add a new header field."><span class="kw kw-may">MAY</span><span class="rq">To circumvent this attack, Verifiers MAY wish to request deletion of existing results header fields after verification and before arranging to add a new header field.</span></li></ul></section><section class="reqsec" id="s6-3"><h3>6.3 Interpret Results/Apply Local Policy</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="in general, modules that consume dkim verification output should not determine message acceptability based solely on a lack of any signature or on an unverifiable signature; such rejection would cause severe interoperability problems."><span class="kw kw-should">SHOULD NOT</span><span class="rq">In general, modules that consume DKIM verification output SHOULD NOT determine message acceptability based solely on a lack of any signature or on an unverifiable signature; such rejection would cause severe interoperability problems.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if an mta does wish to reject such messages during an smtp session (for example, when communicating with a peer who, by prior agreement, agrees to only send signed messages), and a signature is missing or does not verify, the handling mta should use a 550/5.7.x reply code."><span class="kw kw-should">SHOULD</span><span class="rq">If an MTA does wish to reject such messages during an SMTP session (for example, when communicating with a peer who, by prior agreement, agrees to only send signed messages), and a signature is missing or does not verify, the handling MTA SHOULD use a 550/5.7.x reply code.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="where the verifier is integrated within the mta and it is not possible to fetch the public key, perhaps because the key server is not available, a temporary failure message may be generated using a 451/4.7.5 reply code, such as:"><span class="kw kw-may">MAY</span><span class="rq">Where the Verifier is integrated within the MTA and it is not possible to fetch the public key, perhaps because the key server is not available, a temporary failure message MAY be generated using a 451/4.7.5 reply code, such as:</span></li><li class="lv-should" data-group="should" data-quoted data-terms="temporary failures such as inability to access the key server or other external service are the only conditions that should use a 4xx smtp reply code."><span class="kw kw-should">SHOULD</span><span class="rq">Temporary failures such as inability to access the key server or other external service are the only conditions that SHOULD use a 4xx SMTP reply code.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in particular, cryptographic signature verification failures must not provoke 4xx smtp replies."><span class="kw kw-must">MUST NOT</span><span class="rq">In particular, cryptographic signature verification failures MUST NOT provoke 4xx SMTP replies.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="once the signature has been verified, that information must be conveyed to the identity assessor (such as an explicit allow/ whitelist and reputation system) and/or to the end user."><span class="kw kw-must">MUST</span><span class="rq">Once the signature has been verified, that information MUST be conveyed to the Identity Assessor (such as an explicit allow/ whitelist and reputation system) and/or to the end user.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the sdid is not the same as the address in the from: header field, the mail system should take pains to ensure that the actual sdid is clear to the reader."><span class="kw kw-should">SHOULD</span><span class="rq">If the SDID is not the same as the address in the From: header field, the mail system SHOULD take pains to ensure that the actual SDID is clear to the reader.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="for diagnostic purposes, the exact reason why the verification fails should be made available and possibly recorded in the system logs."><span class="kw kw-should">SHOULD</span><span class="rq">For diagnostic purposes, the exact reason why the verification fails SHOULD be made available and possibly recorded in the system logs.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the email cannot be verified, then it should be treated the same as all unverified email, regardless of whether or not it looks like it was signed."><span class="kw kw-should">SHOULD</span><span class="rq">If the email cannot be verified, then it SHOULD be treated the same as all unverified email, regardless of whether or not it looks like it was signed.</span></li></ul></section><section class="reqsec" id="s7"><h3>7 IANA Considerations</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="all registrations into these namespaces must include the name being registered, the document in which it was registered or updated, and an indication of its current status, which must be one of &quot;active&quot; (in current use) or &quot;historic&quot; (no longer in current use)."><span class="kw kw-must">MUST</span><span class="rq">All registrations into these namespaces MUST include the name being registered, the document in which it was registered or updated, and an indication of its current status, which MUST be one of &quot;active&quot; (in current use) or &quot;historic&quot; (no longer in current use).</span></li></ul></section><section class="reqsec" id="s8-8"><h3>8.8 Intentionally Malformed Key Records</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must thoroughly verify all key records retrieved from the dns and be robust against intentionally as well as unintentionally malformed key records."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST thoroughly verify all key records retrieved from the DNS and be robust against intentionally as well as unintentionally malformed key records.</span></li></ul></section><section class="reqsec" id="s8-9"><h3>8.9 Intentionally Malformed DKIM-Signature Header Fields</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="verifiers must be prepared to receive messages with malformed dkim- signature header fields and thoroughly verify the header field before depending on any of its contents."><span class="kw kw-must">MUST</span><span class="rq">Verifiers MUST be prepared to receive messages with malformed DKIM- Signature header fields and thoroughly verify the header field before depending on any of its contents.</span></li></ul></section><section class="reqsec" id="s8-14"><h3>8.14 Inappropriate Signing by Parent Domains</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="note that a verifier may ignore signatures that come from an unlikely domain such as &quot;.com&quot;, as discussed in section 6.1.1."><span class="kw kw-may">MAY</span><span class="rq">Note that a Verifier MAY ignore signatures that come from an unlikely domain such as &quot;.com&quot;, as discussed in Section 6.1.1.</span></li></ul></section><section class="reqsec" id="s9-2"><h3>9.2 Informative References</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="although the &quot;g=&quot; tag has been deprecated in this version of the dkim specification (and thus must now be ignored), signers are advised not to include the &quot;g=&quot; tag in key records because some [rfc4871]- compliant verifiers will be in use for a considerable period to come."><span class="kw kw-must">MUST</span><span class="rq">Although the &quot;g=&quot; tag has been deprecated in this version of the DKIM specification (and thus MUST now be ignored), Signers are advised not to include the &quot;g=&quot; tag in key records because some [RFC4871]- compliant Verifiers will be in use for a considerable period to come.</span></li></ul></section>
+  <p class="empty noresult hidden">Nothing matches that filter.</p>
+</div>
+
+<p class="r"><a href="/rfc/">Every current email RFC</a></p>
+
+</main>
+<footer>
+  <div class="cols">
+    <div>
+      <h2>Tools</h2>
+            <a href="../../check/">Domain check</a>
+      <a href="../../bounce/">Bounce classifier</a>
+      <a href="../../dmarc/">DMARC report reader</a>
+      <a href="../../headers/">Header analyser</a>
+      <a href="../../spf/">SPF lookup counter</a>
+      <a href="../../tools/">All tools</a>
+    </div>
+    <div>
+      <h2>SMTP responses</h2>
+      <a href="../../smtp/">All responses</a>
+      <a href="../../smtp/session/">Anatomy of a session</a>
+    </div>
+    <div>
+      <h2>Research</h2>
+      <a href="../../research/">State of email authentication</a>
+      <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
+    </div>
+    <div>
+      <h2>Elsewhere</h2>
+      <a href="https://github.com/singhrastu">GitHub</a>
+      <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>
+      <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
+    </div>
+  </div>
+  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+     Infrastructure Engineer, Tallinn.
+     Everything here runs in your browser.</p>
+</footer>
+</div>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ticking=false, SY=0;
+  function onScroll(){
+    SY = scrollY/Math.max(1, document.body.scrollHeight-innerHeight);
+    document.documentElement.style.setProperty('--sy', SY.toFixed(4));
+    ticking=false;
+  }
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
+  onScroll();
+
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
+  if(!('IntersectionObserver' in window) || reduce){
+    targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
+  } else {
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('reveal'); io.unobserve(e.target); countUp(e.target);
+      });
+    },{rootMargin:'0px 0px -6% 0px',threshold:.06});
+    targets.forEach(function(n){io.observe(n);});
+  }
+
+  function countUp(root){
+    root.querySelectorAll('.n, .strip b, b').forEach(function(el){
+      if(el.dataset.done) return;
+      var raw=el.textContent, m=raw.match(/[\d][\d.,]*/);
+      if(!m) return;
+      el.dataset.done=1;
+      var end=parseFloat(m[0].replace(/,/g,'')), dec=(m[0].split('.')[1]||'').length;
+      var pre=raw.slice(0,m.index), post=raw.slice(m.index+m[0].length), t0=null;
+      function f(ts){
+        if(!t0)t0=ts;
+        var p=Math.min(1,(ts-t0)/950), e=1-Math.pow(1-p,3), v=end*e;
+        el.textContent = pre+(dec?v.toFixed(dec):Math.round(v).toLocaleString())+post;
+        if(p<1) requestAnimationFrame(f);
+      }
+      el.textContent=pre+(dec?'0.0':'0')+post;
+      requestAnimationFrame(f);
+    });
+  }
+
+  /* The SMTP session types itself out once, when it comes into view.
+     Client lines are typed a character at a time because that is what sending
+     one feels like; server responses land whole, because that is what they do. */
+  (function(){
+    var term=document.getElementById('term'), out=document.getElementById('term-out');
+    if(!term||!out) return;
+    var lines;
+    try{ lines=JSON.parse(term.getAttribute('data-session')); }catch(err){ return; }
+
+    function esc(s){return String(s).replace(/[&<>]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+    function whole(){
+      out.innerHTML=lines.map(function(l){
+        return '<span class="'+l.k+'">'+esc(l.t)+'</span>';}).join('\n');
+    }
+    if(reduce){ whole(); return; }
+
+    var playing=false;
+    function play(){
+      if(playing) return; playing=true;
+      out.innerHTML=''; var i=0;
+      function line(){
+        if(i>=lines.length){ playing=false; return; }
+        var l=lines[i++], sp=document.createElement('span');
+        sp.className=l.k;
+        out.appendChild(sp);
+        out.appendChild(document.createTextNode('\n'));
+        out.parentNode.scrollTop = out.parentNode.scrollHeight;
+        var typed = (l.k==='cmd');
+        if(!typed){ sp.textContent=l.t;
+          setTimeout(line, l.k==='info'?70:(l.k==='c'?150:95)); return; }
+        var j=0;
+        (function ch(){
+          sp.textContent=l.t.slice(0,++j);
+          if(j<l.t.length) setTimeout(ch, 15);
+          else setTimeout(line, 260);
+        })();
+      }
+      line();
+    }
+    if('IntersectionObserver' in window){
+      var to=new IntersectionObserver(function(es){
+        es.forEach(function(en){ if(en.isIntersecting){ play(); to.unobserve(en.target); } });
+      },{threshold:.3});
+      to.observe(term);
+    } else { play(); }
+    term.addEventListener('click',function(){ if(!playing) play(); });
+    term.style.cursor='pointer';
+    term.title='Replay';
+  })();
+
+  /* Living honeycomb: cells brighten near the pointer, and packets route from
+     node to node, which is what this site is about. Pauses when tab is hidden. */
+  if(reduce) return;
+  var cv=document.createElement('canvas');
+  cv.id='hexcanvas'; cv.setAttribute('aria-hidden','true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  var veil=document.createElement('div');
+  veil.className='hexveil'; veil.setAttribute('aria-hidden','true');
+  document.body.insertBefore(veil, cv.nextSibling);
+
+  var ctx=cv.getContext('2d'), DPR=Math.min(2,devicePixelRatio||1);
+  var R=36, nodes=[], packets=[], mx=-1e4, my=-1e4, raf=null;
+  function accent(){return (getComputedStyle(document.documentElement).getPropertyValue('--hex')||'#1f4e79').trim();}
+  function rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');
+    var n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255].join(',');}
+  var C=rgb(accent());
+
+  function build(){
+    cv.width=innerWidth*DPR; cv.height=innerHeight*DPR;
+    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    var dx=R*Math.sqrt(3), dy=R*1.5; nodes=[];
+    for(var row=-2,y=-dy*2; y<innerHeight+dy*3; row++,y+=dy)
+      for(var x=(row%2?dx/2:0)-dx; x<innerWidth+dx; x+=dx) nodes.push({x:x,y:y,g:0});
+    packets=[]; for(var i=0;i<16;i++) spawn();
+  }
+  function spawn(){ if(!nodes.length)return;
+    var a=nodes[(Math.random()*nodes.length)|0];
+    packets.push({x:a.x,y:a.y,tx:a.x,ty:a.y,t:1,sp:.007+Math.random()*.011,life:0}); }
+  function hex(x,y,r){ctx.beginPath();
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30),px=x+r*Math.cos(a),py=y+r*Math.sin(a);
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.closePath();}
+
+  function draw(){
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    var drift=SY*-130;
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i], y=n.y+drift;
+      if(y<-R*2||y>innerHeight+R*2) continue;
+      var d=Math.hypot(n.x-mx,y-my), near=d<210?(1-d/210):0;
+      n.g+=(near-n.g)*.1;
+      ctx.strokeStyle='rgba('+C+','+(.07+n.g*.5).toFixed(3)+')';
+      ctx.lineWidth=1+n.g*1.1;
+      hex(n.x,y,R*.9); ctx.stroke();
+      if(n.g>.2){ctx.fillStyle='rgba('+C+','+(n.g*.075).toFixed(3)+')';ctx.fill();}
+    }
+    for(var j=packets.length-1;j>=0;j--){
+      var p=packets[j]; p.t+=p.sp;
+      if(p.t>=1){
+        var fx=p.tx, fy=p.ty, cand=null, best=1e9;
+        for(var k=0;k<26;k++){var q=nodes[(Math.random()*nodes.length)|0];
+          var dd=Math.hypot(q.x-fx,q.y-fy);
+          if(dd>R*1.3&&dd<R*2.3&&dd<best){best=dd;cand=q;}}
+        if(!cand||p.life>28){packets.splice(j,1);spawn();continue;}
+        p.x=fx;p.y=fy;p.tx=cand.x;p.ty=cand.y;p.t=0;p.life++;
+      }
+      var e=p.t<.5?2*p.t*p.t:1-Math.pow(-2*p.t+2,2)/2;
+      var cx=p.x+(p.tx-p.x)*e, cy=p.y+(p.ty-p.y)*e+drift;
+      if(cy<-40||cy>innerHeight+40) continue;
+      var g=ctx.createLinearGradient(p.x,p.y+drift,cx,cy);
+      g.addColorStop(0,'rgba('+C+',0)'); g.addColorStop(1,'rgba('+C+',.34)');
+      ctx.strokeStyle=g; ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(p.x,p.y+drift);ctx.lineTo(cx,cy);ctx.stroke();
+      ctx.fillStyle='rgba('+C+',.6)';
+      ctx.beginPath();ctx.arc(cx,cy,2,0,7);ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  addEventListener('resize',build,{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){cancelAnimationFrame(raf);raf=null;} else if(!raf){raf=requestAnimationFrame(draw);}});
+  build(); draw();
+})();
+</script>
+
+<script type="module" src="/js/filter.js"></script>
+</body>
+</html>

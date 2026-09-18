@@ -228,13 +228,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 
 /* ---- card grid for the reference index -------------------------------- */
 .grid{display:grid;gap:.55rem;margin-top:1.2rem}
-.grid a{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
+.grid>a,.grid>.repo{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
         text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
-.grid a:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
-.grid a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.grid a strong{color:var(--ink);font-size:.97rem}
-.grid a .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
-.grid a span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
+.grid>a:hover,.grid>.repo:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid>a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid>a strong,.grid>.repo strong{color:var(--ink);font-size:.97rem}
+.grid>a .p,.grid>.repo .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
+.grid>a span.d,.grid>.repo span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
 
 /* ---- portrait --------------------------------------------------------- */
 .portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
@@ -596,14 +596,14 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 .chip.more{border-color:var(--accent-soft);color:var(--accent)}
 
 /* ---- reference index rows ------------------------------------------------ */
-.grid a{position:relative}
-.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+.grid>a,.grid>.repo{position:relative}
+.grid>a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
   text-transform:uppercase;font-weight:700;border:1px solid currentColor;
   border-radius:100px;padding:.14rem .5rem}
-.grid a .d{padding-right:5.5rem}
+.grid>a .d{padding-right:5.5rem}
 @media(max-width:34rem){
-  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
-  .grid a .d{padding-right:0}
+  .grid>a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid>a .d{padding-right:0}
 }
 
 /* ---- SPF include tree ---------------------------------------------------- */
@@ -895,11 +895,117 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   .term .cur{animation:none;opacity:0}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
-  .grid a:hover{transform:none}
+  .grid>a:hover,.grid>.repo:hover{transform:none}
 }
 @media(max-width:34rem){
   .portrait{max-width:38%;margin-left:1rem}
   h2{margin-top:2.3rem}
+}
+
+/* ---------------------------------------------------------------- RFC decoded */
+.rfc{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem;
+  border-left-color:var(--line)}
+.rfc.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  border-left-color:var(--accent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.rfc header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.rfc .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.rfc.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.rfc .cat,.rfc .yr{font-size:var(--t1);color:var(--ink-3)}
+.rfc .yr{margin-left:auto}
+.rfc h3{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.rfc.lead h3{font-size:1.2rem}
+.rfc h3 a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+.rfc h3 a:hover{border-bottom-color:var(--accent)}
+.rfc .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.rfc .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.rfc .lv{color:var(--ink-3)}
+.rfc .warn-line{margin:.3rem 0;font-size:var(--t1);color:var(--ink-2);line-height:1.6}
+.rfc .warn-line strong{color:var(--warn)}
+.rfc .warn-line a{margin-right:.4rem}
+
+/* The maturity label, which is the field people misread. Colour separates a
+   standards-track document from one that carries no standards weight. */
+.st{font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
+  padding:.16rem .45rem;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.st-std{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.st-bcp{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.st-info{color:var(--ink-3)}
+.st-exp{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.st-hist{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+
+/* The answer for somebody holding a dead number. */
+.redirect{border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+  background:color-mix(in srgb,var(--warn) 7%,transparent);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.redirect p{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.redirect p:last-child{margin:0}
+.redirect strong{color:var(--ink)}
+
+.warnbox{border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0;background:var(--surface);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.warnbox.s-info{border-left-color:var(--info)}
+.warnbox p{margin:0 0 .5rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.warnbox ul{margin:0;padding-left:1.1rem}
+.warnbox li{font-size:var(--t2);color:var(--ink-2);margin:.2rem 0}
+
+.rfc-cat{margin:0 0 var(--s4)}
+.rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
+.rfc-list{display:flex;flex-direction:column;gap:2px}
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+  align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
+  text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
+.rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.rfc-row code{color:var(--ink-3);font-size:var(--t1)}
+.rfc-row:hover code{color:var(--accent)}
+.rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
+
+.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+  font-size:var(--t2)}
+.meta dt{color:var(--ink-3);font-weight:600}
+.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+.hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
+
+.reqsec{margin:0 0 var(--s4)}
+.reqsec h3{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:0 0 .5rem;
+  padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.reqs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.reqs li{display:grid;grid-template-columns:5.4rem 1fr;gap:.7rem;align-items:start;
+  padding:.5rem .7rem;border-radius:8px;background:var(--surface);
+  border:1px solid var(--line);border-left-width:2px}
+.reqs li.lv-must{border-left-color:var(--bad)}
+.reqs li.lv-should{border-left-color:var(--warn)}
+.reqs li.lv-may{border-left-color:var(--info)}
+.kw{font-size:.62rem;letter-spacing:.06em;font-weight:700;text-transform:uppercase;
+  padding-top:.2rem;white-space:nowrap}
+.kw-must{color:var(--bad)} .kw-should{color:var(--warn)} .kw-may{color:var(--info)}
+.rq{font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+
+.repo .repo-t{text-decoration:none;border-bottom:1px solid transparent}
+.repo .repo-t:hover strong{color:var(--accent)}
+.repo span.d a{color:var(--ink-2);text-decoration:none;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.repo span.d a:hover{color:var(--accent)}
+#rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
+.pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.pagemeta .cat{font-size:var(--t1);color:var(--ink-3)}
+.ex{margin:.7rem 0 0;font-size:var(--t1);color:var(--ink-3);display:flex;
+  gap:.4rem;align-items:center;flex-wrap:wrap}
+.ex .dim{color:var(--ink-3);opacity:.8}
+@media(max-width:620px){
+  .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
+  .rfc-row .n{display:none}
+  .reqs li{grid-template-columns:1fr;gap:.25rem}
+  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  .meta dt{margin-top:.5rem}
 }
 """
 
@@ -1180,6 +1286,7 @@ TOOLS = [
 NAV = [
     ("Tools", "tools/"),
     ("SMTP responses", "smtp/"),
+    ("RFC decoded", "rfc/"),
     ("Research", "research/"),
     ("About", "about/"),
 ]
@@ -2041,14 +2148,14 @@ make.</p>
 </div>
 
 <div class="grid r">
-  <a href="https://github.com/singhrastu/smtpsift">
-    <strong>smtpsift</strong><span class="p">Python</span>
+  <div class="repo">
+    <a class="repo-t" href="https://github.com/singhrastu/smtpsift"><strong>smtpsift</strong></a><span class="p">Python</span>
     <span class="d">Classifies SMTP rejections and deferrals into a category and an
-    action. Powers the <a href="/bounce/">bounce classifier</a>.</span></a>
-  <a href="https://github.com/singhrastu/dmarcsight">
-    <strong>dmarcsight</strong><span class="p">Python</span>
+    action. Powers the <a href="/bounce/">bounce classifier</a>.</span></div>
+  <div class="repo">
+    <a class="repo-t" href="https://github.com/singhrastu/dmarcsight"><strong>dmarcsight</strong></a><span class="p">Python</span>
     <span class="d">Audits a domain's authentication posture end to end. Powers the
-    <a href="/check/">domain check</a> and the <a href="/spf/">SPF counter</a>.</span></a>
+    <a href="/check/">domain check</a> and the <a href="/spf/">SPF counter</a>.</span></div>
 </div>
 """
     return page(
@@ -2227,7 +2334,7 @@ or find the mechanism that quietly switched off an SPF record.</p>
     <em>click to replay</em></div>
   <pre><code id="term-out"></code><span class="cur"></span></pre>
 </div>
-<p class="prose r"><a href="/smtp/session/">Read it annotated, line by line &rarr;</a></p>
+<p class="r"><a href="/smtp/session/">Read it annotated, line by line &rarr;</a></p>
 
 <div class="sechead r">
   <h2>SMTP response reference</h2>
@@ -2304,6 +2411,306 @@ def build_code_page(c):
     return page(c["title"], c["answer"][:300], body, f"smtp/{s}/index.html",
                 extra_ld=ld, nav_key="SMTP responses",
                 crumbs=(("SMTP responses", "smtp/"), (c.get("label") or c["code"], None)))
+
+
+def _rfc_data():
+    with open(os.path.join(HERE, "rfcs.json"), encoding="utf8") as fh:
+        return json.load(fh)
+
+
+def _rfc_reqs(num):
+    p = os.path.join(HERE, "rfc", f"{num}.json")
+    with open(p, encoding="utf8") as fh:
+        return json.load(fh)
+
+
+STATUS_NOTE = {
+    "INTERNET STANDARD": ("std", "Internet Standard",
+        "The top of the standards track. An old document can hold this label "
+        "while the document that replaced it holds a lower one, which is the "
+        "single most misleading thing about RFC status."),
+    "DRAFT STANDARD": ("std", "Draft Standard",
+        "A maturity level the IETF retired in 2011. Documents that had reached "
+        "it kept the label, so it still appears on current work such as RFC 5321."),
+    "PROPOSED STANDARD": ("std", "Proposed Standard",
+        "On the standards track and stable enough to implement against. Most of "
+        "the email stack stays at this level permanently."),
+    "BEST CURRENT PRACTICE": ("bcp", "Best Current Practice",
+        "Not a protocol specification. Operational guidance the community has "
+        "agreed on."),
+    "INFORMATIONAL": ("info", "Informational",
+        "Published for the record and carrying no standards weight. Worth "
+        "knowing before citing it as a requirement."),
+    "EXPERIMENTAL": ("exp", "Experimental",
+        "Published to be tried rather than relied on. Implementations may "
+        "legitimately disagree."),
+    "HISTORIC": ("hist", "Historic", "Superseded or abandoned."),
+}
+
+
+def _status(status):
+    return STATUS_NOTE.get((status or "").upper(),
+                           ("info", status or "Unknown", ""))
+
+
+def _num(rid):
+    return re.sub(r"\D", "", str(rid))
+
+
+def build_rfc_index():
+    """The email RFCs that are current, searchable by whatever you were handed.
+
+    Everything stays in the DOM and is only hidden by the filter, so a crawler
+    and a reader without JavaScript still get the whole list.
+    """
+    data = _rfc_data()
+    rfcs = data["rfcs"]
+    total = len(rfcs)
+    aliases = len(data.get("aliases", {}))
+    amended = sum(1 for x in rfcs if x.get("updated_by"))
+
+    by_cat = {}
+    for x in rfcs:
+        by_cat.setdefault(x["category"], []).append(x)
+
+    blocks = []
+    for cat in data["categories"]:
+        items = sorted(by_cat.get(cat, []), key=lambda x: x["num"])
+        if not items:
+            continue
+        rows = []
+        for x in items:
+            kind, label, _ = _status(x["status"])
+            n = sum(x["req_counts"].values())
+            terms = e(f'{x["num"]} {x["title"]} {cat}'.lower())
+            rows.append(
+                f'<a class="rfc-row" href="/rfc/{x["num"]}/" data-terms="{terms}" data-quoted>'
+                f'<code>{x["num"]}</code>'
+                f'<span class="t">{e(x["title"])}</span>'
+                f'<span class="st st-{kind}">{e(label)}</span>'
+                f'<span class="n">{n or ""}</span></a>')
+        blocks.append(
+            f'<section class="rfc-cat"><h3>{e(cat)}</h3>'
+            f'<div class="rfc-list">{"".join(rows)}</div></section>')
+
+    body = f"""
+<div class="sechead">
+  <h1>RFC decoded</h1>
+  <p class="lede">What each email RFC actually requires, and which one you should
+  be reading. {total} current documents, with the {amended} that are current but
+  amended by something later, and the normative requirements pulled out section
+  by section.</p>
+</div>
+
+<div class="tool r">
+  <label class="lbl-mi" for="rfc-q">A number, a name, or what you are trying to do
+    <em><span id="rfc-count">{total} current email RFCs</span>, resolved against the
+    RFC Editor index</em></label>
+  <input class="field" id="rfc-q" type="search" autocomplete="off" spellcheck="false"
+         placeholder="A number, a name, or what you are trying to do: 5321, DKIM, MTA-STS">
+  <p class="ex">Try
+    <button class="chip" type="button" data-rfc="821">821</button>
+    <button class="chip" type="button" data-rfc="7489">7489</button>
+    <button class="chip" type="button" data-rfc="dkim">DKIM</button>
+    <button class="chip" type="button" data-rfc="mta-sts">MTA-STS</button>
+    <button class="chip" type="button" data-rfc="5321">5321</button>
+    <span class="dim">821 and 7489 are numbers people are still handed. Both have
+    been replaced.</span></p>
+</div>
+<div id="rfc-out" class="report" role="region" aria-live="polite"
+     aria-label="Result"></div>
+
+<div id="rfc-browse">
+  <div class="sechead r">
+    <h2>Every current email RFC</h2>
+    <p>Grouped the way you look for them rather than by number. {aliases}
+    replaced documents resolve to whatever took their place, so an old number
+    still finds the right answer.</p>
+  </div>
+  <div class="filter r" data-filter>
+    <label class="lbl-mi" for="rfc-f">Filter the list</label>
+    <input class="field" id="rfc-f" type="search" placeholder="Filter by name or number"
+           autocomplete="off">
+    <span class="count" role="status" aria-live="polite"></span>
+    {"".join(blocks)}
+    <p class="empty noresult hidden">Nothing matches that filter.</p>
+  </div>
+</div>
+
+<div class="sechead r">
+  <h2>Where this comes from</h2>
+  <p>The metadata is parsed from the
+  <a href="https://www.rfc-editor.org/rfc-index.xml">RFC Editor's index</a>, which
+  is what records status, what a document replaced, and what has amended it since.
+  The requirements are extracted from the RFC text itself: every sentence carrying
+  an <a href="https://www.rfc-editor.org/rfc/rfc2119.html">RFC 2119</a> keyword,
+  with the section it came from. Only the uppercase keywords count, because a
+  lowercase "must" is prose and binds nobody.</p>
+</div>
+"""
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "RFC decoded: the email RFCs",
+        "url": f"{SITE}/rfc/",
+        "author": {"@id": f"{SITE}/#person"},
+    }
+    return page(
+        "RFC decoded: every current email RFC and what it requires",
+        f"Look up any email RFC by number or name. {total} current documents with "
+        "status, what replaced what, what amends them, and every normative "
+        "requirement extracted section by section.",
+        body, "rfc/index.html", extra_ld=ld, wide=True, nav_key="RFC decoded",
+        modules=("/js/filter.js", "/js/rfc-ui.js"))
+
+
+def build_rfc_pages():
+    """One page per RFC, rendered at build time.
+
+    The requirements are in the HTML rather than fetched, so a crawler and a
+    reader without JavaScript get all of them, and so the page is citable.
+    """
+    data = _rfc_data()
+    titles = {}
+    for x in data["rfcs"]:
+        titles[x["id"]] = x["title"]
+    urls = []
+    for x in data["rfcs"]:
+        num = x["num"]
+        kind, label, note = _status(x["status"])
+        r = _rfc_reqs(num)
+        reqs = r["requirements"]
+        rel = x.get("rel_titles", {})
+
+        def ref(rid):
+            t = rel.get(rid) or titles.get(rid) or ""
+            n = _num(rid)
+            inner = f"RFC {n}" + (f": {e(t)}" if t else "")
+            return (f'<a href="/rfc/{n}/">{inner}</a>' if rid in titles
+                    else f'<a href="https://www.rfc-editor.org/rfc/rfc{n}.html">{inner}</a>')
+
+        warn = []
+        if x.get("updated_by"):
+            warn.append(
+                '<div class="warnbox s-warn"><p><strong>This document is current '
+                f'and has been amended.</strong> {len(x["updated_by"])} later '
+                f'{"RFC has" if len(x["updated_by"]) == 1 else "RFCs have"} changed '
+                'part of it. Nothing on the RFC itself tells you this.</p><ul>'
+                + "".join(f"<li>{ref(u)}</li>" for u in x["updated_by"])
+                + "</ul></div>")
+        if kind in ("info", "exp"):
+            warn.append(
+                f'<div class="warnbox s-info"><p><strong>{e(label)}, not a '
+                f'standard.</strong> {e(note)}</p></div>')
+
+        hist = ""
+        if x.get("replaces"):
+            hist = ('<p class="hist"><strong>Replaces</strong> '
+                    + ", ".join(ref(o) for o in x["replaces"]) + ".</p>")
+
+        if not reqs:
+            reqblock = (
+                '<div class="sechead r"><h2>Normative requirements</h2></div>'
+                '<p class="empty">'
+                + ("This document does not use the RFC 2119 keywords. It states "
+                   "its requirements in ordinary prose, which is why nothing is "
+                   "listed here rather than because nothing was found."
+                   if r.get("uses_2119") is False else
+                   "No normative requirements were extracted from this document.")
+                + '</p>')
+        else:
+            groups = {}
+            order = []
+            for q in reqs:
+                k = (q["section"], q["heading"])
+                if k not in groups:
+                    groups[k] = []
+                    order.append(k)
+                groups[k].append(q)
+
+            def key(k):
+                return [int(p) for p in k[0].split(".") if p.isdigit()] or [999]
+            order.sort(key=key)
+
+            secs = []
+            for k in order:
+                head = (f'{e(k[0])} {e(k[1])}' if k[0] else e(k[1] or "Unsectioned"))
+                lis = "".join(
+                    f'<li class="lv-{q["level"]}" data-group="{q["level"]}" data-quoted '
+                    f'data-terms="{e(q["text"]).lower()}">'
+                    f'<span class="kw kw-{q["level"]}">{e(q["keyword"])}</span>'
+                    f'<span class="rq">{e(q["text"])}</span></li>'
+                    for q in groups[k])
+                anchor = ("s" + k[0].replace(".", "-")) if k[0] else "s0"
+                secs.append(
+                    f'<section class="reqsec" id="{anchor}">'
+                    f'<h3>{head}</h3><ul class="reqs">{lis}</ul></section>')
+
+            c = x["req_counts"]
+            reqblock = f"""
+<div class="sechead r">
+  <h2>Normative requirements</h2>
+  <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
+  came from. {c["must"]} must, {c["should"]} should, {c["may"]} may.</p>
+</div>
+<div class="filter r" data-filter>
+  <div class="chips">
+    <button class="chip on" data-group="all" type="button">All</button>
+    <button class="chip" data-group="must" type="button">Must</button>
+    <button class="chip" data-group="should" type="button">Should</button>
+    <button class="chip" data-group="may" type="button">May</button>
+    <span class="count" role="status" aria-live="polite"></span>
+  </div>
+  <label class="lbl-mi" for="rq-f">Filter the requirements</label>
+  <input class="field" id="rq-f" type="search" placeholder="Filter by wording" autocomplete="off">
+  {"".join(secs)}
+  <p class="empty noresult hidden">Nothing matches that filter.</p>
+</div>"""
+
+        body = f"""
+<div class="sechead">
+  <p class="pagemeta"><code>RFC {num}</code> <span class="st st-{kind}">{e(label)}</span>
+     <span class="cat">{e(x["category"])}</span></p>
+  <h1 data-quoted>{e(x["title"])}</h1>
+  <p class="lede" data-quoted>{e(x["abstract"][:520]) if x.get("abstract") else ""}</p>
+</div>
+
+<div class="panel r">
+  <dl class="meta">
+    <dt>Status</dt><dd>{e(label)}. {e(note)}</dd>
+    <dt>Published</dt><dd>{e(x.get("published", ""))}</dd>
+    {"<dt>Authors</dt><dd>" + e(", ".join(x.get("authors", []))) + "</dd>"
+     if x.get("authors") else ""}
+    <dt>Read it</dt><dd>
+      <a href="https://www.rfc-editor.org/rfc/rfc{num}.html">rfc-editor.org</a>
+      {' &middot; <a href="' + e(x["errata"]) + '">errata</a>' if x.get("errata") else ""}
+      {' &middot; <a href="https://doi.org/' + e(x["doi"]) + '">DOI</a>'
+       if x.get("doi") else ""}
+    </dd>
+  </dl>
+  {hist}
+</div>
+
+{"".join(warn)}
+{reqblock}
+
+<p class="r"><a href="/rfc/">Every current email RFC</a></p>
+"""
+        ld = {
+            "@context": "https://schema.org",
+            "@type": "TechArticle",
+            "headline": f"RFC {num}: {x['title']}",
+            "url": f"{SITE}/rfc/{num}/",
+            "author": {"@id": f"{SITE}/#person"},
+            "about": x["title"],
+        }
+        urls.append(page(f"RFC {num}: {x['title']} explained",
+             (f"RFC {num}, {label}. " + (x.get("abstract") or "")[:150]).strip(),
+             body, f"rfc/{num}/index.html", extra_ld=ld, wide=True,
+             nav_key="RFC decoded",
+             crumbs=(("RFC decoded", "/rfc/"), (f"RFC {num}", None)),
+             modules=("/js/filter.js",)))
+    return urls
 
 
 def build_smtp_index():
@@ -2881,6 +3288,16 @@ def check_voice():
             f = os.path.join(root, n)
             rel = "/" + os.path.relpath(f, OUT)
             body = open(f, encoding="utf8").read()
+            # Text quoted from a standards document is reproduced verbatim and is
+            # not ours to rewrite. RFC 2919's abstract contains "as mentioned
+            # above"; that is the IETF's wording, not assistant register.
+            body = re.sub(r"<([a-z0-9]+)[^>]*\sdata-quoted[^>]*>.*?</\1>", " ",
+                          body, flags=re.S | re.I)
+            # meta descriptions and JSON-LD restate the same quoted text for
+            # machines. They are generated from content checked in its own right.
+            body = re.sub(r"<meta\b[^>]*>", " ", body, flags=re.I)
+            body = re.sub(r'<script type="application/ld\+json">.*?</script>', " ",
+                          body, flags=re.S | re.I)
             for pat, why in banned:
                 m = re.search(pat, body, re.I)
                 if m:
@@ -2908,6 +3325,81 @@ def check_voice():
     if bad:
         raise SystemExit("voice check failed:\n  " + "\n  ".join(bad))
     print("  voice ok (no machine register, no model named outside /about/)")
+
+
+def s_inline_scripts():
+    """Every inline script on the built site, concatenated."""
+    out = []
+    for root, _, files in os.walk(OUT):
+        for n in files:
+            if n.endswith(".html"):
+                body = open(os.path.join(root, n), encoding="utf8").read()
+                out += re.findall(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>",
+                                  body, re.S)
+    return "\n".join(out)
+
+
+def check_html():
+    """Structural rules a browser will not report and the page will not survive.
+
+    An anchor inside an anchor is the one that bit: HTML5 forbids it, so the
+    parser closes the outer element early and the card breaks into three boxes
+    with a stray full stop between them. Nothing errors. It just looks broken.
+    """
+    nested = re.compile(r"<a\b[^>]*>(?:(?!</a>).)*?<a\b", re.S)
+    button = re.compile(r"<button\b[^>]*>(?:(?!</button>).)*?<(?:a|button)\b", re.S)
+    bad = []
+    for root, _, files in os.walk(OUT):
+        for n in files:
+            if not n.endswith(".html"):
+                continue
+            f = os.path.join(root, n)
+            rel = "/" + os.path.relpath(f, OUT)
+            body = open(f, encoding="utf8").read()
+            if nested.search(body):
+                bad.append(f"{rel}: an anchor contains an anchor")
+            if button.search(body):
+                bad.append(f"{rel}: a button contains a link or another button")
+    if bad:
+        raise SystemExit("html check failed:\n  " + "\n  ".join(bad))
+
+    # A class that exists in no stylesheet and in no script does nothing. This
+    # caught `class="vh"`, invented for a visually-hidden label and never
+    # written, so the label rendered in full where it was meant to be silent.
+    styled = set(re.findall(r"\.([a-zA-Z][\w-]*)", CSS))
+    scripted = set()
+    for j in os.listdir(os.path.join(HERE, "js")):
+        if j.endswith(".js"):
+            scripted |= set(re.findall(r"[\"'`]([a-zA-Z][\w-]*)[\"'`]",
+                                       open(os.path.join(HERE, "js", j),
+                                            encoding="utf8").read()))
+    scripted |= set(re.findall(r"[\"'`]([a-zA-Z][\w-]*)[\"'`]", s_inline_scripts()))
+    # A class reached through a selector reads as ".noresult", not "noresult",
+    # so a quoted-identifier scan alone misses every querySelector call.
+    for src in [open(os.path.join(HERE, "js", j), encoding="utf8").read()
+                for j in os.listdir(os.path.join(HERE, "js")) if j.endswith(".js")
+                ] + [s_inline_scripts()]:
+        scripted |= set(re.findall(r"\.([a-zA-Z][\w-]*)", src))
+    dead = {}
+    for root, _, files in os.walk(OUT):
+        for n in files:
+            if not n.endswith(".html"):
+                continue
+            f = os.path.join(root, n)
+            html_only = re.sub(r"<script[^>]*>.*?</script>", " ",
+                               open(f, encoding="utf8").read(), flags=re.S | re.I)
+            # Scripts build class attributes by concatenation, so scanning them
+            # yields fragments like '+l.k+' that are not classes at all.
+            for attr in re.findall(r'class="([^"]*)"', html_only):
+                for c in attr.split():
+                    if c not in styled and c not in scripted:
+                        dead.setdefault(c, "/" + os.path.relpath(f, OUT))
+    if dead:
+        raise SystemExit("html check failed: classes that exist nowhere:\n  "
+                         + "\n  ".join(f"{c}  (first seen {where})"
+                                        for c, where in sorted(dead.items())))
+    print(f"  html ok (no nested interactive elements, "
+          f"every class resolves)")
 
 
 def check_links():
@@ -2997,7 +3489,8 @@ def check_js():
                         ("parity-unzip.mjs", "the zip reader is wrong"),
                         ("parity-rua.mjs", "the DMARC report reader is wrong"),
                         ("parity-headers.mjs", "the header analyser is wrong"),
-                        ("parity-lookup.mjs", "the response lookup is wrong")):
+                        ("parity-lookup.mjs", "the response lookup is wrong"),
+                        ("parity-rfc.mjs", "the RFC index is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue
@@ -3029,10 +3522,11 @@ def main():
     urls = [build_home(), build_tools(), build_about(),
             build_check(), build_bounce(), build_dmarc(), build_spf(),
             build_headers(),
-            build_smtp_index(), build_session()]
+            build_smtp_index(), build_session(), build_rfc_index()]
     for c in CODES:
         urls.append(build_code_page(c))
 
+    urls.extend(build_rfc_pages())
     urls.append(build_research())
 
     # the auditor's modules, copied rather than inlined so the browser can cache
@@ -3041,13 +3535,23 @@ def main():
     os.makedirs(jsdir, exist_ok=True)
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
                  "unzip.js", "rua.js", "rua-ui.js", "findings.js",
-                 "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js"):
+                 "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js",
+                 "rfc.js", "rfc-ui.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # The response registry, fetched by the lookup rather than inlined: it is
     # 24 KB gzipped and caches independently of the page.
     shutil.copy2(os.path.join(HERE, "registry.json"),
                  os.path.join(OUT, "registry.json"))
+
+    # The RFC index, and one requirements file per RFC. Split so the index stays
+    # small: the 3,600 requirement sentences are a megabyte nobody has asked for
+    # until they open a document.
+    shutil.copy2(os.path.join(HERE, "rfcs.json"), os.path.join(OUT, "rfcs.json"))
+    rfcout = os.path.join(OUT, "rfc-req")
+    if os.path.isdir(rfcout):
+        shutil.rmtree(rfcout)
+    shutil.copytree(os.path.join(HERE, "rfc"), rfcout)
 
     # images
     for name in ("rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg",
@@ -3093,6 +3597,7 @@ def main():
     check_js()
     check_copy()
     check_voice()
+    check_html()
     check_links()
 
     # preview/instrument.html is the alternative direction that was compared

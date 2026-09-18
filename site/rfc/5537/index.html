@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RFC 5537: Netnews Architecture and Protocols explained</title>
+<meta name="description" content="RFC 5537, Proposed Standard. This document defines the architecture of Netnews systems and specifies the correct manipulation and interpretation of Netnews articles by software th">
+<meta name="author" content="Rastu Singh">
+<link rel="canonical" href="https://rastu.tech/rfc/5537/">
+<meta property="og:title" content="RFC 5537: Netnews Architecture and Protocols explained">
+<meta property="og:description" content="RFC 5537, Proposed Standard. This document defines the architecture of Netnews systems and specifies the correct manipulation and interpretation of Netnews articles by software th">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://rastu.tech/rfc/5537/">
+<meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+<meta property="og:site_name" content="Rastu Singh">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://rastu.tech/rastu-singh.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230a0e0d'/%3E%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11z' fill='none' stroke='%233ddc84' stroke-width='2.4'/%3E%3Ccircle cx='16' cy='16' r='2.6' fill='%233ddc84'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="/rastu-singh-180.jpg">
+<meta name="theme-color" content="#0a0e0d">
+<style>
+/* Design tokens.
+
+   Dark is the base here rather than an alternative. A near-black surface with a
+   terminal green is what a mail log looks like, and this site is about mail
+   logs; the honeycomb drifting behind it is the routing metaphor made literal.
+
+   The status colours are reserved for state (suppress, throttle, retry) and are
+   deliberately not green, because green is the accent and a status must never
+   read as branding. Each one ships with its word, so state is never carried by
+   colour alone either. */
+:root{
+  --ink:#e7eeea; --ink-2:#a8b6af; --ink-3:#77867f;
+  --line:#1f2926; --line-2:#161e1b;
+  --bg:#0a0e0d; --surface:#111816; --code:#0d1412;
+  --accent:#3ddc84; --accent-2:#74f0ac; --accent-soft:#0f2019;
+  --hex:#3ddc84;
+  --ok:#3ddc84; --warn:#e6b25c; --bad:#ff7a7a; --info:#5db8ff;
+  --radius:10px;
+  --measure:44rem;
+  /* The readable band is 45-75 characters a line. Before this, list items on the
+     wide pages ran to 115 and headings to 93, which is where a reader starts
+     losing their place on the return sweep. Tools, tables and card grids opt out
+     and use the full container. */
+  --measure-text:42rem;
+  /* Spacing and type scales. Before these, every size in the sheet was a bare
+     rem literal, which is survivable at six pages and is not at fifteen. */
+  --s1:.25rem; --s2:.5rem; --s3:.85rem; --s4:1.3rem; --s5:2.2rem; --s6:3.6rem;
+  --t0:.72rem; --t1:.8rem; --t2:.885rem; --t3:.95rem; --t4:1.14rem;
+  --t5:1.5rem; --t6:2.4rem;
+}
+::selection{background:var(--accent-soft);color:var(--accent-2)}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;background:var(--bg);color:var(--ink);
+  font:17px/1.72 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+/* ---- honeycomb field -------------------------------------------------
+   Fixed behind everything, drifting slowly as the page scrolls. Pure CSS
+   background + one transform driven by a custom property, so it costs one
+   compositor layer and no layout. Hidden entirely under reduced-motion. */
+#hexcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
+.hexveil{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(120% 85% at 50% 0%,transparent 0%,
+    color-mix(in srgb,var(--bg) 72%,transparent) 58%,
+    color-mix(in srgb,var(--bg) 92%,transparent) 100%)}
+
+.wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
+.wrap.wide{max-width:64rem}
+/* Prose gets the readable measure; anything that is a layout opts out by not
+   being in this list. */
+.wrap.wide main > p,
+.wrap.wide main > ul,
+.wrap.wide main > ol,
+.wrap.wide main > dl,
+.wrap.wide main > h2,
+.wrap.wide main > h3,
+.wrap.wide main > pre,
+.wrap.wide main > .callout,
+.wrap.wide main > .sechead{max-width:var(--measure-text)}
+.wrap.wide main > .full{max-width:none}
+.wrap.wide main > h2{margin-top:var(--s6)}
+
+/* ---- nav ---------------------------------------------------------------- */
+.skip{position:absolute;left:-9999px;top:0;z-index:9;background:var(--accent);
+  color:#08140d;padding:.6rem 1rem;border-radius:0 0 8px 0;font-weight:650}
+.skip:focus{left:0}
+nav.top{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
+  padding:1.25rem 0 var(--s5);font-size:1.02rem}
+nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:500;
+  padding:.5rem .85rem;border-radius:9px;border:1px solid transparent;
+  transition:color .18s,background .18s,border-color .18s,transform .18s}
+nav.top a:hover{color:var(--ink);background:var(--surface);border-color:var(--line);
+  transform:translateY(-2px)}
+nav.top a:active{transform:translateY(0)}
+nav.top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* The page you are on, and the one you just clicked, both read as accent. */
+nav.top a[aria-current]{color:var(--accent);background:var(--accent-soft);
+  border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:650}
+nav.top a[aria-current]:hover{color:var(--accent-2);transform:translateY(-2px)}
+nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-weight:700;color:var(--ink);font-size:1.12rem;letter-spacing:-.02em;
+  padding-left:0;border:0}
+nav.top .mark span{color:var(--accent)}
+nav.top .mark:hover{background:none;border-color:transparent;color:var(--accent-2)}
+
+@media(max-width:34rem){
+  nav.top{gap:.25rem;padding-bottom:var(--s4);font-size:.95rem}
+  nav.top .mark{margin-right:0;width:100%;margin-bottom:.4rem}
+  nav.top a{padding:.45rem .7rem}
+}
+
+/* ---- type ------------------------------------------------------------- */
+a{color:var(--accent);text-underline-offset:2px}
+h1{font-size:clamp(1.9rem,4.5vw,2.5rem);line-height:1.16;letter-spacing:-.021em;margin:.3rem 0 .7rem;font-weight:680}
+h2{font-size:1.3rem;letter-spacing:-.012em;margin:3rem 0 1rem;padding-bottom:.5rem;
+   border-bottom:1px solid var(--line);font-weight:650;line-height:1.3}
+h3{font-size:1.06rem;margin:2.1rem 0 .55rem;font-weight:650;line-height:1.4}
+p{margin:0 0 1.15rem}
+.kicker{color:var(--ink-3);font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;margin:0 0 .2rem;font-weight:600}
+.lede{font-size:1.14rem;line-height:1.6;color:var(--ink);margin-bottom:1.3rem}
+.meta{color:var(--ink-3);font-size:.9rem}
+ul,ol{padding-left:1.3rem}
+li{margin:.55rem 0;line-height:1.7}
+li::marker{color:var(--ink-3)}
+main ul li strong:first-child{color:var(--ink)}
+strong{font-weight:650}
+
+/* ---- code ------------------------------------------------------------- */
+pre,code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+pre{background:var(--code);padding:.9rem 1.05rem;border-radius:var(--radius);overflow-x:auto;
+    font-size:.845rem;line-height:1.55;border:1px solid var(--line);margin:.9rem 0}
+code{background:var(--code);padding:.12rem .38rem;border-radius:5px;font-size:.88em}
+pre code{background:none;padding:0}
+
+/* ---- badges ----------------------------------------------------------- */
+.badge{display:inline-block;background:var(--surface);border:1px solid var(--line);
+       border-radius:100px;padding:.2rem .68rem;font-size:.775rem;color:var(--ink-2);
+       margin:0 .4rem .4rem 0;font-weight:500}
+
+/* ---- callout ---------------------------------------------------------- */
+.callout{border-left:3px solid var(--accent);background:var(--accent-soft);
+         padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;
+         color:var(--ink-2);font-size:.96rem}
+.callout p{margin:0}
+
+/* ---- tables ----------------------------------------------------------- */
+.scroll-x{overflow-x:auto;margin:1.1rem 0;-webkit-overflow-scrolling:touch}
+.scroll-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:30rem}
+@media(max-width:34rem){table{min-width:26rem;font-size:.87rem}}
+th,td{text-align:left;padding:.58rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--ink-3);font-weight:600;font-size:.79rem;letter-spacing:.045em;
+   text-transform:uppercase;border-bottom:1px solid var(--line)}
+tbody tr:hover{background:var(--surface)}
+td:not(:first-child){font-variant-numeric:tabular-nums}
+
+/* ---- stat tiles: the right form for a single headline number ---------- */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.7rem;margin:1.4rem 0 1.8rem}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1rem 1.05rem}
+.stat .n{font-size:1.85rem;line-height:1.1;font-weight:680;letter-spacing:-.025em;
+         font-variant-numeric:tabular-nums;color:var(--ink)}
+.stat .l{font-size:.815rem;color:var(--ink-3);margin-top:.3rem;line-height:1.35}
+
+/* ---- single-series magnitude bars ------------------------------------- */
+.bars{margin:1.3rem 0 1.8rem}
+.bar-row{display:grid;grid-template-columns:1fr 3.2rem;gap:.85rem;align-items:center;margin:.55rem 0}
+.bar-label{font-size:.885rem;color:var(--ink-2);line-height:1.35}
+.bar-track{grid-column:1/-1;height:7px;background:var(--line-2);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;background:var(--accent);border-radius:4px;
+          width:0;transition:width .9s cubic-bezier(.22,.7,.3,1)}
+.reveal .bar-fill{width:var(--w)}
+.bar-val{font-size:.885rem;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+
+/* ---- card grid for the reference index -------------------------------- */
+.grid{display:grid;gap:.55rem;margin-top:1.2rem}
+.grid>a,.grid>.repo{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
+        text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
+.grid>a:hover,.grid>.repo:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid>a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.grid>a strong,.grid>.repo strong{color:var(--ink);font-size:.97rem}
+.grid>a .p,.grid>.repo .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
+.grid>a span.d,.grid>.repo span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
+
+/* ---- portrait --------------------------------------------------------- */
+.portrait{border-radius:var(--radius);float:right;margin:.2rem 0 1rem 1.6rem;
+          max-width:32%;border:1px solid var(--line)}
+
+/* ---- hero -------------------------------------------------------------- */
+.hero{display:grid;grid-template-columns:1fr auto;gap:2.2rem;align-items:start;padding:.4rem 0}
+.hero-copy{min-width:0}
+.hero img{width:152px;height:152px;border-radius:14px;border:1px solid var(--line);
+          box-shadow:0 12px 36px -14px rgba(0,0,0,.5);display:block}
+@media(max-width:44rem){.hero{grid-template-columns:1fr;gap:1.1rem}
+  .hero img{width:104px;height:104px}}
+
+/* ---- credential strip -------------------------------------------------- */
+.strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));gap:.55rem;margin:1.7rem 0 1.4rem}
+.strip div{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+           padding:.82rem .9rem;transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s}
+.strip div:hover{transform:translateY(-3px);border-color:var(--accent)}
+.strip b{display:block;font-size:1.34rem;font-weight:680;letter-spacing:-.022em;
+         font-variant-numeric:tabular-nums;line-height:1.15}
+.strip span{display:block;font-size:.755rem;color:var(--ink-3);margin-top:.22rem;line-height:1.3}
+
+/* ---- bento ------------------------------------------------------------- */
+.bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0}
+@media(min-width:56rem){
+  .bento{grid-template-columns:repeat(8,1fr)}
+  .bento .card:nth-child(1){grid-column:span 5}
+  .bento .card:nth-child(2){grid-column:span 3}
+  .bento .card:nth-child(n+3){grid-column:span 2}
+  .bento .card:nth-child(1) h3{font-size:1.2rem}
+  .bento .card:nth-child(1) p{font-size:.93rem}
+  .bento .card:nth-child(n+3) p{font-size:.845rem}
+}
+.bento .card{position:relative;overflow:hidden;background:var(--surface);
+     border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
+     text-decoration:none;color:inherit;display:block;
+     transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s,box-shadow .3s}
+.bento .card:hover{transform:translateY(-4px);border-color:var(--accent);
+     box-shadow:0 16px 38px -20px rgba(0,0,0,.5)}
+.bento .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.bento .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+     background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.bento .card:hover::before{opacity:1}
+.bento h3{margin:.1rem 0 .4rem;font-size:1.05rem;color:var(--ink)}
+.bento p{margin:0;font-size:.885rem;color:var(--ink-3);line-height:1.52}
+.bento .tag{display:inline-block;font-size:.695rem;letter-spacing:.09em;text-transform:uppercase;
+     color:var(--accent);font-weight:650;margin-bottom:.35rem}
+.bento .go{display:inline-block;margin-top:.75rem;font-size:.85rem;color:var(--accent);font-weight:600}
+
+.bento .codes{display:flex;flex-wrap:wrap;gap:.3rem;margin:.85rem 0 0}
+.bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
+  font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
+.bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
+/* ---- the p=reject simulation, the headline answer ------------------------- */
+.sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
+  background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.sim.s-fail{border-color:color-mix(in srgb,var(--bad) 45%,transparent);
+  background:linear-gradient(140deg,color-mix(in srgb,var(--bad) 8%,transparent),transparent 80%)}
+.sim.s-warn{border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.sim.s-ok{border-color:color-mix(in srgb,var(--ok) 40%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 80%)}
+.sim h3{margin:0 0 .6rem;font-size:var(--t4);font-weight:680;color:var(--ink)}
+.sim p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.65;max-width:44rem}
+.sim-nums{display:flex;gap:var(--s5);flex-wrap:wrap;margin:var(--s3) 0}
+.sim-nums div b{display:block;font-size:2.4rem;line-height:1;font-weight:700;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--bad)}
+.sim.s-warn .sim-nums div b{color:var(--warn)}
+.sim-nums div.soft b{color:var(--ink-3)}
+.sim-nums div span{display:block;font-size:var(--t1);color:var(--ink-3);margin-top:.35rem;
+  line-height:1.45}
+.sim-note{margin-top:var(--s3)!important;font-size:var(--t1)!important;opacity:.85}
+@media(max-width:34rem){.sim-nums{gap:var(--s4)}.sim-nums div b{font-size:1.9rem}}
+
+/* a toggle button that stays on, for marking a source as yours */
+.btn.ghost.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);
+  font-weight:650}
+
+/* ---- findings: the shared result shape every tool emits -------------------- */
+.findings{display:grid;gap:var(--s2);margin:var(--s3) 0 0}
+.fnd{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem}
+.fnd.s-critical{border-left-color:var(--bad)}
+.fnd.s-warn{border-left-color:var(--warn)}
+.fnd.s-info{border-left-color:var(--info)}
+.fnd.s-ok{border-left-color:var(--ok)}
+.fnd header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.4rem}
+.fnd .pill{font-size:.64rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.14rem .5rem;border-radius:100px;border:1px solid currentColor}
+.fnd.s-critical .pill{color:var(--bad)}
+.fnd.s-warn .pill{color:var(--warn)}
+.fnd.s-info .pill{color:var(--info)}
+.fnd.s-ok .pill{color:var(--ok)}
+.fnd .scope{font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);color:var(--ink-3)}
+/* Ownership is the thing no other tool in this category tells you, so it gets
+   its own visual slot rather than being buried in the prose. */
+.fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
+  font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
+  background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
+.fnd.o-you .owner{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.fnd h4{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;color:var(--ink);line-height:1.45}
+.fnd .d{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6;max-width:44rem}
+.fnd .fix{margin:.55rem 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:44rem}
+.fnd .fix b{color:var(--accent);font-weight:650;margin-right:.35rem;
+  font-size:.66rem;letter-spacing:.09em;text-transform:uppercase}
+.fnd .ev{display:block;margin:.55rem 0 0;font-size:.72rem;color:var(--ink-3);
+  background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.4rem .55rem;overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.fnd .ref{margin:.5rem 0 0;font-size:var(--t1)}
+
+/* ---- fix these first ------------------------------------------------------ */
+.shortlist{counter-reset:fx;list-style:none;padding:0;margin:var(--s2) 0 var(--s4);
+  border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%);
+  padding:var(--s3) var(--s4)}
+.shortlist li{counter-increment:fx;position:relative;padding-left:1.9rem;margin:.55rem 0;
+  font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.shortlist li::before{content:counter(fx);position:absolute;left:0;top:.05rem;
+  width:1.35rem;height:1.35rem;border-radius:50%;background:var(--accent);color:#08140d;
+  font-size:.72rem;font-weight:700;display:grid;place-items:center}
+.shortlist li strong{color:var(--ink);display:block;margin-bottom:.1rem}
+
+/* ---- drop zone ----------------------------------------------------------- */
+.drop{display:block;position:relative;border:1.5px dashed var(--line);border-radius:12px;
+  padding:var(--s5) var(--s4);text-align:center;cursor:pointer;background:var(--bg);
+  transition:border-color .2s,background .2s,transform .2s}
+.drop:hover{border-color:var(--accent);background:var(--accent-soft)}
+.drop.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.005)}
+.drop:focus-within{border-color:var(--accent);background:var(--accent-soft);
+  outline:2px solid var(--accent);outline-offset:2px}
+.drop b{display:block;font-size:var(--t4);color:var(--ink);margin-bottom:.3rem}
+.drop span{display:block;font-size:var(--t2);color:var(--ink-3)}
+.drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.paste{margin-top:var(--s3)}
+.paste summary{cursor:pointer;font-size:var(--t2);color:var(--ink-3);
+  list-style:none;display:inline-block;padding:.25rem 0}
+.paste summary::-webkit-details-marker{display:none}
+.paste summary::before{content:"+ ";color:var(--accent)}
+.paste[open] summary::before{content:"- "}
+.paste summary:hover{color:var(--accent)}
+.paste textarea{margin:.6rem 0;min-height:8rem}
+
+/* ---- header analyser ------------------------------------------------------ */
+textarea.field.tall{min-height:13rem}
+.tool .row-2{display:grid;grid-template-columns:1fr auto;gap:var(--s4);
+  align-items:start;margin-top:var(--s3)}
+.tool .row-2 .actions{display:flex;gap:.5rem;align-items:center;padding-top:1.45rem}
+.hint-text{margin:.4rem 0 0;font-size:var(--t1);color:var(--ink-3);line-height:1.5;
+  max-width:30rem}
+@media(max-width:44rem){
+  .tool .row-2{grid-template-columns:1fr}
+  .tool .row-2 .actions{padding-top:0}
+}
+
+/* key/value summary of the message */
+table.kv{min-width:0;margin:var(--s3) 0}
+table.kv th{width:9rem;text-align:left;vertical-align:top;color:var(--ink-3);
+  font-size:var(--t1);text-transform:none;letter-spacing:0;font-weight:600;
+  white-space:nowrap}
+table.kv td{font-size:var(--t2);word-break:break-word}
+.warnnote{display:block;margin-top:.25rem;font-size:var(--t1);color:var(--warn);
+  line-height:1.5}
+
+/* the alignment arithmetic, which is the differentiator and gets the space */
+.align{border:1px solid var(--line);border-radius:14px;padding:var(--s4);
+  margin:var(--s5) 0;background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.align h3{margin:0 0 var(--s3);font-size:var(--t4)}
+table.arith{min-width:38rem;font-size:var(--t2)}
+table.arith td,table.arith th{padding:.5rem .6rem}
+table.arith .op{color:var(--ink-3);text-align:center;width:2rem}
+table.arith .pill{font-size:.64rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.12rem .45rem;border-radius:100px;border:1px solid currentColor}
+table.arith tr.s-ok .pill{color:var(--ok)}
+table.arith tr.s-critical .pill{color:var(--bad)}
+table.arith tr.s-info .pill{color:var(--info)}
+table.arith tr.s-ok td:last-child{color:var(--ok)}
+table.arith tr.s-critical td:last-child{color:var(--bad)}
+
+.dispo{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));
+  gap:.55rem;margin-top:var(--s4)}
+.dispo div{border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;
+  background:var(--bg)}
+.dispo b{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t2);
+  margin-bottom:.2rem}
+.dispo span{font-size:var(--t1);color:var(--ink-3);line-height:1.45}
+.dispo .s-ok b{color:var(--ok)} .dispo .s-warn b{color:var(--warn)}
+.dispo .s-critical b{color:var(--bad)}
+.dispo .s-critical{border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+
+/* the Authentication-Results stack, with the trust boundary drawn through it */
+.ar{border:1px solid var(--line);border-radius:12px;padding:var(--s3) var(--s4);
+  margin:0 0 .6rem;background:var(--surface)}
+.ar.trusted{border-color:color-mix(in srgb,var(--accent) 45%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 75%)}
+.ar.untrusted{opacity:.6;border-style:dashed}
+.ar h4{margin:0 0 .5rem;font-size:var(--t2);display:flex;gap:.5rem;align-items:center;
+  flex-wrap:wrap}
+.ar ul{list-style:none;padding:0;margin:0}
+.ar li{margin:.3rem 0;font-size:var(--t1);line-height:1.6;word-break:break-word}
+.ar li code{font-size:.72rem;color:var(--ink-3);word-break:break-all}
+.ar ul{min-width:0}
+.ar .pill{font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:.1rem .42rem;border-radius:100px;border:1px solid currentColor;margin-right:.3rem}
+.ar li.s-ok .pill{color:var(--ok)} .ar li.s-critical .pill{color:var(--bad)}
+.ar li.s-warn .pill{color:var(--warn)} .ar li.s-info .pill{color:var(--info)}
+.badge.ok{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
+  background:var(--accent-soft)}
+.badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+
+/* the path */
+table.hops{min-width:34rem;font-size:var(--t2)}
+table.hops .ip{display:block;font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.15rem}
+table.hops .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tls{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--ok);
+  border:1px solid color-mix(in srgb,var(--ok) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.cleartext{display:inline-block;margin-left:.4rem;font-size:.62rem;letter-spacing:.07em;
+  text-transform:uppercase;font-weight:700;color:var(--warn);
+  border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-radius:100px;padding:.1rem .42rem}
+.skew{color:var(--ink-3);font-style:italic;font-size:var(--t1)}
+.muted{color:var(--ink-3)}
+.rawhops{display:none;font-size:.7rem;max-height:22rem;overflow:auto}
+.rawhops.open{display:block}
+@media(max-width:40rem){
+  table.arith,table.hops{min-width:28rem}
+}
+
+/* ---- report table -------------------------------------------------------- */
+table.rua{min-width:46rem}
+@media(max-width:40rem){
+  /* Below this the table is a scroller you have to drag 400px to reach the
+     verdict in. Stacked cards put the answer next to the question. */
+  table.rua,table.rua tbody,table.rua tr,table.rua td{display:block;width:100%;min-width:0}
+  table.rua thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  table.rua tr{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;
+    margin:0 0 .55rem;background:var(--surface)}
+  table.rua td{border:0;padding:.15rem 0}
+  table.rua td.num{text-align:left}
+  table.rua td.num::before{content:"Messages: ";color:var(--ink-3);font-size:var(--t1)}
+  table.rua .why{max-width:none}
+}
+table.rua td{vertical-align:top}
+table.rua .ip{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:var(--t1);color:var(--ink-3);margin-top:.15rem}
+table.rua .ptr{display:block;font-family:ui-monospace,Menlo,monospace;
+  font-size:.72rem;color:var(--ink-3);opacity:.7;word-break:break-all;margin-top:.1rem}
+table.rua .ptr em{font-style:normal;color:var(--warn)}
+table.rua .unk{color:var(--ink-3);font-weight:500}
+table.rua .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+table.rua .why{color:var(--ink-3);font-size:var(--t2);max-width:22rem}
+table.rua .tags{display:block;margin-top:.3rem}
+table.rua .tags code{font-size:.68rem;margin-right:.25rem}
+table.rua tr.s-fail .pill{color:var(--bad)}
+table.rua tr.s-warn .pill{color:var(--warn)}
+table.rua tr.s-ok .pill{color:var(--ok)}
+table.rua tr.s-info .pill{color:var(--info)}
+
+/* A privacy claim sits beside the input it reassures you about, not in a banner
+   above it. Quiet, and only where somebody is about to hand over a file. */
+.drop em,.lbl-mi em{display:block;font-style:normal;font-size:var(--t1);
+  color:var(--ink-3);margin-top:.35rem;letter-spacing:0;text-transform:none;
+  font-weight:400}
+.lbl-mi em{margin-top:.2rem}
+
+/* ---- cost table ---------------------------------------------------------- */
+table.cost td:first-child{white-space:nowrap}
+table.cost .num{text-align:right;white-space:nowrap;color:var(--ink);font-weight:600}
+table.cost tr.s-ok .num{color:var(--ok)}
+table.cost tr.s-warn .num{color:var(--warn)}
+table.cost tr.s-fail .num{color:var(--bad)}
+table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
+
+/* ---- tool cards ----------------------------------------------------------
+   A card has to read as an instrument, not as an article about one. The icon
+   anchors it, the input example says what you feed it, and the call to action
+   is shaped like a button rather than a link. */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+.bento.tools .card{display:flex;flex-direction:column;padding:1.35rem 1.4rem 1.25rem}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+
+.card-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.9rem}
+.card .ico{width:44px;height:44px;padding:10px;border-radius:11px;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);
+  transition:background .3s,color .3s,transform .3s,border-color .3s}
+.bento .card:hover .ico{background:var(--accent);color:#08140d;transform:scale(1.06);
+  border-color:var(--accent)}
+.bento .card .tag{margin:0}
+
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* What you give it. Nothing else on a card conveys "usable" this cheaply. */
+.card .takes{display:flex;align-items:center;gap:.5rem;margin:.9rem 0 0;
+  padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
+  background:var(--code);min-width:0}
+.card .takes span{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;flex:none}
+.card .takes code{background:none;padding:0;font-size:.74rem;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.bento .card .go{display:inline-flex;align-items:center;gap:.55rem;margin-top:auto;
+  padding-top:1.1rem;font-size:var(--t2);color:var(--accent);font-weight:650}
+/* A bordered square with an arrow in it, rather than two crossed gradients
+   pretending to be one. */
+.bento .card .go::after{content:"→";display:grid;place-items:center;
+  width:1.7rem;height:1.7rem;border-radius:7px;font-size:.9rem;line-height:1;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 32%,transparent);
+  transition:background .25s,color .25s,transform .25s}
+.bento .card:hover .go::after{background:var(--accent);color:#08140d;
+  transform:translateX(3px)}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid>a,.grid>.repo{position:relative}
+.grid>a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid>a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid>a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid>a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(2.6rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.28rem;width:1.7rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem;
+  border-right:1px solid var(--line);padding-right:.4rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.55;font-size:.74rem}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- steps under the session -------------------------------------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));
+  gap:var(--s3);margin:var(--s4) 0}
+.steps .step{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:var(--s3) 1rem;transition:border-color .25s}
+.steps .step:hover{border-color:var(--accent)}
+.steps .step h3{margin:0 0 .4rem;font-size:var(--t3)}
+.steps .step code{display:block;background:var(--code);border:1px solid var(--line);
+  border-radius:6px;padding:.4rem .55rem;font-size:.72rem;color:var(--ink-2);
+  margin-bottom:.55rem;white-space:pre-wrap;word-break:break-word}
+.steps .step p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6}
+.term .bar em{margin-left:auto;font-style:normal;font-size:.7rem;color:var(--ink-3);
+  opacity:.6;transition:opacity .2s}
+.term:hover .bar em{opacity:1;color:var(--accent)}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
+
+/* ---- highlight panel --------------------------------------------------- */
+.panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
+   background:linear-gradient(140deg,var(--accent-soft),transparent 72%)}
+.panel h3{margin:0 0 .45rem;font-size:1.06rem}
+.panel p{margin:0 0 .55rem;font-size:.93rem;color:var(--ink-2)}
+.panel .doi{font-family:ui-monospace,Menlo,monospace;font-size:.805rem;color:var(--ink-3)}
+
+/* ---- stack chips ------------------------------------------------------- */
+.stack .row{display:flex;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 1rem}
+.stack .lbl{font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
+   font-weight:650;width:100%;margin-bottom:.15rem}
+.chip{font-size:.815rem;padding:.4rem .85rem;line-height:1.3;border:1px solid var(--line);
+   border-radius:7px;background:var(--bg);color:var(--ink-2);min-height:44px;
+   display:inline-flex;align-items:center;
+   transition:border-color .22s,color .22s,transform .22s}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
+
+/* ---- timeline, as disclosures ------------------------------------------ */
+.tl{position:relative;margin:1.2rem 0;padding-left:1.55rem}
+.tl::before{content:"";position:absolute;left:5px;top:.9rem;bottom:.9rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.15rem 0 .35rem;border-bottom:1px solid var(--line-2)}
+.tl .e:last-child{border-bottom:0}
+.tl .e::before{content:"";position:absolute;left:-1.55rem;top:1.05rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);
+   transition:border-color .25s,background .25s;z-index:1}
+.tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
+.tl .e[open]::before,.tl .e:hover::before{border-color:var(--accent)}
+.tl summary{list-style:none;cursor:pointer;padding:.55rem 1.6rem .55rem 0;position:relative;
+   border-radius:8px;transition:background .2s}
+.tl summary::-webkit-details-marker{display:none}
+.tl summary:hover{background:var(--surface)}
+.tl summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl summary::after{content:"";position:absolute;right:.45rem;top:1.15rem;width:7px;height:7px;
+   border-right:1.6px solid var(--ink-3);border-bottom:1.6px solid var(--ink-3);
+   transform:rotate(45deg);transition:transform .25s,border-color .25s}
+.tl .e[open] summary::after{transform:rotate(-135deg);border-color:var(--accent)}
+.tl .role{display:block;font-weight:650;font-size:.97rem;color:var(--ink)}
+.tl .org{display:block;color:var(--ink-2);font-size:.895rem}
+.tl .yr{display:block;color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .yr .n{margin-left:.6rem;color:var(--accent);opacity:.75;font-variant-numeric:normal}
+.tl .e[open] .yr .n{opacity:0}
+.tl .ach{margin:.2rem 0 .95rem;padding-left:1.05rem}
+.tl .ach li{margin:.42rem 0;font-size:.915rem;line-height:1.6;color:var(--ink-2)}
+.tl .ach li::marker{color:var(--accent)}
+.tl .e[open] .ach li{animation:rise .5s cubic-bezier(.22,.8,.3,1) both}
+.tl .e[open] .ach li:nth-child(2){animation-delay:.03s}
+.tl .e[open] .ach li:nth-child(3){animation-delay:.06s}
+.tl .e[open] .ach li:nth-child(4){animation-delay:.09s}
+.tl .e[open] .ach li:nth-child(n+5){animation-delay:.12s}
+
+/* ---- section heading with a lede --------------------------------------- */
+.sechead{margin:3.4rem 0 1rem}
+.sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
+.sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
+.sechead.reveal h2.r{opacity:1;transform:none}
+
+/* ---- SMTP session panel ------------------------------------------------
+   A real handshake, typed out. It is the one thing on the page that says what
+   this work actually is without a sentence of explanation. */
+.term{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  overflow:hidden;margin:1.2rem 0 0;box-shadow:0 18px 44px -28px rgba(0,0,0,.55)}
+.term .bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;
+  border-bottom:1px solid var(--line);background:var(--surface)}
+.term .bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.term .bar span{margin-left:.5rem;font-size:.74rem;color:var(--ink-3);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.term pre{margin:0;border:0;border-radius:0;background:none;padding:1rem 1.1rem 1.15rem;
+  font-size:.795rem;line-height:1.72;height:23rem;overflow-y:auto;overscroll-behavior:contain;
+  white-space:pre-wrap;word-break:break-word;scrollbar-width:thin}
+.term .c{color:var(--ink)}                       /* what we send */
+.term .s{color:var(--ink-3)}                     /* what the server says */
+.term .ok{color:var(--ok);font-weight:600}       /* a 2xx */
+.term .cmd{color:var(--accent);font-weight:600}  /* the shell line */
+.term .info{color:var(--ink-3);opacity:.8}       /* swaks talking, not the server */
+.term .cur{display:inline-block;width:.5em;height:1.05em;vertical-align:-.16em;
+  background:var(--accent);animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media(max-width:34rem){.term pre{font-size:.695rem;height:19rem}}
+
+/* ---- buttons: one definition, three sizes -------------------------------- */
+.btn{font:inherit;font-size:var(--t3);font-weight:650;cursor:pointer;
+  padding:.72rem 1.4rem;min-height:44px;border-radius:10px;border:1px solid var(--accent);
+  background:var(--accent);color:#08140d;
+  transition:transform .2s,opacity .2s,border-color .2s,color .2s,background .2s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible{outline:2px solid var(--accent-2);outline-offset:2px}
+.btn:disabled{opacity:.55;cursor:progress;transform:none}
+.btn.ghost{background:var(--bg);color:var(--ink-2);border-color:var(--line);font-weight:500}
+.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn.sm{font-size:var(--t1);padding:.4rem .85rem;border-radius:7px;line-height:1.3;
+  min-height:44px}
+
+/* ---- fields: one definition, one focus ring ------------------------------ */
+.field{width:100%;background:var(--bg);color:var(--ink);
+  border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1rem;
+  line-height:1.55;transition:border-color .2s,box-shadow .2s}
+.field:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+/* 16px is the floor: below it iOS Safari zooms the viewport on focus and the
+   user is left scrolled sideways on a page that was fine a moment ago. */
+textarea.field{min-height:5.2rem;resize:vertical;font-size:1rem}
+.lbl-mi{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;margin-bottom:var(--s2)}
+
+/* ---- tool panel: the shell every tool sits in ---------------------------- */
+.tool{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:var(--s4) var(--s4) 1.35rem;margin:var(--s4) 0 0;position:relative;overflow:hidden}
+.tool::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.tool .row{display:flex;gap:var(--s2);flex-wrap:wrap}
+.tool .row .field{flex:1 1 16rem;min-width:0;width:auto}
+.tool .hint{display:flex;gap:.4rem;flex-wrap:wrap;margin:.75rem 0 0;
+  font-size:var(--t1);color:var(--ink-3);align-items:center}
+.tool .hint a,.tool .hint button{font:inherit;font-size:var(--t1);cursor:pointer;
+  color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
+  border-radius:7px;padding:.4rem .8rem;background:var(--bg);line-height:1.3;
+  min-height:44px;display:inline-flex;align-items:center;
+  transition:border-color .2s,color .2s}
+.tool .hint a:focus-visible,.tool .hint button:focus-visible{outline:2px solid var(--accent);
+  outline-offset:2px}
+.tool .hint a:hover,.tool .hint button:hover{border-color:var(--accent);color:var(--accent)}
+.empty{color:var(--ink-3);font-size:var(--t2);line-height:1.6;margin:var(--s3) 0 0}
+
+/* ---- filter: search field + chip row for the reference ------------------- */
+.filter{margin:var(--s4) 0 var(--s3)}
+.filter input{margin-bottom:.7rem}
+.filter .chips{display:flex;gap:.4rem;flex-wrap:wrap;align-items:center}
+.filter .count{font-size:var(--t1);color:var(--ink-3);margin-left:auto;
+  font-variant-numeric:tabular-nums}
+button.chip{font:inherit;cursor:pointer}
+.hidden{display:none!important}
+
+/* ---- breadcrumbs --------------------------------------------------------- */
+.crumb{font-size:var(--t1);color:var(--ink-3);margin:0 0 var(--s3);display:flex;
+  gap:.45rem;flex-wrap:wrap;align-items:center}
+.crumb a{color:var(--ink-3);text-decoration:none}
+.crumb a:hover{color:var(--accent)}
+.crumb span{opacity:.5}
+
+/* ---- classifier verdict --------------------------------------------------- */
+.verdict{margin-top:1rem;border-top:1px solid var(--line);padding-top:1rem;
+  opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.verdict.on{opacity:1;transform:none}
+.verdict .head{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
+.verdict .act{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.24rem .6rem;border-radius:100px;border:1px solid currentColor}
+.verdict .cat{font-weight:680;font-size:1.06rem;letter-spacing:-.012em}
+.verdict .prov{font-size:.78rem;color:var(--ink-3)}
+.verdict .why{margin:.6rem 0 0;font-size:.93rem;color:var(--ink-2)}
+.verdict .lnk{margin:.7rem 0 0;font-size:.875rem}
+/* Action colours are a status palette, reserved for state and never reused as
+   series colours. Each ships with its word, so it is never colour alone. */
+.a-suppress,.a-pause{color:var(--bad)}
+.a-throttle,.a-review,.a-fix_config{color:var(--warn)}
+.a-retry{color:var(--info)}
+
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* ---- tool result surfaces ------------------------------------------------ */
+.report{opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s;margin-top:1.6rem}
+.report.on{opacity:1;transform:none}
+.report .head{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.report h2{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1.15rem;
+  border:0;padding:0;margin:0}
+.report .verdict-line{margin:.7rem 0 0;font-size:.97rem;font-weight:600}
+.report .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1rem 0 1.6rem}
+.report .t{background:var(--surface);border:1px solid var(--line);border-radius:10px;
+  padding:.7rem .8rem;text-align:center}
+.report .t b{display:block;font-size:1.5rem;font-weight:680;font-variant-numeric:tabular-nums;line-height:1.1}
+.report .t span{display:block;font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin-top:.2rem}
+.report .grp{margin:0 0 1.5rem}
+.report .grp h3{font-size:.76rem;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 .5rem;font-weight:650}
+.report .grp ul{list-style:none;padding:0;margin:0}
+.report .grp li{border-left:2px solid var(--line);padding:.5rem 0 .6rem .85rem;margin:0 0 .45rem}
+.report .pill{display:inline-block;font-size:.66rem;letter-spacing:.09em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .5rem;border-radius:100px;border:1px solid currentColor;
+  margin-right:.5rem;vertical-align:1px}
+.report .f{font-size:.95rem;color:var(--ink)}
+.report .rem{display:block;font-size:.875rem;color:var(--ink-3);margin-top:.3rem;line-height:1.55}
+.report .det{display:block;font-size:.76rem;color:var(--ink-3);margin-top:.35rem;
+  background:var(--code);border:1px solid var(--line);border-radius:6px;padding:.35rem .5rem;
+  overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.report .note{font-size:.855rem;color:var(--ink-3);line-height:1.6;margin:1.4rem 0 0;
+  border-top:1px solid var(--line);padding-top:1rem}
+/* Severity is a reserved status palette, never reused for anything decorative,
+   and every one of them ships with its word so it is never colour alone. */
+.s-critical{color:var(--bad)} .s-fail{color:var(--bad)} .s-warn{color:var(--warn)}
+.s-info{color:var(--info)} .s-ok{color:var(--ok)}
+.report .t.s-critical b{color:var(--bad)}
+.report .grp li.s-critical{border-left-color:var(--bad)}
+.report .grp li.s-fail{border-left-color:var(--bad)}
+.report .grp li.s-warn{border-left-color:var(--warn)}
+.report .grp li.s-ok{border-left-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.report .t.s-fail b{color:var(--bad)} .report .t.s-warn b{color:var(--warn)}
+.report .t.s-info b{color:var(--info)} .report .t.s-ok b{color:var(--ok)}
+@media(max-width:34rem){.report .tiles{grid-template-columns:repeat(2,1fr)}}
+
+/* ---- footer -------------------------------------------------------------- */
+footer{margin-top:var(--s6);padding-top:var(--s4);border-top:1px solid var(--line);
+  color:var(--ink-3);font-size:var(--t2)}
+footer .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr));
+  gap:var(--s4) var(--s3);margin-bottom:var(--s4)}
+footer h2{font-size:var(--t0);letter-spacing:.11em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .55rem;padding:0;border:0;font-weight:650}
+footer .cols a{display:flex;align-items:center;color:var(--ink-2);text-decoration:none;
+  min-height:44px;font-size:var(--t2);line-height:1.4;transition:color .16s}
+footer .cols a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+footer .cols a:hover{color:var(--accent)}
+footer .by{margin:0;line-height:1.6;max-width:44rem}
+
+/* ---- scroll reveal ---------------------------------------------------- */
+.r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
+.r.reveal{opacity:1;transform:none}
+.strip.reveal div,.bento.reveal .card{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
+.strip.reveal div:nth-child(2),.bento.reveal .card:nth-child(2){animation-delay:.07s}
+.strip.reveal div:nth-child(3),.bento.reveal .card:nth-child(3){animation-delay:.14s}
+.strip.reveal div:nth-child(4),.bento.reveal .card:nth-child(4){animation-delay:.21s}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
+.lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
+.hero img{animation:rise .85s cubic-bezier(.22,.8,.3,1) .18s both}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  #hexcanvas{display:none}
+  h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
+  .verdict{transition:none}
+  .tl .e[open] .ach li{animation:none}
+  .term .cur{animation:none;opacity:0}
+  .r{opacity:1;transform:none;transition:none}
+  .bar-fill{transition:none;width:var(--w)}
+  .grid>a:hover,.grid>.repo:hover{transform:none}
+}
+@media(max-width:34rem){
+  .portrait{max-width:38%;margin-left:1rem}
+  h2{margin-top:2.3rem}
+}
+
+/* ---------------------------------------------------------------- RFC decoded */
+.rfc{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem;
+  border-left-color:var(--line)}
+.rfc.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  border-left-color:var(--accent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.rfc header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.rfc .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.rfc.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.rfc .cat,.rfc .yr{font-size:var(--t1);color:var(--ink-3)}
+.rfc .yr{margin-left:auto}
+.rfc h3{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.rfc.lead h3{font-size:1.2rem}
+.rfc h3 a{color:var(--ink);text-decoration:none;border-bottom:1px solid transparent}
+.rfc h3 a:hover{border-bottom-color:var(--accent)}
+.rfc .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6}
+.rfc .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.rfc .lv{color:var(--ink-3)}
+.rfc .warn-line{margin:.3rem 0;font-size:var(--t1);color:var(--ink-2);line-height:1.6}
+.rfc .warn-line strong{color:var(--warn)}
+.rfc .warn-line a{margin-right:.4rem}
+
+/* The maturity label, which is the field people misread. Colour separates a
+   standards-track document from one that carries no standards weight. */
+.st{font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;font-weight:700;
+  padding:.16rem .45rem;border-radius:4px;border:1px solid var(--line);white-space:nowrap}
+.st-std{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 40%,transparent)}
+.st-bcp{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,transparent)}
+.st-info{color:var(--ink-3)}
+.st-exp{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.st-hist{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 40%,transparent)}
+
+/* The answer for somebody holding a dead number. */
+.redirect{border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);
+  border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+  background:color-mix(in srgb,var(--warn) 7%,transparent);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.redirect p{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.redirect p:last-child{margin:0}
+.redirect strong{color:var(--ink)}
+
+.warnbox{border:1px solid var(--line);border-left:3px solid var(--warn);
+  border-radius:0 10px 10px 0;background:var(--surface);
+  padding:var(--s3) var(--s4);margin:0 0 var(--s4)}
+.warnbox.s-info{border-left-color:var(--info)}
+.warnbox p{margin:0 0 .5rem;font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+.warnbox ul{margin:0;padding-left:1.1rem}
+.warnbox li{font-size:var(--t2);color:var(--ink-2);margin:.2rem 0}
+
+.rfc-cat{margin:0 0 var(--s4)}
+.rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
+.rfc-list{display:flex;flex-direction:column;gap:2px}
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+  align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
+  text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
+.rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
+.rfc-row code{color:var(--ink-3);font-size:var(--t1)}
+.rfc-row:hover code{color:var(--accent)}
+.rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
+
+.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+  font-size:var(--t2)}
+.meta dt{color:var(--ink-3);font-weight:600}
+.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+.hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
+
+.reqsec{margin:0 0 var(--s4)}
+.reqsec h3{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:0 0 .5rem;
+  padding-bottom:.3rem;border-bottom:1px solid var(--line)}
+.reqs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.3rem}
+.reqs li{display:grid;grid-template-columns:5.4rem 1fr;gap:.7rem;align-items:start;
+  padding:.5rem .7rem;border-radius:8px;background:var(--surface);
+  border:1px solid var(--line);border-left-width:2px}
+.reqs li.lv-must{border-left-color:var(--bad)}
+.reqs li.lv-should{border-left-color:var(--warn)}
+.reqs li.lv-may{border-left-color:var(--info)}
+.kw{font-size:.62rem;letter-spacing:.06em;font-weight:700;text-transform:uppercase;
+  padding-top:.2rem;white-space:nowrap}
+.kw-must{color:var(--bad)} .kw-should{color:var(--warn)} .kw-may{color:var(--info)}
+.rq{font-size:var(--t2);color:var(--ink-2);line-height:1.65}
+
+.repo .repo-t{text-decoration:none;border-bottom:1px solid transparent}
+.repo .repo-t:hover strong{color:var(--accent)}
+.repo span.d a{color:var(--ink-2);text-decoration:none;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.repo span.d a:hover{color:var(--accent)}
+#rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
+.pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.pagemeta .cat{font-size:var(--t1);color:var(--ink-3)}
+.ex{margin:.7rem 0 0;font-size:var(--t1);color:var(--ink-3);display:flex;
+  gap:.4rem;align-items:center;flex-wrap:wrap}
+.ex .dim{color:var(--ink-3);opacity:.8}
+@media(max-width:620px){
+  .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
+  .rfc-row .n{display:none}
+  .reqs li{grid-template-columns:1fr;gap:.25rem}
+  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  .meta dt{margin-top:.5rem}
+}
+</style>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "RFC decoded", "item": "https://rastu.tech//rfc/"}, {"@type": "ListItem", "position": 3, "name": "RFC 5537"}]}, {"@type": "TechArticle", "headline": "RFC 5537: Netnews Architecture and Protocols", "url": "https://rastu.tech/rfc/5537/", "author": {"@id": "https://rastu.tech/#person"}, "about": "Netnews Architecture and Protocols", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+</head>
+<body>
+<div class="wrap wide">
+<a class="skip" href="#main">Skip to content</a>
+<nav class="top" aria-label="Primary">
+  <a class="mark" href="../../">rastu<span>.tech</span></a>
+  <a href="../../tools/">Tools</a>
+  <a href="../../smtp/">SMTP responses</a>
+  <a href="../../rfc/" aria-current="page">RFC decoded</a>
+  <a href="../../research/">Research</a>
+  <a href="../../about/">About</a>
+</nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../..//rfc/">RFC decoded</a><span>/</span>RFC 5537</nav>
+<main id="main">
+
+<div class="sechead">
+  <p class="pagemeta"><code>RFC 5537</code> <span class="st st-std">Proposed Standard</span>
+     <span class="cat">Message format</span></p>
+  <h1 data-quoted>Netnews Architecture and Protocols</h1>
+  <p class="lede" data-quoted>This document defines the architecture of Netnews systems and specifies the correct manipulation and interpretation of Netnews articles by software that originates, distributes, stores, and displays them. It also specifies the requirements that must be met by any protocol used to transport and serve Netnews articles. [STANDARDS-TRACK]</p>
+</div>
+
+<div class="panel r">
+  <dl class="meta">
+    <dt>Status</dt><dd>Proposed Standard. On the standards track and stable enough to implement against. Most of the email stack stays at this level permanently.</dd>
+    <dt>Published</dt><dd>November 2009</dd>
+    <dt>Authors</dt><dd>R. Allbery, C. Lindsey</dd>
+    <dt>Read it</dt><dd>
+      <a href="https://www.rfc-editor.org/rfc/rfc5537.html">rfc-editor.org</a>
+       &middot; <a href="https://www.rfc-editor.org/errata/rfc5537">errata</a>
+       &middot; <a href="https://doi.org/10.17487/RFC5537">DOI</a>
+    </dd>
+  </dl>
+  <p class="hist"><strong>Replaces</strong> <a href="https://www.rfc-editor.org/rfc/rfc850.html">RFC 850: Standard for interchange of USENET messages</a>, <a href="https://www.rfc-editor.org/rfc/rfc1036.html">RFC 1036: Standard for interchange of USENET messages</a>, <a href="https://www.rfc-editor.org/rfc/rfc1849.html">RFC 1849: &quot;Son of 1036&quot;: News Article Format and Transmission</a>.</p>
+</div>
+
+<div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 1 later RFC has changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/8315/">RFC 8315: Cancel-Locks in Netnews Articles</a></li></ul></div>
+
+<div class="sechead r">
+  <h2 class="r">Normative requirements</h2>
+  <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
+  came from. 92 must, 84 should, 35 may.</p>
+</div>
+<div class="filter r" data-filter>
+  <div class="chips">
+    <button class="chip on" data-group="all" type="button">All</button>
+    <button class="chip" data-group="must" type="button">Must</button>
+    <button class="chip" data-group="should" type="button">Should</button>
+    <button class="chip" data-group="may" type="button">May</button>
+    <span class="count" role="status" aria-live="polite"></span>
+  </div>
+  <label class="lbl-mi" for="rq-f">Filter the requirements</label>
+  <input class="field" id="rq-f" type="search" placeholder="Filter by wording" autocomplete="off">
+  <section class="reqsec" id="s2"><h3>2 Transport</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="transports for netnews articles must treat news articles as uninterpreted sequences of octets, excluding the values %d00 (which may not occur in netnews articles), %d13, and %d10 (which must only appear in netnews articles as a pair in that order and which, together, denote a line separator)."><span class="kw kw-must">MUST</span><span class="rq">Transports for Netnews articles MUST treat news articles as uninterpreted sequences of octets, excluding the values %d00 (which may not occur in Netnews articles), %d13, and %d10 (which MUST only appear in Netnews articles as a pair in that order and which, together, denote a line separator).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in particular, transports must convey all header fields unmodified (including header fields within message/rfc822 objects in article bodies), even if they contain octets in the range of 128 to 255."><span class="kw kw-must">MUST</span><span class="rq">In particular, transports MUST convey all header fields unmodified (including header fields within message/rfc822 objects in article bodies), even if they contain octets in the range of 128 to 255.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="furthermore, transports for relaying and serving agents must, and transports for other agents should, convey lines even if they exceed 998 characters in length, especially in article bodies."><span class="kw kw-must">MUST</span><span class="rq">Furthermore, transports for relaying and serving agents MUST, and transports for other agents SHOULD, convey lines even if they exceed 998 characters in length, especially in article bodies.</span></li></ul></section><section class="reqsec" id="s3"><h3>3 Duties of Agents</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the requirements of all three agents must still be met when the news server is performing the functions of those agents."><span class="kw kw-must">MUST</span><span class="rq">The requirements of all three agents MUST still be met when the news server is performing the functions of those agents.</span></li></ul></section><section class="reqsec" id="s3-1"><h3>3.1 General Principles</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="as applied to netnews, this primarily means that unwanted or non- compliant articles should be rejected as early as possible, but once they are in general circulation, relaying and serving agents may wish to accept them where possible rather than lose information."><span class="kw kw-should">SHOULD</span><span class="rq">As applied to Netnews, this primarily means that unwanted or non- compliant articles SHOULD be rejected as early as possible, but once they are in general circulation, relaying and serving agents may wish to accept them where possible rather than lose information.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="posting agents and injecting agents should therefore be maximally strict in their application of both this protocol and [rfc5536], and reading agents should be robust in the presence of violations of the netnews article format where possible."><span class="kw kw-should">SHOULD</span><span class="rq">Posting agents and injecting agents SHOULD therefore be maximally strict in their application of both this protocol and [RFC5536], and reading agents SHOULD be robust in the presence of violations of the Netnews article format where possible.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="this document specifies how articles are to be treated if they are accepted and specifies some cases where they must be rejected, but an agent may always reject any article for other reasons than those stated here."><span class="kw kw-may">MAY</span><span class="rq">This document specifies how articles are to be treated if they are accepted and specifies some cases where they must be rejected, but an agent MAY always reject any article for other reasons than those stated here.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="accordingly, agents (other than moderators) must not modify articles in ways other than described here."><span class="kw kw-must">MUST NOT</span><span class="rq">Accordingly, agents (other than moderators) MUST NOT modify articles in ways other than described here.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="unacceptable articles must be rejected rather than corrected."><span class="kw kw-must">MUST</span><span class="rq">Unacceptable articles MUST be rejected rather than corrected.</span></li></ul></section><section class="reqsec" id="s3-2"><h3>3.2 The Path Header Field</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="all news server components (injecting agents, relaying agents, and serving agents) must identify themselves, when processing an article, by prepending their &lt;path-identity&gt; (defined in section 3.1.5 of [rfc5536]) to the path header field."><span class="kw kw-must">MUST</span><span class="rq">All news server components (injecting agents, relaying agents, and serving agents) MUST identify themselves, when processing an article, by prepending their &lt;path-identity&gt; (defined in Section 3.1.5 of [RFC5536]) to the Path header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="injecting agents must also use the same identity in injection-info header fields that they add, and serving and relaying agents should use the same identity in any xref header fields they add."><span class="kw kw-must">MUST</span><span class="rq">Injecting agents MUST also use the same identity in Injection-Info header fields that they add, and serving and relaying agents SHOULD use the same identity in any Xref header fields they add.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="this option should not be used unless the earlier options are unavailable or unless the name is of longstanding usage."><span class="kw kw-should">SHOULD NOT</span><span class="rq">This option SHOULD NOT be used unless the earlier options are unavailable or unless the name is of longstanding usage.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the &lt;path-identity&gt; therefore should be all lowercase and implementations should compare identities case-insensitively."><span class="kw kw-should">SHOULD</span><span class="rq">The &lt;path-identity&gt; therefore SHOULD be all lowercase and implementations SHOULD compare identities case-insensitively.</span></li></ul></section><section class="reqsec" id="s3-2-1"><h3>3.2.1 Constructing the Path Header Field</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="if a relaying or serving agent receives an article from an injecting or serving agent that is part of the same news server, it may leave the path header field of the article unchanged."><span class="kw kw-may">MAY</span><span class="rq">If a relaying or serving agent receives an article from an injecting or serving agent that is part of the same news server, it MAY leave the Path header field of the article unchanged.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="otherwise, every injecting, relaying, or serving agent that accepts an article must update the path header field as follows."><span class="kw kw-must">MUST</span><span class="rq">Otherwise, every injecting, relaying, or serving agent that accepts an article MUST update the Path header field as follows.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the agent must prepend &quot;!&quot; to the path header field content."><span class="kw kw-must">MUST</span><span class="rq">The agent MUST prepend &quot;!&quot; to the Path header field content.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="an injecting agent should prepend the &lt;path-diagnostic&gt; &quot;!.posted&quot;, optionally followed by &quot;.&quot; and the fqdn or ip address of the source, to the path header field content."><span class="kw kw-should">SHOULD</span><span class="rq">An injecting agent SHOULD prepend the &lt;path-diagnostic&gt; &quot;!.POSTED&quot;, optionally followed by &quot;.&quot; and the FQDN or IP address of the source, to the Path header field content.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="a relaying or serving agent should prepend a &lt;path-diagnostic&gt; to the path header field content, where the &lt;path-diagnostic&gt; is chosen as follows:"><span class="kw kw-should">SHOULD</span><span class="rq">A relaying or serving agent SHOULD prepend a &lt;path-diagnostic&gt; to the Path header field content, where the &lt;path-diagnostic&gt; is chosen as follows:</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the agent may then prepend to the path header field content &quot;!&quot; or &quot;!!&quot; followed by an additional &lt;path-identity&gt; for itself other than its primary one."><span class="kw kw-may">MAY</span><span class="rq">The agent MAY then prepend to the Path header field content &quot;!&quot; or &quot;!!&quot; followed by an additional &lt;path-identity&gt; for itself other than its primary one.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="using &quot;!!&quot;, and thereby adding a &lt;diag-match&gt; since the &lt;path-identity&gt; clearly is verified, is recommended."><span class="kw kw-should">RECOMMENDED</span><span class="rq">Using &quot;!!&quot;, and thereby adding a &lt;diag-match&gt; since the &lt;path-identity&gt; clearly is verified, is RECOMMENDED.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="each of these &lt;path-identity&gt;s must meet the requirements set out in section 3.2."><span class="kw kw-must">MUST</span><span class="rq">Each of these &lt;path-identity&gt;s MUST meet the requirements set out in Section 3.2.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="finally, the agent must prepend its primary &lt;path-identity&gt; to the path header field content."><span class="kw kw-must">MUST</span><span class="rq">Finally, the agent MUST prepend its primary &lt;path-identity&gt; to the Path header field content.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="any agent that modifies the path header field may fold it by inserting fws (folding white space) immediately after any &lt;path- identity&gt; or &lt;diag-other&gt; it added (see section 3.1.5 of [rfc5536] for allowable locations for fws)."><span class="kw kw-may">MAY</span><span class="rq">Any agent that modifies the Path header field MAY fold it by inserting FWS (folding white space) immediately after any &lt;path- identity&gt; or &lt;diag-other&gt; it added (see Section 3.1.5 of [RFC5536] for allowable locations for FWS).</span></li></ul></section><section class="reqsec" id="s3-3"><h3>3.3 Article History and Duplicate Suppression</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="relaying and serving agents therefore must keep a record of articles they have already seen and use that record to reject additional offers of the same article."><span class="kw kw-must">MUST</span><span class="rq">Relaying and serving agents therefore MUST keep a record of articles they have already seen and use that record to reject additional offers of the same article.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="o agents may select a cutoff interval and reject any article with a date farther in the past than that cutoff interval."><span class="kw kw-may">MAY</span><span class="rq">o Agents MAY select a cutoff interval and reject any article with a date farther in the past than that cutoff interval.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="o agents that enforce such a cutoff may then drop records of articles that had dates older than the cutoff from their history databases."><span class="kw kw-may">MAY</span><span class="rq">o Agents that enforce such a cutoff MAY then drop records of articles that had dates older than the cutoff from their history databases.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="o alternatively, agents may drop history records according to the date when the article was first seen by that agent rather than the date of the article."><span class="kw kw-may">MAY</span><span class="rq">o Alternatively, agents MAY drop history records according to the date when the article was first seen by that agent rather than the date of the article.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in this case, the history retention interval must be at least 24 hours longer than the cutoff interval to allow for articles dated in the future."><span class="kw kw-must">MUST</span><span class="rq">In this case, the history retention interval MUST be at least 24 hours longer than the cutoff interval to allow for articles dated in the future.</span></li></ul></section><section class="reqsec" id="s3-4"><h3>3.4 Duties of a Posting Agent</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="posting agents should ensure that proto-articles they create are valid according to [rfc5536] and any other applicable policies."><span class="kw kw-should">SHOULD</span><span class="rq">Posting agents SHOULD ensure that proto-articles they create are valid according to [RFC5536] and any other applicable policies.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="they must not create any injection-info header field; this header field may only be added by the injecting agent."><span class="kw kw-must">MUST NOT</span><span class="rq">They MUST NOT create any Injection-Info header field; this header field may only be added by the injecting agent.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="if the proto-article already contains both message-id and date header fields, posting agents may add an injection-date header field to that proto-article immediately before passing that proto-article to an injection agent."><span class="kw kw-may">MAY</span><span class="rq">If the proto-article already contains both Message-ID and Date header fields, posting agents MAY add an Injection-Date header field to that proto-article immediately before passing that proto-article to an injection agent.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="they should do so if the date header field (representing the composition time of the proto-article) is more than a day in the past at the time of injection."><span class="kw kw-should">SHOULD</span><span class="rq">They SHOULD do so if the Date header field (representing the composition time of the proto-article) is more than a day in the past at the time of injection.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="they must do so if the proto-article is being submitted to more than one injecting agent; see section 3.4.2."><span class="kw kw-must">MUST</span><span class="rq">They MUST do so if the proto-article is being submitted to more than one injecting agent; see Section 3.4.2.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="contrary to [rfc5322], which implies that the mailbox or mailboxes in the from header field should be that of the poster or posters, a poster who does not, for whatever reason, wish to use his own mailbox may use any mailbox ending in the top-level domain &quot;.invalid&quot; [rfc2606]."><span class="kw kw-may">MAY</span><span class="rq">Contrary to [RFC5322], which implies that the mailbox or mailboxes in the From header field should be that of the poster or posters, a poster who does not, for whatever reason, wish to use his own mailbox MAY use any mailbox ending in the top-level domain &quot;.invalid&quot; [RFC2606].</span></li><li class="lv-should" data-group="should" data-quoted data-terms="posting agents meant for use by ordinary posters should reject any attempt to post an article that cancels or supersedes (via the supersedes header field) another article of which the poster is not the author or sender."><span class="kw kw-should">SHOULD</span><span class="rq">Posting agents meant for use by ordinary posters SHOULD reject any attempt to post an article that cancels or supersedes (via the Supersedes header field) another article of which the poster is not the author or sender.</span></li></ul></section><section class="reqsec" id="s3-4-1"><h3>3.4.1 Proto-Articles</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="a proto-article is only for transmission to an injecting agent and should not be transmitted to any other agent."><span class="kw kw-should">SHOULD NOT</span><span class="rq">A proto-article is only for transmission to an injecting agent and SHOULD NOT be transmitted to any other agent.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="a proto-article has the same format as a normal article except that the injection-info and xref header fields must not be present, the path header field should not contain a &quot;posted&quot; &lt;diag-keyword&gt;, and any of the following mandatory header fields may be omitted: message-id, date, and path."><span class="kw kw-must">MUST NOT</span><span class="rq">A proto-article has the same format as a normal article except that the Injection-Info and Xref header fields MUST NOT be present, the Path header field SHOULD NOT contain a &quot;POSTED&quot; &lt;diag-keyword&gt;, and any of the following mandatory header fields MAY be omitted: Message-ID, Date, and Path.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in all other respects, a proto-article must be a valid netnews article."><span class="kw kw-must">MUST</span><span class="rq">In all other respects, a proto-article MUST be a valid Netnews article.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in particular, the header fields that may be omitted must not be present with invalid content."><span class="kw kw-must">MUST NOT</span><span class="rq">In particular, the header fields that may be omitted MUST NOT be present with invalid content.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if a posting agent intends to offer the same proto-article to multiple injecting agents, the header fields message-id, date, and injection-date must be present and identical in all copies of the proto-article."><span class="kw kw-must">MUST</span><span class="rq">If a posting agent intends to offer the same proto-article to multiple injecting agents, the header fields Message-ID, Date, and Injection-Date MUST be present and identical in all copies of the proto-article.</span></li></ul></section><section class="reqsec" id="s3-4-2"><h3>3.4.2 Multiple Injection of Articles</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="whenever possible, multiple injection should be done by offering the same proto-article to multiple injecting agents."><span class="kw kw-should">SHOULD</span><span class="rq">Whenever possible, multiple injection SHOULD be done by offering the same proto-article to multiple injecting agents.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the posting agent must supply the message-id, date, and injection-date header fields, and the proto-article as offered to each injecting agent must be identical."><span class="kw kw-must">MUST</span><span class="rq">The posting agent MUST supply the Message-ID, Date, and Injection-Date header fields, and the proto-article as offered to each injecting agent MUST be identical.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in this case, the posting agent must remove any xref header field and rename or remove any injection-info, path, and other trace header fields before passing it to another injecting agent."><span class="kw kw-must">MUST</span><span class="rq">In this case, the posting agent MUST remove any Xref header field and rename or remove any Injection-Info, Path, and other trace header fields before passing it to another injecting agent.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="(this converts the article back into a proto-article.) it must retain unmodified the message-id, date, and injection-date header fields."><span class="kw kw-must">MUST</span><span class="rq">(This converts the article back into a proto-article.) It MUST retain unmodified the Message-ID, Date, and Injection-Date header fields.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must not add an injection-date header field if it is missing from the existing article."><span class="kw kw-must">MUST NOT</span><span class="rq">It MUST NOT add an Injection-Date header field if it is missing from the existing article.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="multiple injection of an article that lists one or more moderated newsgroups in its newsgroups header field should only be done by a moderator and must only be done after the proto-article has been approved for all moderated groups to which it is to be posted and after an approved header field has been added (see section 3.9)."><span class="kw kw-should">SHOULD</span><span class="rq">Multiple injection of an article that lists one or more moderated newsgroups in its Newsgroups header field SHOULD only be done by a moderator and MUST only be done after the proto-article has been approved for all moderated groups to which it is to be posted and after an Approved header field has been added (see Section 3.9).</span></li></ul></section><section class="reqsec" id="s3-4-3"><h3>3.4.3 Followups</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="however, posters may then override that default before posting."><span class="kw kw-may">MAY</span><span class="rq">However, posters MAY then override that default before posting.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="despite the historic practice of some posting agents, the keywords header field should not be inherited by default from the precursor article."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Despite the historic practice of some posting agents, the Keywords header field SHOULD NOT be inherited by default from the precursor article.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the followup-to header field of the precursor article consists of &quot;poster&quot;, the followup must not be posted by default but, by default, is to be emailed to the address given in the precursor&#x27;s reply-to or from header field following the rules for an email reply [rfc5322]."><span class="kw kw-must">MUST NOT</span><span class="rq">If the Followup-To header field of the precursor article consists of &quot;poster&quot;, the followup MUST NOT be posted by default but, by default, is to be emailed to the address given in the precursor&#x27;s Reply-To or From header field following the rules for an email reply [RFC5322].</span></li><li class="lv-may" data-group="may" data-quoted data-terms="this action may be overridden by the poster, in which case the posting agent should continue as if the followup-to header field in the precursor did not exist."><span class="kw kw-may">MAY</span><span class="rq">This action MAY be overridden by the poster, in which case the posting agent should continue as if the Followup-To header field in the precursor did not exist.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the newsgroups header field should, by default, be inherited from the precursor&#x27;s followup-to header field if present; otherwise, it is inherited from the precursor&#x27;s newsgroups header field."><span class="kw kw-should">SHOULD</span><span class="rq">The Newsgroups header field SHOULD, by default, be inherited from the precursor&#x27;s Followup-To header field if present; otherwise, it is inherited from the precursor&#x27;s Newsgroups header field.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the subject header field should, by default, be inherited from that of the precursor."><span class="kw kw-should">SHOULD</span><span class="rq">The Subject header field SHOULD, by default, be inherited from that of the precursor.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the case-sensitive string &quot;re: &quot; (including the space after the colon) may be prepended to the content of its subject header field unless it already begins with that string."><span class="kw kw-may">MAY</span><span class="rq">The case-sensitive string &quot;Re: &quot; (including the space after the colon) MAY be prepended to the content of its Subject header field unless it already begins with that string.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the distribution header field should, by default, be inherited from the precursor&#x27;s distribution header field, if present."><span class="kw kw-should">SHOULD</span><span class="rq">The Distribution header field SHOULD, by default, be inherited from the precursor&#x27;s Distribution header field, if present.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the followup must have a references header field referring to its precursor, constructed in accordance with section 3.4.4."><span class="kw kw-must">MUST</span><span class="rq">The followup MUST have a References header field referring to its precursor, constructed in accordance with Section 3.4.4.</span></li></ul></section><section class="reqsec" id="s3-4-4"><h3>3.4.4 Construction of the References Header Field</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the content of the new article&#x27;s references header field must be formed from the content of the parent&#x27;s references header field if present, followed by the content of the message-id header field of the parent."><span class="kw kw-must">MUST</span><span class="rq">The content of the new article&#x27;s References header field MUST be formed from the content of the parent&#x27;s References header field if present, followed by the content of the Message-ID header field of the parent.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the parent had a references header, fws as defined in [rfc5536] must be added between its content and the message-id header field content."><span class="kw kw-must">MUST</span><span class="rq">If the parent had a References header, FWS as defined in [RFC5536] MUST be added between its content and the Message-ID header field content.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the resulting references header field would, after unfolding, exceed 998 characters in length (including its field name but not the final crlf), it must be trimmed (and otherwise may be trimmed)."><span class="kw kw-must">MUST</span><span class="rq">If the resulting References header field would, after unfolding, exceed 998 characters in length (including its field name but not the final CRLF), it MUST be trimmed (and otherwise MAY be trimmed).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="trimming means removing any number of message identifiers from its content, except that the first message identifier and the last two must not be removed."><span class="kw kw-must">MUST NOT</span><span class="rq">Trimming means removing any number of message identifiers from its content, except that the first message identifier and the last two MUST NOT be removed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="an essential property of the references header field, guaranteed by the above procedure and required to be maintained by any extensions to this protocol, is that an article must not precede one of its parents."><span class="kw kw-must">REQUIRED</span><span class="rq">An essential property of the References header field, guaranteed by the above procedure and REQUIRED to be maintained by any extensions to this protocol, is that an article MUST NOT precede one of its parents.</span></li></ul></section><section class="reqsec" id="s3-5"><h3>3.5 Duties of an Injecting Agent</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="an injecting agent must have available a list (possibly empty) of moderated groups for which it accepts articles and the corresponding submission addresses."><span class="kw kw-must">MUST</span><span class="rq">An injecting agent MUST have available a list (possibly empty) of moderated groups for which it accepts articles and the corresponding submission addresses.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should have available a list of valid newsgroups to catch articles not posted to a valid newsgroup and therefore likely to be silently discarded by relaying and serving agents."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD have available a list of valid newsgroups to catch articles not posted to a valid newsgroup and therefore likely to be silently discarded by relaying and serving agents.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should verify that the article is from a trusted source (for example, by relying on the authorization capability of the underlying transport used to talk to the posting agent)."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD verify that the article is from a trusted source (for example, by relying on the authorization capability of the underlying transport used to talk to the posting agent).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must reject any proto-article that does not have the proper mandatory header fields for a proto-article, that has injection- info or xref header fields, that has a path header field containing the &quot;posted&quot; &lt;diag-keyword&gt;, or that is not syntactically valid as defined by [rfc5536]."><span class="kw kw-must">MUST</span><span class="rq">It MUST reject any proto-article that does not have the proper mandatory header fields for a proto-article, that has Injection- Info or Xref header fields, that has a Path header field containing the &quot;POSTED&quot; &lt;diag-keyword&gt;, or that is not syntactically valid as defined by [RFC5536].</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any proto-article that contains a header field deprecated for netnews (see, for example, [rfc3798])."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any proto-article that contains a header field deprecated for Netnews (see, for example, [RFC3798]).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may reject any proto- article that contains trace header fields (e.g., nntp-posting- host) indicating that it was already injected by an injecting agent that did not add injection-info or injection-date."><span class="kw kw-may">MAY</span><span class="rq">It MAY reject any proto- article that contains trace header fields (e.g., NNTP-Posting- Host) indicating that it was already injected by an injecting agent that did not add Injection-Info or Injection-Date.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any article whose injection-date or date header field is more than 24 hours into the future (and may use a margin less than 24 hours)."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any article whose Injection-Date or Date header field is more than 24 hours into the future (and MAY use a margin less than 24 hours).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any article whose injection-date header field is too far in the past (older than the cutoff interval of a relaying agent that the injecting agent is using, for example)."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any article whose Injection-Date header field is too far in the past (older than the cutoff interval of a relaying agent that the injecting agent is using, for example).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should similarly reject any article whose date header field is too far in the past, since not all news servers support injection-date and only the injecting agent"><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD similarly reject any article whose Date header field is too far in the past, since not all news servers support Injection-Date and only the injecting agent</span></li><li class="lv-should" data-group="should" data-quoted data-terms="in either case, this interval should not be any shorter than 72 hours into the past."><span class="kw kw-should">SHOULD NOT</span><span class="rq">In either case, this interval SHOULD NOT be any shorter than 72 hours into the past.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any proto-article whose newsgroups header field does not contain at least one &lt;newsgroup-name&gt; for a valid group, or that contains a &lt;newsgroup-name&gt; reserved for specific purposes by section 3.1.4 of [rfc5536] unless that specific purpose or local agreement applies to the proto-article being processed."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any proto-article whose Newsgroups header field does not contain at least one &lt;newsgroup-name&gt; for a valid group, or that contains a &lt;newsgroup-name&gt; reserved for specific purposes by Section 3.1.4 of [RFC5536] unless that specific purpose or local agreement applies to the proto-article being processed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the message-id and date header fields with appropriate contents must be added when not present in the proto-article."><span class="kw kw-must">MUST</span><span class="rq">The Message-ID and Date header fields with appropriate contents MUST be added when not present in the proto-article.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the injecting agent must not alter the body of the article in any way (including any change of content-transfer-encoding)."><span class="kw kw-must">MUST NOT</span><span class="rq">The injecting agent MUST NOT alter the body of the article in any way (including any change of Content-Transfer-Encoding).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may add other header fields not already provided by the poster, but injecting agents are encouraged to use the injection-info header for such information and to minimize the addition of other headers."><span class="kw kw-may">MAY</span><span class="rq">It MAY add other header fields not already provided by the poster, but injecting agents are encouraged to use the Injection-Info header for such information and to minimize the addition of other headers.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should not alter, delete, or reorder any existing header field except the path header field."><span class="kw kw-should">SHOULD NOT</span><span class="rq">It SHOULD NOT alter, delete, or reorder any existing header field except the Path header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must not alter or delete any existing message-id header field."><span class="kw kw-must">MUST NOT</span><span class="rq">It MUST NOT alter or delete any existing Message-ID header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the newsgroups header contains one or more moderated groups and the proto-article does not contain an approved header field, the injecting agent must either forward it to a moderator as specified in section 3.5.1 or, if that is not possible, reject it."><span class="kw kw-must">MUST</span><span class="rq">If the Newsgroups header contains one or more moderated groups and the proto-article does not contain an Approved header field, the injecting agent MUST either forward it to a moderator as specified in Section 3.5.1 or, if that is not possible, reject it.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="this forwarding must be done after adding the message-id and date headers if required, and before adding the injection- info and injection-date headers."><span class="kw kw-must">MUST</span><span class="rq">This forwarding MUST be done after adding the Message-ID and Date headers if required, and before adding the Injection- Info and Injection-Date headers.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="otherwise, a path header field with a &lt;tail-entry&gt; must be added if not already present."><span class="kw kw-must">MUST</span><span class="rq">Otherwise, a Path header field with a &lt;tail-entry&gt; MUST be added if not already present.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the injecting agent must then update the path header field as described in section 3.2.1."><span class="kw kw-must">MUST</span><span class="rq">The injecting agent MUST then update the Path header field as described in Section 3.2.1.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="an injection-info header field should be added that identifies the source of the article and possibly other trace information as described in section 3.2.8 of [rfc5536]."><span class="kw kw-should">SHOULD</span><span class="rq">An Injection-Info header field SHOULD be added that identifies the source of the article and possibly other trace information as described in Section 3.2.8 of [RFC5536].</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the proto-article already had an injection-date header field, it must not be modified or replaced."><span class="kw kw-must">MUST NOT</span><span class="rq">If the proto-article already had an Injection-Date header field, it MUST NOT be modified or replaced.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if the proto-article had both a message-id header field and a date header field, an injection-date header field must not be added, since the proto- article may have been multiply injected by a posting agent that"><span class="kw kw-must">MUST NOT</span><span class="rq">If the proto-article had both a Message-ID header field and a Date header field, an Injection-Date header field MUST NOT be added, since the proto- article may have been multiply injected by a posting agent that</span></li><li class="lv-must" data-group="must" data-quoted data-terms="otherwise, the injecting agent must add an injection-date header field containing the current date and time."><span class="kw kw-must">MUST</span><span class="rq">Otherwise, the injecting agent MUST add an Injection-Date header field containing the current date and time.</span></li></ul></section><section class="reqsec" id="s3-5-1"><h3>3.5.1 Forwarding Messages to a Moderator</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="an injecting agent must forward the proto-article to the moderator of the leftmost moderated group listed in the newsgroups header field, customarily via email."><span class="kw kw-must">MUST</span><span class="rq">An injecting agent MUST forward the proto-article to the moderator of the leftmost moderated group listed in the Newsgroups header field, customarily via email.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="this should be done by creating an email message with a content-type of application/news-transmission with the usage parameter set to &quot;moderate&quot;."><span class="kw kw-should">SHOULD</span><span class="rq">This SHOULD be done by creating an email message with a Content-Type of application/news-transmission with the usage parameter set to &quot;moderate&quot;.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the body should not contain any content other than the message."><span class="kw kw-should">SHOULD NOT</span><span class="rq">The body SHOULD NOT contain any content other than the message.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the existing message-id header field should be retained."><span class="kw kw-should">SHOULD</span><span class="rq">The existing Message-ID header field SHOULD be retained.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="accordingly, the first method should not be used unless the moderator to which it is being forwarded is known to be able to handle this method."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Accordingly, the first method SHOULD NOT be used unless the moderator to which it is being forwarded is known to be able to handle this method.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="forwarding proto-articles to moderators via email is the most general method and the most common in large netnews networks such as usenet, but any means of forwarding the article that preserves it without injecting it may be used."><span class="kw kw-may">MAY</span><span class="rq">Forwarding proto-articles to moderators via email is the most general method and the most common in large Netnews networks such as Usenet, but any means of forwarding the article that preserves it without injecting it MAY be used.</span></li></ul></section><section class="reqsec" id="s3-6"><h3>3.6 Duties of a Relaying Agent</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="to avoid bypass of injecting agent policies and forgery of path and injection-info headers, relaying agents should accept articles only from trusted agents."><span class="kw kw-should">SHOULD</span><span class="rq">To avoid bypass of injecting agent policies and forgery of Path and Injection-Info headers, relaying agents SHOULD accept articles only from trusted agents.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="an article should not be relayed unless the sending agent has been configured to supply, and the receiving agent to receive, at least one of the &lt;newsgroup-name&gt;s in its newsgroups header field and at least one of the &lt;dist-name&gt;s in its distribution header field (if present)."><span class="kw kw-should">SHOULD NOT</span><span class="rq">An article SHOULD NOT be relayed unless the sending agent has been configured to supply, and the receiving agent to receive, at least one of the &lt;newsgroup-name&gt;s in its Newsgroups header field and at least one of the &lt;dist-name&gt;s in its Distribution header field (if present).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="exceptionally, control messages creating or removing newsgroups (newgroup or rmgroup control messages, for example) should be relayed if the affected group appears in its newsgroups header field and both the sending and receiving relaying agents are configured to relay a newsgroup of that name (whether or not such a newsgroup exists)."><span class="kw kw-should">SHOULD</span><span class="rq">Exceptionally, control messages creating or removing newsgroups (newgroup or rmgroup control messages, for example) SHOULD be relayed if the affected group appears in its Newsgroups header field and both the sending and receiving relaying agents are configured to relay a newsgroup of that name (whether or not such a newsgroup exists).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="in order to avoid unnecessary relaying attempts, an article should not be relayed if the &lt;path-identity&gt; of the receiving agent (or some known alias thereof) appears as a &lt;path-identity&gt; (excluding within the &lt;tail-entry&gt; or following a &quot;posted&quot; &lt;diag-keyword&gt;) in its path header field."><span class="kw kw-should">SHOULD NOT</span><span class="rq">In order to avoid unnecessary relaying attempts, an article SHOULD NOT be relayed if the &lt;path-identity&gt; of the receiving agent (or some known alias thereof) appears as a &lt;path-identity&gt; (excluding within the &lt;tail-entry&gt; or following a &quot;POSTED&quot; &lt;diag-keyword&gt;) in its Path header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must reject any article without a newsgroups header field or message-id header field, or without either an injection-date or date header field."><span class="kw kw-must">MUST</span><span class="rq">It MUST reject any article without a Newsgroups header field or Message-ID header field, or without either an Injection-Date or Date header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must examine the injection-date header field or, if absent, the date header field, and reject the article if that date is more than 24 hours into the future."><span class="kw kw-must">MUST</span><span class="rq">It MUST examine the Injection-Date header field or, if absent, the Date header field, and reject the article if that date is more than 24 hours into the future.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may reject articles with dates in the future with a smaller margin than 24 hours."><span class="kw kw-may">MAY</span><span class="rq">It MAY reject articles with dates in the future with a smaller margin than 24 hours.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must reject any article that has already been accepted."><span class="kw kw-must">MUST</span><span class="rq">It MUST reject any article that has already been accepted.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if it implements one of the mechanisms described in section 3.3, this means that it must reject any article whose date falls outside the cutoff interval since it won&#x27;t know whether or not such articles had been accepted previously."><span class="kw kw-must">MUST</span><span class="rq">If it implements one of the mechanisms described in Section 3.3, this means that it MUST reject any article whose date falls outside the cutoff interval since it won&#x27;t know whether or not such articles had been accepted previously.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any article that does not include all the mandatory header fields."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any article that does not include all the mandatory header fields.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may reject any article that contains header fields that do not have valid contents."><span class="kw kw-may">MAY</span><span class="rq">It MAY reject any article that contains header fields that do not have valid contents.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any article that matches an already-received cancel control message or the contents of the supersedes header field of an accepted article, provided that the relaying agent has chosen (on the basis of local site policy) to honor that cancel control message or supersedes header field."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any article that matches an already-received cancel control message or the contents of the Supersedes header field of an accepted article, provided that the relaying agent has chosen (on the basis of local site policy) to honor that cancel control message or Supersedes header field.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may reject any article without an approved header field posted to a newsgroup known to be moderated."><span class="kw kw-may">MAY</span><span class="rq">It MAY reject any article without an Approved header field posted to a newsgroup known to be moderated.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must update the path header field as described in section 3.2.1."><span class="kw kw-must">MUST</span><span class="rq">It MUST update the Path header field as described in Section 3.2.1.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may delete any xref header field already present."><span class="kw kw-may">MAY</span><span class="rq">It MAY delete any Xref header field already present.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may add a new xref header field for its own use (but recall that [rfc5536] permits at most one such header field)."><span class="kw kw-may">MAY</span><span class="rq">It MAY add a new Xref header field for its own use (but recall that [RFC5536] permits at most one such header field).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="relaying agents should, where possible in the underlying transport, inform the agent that passed the article to the relaying agent if the article was rejected."><span class="kw kw-should">SHOULD</span><span class="rq">Relaying agents SHOULD, where possible in the underlying transport, inform the agent that passed the article to the relaying agent if the article was rejected.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="relaying agents must not inform any other external entity of the rejection of an article unless that external entity has explicitly requested that it be informed of such errors."><span class="kw kw-must">MUST NOT</span><span class="rq">Relaying agents MUST NOT inform any other external entity of the rejection of an article unless that external entity has explicitly requested that it be informed of such errors.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="relaying agents must not alter, delete, or rearrange any part of an article except for the path and xref header fields."><span class="kw kw-must">MUST NOT</span><span class="rq">Relaying agents MUST NOT alter, delete, or rearrange any part of an article except for the Path and Xref header fields.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="they must not modify the body of articles in any way."><span class="kw kw-must">MUST NOT</span><span class="rq">They MUST NOT modify the body of articles in any way.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if an article is not acceptable as is, the article must be rejected rather than modified."><span class="kw kw-must">MUST</span><span class="rq">If an article is not acceptable as is, the article MUST be rejected rather than modified.</span></li></ul></section><section class="reqsec" id="s3-7"><h3>3.7 Duties of a Serving Agent</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="if the serving agent stores articles by newsgroup, control messages should not be stored in the newsgroups listed in the control message&#x27;s newsgroups header field."><span class="kw kw-should">SHOULD NOT</span><span class="rq">If the serving agent stores articles by newsgroup, control messages SHOULD NOT be stored in the newsgroups listed in the control message&#x27;s Newsgroups header field.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="instead, they should be stored in a newsgroup in the hierarchy &quot;control&quot;, which is reserved for this purpose."><span class="kw kw-should">SHOULD</span><span class="rq">Instead, they SHOULD be stored in a newsgroup in the hierarchy &quot;control&quot;, which is reserved for this purpose.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="a serving agent must have available a list (possibly empty) of moderated groups for which it accepts articles so that it can reject unapproved articles posted to moderated groups."><span class="kw kw-must">MUST</span><span class="rq">A serving agent MUST have available a list (possibly empty) of moderated groups for which it accepts articles so that it can reject unapproved articles posted to moderated groups.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must reject any article that does not include all the mandatory header fields or any article that contains header fields that do not have valid contents."><span class="kw kw-must">MUST</span><span class="rq">It MUST reject any article that does not include all the mandatory header fields or any article that contains header fields that do not have valid contents.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should reject any article that matches an already-received and honored cancel message or supersedes header field, following the same rules as a relaying agent (section 3.6)."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD reject any article that matches an already-received and honored cancel message or Supersedes header field, following the same rules as a relaying agent (Section 3.6).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must reject any article without an approved header field posted to any newsgroup listed as moderated."><span class="kw kw-must">MUST</span><span class="rq">It MUST reject any article without an Approved header field posted to any newsgroup listed as moderated.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it must remove any xref header field from each article (except when specially configured to preserve the &lt;article-locator&gt;s set by the sending site)."><span class="kw kw-must">MUST</span><span class="rq">It MUST remove any Xref header field from each article (except when specially configured to preserve the &lt;article-locator&gt;s set by the sending site).</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it then may (and usually will) add a new xref header field (but recall that [rfc5536] permits at most one such header field)."><span class="kw kw-may">MAY</span><span class="rq">It then MAY (and usually will) add a new Xref header field (but recall that [RFC5536] permits at most one such header field).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="serving agents must not create new newsgroups simply because an unrecognized &lt;newsgroup-name&gt; occurs in a newsgroups header field."><span class="kw kw-must">MUST NOT</span><span class="rq">Serving agents MUST NOT create new newsgroups simply because an unrecognized &lt;newsgroup-name&gt; occurs in a Newsgroups header field.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="serving agents must not alter, delete, or rearrange any part of an article except for the path and xref header fields."><span class="kw kw-must">MUST NOT</span><span class="rq">Serving agents MUST NOT alter, delete, or rearrange any part of an article except for the Path and Xref header fields.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="they must not modify the body of the articles in any way."><span class="kw kw-must">MUST NOT</span><span class="rq">They MUST NOT modify the body of the articles in any way.</span></li></ul></section><section class="reqsec" id="s3-9"><h3>3.9 Duties of a Moderator</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="moderators who may receive articles via email should be prepared to accept articles in either format."><span class="kw kw-should">SHOULD</span><span class="rq">Moderators who may receive articles via email SHOULD be prepared to accept articles in either format.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="this forwarding should be done following the procedure in section 3.5.1."><span class="kw kw-should">SHOULD</span><span class="rq">This forwarding SHOULD be done following the procedure in Section 3.5.1.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="it may be done by rotating the &lt;newsgroup-name&gt;s in the newsgroups header field so that the leftmost unapproved newsgroup is the leftmost moderated newsgroup in that field and then posting it, letting the injecting agent do the forwarding."><span class="kw kw-may">MAY</span><span class="rq">It MAY be done by rotating the &lt;newsgroup-name&gt;s in the Newsgroups header field so that the leftmost unapproved newsgroup is the leftmost moderated newsgroup in that field and then posting it, letting the injecting agent do the forwarding.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="however, when using this mechanism, they must first ensure that the article contains no approved header field."><span class="kw kw-must">MUST</span><span class="rq">However, when using this mechanism, they MUST first ensure that the article contains no Approved header field.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="moderators are also encouraged to retain the date header field unless it appears to be stale (72 hours or more in the past) for reasons understood by the moderator (such as delays in the moderation process), in which case they may substitute the current date."><span class="kw kw-may">MAY</span><span class="rq">Moderators are also encouraged to retain the Date header field unless it appears to be stale (72 hours or more in the past) for reasons understood by the moderator (such as delays in the moderation process), in which case they MAY substitute the current date.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="any injection-date, injection-info, or xref header fields already present must be removed."><span class="kw kw-must">MUST</span><span class="rq">Any Injection-Date, Injection-Info, or Xref header fields already present MUST be removed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="any path header field must either be removed or truncated to only those entries following its &quot;posted&quot; &lt;diag-keyword&gt;, if any."><span class="kw kw-must">MUST</span><span class="rq">Any Path header field MUST either be removed or truncated to only those entries following its &quot;POSTED&quot; &lt;diag-keyword&gt;, if any.</span></li></ul></section><section class="reqsec" id="s3-10"><h3>3.10 Duties of a Gateway</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="to prevent this, a gateway must take precautions against loops, as detailed below."><span class="kw kw-must">MUST</span><span class="rq">To prevent this, a gateway MUST take precautions against loops, as detailed below.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the transformations applied to the message should be as minimal as possible while still accomplishing the gatewaying."><span class="kw kw-should">SHOULD</span><span class="rq">The transformations applied to the message SHOULD be as minimal as possible while still accomplishing the gatewaying.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if bidirectional gatewaying (both an incoming and an outgoing gateway) is being set up between netnews and some other medium, the incoming and outgoing gateways should be coordinated to avoid unintended reinjection of gated articles."><span class="kw kw-should">SHOULD</span><span class="rq">If bidirectional gatewaying (both an incoming and an outgoing gateway) is being set up between Netnews and some other medium, the incoming and outgoing gateways SHOULD be coordinated to avoid unintended reinjection of gated articles.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="circular gatewaying (gatewaying a message into another medium and then back into netnews) should not be done; encapsulation of the article should be used instead where this is necessary."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Circular gatewaying (gatewaying a message into another medium and then back into Netnews) SHOULD NOT be done; encapsulation of the article SHOULD be used instead where this is necessary.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="newsgroups intended to be bidirectionally gated to a mailing list should therefore be moderated where possible, even if the moderator"><span class="kw kw-should">SHOULD</span><span class="rq">Newsgroups intended to be bidirectionally gated to a mailing list SHOULD therefore be moderated where possible, even if the moderator</span></li></ul></section><section class="reqsec" id="s3-10-2"><h3>3.10.2 Duties of an Incoming Gateway</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="an incoming gateway must not gate the same message twice."><span class="kw kw-must">MUST NOT</span><span class="rq">An incoming gateway MUST NOT gate the same message twice.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="it may not be possible to ensure this in the face of mangling or modification of the message, but at the very least a gateway, when given a copy of a message that it has already gated and that is identical except for trace header fields (like received in email or path in netnews), must not gate the message again."><span class="kw kw-must">MUST NOT</span><span class="rq">It may not be possible to ensure this in the face of mangling or modification of the message, but at the very least a gateway, when given a copy of a message that it has already gated and that is identical except for trace header fields (like Received in Email or Path in Netnews), MUST NOT gate the message again.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="an incoming gateway should take precautions against having this rule bypassed by modifications of the message that can be anticipated."><span class="kw kw-should">SHOULD</span><span class="rq">An incoming gateway SHOULD take precautions against having this rule bypassed by modifications of the message that can be anticipated.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="news articles prepared by gateways must be valid news proto-articles (see section 3.4.1)."><span class="kw kw-must">MUST</span><span class="rq">News articles prepared by gateways MUST be valid news proto-articles (see Section 3.4.1).</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the gateway must then pass the article to an injecting agent, not directly to a relaying agent."><span class="kw kw-must">MUST</span><span class="rq">The gateway MUST then pass the article to an injecting agent, not directly to a relaying agent.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="incoming gateways must not pass control messages (articles containing a control or supersedes header field) without removing or renaming that header field."><span class="kw kw-must">MUST NOT</span><span class="rq">Incoming gateways MUST NOT pass control messages (articles containing a Control or Supersedes header field) without removing or renaming that header field.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="gateways may, however, generate cancel control messages for messages they have gatewayed."><span class="kw kw-may">MAY</span><span class="rq">Gateways MAY, however, generate cancel control messages for messages they have gatewayed.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if a gateway receives a message that it can determine is a valid equivalent of a cancel control message in the medium it is gatewaying, it should discard that message without gatewaying it, generate a corresponding cancel control message of its own, and inject that cancel control message."><span class="kw kw-should">SHOULD</span><span class="rq">If a gateway receives a message that it can determine is a valid equivalent of a cancel control message in the medium it is gatewaying, it SHOULD discard that message without gatewaying it, generate a corresponding cancel control message of its own, and inject that cancel control message.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if there is a message identifier that fills a role similar to that of the message-id header field in news, it should be used in the formation of the message identifier of the news article, perhaps with transformations required to meet the uniqueness requirement of netnews and with the removal of any comments so as to comply with the syntax in section 3.1.3 of [rfc5536]."><span class="kw kw-should">SHOULD</span><span class="rq">If there is a message identifier that fills a role similar to that of the Message-ID header field in news, it SHOULD be used in the formation of the message identifier of the news article, perhaps with transformations required to meet the uniqueness requirement of Netnews and with the removal of any comments so as to comply with the syntax in Section 3.1.3 of [RFC5536].</span></li><li class="lv-should" data-group="should" data-quoted data-terms="such transformations should be designed so that two messages with the same identifier generate the same message-id header field."><span class="kw kw-should">SHOULD</span><span class="rq">Such transformations SHOULD be designed so that two messages with the same identifier generate the same Message-ID header field.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="exceptionally, if there are multiple incoming gateways for a particular set of messages, each to a different newsgroup(s), each one should generate a message identifier unique to that gateway."><span class="kw kw-should">SHOULD</span><span class="rq">Exceptionally, if there are multiple incoming gateways for a particular set of messages, each to a different newsgroup(s), each one SHOULD generate a message identifier unique to that gateway.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="each incoming gateway nonetheless must ensure that it does not gate the same message twice."><span class="kw kw-must">MUST</span><span class="rq">Each incoming gateway nonetheless MUST ensure that it does not gate the same message twice.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="if no date information is available, the gateway may supply a date header field with the gateway&#x27;s current date."><span class="kw kw-may">MAY</span><span class="rq">If no date information is available, the gateway MAY supply a Date header field with the gateway&#x27;s current date.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if only partial information is available (such as date but not time), this should be fleshed out to a full date by adding default values rather than by discarding this information."><span class="kw kw-should">SHOULD</span><span class="rq">If only partial information is available (such as date but not time), this SHOULD be fleshed out to a full Date by adding default values rather than by discarding this information.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="an incoming gateway must add a sender header field to the news article it forms by containing the &lt;mailbox&gt; of the administrator of the gateway."><span class="kw kw-must">MUST</span><span class="rq">An incoming gateway MUST add a Sender header field to the news article it forms by containing the &lt;mailbox&gt; of the administrator of the gateway.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the &lt;display-name&gt; portion of this &lt;mailbox&gt; should indicate that the entity responsible for injection of the message is a gateway."><span class="kw kw-should">SHOULD</span><span class="rq">The &lt;display-name&gt; portion of this &lt;mailbox&gt; SHOULD indicate that the entity responsible for injection of the message is a gateway.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the original message already had a sender header field, it should be renamed to original-sender so that its contents can be preserved."><span class="kw kw-should">SHOULD</span><span class="rq">If the original message already had a Sender header field, it SHOULD be renamed to Original-Sender so that its contents can be preserved.</span></li></ul></section><section class="reqsec" id="s4"><h3>4 Media Types</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="the media type message/rfc822 (defined in section 5.2.1 of [rfc2046]) should be used in its place."><span class="kw kw-should">SHOULD</span><span class="rq">The media type message/rfc822 (defined in Section 5.2.1 of [RFC2046]) SHOULD be used in its place.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="encoding considerations: a transfer-encoding different from that of the article transmitted may be supplied to ensure correct transmission over some 7bit transport medium."><span class="kw kw-may">MAY</span><span class="rq">Encoding considerations: A transfer-encoding different from that of the article transmitted MAY be supplied to ensure correct transmission over some 7bit transport medium.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the entity receiving the article may only implement one type of agent, in which case the parameter may be omitted."><span class="kw kw-may">MAY</span><span class="rq">The entity receiving the article may only implement one type of agent, in which case the parameter MAY be omitted.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="optional parameters: charset, which must be a charset registered for use with mime text types."><span class="kw kw-must">MUST</span><span class="rq">Optional parameters: charset, which MUST be a charset registered for use with MIME text types.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="encoding considerations: 7bit or 8bit encoding must be used to maintain compatibility."><span class="kw kw-must">MUST</span><span class="rq">Encoding considerations: 7bit or 8bit encoding MUST be used to maintain compatibility.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="although optional, the &lt;newsgroups-tag&gt; should be included for backward compatibility."><span class="kw kw-should">SHOULD</span><span class="rq">Although optional, the &lt;newsgroups-tag&gt; SHOULD be included for backward compatibility.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="the &lt;newsgroup-description&gt; must not contain any occurrence of the string &quot;(moderated)&quot; within it."><span class="kw kw-must">MUST NOT</span><span class="rq">The &lt;newsgroup-description&gt; MUST NOT contain any occurrence of the string &quot;(Moderated)&quot; within it.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="moderated newsgroups must be marked by appending the case-sensitive text &quot; (moderated)&quot; at the end."><span class="kw kw-must">MUST</span><span class="rq">Moderated newsgroups MUST be marked by appending the case-sensitive text &quot; (Moderated)&quot; at the end.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="using a charset of us- ascii where possible is therefore recommended; if not possible, utf-8 [rfc3629] should be used."><span class="kw kw-should">RECOMMENDED</span><span class="rq">Using a charset of US- ASCII where possible is therefore RECOMMENDED; if not possible, UTF-8 [RFC3629] SHOULD be used.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="regardless of the charset used, the constraints of the above grammar must be met and the &lt;newsgroup-name&gt; must be represented in that charset using the same octets as would be used with a charset of us-ascii."><span class="kw kw-must">MUST</span><span class="rq">Regardless of the charset used, the constraints of the above grammar MUST be met and the &lt;newsgroup-name&gt; MUST be represented in that charset using the same octets as would be used with a charset of US-ASCII.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="this media type therefore must not be used for conveying partial information about a hierarchy; if a group from a given hierarchy is present, all groups"><span class="kw kw-must">MUST NOT</span><span class="rq">This media type therefore MUST NOT be used for conveying partial information about a hierarchy; if a group from a given hierarchy is present, all groups</span></li><li class="lv-must" data-group="must" data-quoted data-terms="that exist in that hierarchy must be listed unless its scope is limited by external information, in which case all groups should be listed."><span class="kw kw-must">MUST</span><span class="rq">that exist in that hierarchy MUST be listed unless its scope is limited by external information, in which case all groups SHOULD be listed.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="in an actual message, the newsgroup name and description must be separated by one or more tabs (htab, ascii %d09), not spaces."><span class="kw kw-must">MUST</span><span class="rq">In an actual message, the newsgroup name and description MUST be separated by one or more tabs (HTAB, ASCII %d09), not spaces.</span></li></ul></section><section class="reqsec" id="s5"><h3>5 Control Messages</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="agents may accept other control message types than those specified below, and must either ignore or reject control messages with unrecognized types."><span class="kw kw-may">MAY</span><span class="rq">Agents MAY accept other control message types than those specified below, and MUST either ignore or reject control messages with unrecognized types.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="contrary to [rfc1036], the presence of a subject header field starting with the string &quot;cmsg &quot; must not cause an article to be interpreted as a control message."><span class="kw kw-must">MUST NOT</span><span class="rq">Contrary to [RFC1036], the presence of a Subject header field starting with the string &quot;cmsg &quot; MUST NOT cause an article to be interpreted as a control message.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="agents may reject an article that has such a subject header field and no control header field as ambiguous."><span class="kw kw-may">MAY</span><span class="rq">Agents MAY reject an article that has such a Subject header field and no Control header field as ambiguous.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="likewise, the presence of a &lt;newsgroup-name&gt; ending in &quot;.ctl&quot; in the newsgroups header field or the presence of an also- control header field must not cause the article to be interpreted as a control message."><span class="kw kw-must">MUST NOT</span><span class="rq">Likewise, the presence of a &lt;newsgroup-name&gt; ending in &quot;.ctl&quot; in the Newsgroups header field or the presence of an Also- Control header field MUST NOT cause the article to be interpreted as a control message.</span></li></ul></section><section class="reqsec" id="s5-1"><h3>5.1 Authentication and Authorization</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="agents acting on control messages should take steps to authenticate control messages before acting on them, as determined by local authorization policy."><span class="kw kw-should">SHOULD</span><span class="rq">Agents acting on control messages SHOULD take steps to authenticate control messages before acting on them, as determined by local authorization policy.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the following descriptions specify the actions that a control message requests, but an agent may always decline to act on any given control message."><span class="kw kw-may">MAY</span><span class="rq">The following descriptions specify the actions that a control message requests, but an agent MAY always decline to act on any given control message.</span></li></ul></section><section class="reqsec" id="s5-2"><h3>5.2 Group Control Messages</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="before honoring any group control message, an agent must check the newsgroup or newsgroups affected by that control message and decline to create any newsgroups not in conformance with the restrictions in section 3.1.4 of [rfc5536]."><span class="kw kw-must">MUST</span><span class="rq">Before honoring any group control message, an agent MUST check the newsgroup or newsgroups affected by that control message and decline to create any newsgroups not in conformance with the restrictions in Section 3.1.4 of [RFC5536].</span></li><li class="lv-must" data-group="must" data-quoted data-terms="all of the group control messages must have an approved header field (section 3.2.1 of [rfc5536])."><span class="kw kw-must">MUST</span><span class="rq">All of the group control messages MUST have an Approved header field (Section 3.2.1 of [RFC5536]).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="group control messages without an approved header field should not be honored."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Group control messages without an Approved header field SHOULD NOT be honored.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="group control messages affecting specific groups (newgroup and rmgroup control messages, for example) should include the &lt;newsgroup- name&gt; for the group or groups affected in their newsgroups header field."><span class="kw kw-should">SHOULD</span><span class="rq">Group control messages affecting specific groups (newgroup and rmgroup control messages, for example) SHOULD include the &lt;newsgroup- name&gt; for the group or groups affected in their Newsgroups header field.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="other newsgroups may be included in the newsgroups header field so that the control message will reach more news servers, but due to the special relaying rules for group control messages (see section 3.6) this is normally unnecessary and may be excessive."><span class="kw kw-may">MAY</span><span class="rq">Other newsgroups MAY be included in the Newsgroups header field so that the control message will reach more news servers, but due to the special relaying rules for group control messages (see Section 3.6) this is normally unnecessary and may be excessive.</span></li></ul></section><section class="reqsec" id="s5-2-1"><h3>5.2.1 The newgroup Control Message</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="if the request is honored, the moderation status of the group should be set in accordance with the presence or absence of the &lt;newgroup- flag&gt; &quot;moderated&quot;."><span class="kw kw-should">SHOULD</span><span class="rq">If the request is honored, the moderation status of the group SHOULD be set in accordance with the presence or absence of the &lt;newgroup- flag&gt; &quot;moderated&quot;.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="other flags may be defined by extensions to this protocol and accepted by agents."><span class="kw kw-may">MAY</span><span class="rq">Other flags MAY be defined by extensions to this protocol and accepted by agents.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if an agent does not recognize the &lt;newgroup-flag&gt; of a newgroup control message, it should ignore that control message."><span class="kw kw-should">SHOULD</span><span class="rq">If an agent does not recognize the &lt;newgroup-flag&gt; of a newgroup control message, it SHOULD ignore that control message.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the body of a newgroup message should contain an entity of type application/news-groupinfo specifying the description of the newsgroup, either as the entire body or as an entity within a multipart/mixed object [rfc2046]."><span class="kw kw-should">SHOULD</span><span class="rq">The body of a newgroup message SHOULD contain an entity of type application/news-groupinfo specifying the description of the newsgroup, either as the entire body or as an entity within a multipart/mixed object [RFC2046].</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if such an entity is present, the moderation status specified therein must match the moderation status specified by the &lt;newgroup-flag&gt;."><span class="kw kw-must">MUST</span><span class="rq">If such an entity is present, the moderation status specified therein MUST match the moderation status specified by the &lt;newgroup-flag&gt;.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="the body of a newgroup message may contain other entities (encapsulated in multipart/mixed) that provide additional information about the newsgroup or the circumstances of the control message."><span class="kw kw-may">MAY</span><span class="rq">The body of a newgroup message MAY contain other entities (encapsulated in multipart/mixed) that provide additional information about the newsgroup or the circumstances of the control message.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="in the absence of an application/news-groupinfo entity, a news server may search the body of the message for the line &quot;for your newsgroups file:&quot; and take the following line as a &lt;newsgroups-line&gt;."><span class="kw kw-may">MAY</span><span class="rq">In the absence of an application/news-groupinfo entity, a news server MAY search the body of the message for the line &quot;For your newsgroups file:&quot; and take the following line as a &lt;newsgroups-line&gt;.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the request is honored and contains a newsgroup description, and if the news server honoring it stores newsgroup descriptions, the stored newsgroup description should be updated to the description specified in the control message, even if no other property of the group has changed."><span class="kw kw-should">SHOULD</span><span class="rq">If the request is honored and contains a newsgroup description, and if the news server honoring it stores newsgroup descriptions, the stored newsgroup description SHOULD be updated to the description specified in the control message, even if no other property of the group has changed.</span></li></ul></section><section class="reqsec" id="s5-2-2"><h3>5.2.2 The rmgroup Control Message</h3><ul class="reqs"><li class="lv-may" data-group="may" data-quoted data-terms="the body of the control message may contain anything, usually an explanatory text."><span class="kw kw-may">MAY</span><span class="rq">The body of the control message MAY contain anything, usually an explanatory text.</span></li></ul></section><section class="reqsec" id="s5-2-3"><h3>5.2.3 The checkgroups Control Message</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="since much existing software does not honor the &lt;chkscope&gt; argument, the body of the checkgroups control message must not contain group statements for newsgroups outside the intended scope and should contain a correct newsgroup list even for sub-hierarchies excluded with &quot;!&quot; &lt;chkscope&gt; terms."><span class="kw kw-must">MUST NOT</span><span class="rq">Since much existing software does not honor the &lt;chkscope&gt; argument, the body of the checkgroups control message MUST NOT contain group statements for newsgroups outside the intended scope and SHOULD contain a correct newsgroup list even for sub-hierarchies excluded with &quot;!&quot; &lt;chkscope&gt; terms.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="news servers, however, must honor &lt;chkscope&gt; as specified here."><span class="kw kw-must">MUST</span><span class="rq">News servers, however, MUST honor &lt;chkscope&gt; as specified here.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="if present, it must increase with every change to the newsgroup list, must not ever decrease, and must be included in all subsequent checkgroups control messages with the same scope."><span class="kw kw-must">MUST</span><span class="rq">If present, it MUST increase with every change to the newsgroup list, MUST NOT ever decrease, and MUST be included in all subsequent checkgroups control messages with the same scope.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if provided, news servers should remember the &lt;chksernr&gt; value of the previous checkgroups control message honored for a particular hierarchy or sub-hierarchy and decline to honor any subsequent checkgroups control message for the same hierarchy or sub-hierarchy with a smaller &lt;chksernr&gt; value or with no &lt;chksernr&gt; value."><span class="kw kw-should">SHOULD</span><span class="rq">If provided, news servers SHOULD remember the &lt;chksernr&gt; value of the previous checkgroups control message honored for a particular hierarchy or sub-hierarchy and decline to honor any subsequent checkgroups control message for the same hierarchy or sub-hierarchy with a smaller &lt;chksernr&gt; value or with no &lt;chksernr&gt; value.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="it should be declared as such with appropriate mime headers, but news servers should interpret checkgroups messages that lack the appropriate mime headers as if the body were of type application/news-checkgroups for backward compatibility."><span class="kw kw-should">SHOULD</span><span class="rq">It SHOULD be declared as such with appropriate MIME headers, but news servers SHOULD interpret checkgroups messages that lack the appropriate MIME headers as if the body were of type application/news-checkgroups for backward compatibility.</span></li></ul></section><section class="reqsec" id="s5-3"><h3>5.3 The cancel Control Message</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="a serving agent that elects to honor a cancel message should make the article unavailable to reading agents (perhaps by deleting it completely)."><span class="kw kw-should">SHOULD</span><span class="rq">A serving agent that elects to honor a cancel message SHOULD make the article unavailable to reading agents (perhaps by deleting it completely).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the cancel control message arrives before the article it targets, news servers choosing to honor it should remember the message identifier that was cancelled and reject the cancelled article when it arrives."><span class="kw kw-should">SHOULD</span><span class="rq">If the cancel control message arrives before the article it targets, news servers choosing to honor it SHOULD remember the message identifier that was cancelled and reject the cancelled article when it arrives.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="to best ensure that it will be relayed to the same news servers as the original message, a cancel control message should have the same newsgroups header field as the message it is cancelling."><span class="kw kw-should">SHOULD</span><span class="rq">To best ensure that it will be relayed to the same news servers as the original message, a cancel control message SHOULD have the same Newsgroups header field as the message it is cancelling.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="cancel control messages listing moderated newsgroups in their newsgroups header field must contain an approved header field like any other article in a moderated newsgroup."><span class="kw kw-must">MUST</span><span class="rq">Cancel control messages listing moderated newsgroups in their Newsgroups header field MUST contain an Approved header field like any other article in a moderated newsgroup.</span></li></ul></section><section class="reqsec" id="s5-4"><h3>5.4 The Supersedes Header Field</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="accordingly, news servers should apply to a supersedes header field the same authentication and authorization checks as they would apply to cancel control messages."><span class="kw kw-should">SHOULD</span><span class="rq">Accordingly, news servers SHOULD apply to a Supersedes header field the same authentication and authorization checks as they would apply to cancel control messages.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="if the supersedes header field is honored, the news server should take the same actions as it would take when honoring a cancel control message for the given target article."><span class="kw kw-should">SHOULD</span><span class="rq">If the Supersedes header field is honored, the news server SHOULD take the same actions as it would take when honoring a cancel control message for the given target article.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="the article containing the supersedes header field, whether or not the supersedes header field is honored, should be handled as a normal article and should not receive the special treatment of control messages described in section 3.7."><span class="kw kw-should">SHOULD</span><span class="rq">The article containing the Supersedes header field, whether or not the Supersedes header field is honored, SHOULD be handled as a normal article and SHOULD NOT receive the special treatment of control messages described in Section 3.7.</span></li></ul></section><section class="reqsec" id="s5-5"><h3>5.5 The ihave and sendme Control Messages</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="the message identifiers should be put in the body of the article, not in the control header field, but news servers may recognize and process message identifiers in the control header field for backward compatibility."><span class="kw kw-should">SHOULD</span><span class="rq">The message identifiers SHOULD be put in the body of the article, not in the Control header field, but news servers MAY recognize and process message identifiers in the Control header field for backward compatibility.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="message identifiers must not be put in the control header field if they are present in the body of the control message."><span class="kw kw-must">MUST NOT</span><span class="rq">Message identifiers MUST NOT be put in the Control header field if they are present in the body of the control message.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="contrary to [rfc1036], the relayer-name must be given as the last argument in the control header field."><span class="kw kw-must">MUST</span><span class="rq">Contrary to [RFC1036], the relayer-name MUST be given as the last argument in the Control header field.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="articles with such a group in their newsgroups header fields should not be sent to any news server other than the one identified by &lt;relayer-name&gt;."><span class="kw kw-should">SHOULD NOT</span><span class="rq">Articles with such a group in their Newsgroups header fields SHOULD NOT be sent to any news server other than the one identified by &lt;relayer-name&gt;.</span></li></ul></section><section class="reqsec" id="s5-6"><h3>5.6 Obsolete Control Messages</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="the following control message types are declared obsolete by this document and should not be sent or honored:"><span class="kw kw-should">SHOULD NOT</span><span class="rq">The following control message types are declared obsolete by this document and SHOULD NOT be sent or honored:</span></li></ul></section><section class="reqsec" id="s6-1"><h3>6.1 Compromise of System Integrity</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="administrators of news servers should therefore take steps to verify the authenticity of control messages as discussed in section 5.1."><span class="kw kw-should">SHOULD</span><span class="rq">Administrators of news servers SHOULD therefore take steps to verify the authenticity of control messages as discussed in Section 5.1.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="articles containing supersedes header fields are effectively cancel control messages and should be subject to the same checks as"><span class="kw kw-should">SHOULD</span><span class="rq">Articles containing Supersedes header fields are effectively cancel control messages and SHOULD be subject to the same checks as</span></li><li class="lv-should" data-group="should" data-quoted data-terms="all article contents, and particularly control message contents, should be handled with care and rigorously verified before any action is taken on the basis of the contents of the article."><span class="kw kw-should">SHOULD</span><span class="rq">All article contents, and particularly control message contents, SHOULD be handled with care and rigorously verified before any action is taken on the basis of the contents of the article.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="injecting agents should verify that messages approved for a moderated newsgroup are being injected by the moderator using authentication information from the underlying transport or some other authentication mechanism arranged with the moderator."><span class="kw kw-should">SHOULD</span><span class="rq">Injecting agents SHOULD verify that messages approved for a moderated newsgroup are being injected by the moderator using authentication information from the underlying transport or some other authentication mechanism arranged with the moderator.</span></li><li class="lv-should" data-group="should" data-quoted data-terms="news servers should use the facilities of the underlying transport to authenticate their peers and reject articles from injecting and relaying agents that do not follow the requirements of this protocol or the netnews network."><span class="kw kw-should">SHOULD</span><span class="rq">News servers SHOULD use the facilities of the underlying transport to authenticate their peers and reject articles from injecting and relaying agents that do not follow the requirements of this protocol or the Netnews network.</span></li></ul></section><section class="reqsec" id="s6-2"><h3>6.2 Denial of Service</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="administrators should therefore obtain a genuine copy of the article from their own serving agent before taking action in response to such a complaint."><span class="kw kw-should">SHOULD</span><span class="rq">Administrators SHOULD therefore obtain a genuine copy of the article from their own serving agent before taking action in response to such a complaint.</span></li></ul></section><section class="reqsec" id="s8-2"><h3>8.2 Informative References</h3><ul class="reqs"><li class="lv-should" data-group="should" data-quoted data-terms="o a new, backward-compatible path header field format that permits standardized embedding of additional trace and authentication information is now recommended."><span class="kw kw-should">RECOMMENDED</span><span class="rq">o A new, backward-compatible Path header field format that permits standardized embedding of additional trace and authentication information is now RECOMMENDED.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="o trimming of the references header field is required, and a mechanism for doing so is defined."><span class="kw kw-must">REQUIRED</span><span class="rq">o Trimming of the References header field is REQUIRED, and a mechanism for doing so is defined.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="o addition of the new injection-date header field is required in some circumstances for posting agents (section 3.4.2) and injecting agents (section 3.5), and must be used by news servers for date checks (section 3.6)."><span class="kw kw-must">MUST</span><span class="rq">o Addition of the new Injection-Date header field is required in some circumstances for posting agents (Section 3.4.2) and injecting agents (Section 3.5), and MUST be used by news servers for date checks (Section 3.6).</span></li><li class="lv-should" data-group="should" data-quoted data-terms="o a new media type is defined for transmitting netnews articles through other media (section 4.1), and moderators should prepare to receive submissions in that format (section 3.5.1)."><span class="kw kw-should">SHOULD</span><span class="rq">o A new media type is defined for transmitting Netnews articles through other media (Section 4.1), and moderators SHOULD prepare to receive submissions in that format (Section 3.5.1).</span></li></ul></section>
+  <p class="empty noresult hidden">Nothing matches that filter.</p>
+</div>
+
+<p class="r"><a href="/rfc/">Every current email RFC</a></p>
+
+</main>
+<footer>
+  <div class="cols">
+    <div>
+      <h2>Tools</h2>
+            <a href="../../check/">Domain check</a>
+      <a href="../../bounce/">Bounce classifier</a>
+      <a href="../../dmarc/">DMARC report reader</a>
+      <a href="../../headers/">Header analyser</a>
+      <a href="../../spf/">SPF lookup counter</a>
+      <a href="../../tools/">All tools</a>
+    </div>
+    <div>
+      <h2>SMTP responses</h2>
+      <a href="../../smtp/">All responses</a>
+      <a href="../../smtp/session/">Anatomy of a session</a>
+    </div>
+    <div>
+      <h2>Research</h2>
+      <a href="../../research/">State of email authentication</a>
+      <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
+    </div>
+    <div>
+      <h2>Elsewhere</h2>
+      <a href="https://github.com/singhrastu">GitHub</a>
+      <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>
+      <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
+    </div>
+  </div>
+  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+     Infrastructure Engineer, Tallinn.
+     Everything here runs in your browser.</p>
+</footer>
+</div>
+<script>
+(function(){
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ticking=false, SY=0;
+  function onScroll(){
+    SY = scrollY/Math.max(1, document.body.scrollHeight-innerHeight);
+    document.documentElement.style.setProperty('--sy', SY.toFixed(4));
+    ticking=false;
+  }
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
+  onScroll();
+
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
+  if(!('IntersectionObserver' in window) || reduce){
+    targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
+  } else {
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('reveal'); io.unobserve(e.target); countUp(e.target);
+      });
+    },{rootMargin:'0px 0px -6% 0px',threshold:.06});
+    targets.forEach(function(n){io.observe(n);});
+  }
+
+  function countUp(root){
+    root.querySelectorAll('.n, .strip b, b').forEach(function(el){
+      if(el.dataset.done) return;
+      var raw=el.textContent, m=raw.match(/[\d][\d.,]*/);
+      if(!m) return;
+      el.dataset.done=1;
+      var end=parseFloat(m[0].replace(/,/g,'')), dec=(m[0].split('.')[1]||'').length;
+      var pre=raw.slice(0,m.index), post=raw.slice(m.index+m[0].length), t0=null;
+      function f(ts){
+        if(!t0)t0=ts;
+        var p=Math.min(1,(ts-t0)/950), e=1-Math.pow(1-p,3), v=end*e;
+        el.textContent = pre+(dec?v.toFixed(dec):Math.round(v).toLocaleString())+post;
+        if(p<1) requestAnimationFrame(f);
+      }
+      el.textContent=pre+(dec?'0.0':'0')+post;
+      requestAnimationFrame(f);
+    });
+  }
+
+  /* The SMTP session types itself out once, when it comes into view.
+     Client lines are typed a character at a time because that is what sending
+     one feels like; server responses land whole, because that is what they do. */
+  (function(){
+    var term=document.getElementById('term'), out=document.getElementById('term-out');
+    if(!term||!out) return;
+    var lines;
+    try{ lines=JSON.parse(term.getAttribute('data-session')); }catch(err){ return; }
+
+    function esc(s){return String(s).replace(/[&<>]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+    function whole(){
+      out.innerHTML=lines.map(function(l){
+        return '<span class="'+l.k+'">'+esc(l.t)+'</span>';}).join('\n');
+    }
+    if(reduce){ whole(); return; }
+
+    var playing=false;
+    function play(){
+      if(playing) return; playing=true;
+      out.innerHTML=''; var i=0;
+      function line(){
+        if(i>=lines.length){ playing=false; return; }
+        var l=lines[i++], sp=document.createElement('span');
+        sp.className=l.k;
+        out.appendChild(sp);
+        out.appendChild(document.createTextNode('\n'));
+        out.parentNode.scrollTop = out.parentNode.scrollHeight;
+        var typed = (l.k==='cmd');
+        if(!typed){ sp.textContent=l.t;
+          setTimeout(line, l.k==='info'?70:(l.k==='c'?150:95)); return; }
+        var j=0;
+        (function ch(){
+          sp.textContent=l.t.slice(0,++j);
+          if(j<l.t.length) setTimeout(ch, 15);
+          else setTimeout(line, 260);
+        })();
+      }
+      line();
+    }
+    if('IntersectionObserver' in window){
+      var to=new IntersectionObserver(function(es){
+        es.forEach(function(en){ if(en.isIntersecting){ play(); to.unobserve(en.target); } });
+      },{threshold:.3});
+      to.observe(term);
+    } else { play(); }
+    term.addEventListener('click',function(){ if(!playing) play(); });
+    term.style.cursor='pointer';
+    term.title='Replay';
+  })();
+
+  /* Living honeycomb: cells brighten near the pointer, and packets route from
+     node to node, which is what this site is about. Pauses when tab is hidden. */
+  if(reduce) return;
+  var cv=document.createElement('canvas');
+  cv.id='hexcanvas'; cv.setAttribute('aria-hidden','true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  var veil=document.createElement('div');
+  veil.className='hexveil'; veil.setAttribute('aria-hidden','true');
+  document.body.insertBefore(veil, cv.nextSibling);
+
+  var ctx=cv.getContext('2d'), DPR=Math.min(2,devicePixelRatio||1);
+  var R=36, nodes=[], packets=[], mx=-1e4, my=-1e4, raf=null;
+  function accent(){return (getComputedStyle(document.documentElement).getPropertyValue('--hex')||'#1f4e79').trim();}
+  function rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');
+    var n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255].join(',');}
+  var C=rgb(accent());
+
+  function build(){
+    cv.width=innerWidth*DPR; cv.height=innerHeight*DPR;
+    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    var dx=R*Math.sqrt(3), dy=R*1.5; nodes=[];
+    for(var row=-2,y=-dy*2; y<innerHeight+dy*3; row++,y+=dy)
+      for(var x=(row%2?dx/2:0)-dx; x<innerWidth+dx; x+=dx) nodes.push({x:x,y:y,g:0});
+    packets=[]; for(var i=0;i<16;i++) spawn();
+  }
+  function spawn(){ if(!nodes.length)return;
+    var a=nodes[(Math.random()*nodes.length)|0];
+    packets.push({x:a.x,y:a.y,tx:a.x,ty:a.y,t:1,sp:.007+Math.random()*.011,life:0}); }
+  function hex(x,y,r){ctx.beginPath();
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30),px=x+r*Math.cos(a),py=y+r*Math.sin(a);
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.closePath();}
+
+  function draw(){
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    var drift=SY*-130;
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i], y=n.y+drift;
+      if(y<-R*2||y>innerHeight+R*2) continue;
+      var d=Math.hypot(n.x-mx,y-my), near=d<210?(1-d/210):0;
+      n.g+=(near-n.g)*.1;
+      ctx.strokeStyle='rgba('+C+','+(.07+n.g*.5).toFixed(3)+')';
+      ctx.lineWidth=1+n.g*1.1;
+      hex(n.x,y,R*.9); ctx.stroke();
+      if(n.g>.2){ctx.fillStyle='rgba('+C+','+(n.g*.075).toFixed(3)+')';ctx.fill();}
+    }
+    for(var j=packets.length-1;j>=0;j--){
+      var p=packets[j]; p.t+=p.sp;
+      if(p.t>=1){
+        var fx=p.tx, fy=p.ty, cand=null, best=1e9;
+        for(var k=0;k<26;k++){var q=nodes[(Math.random()*nodes.length)|0];
+          var dd=Math.hypot(q.x-fx,q.y-fy);
+          if(dd>R*1.3&&dd<R*2.3&&dd<best){best=dd;cand=q;}}
+        if(!cand||p.life>28){packets.splice(j,1);spawn();continue;}
+        p.x=fx;p.y=fy;p.tx=cand.x;p.ty=cand.y;p.t=0;p.life++;
+      }
+      var e=p.t<.5?2*p.t*p.t:1-Math.pow(-2*p.t+2,2)/2;
+      var cx=p.x+(p.tx-p.x)*e, cy=p.y+(p.ty-p.y)*e+drift;
+      if(cy<-40||cy>innerHeight+40) continue;
+      var g=ctx.createLinearGradient(p.x,p.y+drift,cx,cy);
+      g.addColorStop(0,'rgba('+C+',0)'); g.addColorStop(1,'rgba('+C+',.34)');
+      ctx.strokeStyle=g; ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(p.x,p.y+drift);ctx.lineTo(cx,cy);ctx.stroke();
+      ctx.fillStyle='rgba('+C+',.6)';
+      ctx.beginPath();ctx.arc(cx,cy,2,0,7);ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  addEventListener('resize',build,{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){cancelAnimationFrame(raf);raf=null;} else if(!raf){raf=requestAnimationFrame(draw);}});
+  build(); draw();
+})();
+</script>
+
+<script type="module" src="/js/filter.js"></script>
+</body>
+</html>

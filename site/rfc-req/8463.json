@@ -1,0 +1,1 @@
+{"num":8463,"id":"RFC8463","uses_2119":true,"requirements":[{"section":"5","heading":"Choice and Strength of Keys and Algorithms","level":"should","keyword":"SHOULD","text":"Signers SHOULD implement and verifiers MUST implement the Ed25519-SHA256 algorithm."}]}
