@@ -43,7 +43,9 @@ PERSON = {
     "same_as": [
         "https://www.linkedin.com/in/rastu",
         "https://github.com/singhrastu",
+        "https://orcid.org/0009-0002-0526-3005",
     ],
+    "orcid": "0009-0002-0526-3005",
     "knows_about": [
         "Email infrastructure", "Email deliverability", "Email security", "SMTP",
         "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka",
@@ -126,6 +128,15 @@ def person_ld():
         },
         "knowsAbout": PERSON["knows_about"],
         "sameAs": PERSON["same_as"],
+        # A persistent researcher identifier. Unlike a profile URL this is a formal
+        # identifier, which is what links the dataset, the site and any future
+        # publication to one entity.
+        "identifier": {
+            "@type": "PropertyValue",
+            "propertyID": "ORCID",
+            "value": PERSON["orcid"],
+            "url": f"https://orcid.org/{PERSON['orcid']}",
+        },
         "worksFor": {"@type": "Organization", "name": "Pipedrive"},
         "alumniOf": [
             {"@type": "Organization", "name": "Adobe"},
@@ -190,7 +201,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
   <p>{e(PERSON['name'])}, {e(PERSON['job_title'])} specialising in
      {e(PERSON['specialism'].lower())}. Based in {e(PERSON['locality'])}, Estonia.</p>
   <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-     <a href="https://github.com/singhrastu">GitHub</a></p>
+     <a href="https://github.com/singhrastu">GitHub</a> &middot;
+     <a href="https://orcid.org/{PERSON['orcid']}">ORCID</a></p>
 </footer>
 </div>
 </body>
@@ -397,7 +409,8 @@ operating these systems rather than from the specifications.</p>
 
 <h2>Contact</h2>
 <p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-   <a href="https://github.com/singhrastu">GitHub</a></p>
+   <a href="https://github.com/singhrastu">GitHub</a> &middot;
+   <a href="https://orcid.org/0009-0002-0526-3005">ORCID 0009-0002-0526-3005</a></p>
 """
     ld = {
         "@context": "https://schema.org",
