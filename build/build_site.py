@@ -256,17 +256,38 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
 .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
 
-/* ---- timeline ---------------------------------------------------------- */
+/* ---- timeline, as disclosures ------------------------------------------ */
 .tl{position:relative;margin:1.2rem 0;padding-left:1.55rem}
-.tl::before{content:"";position:absolute;left:5px;top:.6rem;bottom:.6rem;width:1px;background:var(--line)}
-.tl .e{position:relative;padding:.5rem 0 .95rem}
-.tl .e::before{content:"";position:absolute;left:-1.55rem;top:.95rem;width:9px;height:9px;
-   border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:border-color .25s}
-.tl .e:hover::before{border-color:var(--accent)}
+.tl::before{content:"";position:absolute;left:5px;top:.9rem;bottom:.9rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.15rem 0 .35rem;border-bottom:1px solid var(--line-2)}
+.tl .e:last-child{border-bottom:0}
+.tl .e::before{content:"";position:absolute;left:-1.55rem;top:1.05rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);
+   transition:border-color .25s,background .25s;z-index:1}
 .tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
-.tl .role{font-weight:650;font-size:.97rem}
-.tl .org{color:var(--ink-2);font-size:.895rem}
-.tl .yr{color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .e[open]::before,.tl .e:hover::before{border-color:var(--accent)}
+.tl summary{list-style:none;cursor:pointer;padding:.55rem 1.6rem .55rem 0;position:relative;
+   border-radius:8px;transition:background .2s}
+.tl summary::-webkit-details-marker{display:none}
+.tl summary:hover{background:var(--surface)}
+.tl summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl summary::after{content:"";position:absolute;right:.45rem;top:1.15rem;width:7px;height:7px;
+   border-right:1.6px solid var(--ink-3);border-bottom:1.6px solid var(--ink-3);
+   transform:rotate(45deg);transition:transform .25s,border-color .25s}
+.tl .e[open] summary::after{transform:rotate(-135deg);border-color:var(--accent)}
+.tl .role{display:block;font-weight:650;font-size:.97rem;color:var(--ink)}
+.tl .org{display:block;color:var(--ink-2);font-size:.895rem}
+.tl .yr{display:block;color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .yr .n{margin-left:.6rem;color:var(--accent);opacity:.75;font-variant-numeric:normal}
+.tl .e[open] .yr .n{opacity:0}
+.tl .ach{margin:.2rem 0 .95rem;padding-left:1.05rem}
+.tl .ach li{margin:.42rem 0;font-size:.915rem;line-height:1.6;color:var(--ink-2)}
+.tl .ach li::marker{color:var(--accent)}
+.tl .e[open] .ach li{animation:rise .5s cubic-bezier(.22,.8,.3,1) both}
+.tl .e[open] .ach li:nth-child(2){animation-delay:.03s}
+.tl .e[open] .ach li:nth-child(3){animation-delay:.06s}
+.tl .e[open] .ach li:nth-child(4){animation-delay:.09s}
+.tl .e[open] .ach li:nth-child(n+5){animation-delay:.12s}
 
 /* ---- section heading with a lede --------------------------------------- */
 .sechead{margin:3.4rem 0 1rem}
@@ -285,15 +306,17 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .term .bar span{margin-left:.5rem;font-size:.74rem;color:var(--ink-3);
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .term pre{margin:0;border:0;border-radius:0;background:none;padding:1rem 1.1rem 1.15rem;
-  font-size:.795rem;line-height:1.72;min-height:19.5rem;white-space:pre-wrap;word-break:break-word}
+  font-size:.795rem;line-height:1.72;height:23rem;overflow-y:auto;overscroll-behavior:contain;
+  white-space:pre-wrap;word-break:break-word;scrollbar-width:thin}
 .term .c{color:var(--ink)}                       /* what we send */
 .term .s{color:var(--ink-3)}                     /* what the server says */
 .term .ok{color:var(--ok);font-weight:600}       /* a 2xx */
 .term .cmd{color:var(--accent);font-weight:600}  /* the shell line */
+.term .info{color:var(--ink-3);opacity:.8}       /* swaks talking, not the server */
 .term .cur{display:inline-block;width:.5em;height:1.05em;vertical-align:-.16em;
   background:var(--accent);animation:blink 1.05s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-@media(max-width:34rem){.term pre{font-size:.72rem;min-height:17rem}}
+@media(max-width:34rem){.term pre{font-size:.695rem;height:19rem}}
 
 /* ---- the classifier ----------------------------------------------------
    The site's one interactive tool. Same ruleset as smtpsift, exported at build
@@ -354,6 +377,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   #hexcanvas{display:none}
   h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
   .verdict{transition:none}
+  .tl .e[open] .ach li{animation:none}
   .term .cur{animation:none;opacity:0}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
@@ -436,8 +460,10 @@ JS = """
         sp.className=l.k;
         out.appendChild(sp);
         out.appendChild(document.createTextNode('\\n'));
-        var typed = (l.k==='c'||l.k==='cmd');
-        if(!typed){ sp.textContent=l.t; setTimeout(line, 190+Math.min(340,l.t.length*4)); return; }
+        out.parentNode.scrollTop = out.parentNode.scrollHeight;
+        var typed = (l.k==='cmd');
+        if(!typed){ sp.textContent=l.t;
+          setTimeout(line, l.k==='info'?70:(l.k==='c'?150:95)); return; }
         var j=0;
         (function ch(){
           sp.textContent=l.t.slice(0,++j);
@@ -702,17 +728,11 @@ STACK = [
                   "Grafana", "AWS", "Azure"]),
 ]
 
-# Career, single source. The home page does not repeat it; that is the About
-# page's job and duplicating it across both would split the entity signal.
-CAREER = [
-    ("Infrastructure Engineer", "Pipedrive", "Tallinn, Estonia", "2022 &ndash; present"),
-    ("Technical Consultant, Email Infrastructure", "Adobe", "Bangalore, India", "2020 &ndash; 2022"),
-    ("Email Infrastructure Lead", "Experiture Omni-Channel Marketing Platform", "Remote",
-     "2019 &ndash; 2020"),
-    ("Email Deliverability Specialist", "Zeta Global", "Hyderabad, India", "2018 &ndash; 2019"),
-    ("Technology Executive, Email Deliverability",
-     "IntraSoft Technologies Limited (123Greetings.com)", "Kolkata, India", "2015 &ndash; 2018"),
-]
+# Career comes from the resume, via build/export_career.py. The resume is the
+# source of truth about what he has done; a site that disagrees with the CV is
+# worse than no site.
+with open(os.path.join(HERE, "career.json"), encoding="utf8") as _fh:
+    CAREER = json.load(_fh)["roles"]
 
 
 def stack_html():
@@ -723,33 +743,74 @@ def stack_html():
 
 
 def career_html():
-    return '<div class="tl">' + "".join(
-        f'<div class="e"><div class="role">{r}</div>'
-        f'<div class="org">{o} &middot; {loc}</div><div class="yr">{y}</div></div>'
-        for r, o, loc, y in CAREER) + "</div>"
+    """The career as a set of disclosures.
+
+    <details> rather than JavaScript, for two reasons: it works with no script and
+    it keeps every achievement in the DOM, so search engines and LLM retrievers
+    read all of it whether or not a human ever clicks. A tab widget would hide the
+    content from exactly the readers this page exists for.
+    """
+    out = ['<div class="tl">']
+    for r in CAREER:
+        ach = "".join(f"<li>{e(a)}</li>" for a in r["achievements"])
+        loc = f" &middot; {e(r['location'])}" if r.get("location") else ""
+        out.append(
+            f'<details class="e">'
+            f'<summary>'
+            f'<span class="role">{e(r["title"])}</span>'
+            f'<span class="org">{e(r["company"])}{loc}</span>'
+            f'<span class="yr">{e(r["years"])}'
+            f'<span class="n">{len(r["achievements"])} achievements</span></span>'
+            f'</summary>'
+            f'<ul class="ach">{ach}</ul>'
+            f"</details>")
+    out.append("</div>")
+    return "".join(out)
 
 
-# A real handshake. Typed out on the home page, because it says what this work is
-# without a sentence of explanation. Tuples are (css class, text).
+# A real swaks session, captured against Gmail's MX on 2026-09-18 with
+# --quit-after RCPT, so the handshake completes and no message is ever sent:
+#
+#   swaks --to postmaster@gmail.com --from rastu@rastu.tech \
+#         --server gmail-smtp-in.l.google.com --ehlo rastu.tech --tls \
+#         --quit-after RCPT
+#
+# The only edit is the client IP, replaced with an RFC 5737 documentation
+# address. Every server response is verbatim.
+#
+# swaks prefixes are worth knowing if you are reading this off the page:
+#   ===  swaks talking to you        ->  sent in the clear    <-  received in the clear
+#                                    ~>  sent over TLS        <~  received over TLS
+# The second EHLO is not a mistake. STARTTLS resets the session, so the
+# capabilities have to be asked for again inside the encrypted channel.
 SMTP_SESSION = [
-    ("cmd", "$ swaks --to you@gmail.com --from rastu@rastu.tech --server gmail-smtp-in.l.google.com"),
-    ("s",   "220 mx.google.com ESMTP d9-20020a Ah - gsmtp"),
-    ("c",   "EHLO mail.rastu.tech"),
-    ("s",   "250-mx.google.com at your service, [203.0.113.9]"),
-    ("s",   "250-STARTTLS"),
-    ("s",   "250 SMTPUTF8"),
-    ("c",   "STARTTLS"),
-    ("ok",  "220 2.0.0 Ready to start TLS"),
-    ("c",   "MAIL FROM:<rastu@rastu.tech>"),
-    ("ok",  "250 2.1.0 OK"),
-    ("c",   "RCPT TO:<you@gmail.com>"),
-    ("ok",  "250 2.1.5 OK"),
-    ("c",   "DATA"),
-    ("s",   "354  Go ahead"),
-    ("c",   "."),
-    ("ok",  "250 2.0.0 OK  1758200400 d9-20020a - gsmtp"),
-    ("s",   ""),
-    ("s",   "spf=pass  dkim=pass  dmarc=pass  tls=TLS1_3"),
+    ("cmd",  "$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \\"),
+    ("cmd",  "        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \\"),
+    ("cmd",  "        --tls --quit-after RCPT"),
+    ("info", "=== Trying gmail-smtp-in.l.google.com:25..."),
+    ("info", "=== Connected to gmail-smtp-in.l.google.com."),
+    ("ok",   "<-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp"),
+    ("c",    " -> EHLO rastu.tech"),
+    ("s",    "<-  250-mx.google.com at your service, [198.51.100.24]"),
+    ("s",    "<-  250-SIZE 157286400"),
+    ("s",    "<-  250-STARTTLS"),
+    ("s",    "<-  250-ENHANCEDSTATUSCODES"),
+    ("s",    "<-  250 SMTPUTF8"),
+    ("c",    " -> STARTTLS"),
+    ("ok",   "<-  220 2.0.0 Ready to start TLS"),
+    ("info", "=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256"),
+    ("info", "=== TLS peer[0]   subject=[/CN=mx.google.com]"),
+    ("info", "=== TLS peer certificate passed CA verification, passed host verification"),
+    ("c",    " ~> EHLO rastu.tech"),
+    ("s",    "<~  250-mx.google.com at your service, [198.51.100.24]"),
+    ("s",    "<~  250 SMTPUTF8"),
+    ("c",    " ~> MAIL FROM:<rastu@rastu.tech>"),
+    ("ok",   "<~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp"),
+    ("c",    " ~> RCPT TO:<postmaster@gmail.com>"),
+    ("ok",   "<~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp"),
+    ("c",    " ~> QUIT"),
+    ("ok",   "<~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp"),
+    ("info", "=== Connection closed with remote host."),
 ]
 
 # Shown under the box so the tool is usable without a log to hand.
@@ -872,7 +933,8 @@ def build_home():
 
     strip = [
         ("6", "MTA platforms run in production"),
-        ("80+", "sending IPs across providers"),
+        ("1,000+", "sending IPs in a single estate"),
+        ("Millions", "of messages a day"),
         ("100,000", "domains measured for the survey"),
         ("48h", "from Spamhaus listing to delisted"),
     ]
@@ -894,7 +956,8 @@ def build_home():
     whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
     reputation, and the authentication layer underneath them.</p>
     <p class="prose">PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
-    production. Queueing, throttling and retry behaviour. IP pool design and warm-up.
+    production, on estates running to over a thousand sending IPs and millions of
+    messages a day. Queueing, throttling and retry behaviour. IP pool design and warm-up.
     Bounce, deferral and complaint classification. Blocklist remediation when
     reputation goes wrong. <a href="/about/">More about me &rarr;</a></p>
   </div>
@@ -907,13 +970,15 @@ def build_home():
 <div class="sechead r">
   <p class="kicker">When it works</p>
   <h2>One message, all the way through</h2>
-  <p>Every hop below is a place delivery can fail, and most of the work is knowing
-  which hop a failure came from. This is the whole conversation when nothing
-  goes wrong.</p>
+  <p>A real swaks run against Gmail's MX, captured on this machine. Every server
+  response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</code>
+  stops before DATA, so the handshake completes and no message is ever sent, which
+  is how you test a route without touching a recipient. Every line is a place
+  delivery can fail, and most of the work is knowing which one it failed at.</p>
 </div>
 
 <div class="term" id="term" data-session='{e(session)}'>
-  <div class="bar"><i></i><i></i><i></i><span>smtp session</span></div>
+  <div class="bar"><i></i><i></i><i></i><span>swaks &mdash; gmail-smtp-in.l.google.com:25</span></div>
   <pre><code id="term-out"></code><span class="cur"></span></pre>
 </div>
 
@@ -936,9 +1001,10 @@ def build_home():
 
 <div class="sechead r">
   <p class="kicker">Everything else here</p>
-  <h2>Written from operating it, not from the RFCs</h2>
-  <p>The parts of this work that are hard to find written down properly. Kept
-  current rather than published once and left.</p>
+  <h2>Reference, research and tools</h2>
+  <p>Four things, all of them built from running this infrastructure rather than
+  reading about it: one page per SMTP response, a 100,000-domain survey published
+  with its raw dataset, two open-source tools, and the background behind all of it.</p>
 </div>
 
 <div class="bento">
@@ -1109,12 +1175,13 @@ since 2015.</p>
 <h2>What he does</h2>
 <p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
 
-<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
-production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
-policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
-backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
-estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
-Python and Bash.</p>
+<p><strong>Email infrastructure.</strong> Building and operating the transport layer at scale:
+estates running to over a thousand sending IPs and delivering millions of messages a day. Six
+MTAs in production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and
+GreenArrow. Queue policy, per-domain and per-provider throttling, connection and concurrency
+limits, retry and backoff strategy, multi-datacenter routing, and the DNS underneath it. He has
+built sending estates from nothing on bare metal and cloud, and automated them with Ansible,
+Terraform, Python and Bash.</p>
 
 <p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
 high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
@@ -1129,6 +1196,7 @@ abuse prevention, open-relay protection, and reducing domain spoofing and phishi
 without breaking legitimate mail flow.</p>
 
 <h2>Career</h2>
+<p>Every role, and what actually got done in it. Open one to read the detail.</p>
 {career_html()}
 
 <p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established

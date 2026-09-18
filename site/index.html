@@ -208,17 +208,38 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
 .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
 
-/* ---- timeline ---------------------------------------------------------- */
+/* ---- timeline, as disclosures ------------------------------------------ */
 .tl{position:relative;margin:1.2rem 0;padding-left:1.55rem}
-.tl::before{content:"";position:absolute;left:5px;top:.6rem;bottom:.6rem;width:1px;background:var(--line)}
-.tl .e{position:relative;padding:.5rem 0 .95rem}
-.tl .e::before{content:"";position:absolute;left:-1.55rem;top:.95rem;width:9px;height:9px;
-   border-radius:50%;background:var(--bg);border:2px solid var(--line);transition:border-color .25s}
-.tl .e:hover::before{border-color:var(--accent)}
+.tl::before{content:"";position:absolute;left:5px;top:.9rem;bottom:.9rem;width:1px;background:var(--line)}
+.tl .e{position:relative;padding:.15rem 0 .35rem;border-bottom:1px solid var(--line-2)}
+.tl .e:last-child{border-bottom:0}
+.tl .e::before{content:"";position:absolute;left:-1.55rem;top:1.05rem;width:9px;height:9px;
+   border-radius:50%;background:var(--bg);border:2px solid var(--line);
+   transition:border-color .25s,background .25s;z-index:1}
 .tl .e:first-child::before{border-color:var(--accent);background:var(--accent)}
-.tl .role{font-weight:650;font-size:.97rem}
-.tl .org{color:var(--ink-2);font-size:.895rem}
-.tl .yr{color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .e[open]::before,.tl .e:hover::before{border-color:var(--accent)}
+.tl summary{list-style:none;cursor:pointer;padding:.55rem 1.6rem .55rem 0;position:relative;
+   border-radius:8px;transition:background .2s}
+.tl summary::-webkit-details-marker{display:none}
+.tl summary:hover{background:var(--surface)}
+.tl summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tl summary::after{content:"";position:absolute;right:.45rem;top:1.15rem;width:7px;height:7px;
+   border-right:1.6px solid var(--ink-3);border-bottom:1.6px solid var(--ink-3);
+   transform:rotate(45deg);transition:transform .25s,border-color .25s}
+.tl .e[open] summary::after{transform:rotate(-135deg);border-color:var(--accent)}
+.tl .role{display:block;font-weight:650;font-size:.97rem;color:var(--ink)}
+.tl .org{display:block;color:var(--ink-2);font-size:.895rem}
+.tl .yr{display:block;color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
+.tl .yr .n{margin-left:.6rem;color:var(--accent);opacity:.75;font-variant-numeric:normal}
+.tl .e[open] .yr .n{opacity:0}
+.tl .ach{margin:.2rem 0 .95rem;padding-left:1.05rem}
+.tl .ach li{margin:.42rem 0;font-size:.915rem;line-height:1.6;color:var(--ink-2)}
+.tl .ach li::marker{color:var(--accent)}
+.tl .e[open] .ach li{animation:rise .5s cubic-bezier(.22,.8,.3,1) both}
+.tl .e[open] .ach li:nth-child(2){animation-delay:.03s}
+.tl .e[open] .ach li:nth-child(3){animation-delay:.06s}
+.tl .e[open] .ach li:nth-child(4){animation-delay:.09s}
+.tl .e[open] .ach li:nth-child(n+5){animation-delay:.12s}
 
 /* ---- section heading with a lede --------------------------------------- */
 .sechead{margin:3.4rem 0 1rem}
@@ -237,15 +258,17 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .term .bar span{margin-left:.5rem;font-size:.74rem;color:var(--ink-3);
   font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 .term pre{margin:0;border:0;border-radius:0;background:none;padding:1rem 1.1rem 1.15rem;
-  font-size:.795rem;line-height:1.72;min-height:19.5rem;white-space:pre-wrap;word-break:break-word}
+  font-size:.795rem;line-height:1.72;height:23rem;overflow-y:auto;overscroll-behavior:contain;
+  white-space:pre-wrap;word-break:break-word;scrollbar-width:thin}
 .term .c{color:var(--ink)}                       /* what we send */
 .term .s{color:var(--ink-3)}                     /* what the server says */
 .term .ok{color:var(--ok);font-weight:600}       /* a 2xx */
 .term .cmd{color:var(--accent);font-weight:600}  /* the shell line */
+.term .info{color:var(--ink-3);opacity:.8}       /* swaks talking, not the server */
 .term .cur{display:inline-block;width:.5em;height:1.05em;vertical-align:-.16em;
   background:var(--accent);animation:blink 1.05s steps(1) infinite}
 @keyframes blink{50%{opacity:0}}
-@media(max-width:34rem){.term pre{font-size:.72rem;min-height:17rem}}
+@media(max-width:34rem){.term pre{font-size:.695rem;height:19rem}}
 
 /* ---- the classifier ----------------------------------------------------
    The site's one interactive tool. Same ruleset as smtpsift, exported at build
@@ -306,6 +329,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   #hexcanvas{display:none}
   h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
   .verdict{transition:none}
+  .tl .e[open] .ach li{animation:none}
   .term .cur{animation:none;opacity:0}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
@@ -337,7 +361,8 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
     whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
     reputation, and the authentication layer underneath them.</p>
     <p class="prose">PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
-    production. Queueing, throttling and retry behaviour. IP pool design and warm-up.
+    production, on estates running to over a thousand sending IPs and millions of
+    messages a day. Queueing, throttling and retry behaviour. IP pool design and warm-up.
     Bounce, deferral and complaint classification. Blocklist remediation when
     reputation goes wrong. <a href="/about/">More about me &rarr;</a></p>
   </div>
@@ -345,18 +370,20 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
        loading="eager" decoding="async">
 </div>
 
-<div class="strip"><div><b>6</b><span>MTA platforms run in production</span></div><div><b>80+</b><span>sending IPs across providers</span></div><div><b>100,000</b><span>domains measured for the survey</span></div><div><b>48h</b><span>from Spamhaus listing to delisted</span></div></div>
+<div class="strip"><div><b>6</b><span>MTA platforms run in production</span></div><div><b>1,000+</b><span>sending IPs in a single estate</span></div><div><b>Millions</b><span>of messages a day</span></div><div><b>100,000</b><span>domains measured for the survey</span></div><div><b>48h</b><span>from Spamhaus listing to delisted</span></div></div>
 
 <div class="sechead r">
   <p class="kicker">When it works</p>
   <h2 class="r">One message, all the way through</h2>
-  <p>Every hop below is a place delivery can fail, and most of the work is knowing
-  which hop a failure came from. This is the whole conversation when nothing
-  goes wrong.</p>
+  <p>A real swaks run against Gmail's MX, captured on this machine. Every server
+  response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</code>
+  stops before DATA, so the handshake completes and no message is ever sent, which
+  is how you test a route without touching a recipient. Every line is a place
+  delivery can fail, and most of the work is knowing which one it failed at.</p>
 </div>
 
-<div class="term" id="term" data-session='[{&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;$ swaks --to you@gmail.com --from rastu@rastu.tech --server gmail-smtp-in.l.google.com&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;220 mx.google.com ESMTP d9-20020a Ah - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;EHLO mail.rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;250-mx.google.com at your service, [203.0.113.9]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;250-STARTTLS&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;STARTTLS&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;220 2.0.0 Ready to start TLS&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;MAIL FROM:&lt;rastu@rastu.tech&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;250 2.1.0 OK&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;RCPT TO:&lt;you@gmail.com&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;250 2.1.5 OK&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;DATA&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;354  Go ahead&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot;.&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;250 2.0.0 OK  1758200400 d9-20020a - gsmtp&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;spf=pass  dkim=pass  dmarc=pass  tls=TLS1_3&quot;}]'>
-  <div class="bar"><i></i><i></i><i></i><span>smtp session</span></div>
+<div class="term" id="term" data-session='[{&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --tls --quit-after RCPT&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Trying gmail-smtp-in.l.google.com:25...&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connected to gmail-smtp-in.l.google.com.&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-SIZE 157286400&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-STARTTLS&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-ENHANCEDSTATUSCODES&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; STARTTLS&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 2.0.0 Ready to start TLS&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer[0]   subject=[/CN=mx.google.com]&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer certificate passed CA verification, passed host verification&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; QUIT&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connection closed with remote host.&quot;}]'>
+  <div class="bar"><i></i><i></i><i></i><span>swaks &mdash; gmail-smtp-in.l.google.com:25</span></div>
   <pre><code id="term-out"></code><span class="cur"></span></pre>
 </div>
 
@@ -379,9 +406,10 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <div class="sechead r">
   <p class="kicker">Everything else here</p>
-  <h2 class="r">Written from operating it, not from the RFCs</h2>
-  <p>The parts of this work that are hard to find written down properly. Kept
-  current rather than published once and left.</p>
+  <h2 class="r">Reference, research and tools</h2>
+  <p>Four things, all of them built from running this infrastructure rather than
+  reading about it: one page per SMTP response, a 100,000-domain survey published
+  with its raw dataset, two open-source tools, and the background behind all of it.</p>
 </div>
 
 <div class="bento">
@@ -515,8 +543,10 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
         sp.className=l.k;
         out.appendChild(sp);
         out.appendChild(document.createTextNode('\n'));
-        var typed = (l.k==='c'||l.k==='cmd');
-        if(!typed){ sp.textContent=l.t; setTimeout(line, 190+Math.min(340,l.t.length*4)); return; }
+        out.parentNode.scrollTop = out.parentNode.scrollHeight;
+        var typed = (l.k==='cmd');
+        if(!typed){ sp.textContent=l.t;
+          setTimeout(line, l.k==='info'?70:(l.k==='c'?150:95)); return; }
         var j=0;
         (function ch(){
           sp.textContent=l.t.slice(0,++j);
