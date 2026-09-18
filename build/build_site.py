@@ -67,23 +67,27 @@ PERSON = {
 }
 
 CSS = """
-/* Design tokens. Light is the base; dark redefines only the tokens. */
+/* Design tokens.
+
+   Dark is the base here rather than an alternative. A near-black surface with a
+   terminal green is what a mail log looks like, and this site is about mail
+   logs; the honeycomb drifting behind it is the routing metaphor made literal.
+
+   The status colours are reserved for state (suppress, throttle, retry) and are
+   deliberately not green, because green is the accent and a status must never
+   read as branding. Each one ships with its word, so state is never carried by
+   colour alone either. */
 :root{
-  --ink:#14171c; --ink-2:#3d4450; --ink-3:#6b7280;
-  --line:#e4e7ec; --line-2:#f1f3f6;
-  --bg:#fff; --surface:#f8f9fb; --code:#f4f6f8;
-  --accent:#1f4e79; --accent-2:#2d6ca8; --accent-soft:#eaf1f8;
-  --hex:#1f4e79;
+  --ink:#e7eeea; --ink-2:#a8b6af; --ink-3:#77867f;
+  --line:#1f2926; --line-2:#161e1b;
+  --bg:#0a0e0d; --surface:#111816; --code:#0d1412;
+  --accent:#3ddc84; --accent-2:#74f0ac; --accent-soft:#0f2019;
+  --hex:#3ddc84;
+  --ok:#3ddc84; --warn:#e6b25c; --bad:#ff7a7a; --info:#5db8ff;
   --radius:10px;
   --measure:44rem;
 }
-@media(prefers-color-scheme:dark){:root{
-  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8b93a1;
-  --line:#272c34; --line-2:#1e222a;
-  --bg:#101318; --surface:#161a21; --code:#1a1f27;
-  --accent:#7fb2e5; --accent-2:#9cc6f0; --accent-soft:#18222e;
-  --hex:#7fb2e5;
-}}
+::selection{background:var(--accent-soft);color:var(--accent-2)}
 
 *{box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -99,7 +103,9 @@ body{
    compositor layer and no layout. Hidden entirely under reduced-motion. */
 #hexcanvas{position:fixed;inset:0;z-index:0;pointer-events:none;display:block}
 .hexveil{position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent 0%,transparent 42%,var(--bg) 94%)}
+  background:radial-gradient(120% 85% at 50% 0%,transparent 0%,
+    color-mix(in srgb,var(--bg) 72%,transparent) 58%,
+    color-mix(in srgb,var(--bg) 92%,transparent) 100%)}
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
 .wrap.wide{max-width:64rem}
@@ -252,6 +258,27 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
 .sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
 
+/* ---- SMTP session panel ------------------------------------------------
+   A real handshake, typed out. It is the one thing on the page that says what
+   this work actually is without a sentence of explanation. */
+.term{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  overflow:hidden;margin:1.2rem 0 0;box-shadow:0 18px 44px -28px rgba(0,0,0,.55)}
+.term .bar{display:flex;align-items:center;gap:.45rem;padding:.6rem .9rem;
+  border-bottom:1px solid var(--line);background:var(--surface)}
+.term .bar i{width:9px;height:9px;border-radius:50%;background:var(--line);display:block}
+.term .bar span{margin-left:.5rem;font-size:.74rem;color:var(--ink-3);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.term pre{margin:0;border:0;border-radius:0;background:none;padding:1rem 1.1rem 1.15rem;
+  font-size:.795rem;line-height:1.72;min-height:19.5rem;white-space:pre-wrap;word-break:break-word}
+.term .c{color:var(--ink)}                       /* what we send */
+.term .s{color:var(--ink-3)}                     /* what the server says */
+.term .ok{color:var(--ok);font-weight:600}       /* a 2xx */
+.term .cmd{color:var(--accent);font-weight:600}  /* the shell line */
+.term .cur{display:inline-block;width:.5em;height:1.05em;vertical-align:-.16em;
+  background:var(--accent);animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+@media(max-width:34rem){.term pre{font-size:.72rem;min-height:17rem}}
+
 /* ---- the classifier ----------------------------------------------------
    The site's one interactive tool. Same ruleset as smtpsift, exported at build
    time, so the page and the CLI can never disagree about a response. */
@@ -285,14 +312,9 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .verdict .lnk{margin:.7rem 0 0;font-size:.875rem}
 /* Action colours are a status palette, reserved for state and never reused as
    series colours. Each ships with its word, so it is never colour alone. */
-.a-suppress{color:#b4232a}.a-pause{color:#b4232a}
-.a-throttle{color:#9a6708}.a-review{color:#9a6708}.a-fix_config{color:#9a6708}
-.a-retry{color:#1f6f43}
-@media(prefers-color-scheme:dark){
-  .a-suppress,.a-pause{color:#f08a8f}
-  .a-throttle,.a-review,.a-fix_config{color:#e3b155}
-  .a-retry{color:#6fd39b}
-}
+.a-suppress,.a-pause{color:var(--bad)}
+.a-throttle,.a-review,.a-fix_config{color:var(--warn)}
+.a-retry{color:var(--info)}
 
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
@@ -316,6 +338,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   #hexcanvas{display:none}
   h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
   .verdict{transition:none}
+  .term .cur{animation:none;opacity:0}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
   .grid a:hover{transform:none}
@@ -369,6 +392,55 @@ JS = """
       requestAnimationFrame(f);
     });
   }
+
+  /* The SMTP session types itself out once, when it comes into view.
+     Client lines are typed a character at a time because that is what sending
+     one feels like; server responses land whole, because that is what they do. */
+  (function(){
+    var term=document.getElementById('term'), out=document.getElementById('term-out');
+    if(!term||!out) return;
+    var lines;
+    try{ lines=JSON.parse(term.getAttribute('data-session')); }catch(err){ return; }
+
+    function esc(s){return String(s).replace(/[&<>]/g,function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
+    function whole(){
+      out.innerHTML=lines.map(function(l){
+        return '<span class="'+l.k+'">'+esc(l.t)+'</span>';}).join('\n');
+    }
+    if(reduce){ whole(); return; }
+
+    var playing=false;
+    function play(){
+      if(playing) return; playing=true;
+      out.innerHTML=''; var i=0;
+      function line(){
+        if(i>=lines.length){ playing=false; return; }
+        var l=lines[i++], sp=document.createElement('span');
+        sp.className=l.k;
+        out.appendChild(sp);
+        out.appendChild(document.createTextNode('\n'));
+        var typed = (l.k==='c'||l.k==='cmd');
+        if(!typed){ sp.textContent=l.t; setTimeout(line, 190+Math.min(340,l.t.length*4)); return; }
+        var j=0;
+        (function ch(){
+          sp.textContent=l.t.slice(0,++j);
+          if(j<l.t.length) setTimeout(ch, 15);
+          else setTimeout(line, 260);
+        })();
+      }
+      line();
+    }
+    if('IntersectionObserver' in window){
+      var to=new IntersectionObserver(function(es){
+        es.forEach(function(en){ if(en.isIntersecting){ play(); to.unobserve(en.target); } });
+      },{threshold:.3});
+      to.observe(term);
+    } else { play(); }
+    term.addEventListener('click',function(){ if(!playing) play(); });
+    term.style.cursor='pointer';
+    term.title='Replay';
+  })();
 
   /* Living honeycomb: cells brighten near the pointer, and packets route from
      node to node, which is what this site is about. Pauses when tab is hidden. */
@@ -590,6 +662,67 @@ CATEGORY_LABEL = {
     "unknown": "Unrecognised",
 }
 
+# The stack, shown as chips on the About page where the prose gives it context.
+STACK = [
+    ("MTAs", ["PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow"]),
+    ("Authentication", ["SPF", "DKIM", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "ARC"]),
+    ("Reputation", ["IP warm-up", "Pool design", "Spamhaus", "Postmaster Tools", "SNDS",
+                    "Complaint feedback loops"]),
+    ("Filtering", ["Rspamd", "SpamAssassin", "Milter", "Content policy"]),
+    ("Platform", ["Linux", "Terraform", "Ansible", "Python", "Bash", "Prometheus",
+                  "Grafana", "AWS", "Azure"]),
+]
+
+# Career, single source. The home page does not repeat it; that is the About
+# page's job and duplicating it across both would split the entity signal.
+CAREER = [
+    ("Infrastructure Engineer", "Pipedrive", "Tallinn, Estonia", "2022 &ndash; present"),
+    ("Technical Consultant, Email Infrastructure", "Adobe", "Bangalore, India", "2020 &ndash; 2022"),
+    ("Email Infrastructure Lead", "Experiture Omni-Channel Marketing Platform", "Remote",
+     "2019 &ndash; 2020"),
+    ("Email Deliverability Specialist", "Zeta Global", "Hyderabad, India", "2018 &ndash; 2019"),
+    ("Technology Executive, Email Deliverability",
+     "IntraSoft Technologies Limited (123Greetings.com)", "Kolkata, India", "2015 &ndash; 2018"),
+]
+
+
+def stack_html():
+    return '<div class="stack r">' + "".join(
+        '<div class="row"><span class="lbl">' + e(lbl) + "</span>"
+        + "".join(f'<span class="chip">{e(c)}</span>' for c in items) + "</div>"
+        for lbl, items in STACK) + "</div>"
+
+
+def career_html():
+    return '<div class="tl">' + "".join(
+        f'<div class="e"><div class="role">{r}</div>'
+        f'<div class="org">{o} &middot; {loc}</div><div class="yr">{y}</div></div>'
+        for r, o, loc, y in CAREER) + "</div>"
+
+
+# A real handshake. Typed out on the home page, because it says what this work is
+# without a sentence of explanation. Tuples are (css class, text).
+SMTP_SESSION = [
+    ("cmd", "$ swaks --to you@gmail.com --from rastu@rastu.tech --server gmail-smtp-in.l.google.com"),
+    ("s",   "220 mx.google.com ESMTP d9-20020a Ah - gsmtp"),
+    ("c",   "EHLO mail.rastu.tech"),
+    ("s",   "250-mx.google.com at your service, [203.0.113.9]"),
+    ("s",   "250-STARTTLS"),
+    ("s",   "250 SMTPUTF8"),
+    ("c",   "STARTTLS"),
+    ("ok",  "220 2.0.0 Ready to start TLS"),
+    ("c",   "MAIL FROM:<rastu@rastu.tech>"),
+    ("ok",  "250 2.1.0 OK"),
+    ("c",   "RCPT TO:<you@gmail.com>"),
+    ("ok",  "250 2.1.5 OK"),
+    ("c",   "DATA"),
+    ("s",   "354  Go ahead"),
+    ("c",   "."),
+    ("ok",  "250 2.0.0 OK  1758200400 d9-20020a - gsmtp"),
+    ("s",   ""),
+    ("s",   "spf=pass  dkim=pass  dmarc=pass  tls=TLS1_3"),
+]
+
 # Shown under the box so the tool is usable without a log to hand.
 SIFT_EXAMPLES = [
     ("Gmail throttle",
@@ -693,13 +826,17 @@ run();
 
 
 def build_home():
-    """The homepage has two jobs at once.
+    """The homepage has two readers at once.
 
-    It has to state the identity inside the first 150 words, because that is the
-    part of a page ChatGPT and friends weight most heavily. And it has to be worth
-    landing on for someone who is not looking for a person at all, but for what a
-    bounce means at two in the morning. The classifier is there for the second
-    reader; everything they use makes the first job work better.
+    Someone looking for the person, and someone with a bounce in front of them at
+    two in the morning. The identity statement has to land inside the first 150
+    words for the first reader; everything after it is built for the second, on the
+    argument that a page which gets used is a better credential than a page which
+    describes.
+
+    It deliberately does NOT repeat the biography. That is /about/, which is the
+    mainEntityOfPage in the schema, and saying the same thing twice splits the
+    signal instead of doubling it.
     """
     ex = "".join(
         f'<button type="button" data-ex="{e(v)}">{e(k)}</button>' for k, v in SIFT_EXAMPLES)
@@ -712,32 +849,7 @@ def build_home():
     ]
     strip_html = "".join(f"<div><b>{e(n)}</b><span>{e(l)}</span></div>" for n, l in strip)
 
-    stack = [
-        ("MTAs", ["PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow"]),
-        ("Authentication", ["SPF", "DKIM", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "ARC"]),
-        ("Reputation", ["IP warm-up", "Pool design", "Spamhaus", "Postmaster Tools",
-                        "SNDS", "Complaint feedback loops"]),
-        ("Filtering", ["Rspamd", "SpamAssassin", "Milter", "Content policy"]),
-        ("Platform", ["Linux", "Terraform", "Ansible", "Python", "Bash", "Prometheus",
-                      "Grafana", "AWS", "Azure"]),
-    ]
-    stack_html = "".join(
-        '<div class="row"><span class="lbl">' + e(lbl) + "</span>"
-        + "".join(f'<span class="chip">{e(c)}</span>' for c in items) + "</div>"
-        for lbl, items in stack)
-
-    tl = [
-        ("Infrastructure Engineer", "Pipedrive", "2022 &ndash; present"),
-        ("Technical Consultant, Email Infrastructure", "Adobe", "2020 &ndash; 2022"),
-        ("Email Infrastructure Lead", "Experiture", "2019 &ndash; 2020"),
-        ("Email Deliverability Specialist", "Zeta Global", "2018 &ndash; 2019"),
-        ("Technology Executive, Email Deliverability",
-         "IntraSoft Technologies (123Greetings.com)", "2015 &ndash; 2018"),
-    ]
-    tl_html = "".join(
-        f'<div class="e"><div class="role">{r}</div>'
-        f'<div class="org">{o}</div><div class="yr">{y}</div></div>'
-        for r, o, y in tl)
+    session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
 
     body = f"""
 <div class="hero">
@@ -748,6 +860,10 @@ def build_home():
     deliverability and email security. I build and operate the systems that decide
     whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
     reputation, and the authentication layer underneath them.</p>
+    <p class="prose">PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
+    production. Queueing, throttling and retry behaviour. IP pool design and warm-up.
+    Bounce, deferral and complaint classification. Blocklist remediation when
+    reputation goes wrong. <a href="/about/">More about me &rarr;</a></p>
   </div>
   <img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="152" height="152"
        loading="eager" decoding="async">
@@ -755,20 +871,26 @@ def build_home():
 
 <div class="strip">{strip_html}</div>
 
-<p class="prose r">Day to day that means PowerMTA, KumoMTA, Postfix, Haraka, Momentum and
-GreenArrow in production; queueing, throttling and retry behaviour; DNS and the SPF, DKIM,
-DMARC, MTA-STS and TLS-RPT stack; IP pool design and warm-up; bounce, deferral and complaint
-classification; and blocklist remediation when reputation goes wrong. I have run outbound
-estates on bare metal and cloud across several hosting providers, and led the team that
-operated them.</p>
+<div class="sechead r">
+  <p class="kicker">When it works</p>
+  <h2>One message, all the way through</h2>
+  <p>Every hop below is a place delivery can fail, and most of the work is knowing
+  which hop a failure came from. This is the whole conversation when nothing
+  goes wrong.</p>
+</div>
+
+<div class="term" id="term" data-session='{e(session)}'>
+  <div class="bar"><i></i><i></i><i></i><span>smtp session</span></div>
+  <pre><code id="term-out"></code><span class="cur"></span></pre>
+</div>
 
 <div class="sechead r">
-  <p class="kicker">Tool</p>
+  <p class="kicker">When it does not</p>
   <h2>What is this bounce telling you?</h2>
   <p>Paste an SMTP response out of your mail log. It is classified against the same
   ruleset as <a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, which
-  separates the cases that need opposite responses: retry, back off, or stop and fix
-  the sender. Nothing is sent anywhere. It runs in your browser.</p>
+  separates the cases that need opposite responses: retry, back off, or stop and
+  fix the sender. Nothing is sent anywhere. It runs in your browser.</p>
 </div>
 
 <div class="sift">
@@ -780,10 +902,10 @@ operated them.</p>
 </div>
 
 <div class="sechead r">
-  <p class="kicker">Reference</p>
+  <p class="kicker">Everything else here</p>
   <h2>Written from operating it, not from the RFCs</h2>
-  <p>The parts of this work that are hard to find written down properly, kept current
-  rather than published once and left.</p>
+  <p>The parts of this work that are hard to find written down properly. Kept
+  current rather than published once and left.</p>
 </div>
 
 <div class="bento">
@@ -809,6 +931,13 @@ operated them.</p>
     dmarcsight audits a domain's SPF, DKIM, DMARC, MTA-STS and TLS-RPT posture.</p>
     <span class="go">Both on GitHub &rarr;</span>
   </a>
+  <a class="card" href="/about/">
+    <span class="tag">Background</span>
+    <h3>About</h3>
+    <p>Eleven years of it, all of it email: Pipedrive, Adobe, Experiture, Zeta Global
+    and IntraSoft. What each role actually involved, and the stack behind it.</p>
+    <span class="go">The longer version &rarr;</span>
+  </a>
 </div>
 
 <div class="panel r">
@@ -820,21 +949,6 @@ operated them.</p>
   <p class="doi">doi:{e(DOI)} &middot; CC BY 4.0 &middot; raw dataset included</p>
   <p><a href="/research/">Read the findings &rarr;</a></p>
 </div>
-
-<div class="sechead r">
-  <p class="kicker">Stack</p>
-  <h2>What I work with</h2>
-  <p>Production experience, not a reading list.</p>
-</div>
-<div class="stack r">{stack_html}</div>
-
-<div class="sechead r">
-  <p class="kicker">Background</p>
-  <h2>Where this came from</h2>
-  <p>Eleven years of it, all of it email.</p>
-</div>
-<div class="tl">{tl_html}</div>
-<p class="prose r"><a href="/about/">The longer version &rarr;</a></p>
 
 <div class="sechead r">
   <p class="kicker">Contact</p>
@@ -941,8 +1055,12 @@ def build_about():
     Everything here is verifiable against his employment history. The opening
     paragraph is written to be lifted directly as an answer, because that is what
     both Google snippets and LLM retrievers do with a page like this.
+
+    This is the biography page and the home page is not. Home states the identity
+    in its first 150 words and then gets on with the tools; the depth lives here,
+    once, so the two pages reinforce one entity instead of competing for it.
     """
-    body = """
+    body = f"""
 <p class="kicker">About</p>
 <img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="150" height="150"
      style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:35%">
@@ -977,19 +1095,17 @@ abuse prevention, open-relay protection, and reducing domain spoofing and phishi
 without breaking legitimate mail flow.</p>
 
 <h2>Career</h2>
-<table>
-<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
-<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
-<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
-<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
-<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
-<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
-</table>
+{career_html()}
 
 <p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
 the authentication layer across all sending domains, and led the IT team and a group of junior
 deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
 300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
+
+<h2>What he works with</h2>
+<p>Production experience rather than a reading list. Every item below has been run in
+anger on a live sending estate.</p>
+{stack_html()}
 
 <h2>Open-source work</h2>
 <p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
