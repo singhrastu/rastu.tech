@@ -242,6 +242,40 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
 /* ---- the p=reject simulation, the headline answer ------------------------- */
 .sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
   background:linear-gradient(140deg,var(--surface),transparent 80%)}
@@ -841,6 +875,21 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 or find the mechanism that quietly switched off an SPF record.</p>
 
 <div class="bento tools"><a class="card" href="/check/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span class="tag">DNS</span></div><h3>Domain check</h3><p class="q">Is this domain&#x27;s email authentication set up correctly?</p><p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open Domain check</span></a><a class="card" href="/bounce/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="5.5" width="19" height="13" rx="2"/><path d="M3 7l9 6 9-6"/><path d="M8 17l-3-3 3-3"/><path d="M5 14h6"/></svg><span class="tag">Logs</span></div><h3>Bounce classifier</h3><p class="q">What is this bounce or deferral telling me?</p><p>Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.</p><p class="takes"><span>takes</span><code>550 5.7.1 Service unavailable...</code></p><span class="go">Open Bounce classifier</span></a><a class="card" href="/dmarc/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4"/><path d="M9 17v-3M12 17v-6M15 17v-4"/></svg><span class="tag">Reports</span></div><h3>DMARC report reader</h3><p class="q">Who is sending mail as my domain, and what is failing?</p><p>Drop in an aggregate (rua) report and read it: every source, what aligned, what did not, and which ones to fix first. The file is parsed in this tab and never uploaded.</p><p class="takes"><span>takes</span><code>report.xml.gz  ·  report.zip</code></p><span class="go">Open DMARC report reader</span></a><a class="card" href="/headers/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18M3 9h18M3 13h7M3 17h7"/><circle cx="16" cy="16" r="4"/><path d="M19 19l2.5 2.5"/></svg><span class="tag">Messages</span></div><h3>Header analyser</h3><p class="q">What went wrong with this message, and whose problem is it?</p><p>Paste raw headers and get the issues, ranked, each one saying whether it is yours to fix, the receiver&#x27;s, or something a forwarder did in transit. Plus the DMARC arithmetic a receiver actually ran.</p><p class="takes"><span>takes</span><code>Received: from ...  (full header block)</code></p><span class="go">Open Header analyser</span></a><a class="card" href="/spf/"><div class="card-top"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/><path d="M7 12h3M10 12V6h7M10 12h7M10 12v6h7"/></svg><span class="tag">DNS</span></div><h3>SPF lookup counter</h3><p class="q">How close is this SPF record to the ten-lookup limit?</p><p>The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.</p><p class="takes"><span>takes</span><code>example.com</code></p><span class="go">Open SPF lookup counter</span></a></div>
+
+<div class="sechead r">
+  <h2 class="r">One message, all the way through</h2>
+  <p>A real swaks run against Gmail's MX, captured with <code>--quit-after RCPT</code> so
+  the handshake completes and no message is ever sent. Every line is a place delivery can
+  fail, and most of the work is knowing which one it failed at.</p>
+</div>
+
+<div class="term" id="term" data-session='[{&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --tls --quit-after RCPT&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Trying gmail-smtp-in.l.google.com:25...&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connected to gmail-smtp-in.l.google.com.&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-SIZE 157286400&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-STARTTLS&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-ENHANCEDSTATUSCODES&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; STARTTLS&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 2.0.0 Ready to start TLS&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer[0]   subject=[/CN=mx.google.com]&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer certificate passed CA verification, passed host verification&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; QUIT&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connection closed with remote host.&quot;}]'>
+  <div class="bar"><i></i><i></i><i></i>
+    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <em>click to replay</em></div>
+  <pre><code id="term-out"></code><span class="cur"></span></pre>
+</div>
+<p class="prose r"><a href="/smtp/session/">Read it annotated, line by line &rarr;</a></p>
 
 <div class="sechead r">
   <h2 class="r">SMTP response reference</h2>

@@ -242,6 +242,40 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
 /* ---- the p=reject simulation, the headline answer ------------------------- */
 .sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
   background:linear-gradient(140deg,var(--surface),transparent 80%)}
@@ -837,26 +871,53 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 <main id="main">
 
 <h1>SMTP responses: what each one means and what to do</h1>
-<p class="lede">What the responses in your mail log actually mean, whether retrying will
-help, and what to change so they stop. Written from operating these systems, not from the
-spec.</p>
+<p class="lede">Paste a bounce out of your mail log, or type any part of a code. The
+registry covers every reply code in RFC 5321, every enhanced status code IANA has
+registered, and Microsoft's own, which are mostly outside both.</p>
 
-<div class="filter" data-filter>
-  <input class="field" type="search" id="ref-q" autocomplete="off" spellcheck="false"
-         placeholder="Paste a code or search: 4.7.28, blocked, quota, reputation"
-         aria-label="Search the reference">
-  <div class="chips"><button class="chip on" data-group="all" type="button">All</button><button class="chip" data-group="Generic" type="button">Generic</button><button class="chip" data-group="Gmail" type="button">Gmail</button><button class="chip" data-group="Microsoft / Outlook" type="button">Microsoft / Outlook</button><button class="chip" data-group="Yahoo" type="button">Yahoo</button><span class="count"></span></div>
-  <div class="grid"><a href="/smtp/4-2-2/" data-terms="4.2.2 4.2.2 generic mailbox full retry the mailbox is over quota. temporary, and the address is still good. retry with backoff." data-group="Generic"><strong>4.2.2</strong><span class="p">RFC 3463</span><span class="d">The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.</span><span class="act a-retry">retry</span></a><a href="/smtp/4-4-1/" data-terms="4.4.1 4.4.1 generic connection retry a transport failure, not a mail failure. retry, but investigate if it sticks to one route." data-group="Generic"><strong>4.4.1</strong><span class="p">RFC 3463</span><span class="d">A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.</span><span class="act a-retry">retry</span></a><a href="/smtp/5-1-1/" data-terms="5.1.1 5.1.1 generic invalid recipient suppress the mailbox does not exist. permanent. suppress it, because retrying costs reputation." data-group="Generic"><strong>5.1.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-2-1/" data-terms="5.2.1 5.2.1 generic mailbox inactive suppress the mailbox exists but is disabled. suppress it, these turn into spam traps." data-group="Generic"><strong>5.2.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox exists but is disabled. Suppress it, these turn into spam traps.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-7-1/" data-terms="5.7.1 5.7.1 generic policy block review a deliberate policy rejection by the receiver, usually not about your reputation." data-group="Generic"><strong>5.7.1</strong><span class="p">RFC 3463</span><span class="d">A deliberate policy rejection by the receiver, usually not about your reputation.</span><span class="act a-review">review</span></a><a href="/smtp/spamhaus/" data-terms="spamhaus listing spamhaus generic blocklist pause the receiver queried spamhaus and found your ip listed. delist before sending again." data-group="Generic"><strong>Spamhaus listing</strong><span class="p">Blocklist</span><span class="d">The receiver queried Spamhaus and found your IP listed. Delist before sending again.</span><span class="act a-pause">pause</span></a><a href="/smtp/tls-handshake/" data-terms="tls handshake tls-handshake generic connection retry the connection opened but encryption could not be negotiated. usually cipher or certificate." data-group="Generic"><strong>TLS handshake</strong><span class="p">Transport</span><span class="d">The connection opened but encryption could not be negotiated. Usually cipher or certificate.</span><span class="act a-retry">retry</span></a><a href="/smtp/gmail-4-7-28/" data-terms="4.7.28 4.7.28 gmail rate limited throttle a throttle, not a block. slow down for gmail specifically and the mail still goes." data-group="Gmail"><strong>4.7.28</strong><span class="p">Gmail</span><span class="d">A throttle, not a block. Slow down for Gmail specifically and the mail still goes.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/gmail-5-7-1/" data-terms="5.7.1 5.7.1 gmail reputation block pause a hard reputation block. stop sending from this ip or domain and remediate." data-group="Gmail"><strong>5.7.1</strong><span class="p">Gmail</span><span class="d">A hard reputation block. Stop sending from this IP or domain and remediate.</span><span class="act a-pause">pause</span></a><a href="/smtp/gmail-5-7-26/" data-terms="5.7.26 5.7.26 gmail auth failure fix_config authentication failed. spf or dkim has to pass and align, and retrying will not help." data-group="Gmail"><strong>5.7.26</strong><span class="p">Gmail</span><span class="d">Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-4-7-500/" data-terms="4.7.500 4.7.500 microsoft / outlook rate limited throttle throttling. deferred rather than refused, so back off per-provider and retry." data-group="Microsoft / Outlook"><strong>4.7.500</strong><span class="p">Microsoft / Outlook</span><span class="d">Throttling. Deferred rather than refused, so back off per-provider and retry.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-5-7-606/" data-terms="5.7.606 5.7.606 microsoft / outlook reputation block pause your sending ip is on outlook&#x27;s block list. delist, then fix what caused it." data-group="Microsoft / Outlook"><strong>5.7.606</strong><span class="p">Microsoft / Outlook</span><span class="d">Your sending IP is on Outlook&#x27;s block list. Delist, then fix what caused it.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-s3140/" data-terms="s3140 s3140 microsoft / outlook reputation block pause microsoft&#x27;s internal reason code on a block. it points at ip reputation." data-group="Microsoft / Outlook"><strong>S3140</strong><span class="p">Microsoft / Outlook</span><span class="d">Microsoft&#x27;s internal reason code on a block. It points at IP reputation.</span><span class="act a-pause">pause</span></a><a href="/smtp/yahoo-ts03/" data-terms="ts03 ts03 yahoo reputation block pause a 4xx that behaves like a block. retrying on schedule will not clear it." data-group="Yahoo"><strong>TS03</strong><span class="p">Yahoo</span><span class="d">A 4xx that behaves like a block. Retrying on schedule will not clear it.</span><span class="act a-pause">pause</span></a></div>
-  <p class="empty noresult hidden">Nothing matches that. The reference covers
-  14 responses so far and grows from real mail logs; if you have hit
-  something that is missing, it is worth reporting.</p>
+<div class="tool">
+  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one</label>
+  <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
+         placeholder="Loading the registry...">
+  <p class="hint">Try:
+    <button type="button" data-lk="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org">a whole bounce</button>
+    <button type="button" data-lk="5.7.620">a code inside a range</button>
+    <button type="button" data-lk="512">three digits</button>
+    <button type="button" data-lk="4.2.2">a transient code</button>
+    <button type="button" data-lk="mailbox full">what it said</button>
+  </p>
+  <div class="report" id="lk-out" aria-live="polite"></div>
 </div>
+<script type="application/json" id="lk-pages">{"4.7.28": "/smtp/gmail-4-7-28/", "5.7.26": "/smtp/gmail-5-7-26/", "5.7.1": "/smtp/5-7-1/", "5.7.606": "/smtp/microsoft-outlook-5-7-606/", "S3140": "/smtp/microsoft-outlook-s3140/", "4.7.500": "/smtp/microsoft-outlook-4-7-500/", "TS03": "/smtp/yahoo-ts03/", "5.1.1": "/smtp/5-1-1/", "4.2.2": "/smtp/4-2-2/", "5.2.1": "/smtp/5-2-1/", "spamhaus": "/smtp/spamhaus/", "4.4.1": "/smtp/4-4-1/", "tls-handshake": "/smtp/tls-handshake/"}</script>
 
-<h2 class="r">How to read an entry</h2>
-<p>Each page states the answer first, then what the response looks like in a log, why it
-happens, and what to do. The action on each card is the same vocabulary the
-<a href="/bounce/">bounce classifier</a> uses, so a rule in your bounce handling and a page
-here always agree.</p>
+<div id="lk-browse">
+  <div class="sechead r">
+    <h2 class="r">Written up in full</h2>
+    <p>14 of them have a page: real log samples, why it happens, and what to
+    change. The rest resolve in the lookup above with their registry definition and the
+    action their class implies.</p>
+  </div>
+
+  <div class="filter" data-filter>
+    <div class="chips"><button class="chip on" data-group="all" type="button">All</button><button class="chip" data-group="Generic" type="button">Generic</button><button class="chip" data-group="Gmail" type="button">Gmail</button><button class="chip" data-group="Microsoft / Outlook" type="button">Microsoft / Outlook</button><button class="chip" data-group="Yahoo" type="button">Yahoo</button><span class="count"></span></div>
+    <div class="grid"><a href="/smtp/4-2-2/" data-terms="4.2.2 4.2.2 generic mailbox full retry the mailbox is over quota. temporary, and the address is still good. retry with backoff." data-group="Generic"><strong>4.2.2</strong><span class="p">RFC 3463</span><span class="d">The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.</span><span class="act a-retry">retry</span></a><a href="/smtp/4-4-1/" data-terms="4.4.1 4.4.1 generic connection retry a transport failure, not a mail failure. retry, but investigate if it sticks to one route." data-group="Generic"><strong>4.4.1</strong><span class="p">RFC 3463</span><span class="d">A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.</span><span class="act a-retry">retry</span></a><a href="/smtp/5-1-1/" data-terms="5.1.1 5.1.1 generic invalid recipient suppress the mailbox does not exist. permanent. suppress it, because retrying costs reputation." data-group="Generic"><strong>5.1.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-2-1/" data-terms="5.2.1 5.2.1 generic mailbox inactive suppress the mailbox exists but is disabled. suppress it, these turn into spam traps." data-group="Generic"><strong>5.2.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox exists but is disabled. Suppress it, these turn into spam traps.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-7-1/" data-terms="5.7.1 5.7.1 generic policy block review a deliberate policy rejection by the receiver, usually not about your reputation." data-group="Generic"><strong>5.7.1</strong><span class="p">RFC 3463</span><span class="d">A deliberate policy rejection by the receiver, usually not about your reputation.</span><span class="act a-review">review</span></a><a href="/smtp/spamhaus/" data-terms="spamhaus listing spamhaus generic blocklist pause the receiver queried spamhaus and found your ip listed. delist before sending again." data-group="Generic"><strong>Spamhaus listing</strong><span class="p">Blocklist</span><span class="d">The receiver queried Spamhaus and found your IP listed. Delist before sending again.</span><span class="act a-pause">pause</span></a><a href="/smtp/tls-handshake/" data-terms="tls handshake tls-handshake generic connection retry the connection opened but encryption could not be negotiated. usually cipher or certificate." data-group="Generic"><strong>TLS handshake</strong><span class="p">Transport</span><span class="d">The connection opened but encryption could not be negotiated. Usually cipher or certificate.</span><span class="act a-retry">retry</span></a><a href="/smtp/gmail-4-7-28/" data-terms="4.7.28 4.7.28 gmail rate limited throttle a throttle, not a block. slow down for gmail specifically and the mail still goes." data-group="Gmail"><strong>4.7.28</strong><span class="p">Gmail</span><span class="d">A throttle, not a block. Slow down for Gmail specifically and the mail still goes.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/gmail-5-7-1/" data-terms="5.7.1 5.7.1 gmail reputation block pause a hard reputation block. stop sending from this ip or domain and remediate." data-group="Gmail"><strong>5.7.1</strong><span class="p">Gmail</span><span class="d">A hard reputation block. Stop sending from this IP or domain and remediate.</span><span class="act a-pause">pause</span></a><a href="/smtp/gmail-5-7-26/" data-terms="5.7.26 5.7.26 gmail auth failure fix_config authentication failed. spf or dkim has to pass and align, and retrying will not help." data-group="Gmail"><strong>5.7.26</strong><span class="p">Gmail</span><span class="d">Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-4-7-500/" data-terms="4.7.500 4.7.500 microsoft / outlook rate limited throttle throttling. deferred rather than refused, so back off per-provider and retry." data-group="Microsoft / Outlook"><strong>4.7.500</strong><span class="p">Microsoft / Outlook</span><span class="d">Throttling. Deferred rather than refused, so back off per-provider and retry.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-5-7-606/" data-terms="5.7.606 5.7.606 microsoft / outlook reputation block pause your sending ip is on outlook&#x27;s block list. delist, then fix what caused it." data-group="Microsoft / Outlook"><strong>5.7.606</strong><span class="p">Microsoft / Outlook</span><span class="d">Your sending IP is on Outlook&#x27;s block list. Delist, then fix what caused it.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-s3140/" data-terms="s3140 s3140 microsoft / outlook reputation block pause microsoft&#x27;s internal reason code on a block. it points at ip reputation." data-group="Microsoft / Outlook"><strong>S3140</strong><span class="p">Microsoft / Outlook</span><span class="d">Microsoft&#x27;s internal reason code on a block. It points at IP reputation.</span><span class="act a-pause">pause</span></a><a href="/smtp/yahoo-ts03/" data-terms="ts03 ts03 yahoo reputation block pause a 4xx that behaves like a block. retrying on schedule will not clear it." data-group="Yahoo"><strong>TS03</strong><span class="p">Yahoo</span><span class="d">A 4xx that behaves like a block. Retrying on schedule will not clear it.</span><span class="act a-pause">pause</span></a></div>
+    <p class="empty noresult hidden">Nothing matches that filter.</p>
+  </div>
+
+  <h2 class="r">Where these come from</h2>
+  <p>Nothing here is written from memory. The reply codes are parsed from
+  <a href="https://www.rfc-editor.org/rfc/rfc5321.html#section-4.2.3">RFC 5321 section
+  4.2.3</a>, the enhanced status codes from the
+  <a href="https://www.iana.org/assignments/smtp-enhanced-status-codes/">IANA registry</a>,
+  and the Microsoft codes from
+  <a href="https://learn.microsoft.com/en-us/exchange/mail-flow-best-practices/non-delivery-reports-in-exchange-online/non-delivery-reports-in-exchange-online">Microsoft's
+  own NDR reference</a>. Each entry says which.</p>
+  <p>What the registries do not carry is what to do about a code, which is the only
+  reason anybody looks one up. So every entry also has an action. Where that action was
+  derived from the code's class rather than from operating the failure, it says so:
+  a sound default and somebody's experience are not the same thing, and a reference that
+  lets the two read alike is not worth trusting.</p>
+</div>
 
 </main>
 <footer>
@@ -1064,5 +1125,6 @@ here always agree.</p>
 </script>
 
 <script type="module" src="/js/filter.js"></script>
+<script type="module" src="/js/lookup-ui.js"></script>
 </body>
 </html>

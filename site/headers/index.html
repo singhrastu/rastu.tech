@@ -242,6 +242,40 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
 /* ---- the p=reject simulation, the headline answer ------------------------- */
 .sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
   background:linear-gradient(140deg,var(--surface),transparent 80%)}

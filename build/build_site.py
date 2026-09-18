@@ -289,6 +289,40 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- response lookup ------------------------------------------------------ */
+#lk-q{font-size:1.05rem;padding:.9rem 1rem}
+.lk{border:1px solid var(--line);border-left-width:3px;border-radius:0 10px 10px 0;
+  background:var(--surface);padding:var(--s3) var(--s4) var(--s3) 1rem;margin:0 0 .5rem}
+.lk.s-critical{border-left-color:var(--bad)}
+.lk.s-warn{border-left-color:var(--warn)}
+.lk.s-info{border-left-color:var(--info)}
+.lk.s-ok{border-left-color:var(--ok)}
+/* The first result is the answer; the rest are alternatives. It gets the weight. */
+.lk.lead{background:linear-gradient(140deg,var(--accent-soft),transparent 78%);
+  border-color:color-mix(in srgb,var(--accent) 30%,transparent);
+  padding:var(--s4) var(--s4) var(--s4) 1.1rem;margin-bottom:var(--s4)}
+.lk header{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.45rem}
+.lk .c{background:var(--code);border:1px solid var(--line);border-radius:6px;
+  padding:.16rem .5rem;font-size:var(--t2);color:var(--ink);font-weight:600}
+.lk.lead .c{font-size:var(--t4);padding:.25rem .65rem}
+.lk .cls,.lk .prov{font-size:var(--t1);color:var(--ink-3)}
+.lk .act{margin-left:auto;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  font-weight:700;padding:.16rem .55rem;border-radius:100px;border:1px solid currentColor}
+.lk.s-critical .act{color:var(--bad)} .lk.s-warn .act{color:var(--warn)}
+.lk.s-info .act{color:var(--info)} .lk.s-ok .act{color:var(--ok)}
+.lk h3{margin:0 0 .25rem;font-size:var(--t3);font-weight:650;line-height:1.45}
+.lk.lead h3{font-size:1.2rem}
+.lk .does{margin:0 0 .5rem;font-size:var(--t3);color:var(--ink);font-weight:550}
+.lk .d{margin:0 0 .4rem;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
+  max-width:46rem}
+.lk .d.dim{color:var(--ink-3);font-size:var(--t1)}
+.lk .src{margin:.5rem 0 0;font-size:var(--t1);color:var(--ink-3)}
+.lk .src span[title]{cursor:help;border-bottom:1px dotted var(--line)}
+.lk-read{font-size:var(--t2);color:var(--ink-3);margin:0 0 var(--s3)}
+.lk-more{margin-top:var(--s4)}
+.lk-more h4{font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 .6rem;font-weight:650}
+
 /* ---- the p=reject simulation, the headline answer ------------------------- */
 .sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
   background:linear-gradient(140deg,var(--surface),transparent 80%)}
@@ -2159,6 +2193,7 @@ def build_home():
     the old personal homepage, not smaller.
     """
     cards = "".join(tool_card(t) for t in TOOLS)
+    session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
 
     # The responses people actually arrive on, as a way in to the reference.
     picks = ["4.7.28", "5.7.1", "5.7.606", "5.1.1", "TS03", "spamhaus"]
@@ -2192,6 +2227,21 @@ def build_home():
 or find the mechanism that quietly switched off an SPF record.</p>
 
 <div class="bento tools">{cards}</div>
+
+<div class="sechead r">
+  <h2>One message, all the way through</h2>
+  <p>A real swaks run against Gmail's MX, captured with <code>--quit-after RCPT</code> so
+  the handshake completes and no message is ever sent. Every line is a place delivery can
+  fail, and most of the work is knowing which one it failed at.</p>
+</div>
+
+<div class="term" id="term" data-session='{e(session)}'>
+  <div class="bar"><i></i><i></i><i></i>
+    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <em>click to replay</em></div>
+  <pre><code id="term-out"></code><span class="cur"></span></pre>
+</div>
+<p class="prose r"><a href="/smtp/session/">Read it annotated, line by line &rarr;</a></p>
 
 <div class="sechead r">
   <h2>SMTP response reference</h2>
@@ -2306,28 +2356,58 @@ def build_smtp_index():
             f'<span class="act a-{e(c["action"])}">{e(c["action"].replace("_", " "))}</span>'
             f"</a>")
 
+    # Which codes have a written page, so the lookup can offer the deep version.
+    pages = {c["code"]: "/smtp/" + slug(c) + "/" for c in CODES}
+
     body = f"""
 <h1>SMTP responses: what each one means and what to do</h1>
-<p class="lede">What the responses in your mail log actually mean, whether retrying will
-help, and what to change so they stop. Written from operating these systems, not from the
-spec.</p>
+<p class="lede">Paste a bounce out of your mail log, or type any part of a code. The
+registry covers every reply code in RFC 5321, every enhanced status code IANA has
+registered, and Microsoft's own, which are mostly outside both.</p>
 
-<div class="filter" data-filter>
-  <input class="field" type="search" id="ref-q" autocomplete="off" spellcheck="false"
-         placeholder="Paste a code or search: 4.7.28, blocked, quota, reputation"
-         aria-label="Search the reference">
-  <div class="chips">{chips}<span class="count"></span></div>
-  <div class="grid">{"".join(items)}</div>
-  <p class="empty noresult hidden">Nothing matches that. The reference covers
-  {len(CODES)} responses so far and grows from real mail logs; if you have hit
-  something that is missing, it is worth reporting.</p>
+<div class="tool">
+  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one</label>
+  <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
+         placeholder="Loading the registry...">
+  <p class="hint">Try:
+    <button type="button" data-lk="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org">a whole bounce</button>
+    <button type="button" data-lk="5.7.620">a code inside a range</button>
+    <button type="button" data-lk="512">three digits</button>
+    <button type="button" data-lk="4.2.2">a transient code</button>
+    <button type="button" data-lk="mailbox full">what it said</button>
+  </p>
+  <div class="report" id="lk-out" aria-live="polite"></div>
 </div>
+<script type="application/json" id="lk-pages">{json.dumps(pages)}</script>
 
-<h2>How to read an entry</h2>
-<p>Each page states the answer first, then what the response looks like in a log, why it
-happens, and what to do. The action on each card is the same vocabulary the
-<a href="/bounce/">bounce classifier</a> uses, so a rule in your bounce handling and a page
-here always agree.</p>
+<div id="lk-browse">
+  <div class="sechead r">
+    <h2>Written up in full</h2>
+    <p>{len(CODES)} of them have a page: real log samples, why it happens, and what to
+    change. The rest resolve in the lookup above with their registry definition and the
+    action their class implies.</p>
+  </div>
+
+  <div class="filter" data-filter>
+    <div class="chips">{chips}<span class="count"></span></div>
+    <div class="grid">{"".join(items)}</div>
+    <p class="empty noresult hidden">Nothing matches that filter.</p>
+  </div>
+
+  <h2>Where these come from</h2>
+  <p>Nothing here is written from memory. The reply codes are parsed from
+  <a href="https://www.rfc-editor.org/rfc/rfc5321.html#section-4.2.3">RFC 5321 section
+  4.2.3</a>, the enhanced status codes from the
+  <a href="https://www.iana.org/assignments/smtp-enhanced-status-codes/">IANA registry</a>,
+  and the Microsoft codes from
+  <a href="https://learn.microsoft.com/en-us/exchange/mail-flow-best-practices/non-delivery-reports-in-exchange-online/non-delivery-reports-in-exchange-online">Microsoft's
+  own NDR reference</a>. Each entry says which.</p>
+  <p>What the registries do not carry is what to do about a code, which is the only
+  reason anybody looks one up. So every entry also has an action. Where that action was
+  derived from the code's class rather than from operating the failure, it says so:
+  a sound default and somebody's experience are not the same thing, and a reference that
+  lets the two read alike is not worth trusting.</p>
+</div>
 """
     ld = {
         "@context": "https://schema.org",
@@ -2343,7 +2423,8 @@ here always agree.</p>
         "Searchable reference for SMTP rejection and deferral responses: what each means, "
         "whether to retry, and how to fix the cause.",
         body, "smtp/index.html", extra_ld=ld, wide=True,
-        nav_key="SMTP responses", modules=("/js/filter.js",))
+        nav_key="SMTP responses",
+        modules=("/js/filter.js", "/js/lookup-ui.js"))
 
 
 def build_session():
@@ -2859,7 +2940,8 @@ def check_js():
                         ("parity.mjs", "the in-browser auditor has drifted from dmarcsight"),
                         ("parity-unzip.mjs", "the zip reader is wrong"),
                         ("parity-rua.mjs", "the DMARC report reader is wrong"),
-                        ("parity-headers.mjs", "the header analyser is wrong")):
+                        ("parity-headers.mjs", "the header analyser is wrong"),
+                        ("parity-lookup.mjs", "the response lookup is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue
@@ -2903,8 +2985,13 @@ def main():
     os.makedirs(jsdir, exist_ok=True)
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
                  "unzip.js", "rua.js", "rua-ui.js", "findings.js",
-                 "headers.js", "headers-ui.js"):
+                 "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
+
+    # The response registry, fetched by the lookup rather than inlined: it is
+    # 24 KB gzipped and caches independently of the page.
+    shutil.copy2(os.path.join(HERE, "registry.json"),
+                 os.path.join(OUT, "registry.json"))
 
     # images
     for name in ("rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg",
