@@ -27,8 +27,9 @@ CODES = [
     # ---------------------------------------------------------------- Gmail
     {
         "code": "4.7.28",
+        "summary": 'A throttle, not a block. Slow down for Gmail specifically and the mail still goes.',
         "provider": "Gmail",
-        "title": "Gmail 4.7.28: what it means and how to fix it",
+        "title": "Gmail 4.7.28: unusual rate, deferred not blocked",
         "answer": (
             "Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an "
             "unusual volume of mail from your IP or domain and is deferring rather than "
@@ -67,6 +68,7 @@ CODES = [
     },
     {
         "code": "5.7.26",
+        "summary": 'Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.',
         "provider": "Gmail",
         "title": "Gmail 5.7.26: unauthenticated mail rejected",
         "answer": (
@@ -98,8 +100,9 @@ CODES = [
     },
     {
         "code": "5.7.1",
+        "summary": 'A hard reputation block. Stop sending from this IP or domain and remediate.',
         "provider": "Gmail",
-        "title": "Gmail 5.7.1: message blocked, and what to do about it",
+        "title": "Gmail 5.7.1: message blocked for reputation",
         "answer": (
             "Gmail 5.7.1 is a hard block. Unlike 4.7.28, this is Gmail refusing the message "
             "outright, usually on content or on the reputation of the sending IP or domain. "
@@ -130,6 +133,7 @@ CODES = [
     # ------------------------------------------------------------ Microsoft
     {
         "code": "5.7.606",
+        "summary": "Your sending IP is on Outlook's block list. Delist, then fix what caused it.",
         "provider": "Microsoft / Outlook",
         "title": "Microsoft 5.7.606: access denied, banned sending IP",
         "answer": (
@@ -166,8 +170,9 @@ CODES = [
     },
     {
         "code": "S3140",
+        "summary": "Microsoft's internal reason code on a block. It points at IP reputation.",
         "provider": "Microsoft / Outlook",
-        "title": "Microsoft S3140: what this error code means",
+        "title": "Microsoft S3140: sending IP reputation block",
         "answer": (
             "S3140 is Microsoft's internal reason code attached to a block, and it points at "
             "the reputation of the sending IP. You will normally see it alongside a 550 5.7.x "
@@ -196,6 +201,7 @@ CODES = [
     },
     {
         "code": "4.7.500",
+        "summary": 'Throttling. Deferred rather than refused, so back off per-provider and retry.',
         "provider": "Microsoft / Outlook",
         "title": "Microsoft 4.7.500: server busy, throttled",
         "answer": (
@@ -225,6 +231,7 @@ CODES = [
     # ---------------------------------------------------------------- Yahoo
     {
         "code": "TS03",
+        "summary": 'A 4xx that behaves like a block. Retrying on schedule will not clear it.',
         "provider": "Yahoo",
         "title": "Yahoo TS03: deferred for policy reasons",
         "answer": (
@@ -260,6 +267,7 @@ CODES = [
     # -------------------------------------------------------------- generic
     {
         "code": "5.1.1",
+        "summary": 'The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.',
         "provider": None,
         "title": "SMTP 5.1.1: recipient address does not exist",
         "answer": (
@@ -288,6 +296,7 @@ CODES = [
     },
     {
         "code": "4.2.2",
+        "summary": 'The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.',
         "provider": None,
         "title": "SMTP 4.2.2: recipient mailbox is full",
         "answer": (
@@ -315,6 +324,7 @@ CODES = [
     },
     {
         "code": "5.2.1",
+        "summary": 'The mailbox exists but is disabled. Suppress it, these turn into spam traps.',
         "provider": None,
         "title": "SMTP 5.2.1: mailbox disabled or inactive",
         "answer": (
@@ -342,6 +352,7 @@ CODES = [
     },
     {
         "code": "5.7.1",
+        "summary": 'A deliberate policy rejection by the receiver, usually not about your reputation.',
         "provider": None,
         "title": "SMTP 5.7.1: delivery not authorized, message refused",
         "answer": (
@@ -371,6 +382,9 @@ CODES = [
     },
     {
         "code": "spamhaus",
+        "summary": 'The receiver queried Spamhaus and found your IP listed. Delist before sending again.',
+        "label": 'Spamhaus listing',
+        "badge": 'Blocklist',
         "provider": None,
         "title": "Blocked using Spamhaus: how to diagnose and get delisted",
         "answer": (
@@ -407,6 +421,7 @@ CODES = [
     },
     {
         "code": "4.4.1",
+        "summary": 'A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.',
         "provider": None,
         "title": "SMTP 4.4.1: connection timed out or refused",
         "answer": (
@@ -435,6 +450,9 @@ CODES = [
     },
     {
         "code": "tls-handshake",
+        "summary": 'The connection opened but encryption could not be negotiated. Usually cipher or certificate.',
+        "label": 'TLS handshake',
+        "badge": 'Transport',
         "provider": None,
         "title": "TLS handshake failures on outbound SMTP",
         "answer": (

@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SMTP 5.1.1: recipient address does not exist</title>
-<meta name="description" content="5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.">
-<link rel="canonical" href="https://rastu.tech/smtp/5-1-1/">
-<meta property="og:title" content="SMTP 5.1.1: recipient address does not exist">
-<meta property="og:description" content="5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.">
+<title>SPF lookup counter: find the mechanism that breaks your SPF record</title>
+<meta name="description" content="Walk a domain&#x27;s full SPF include tree with a running RFC 7208 DNS lookup count, and find the exact mechanism that pushes it past ten and into permerror.">
+<link rel="canonical" href="https://rastu.tech/spf/">
+<meta property="og:title" content="SPF lookup counter: find the mechanism that breaks your SPF record">
+<meta property="og:description" content="Walk a domain&#x27;s full SPF include tree with a running RFC 7208 DNS lookup count, and find the exact mechanism that pushes it past ten and into permerror.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/smtp/5-1-1/">
+<meta property="og:url" content="https://rastu.tech/spf/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -501,63 +501,89 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "SMTP 5.1.1: recipient address does not exist", "description": "5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "5.1.1", "mainEntityOfPage": "https://rastu.tech/smtp/5-1-1/"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "SPF lookup counter", "url": "https://rastu.tech/spf/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}, "isAccessibleForFree": true}</script>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
-  <a class="mark" href="../../">rastu<span>.tech</span></a>
-  <a href="../../tools/">Tools</a>
-  <a href="../../smtp/">Reference</a>
-  <a href="../../research/">Research</a>
-  <a href="../../about/">About</a>
+  <a class="mark" href="../">rastu<span>.tech</span></a>
+  <a href="../tools/" aria-current="page">Tools</a>
+  <a href="../smtp/">Reference</a>
+  <a href="../research/">Research</a>
+  <a href="../about/">About</a>
 </nav>
-
+<nav class="crumb" aria-label="Breadcrumb"><a href="../">Home</a><span>/</span><a href="../tools/">Tools</a><span>/</span>SPF lookup counter</nav>
 <main id="main">
 
-<p class="kicker">SMTP reference</p>
-<h1>SMTP 5.1.1: recipient address does not exist</h1>
-<p><span class="badge">RFC 3463</span><span class="badge">invalid_recipient</span><span class="badge">action: suppress</span></p>
-<p class="lede">5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Continuing to send to addresses that return 5.1.1 is one of the fastest ways to damage sender reputation.</p>
+<h1>SPF lookup counter</h1>
+<p class="lede">RFC 7208 caps an SPF evaluation at ten DNS lookups. Over the cap it is a
+permerror, and most receivers treat a permerror as no SPF at all. This walks the whole
+include tree and shows you exactly where the count goes.</p>
 
-<h2 class="r">What it looks like in the log</h2>
-<pre><code>550 5.1.1 &lt;user@example.com&gt;: Recipient address rejected: User unknown in virtual mailbox table</code></pre>
-<pre><code>550 5.1.1 The email account that you tried to reach does not exist.</code></pre>
-<pre><code>550 5.1.1 unknown or illegal alias</code></pre>
-<h2 class="r">Why it happens</h2>
-<ul><li>The address was mistyped at collection.</li>
-<li>The mailbox was deleted, commonly after someone leaves an organisation.</li>
-<li>The address was never real, which points at list quality or a lack of confirmed opt-in.</li></ul>
-<h2 class="r">What to do</h2>
-<ul><li>Suppress permanently on the first occurrence. There is no reason to retry.</li>
-<li>If the hard bounce rate is above about 2%, the problem is list acquisition, not delivery.</li>
-<li>Validate at the point of capture rather than discovering invalid addresses at send time.</li></ul>
-<h2 class="r">Related</h2><p><a href="/smtp/5-2-1/">5.2.1</a> &middot; <a href="/smtp/4-2-2/">4.2.2</a></p>
-<h2 class="r">Classifying this automatically</h2>
-<p>This response maps to <code>invalid_recipient</code> with a recommended action of
-<code>suppress</code> in
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
-SMTP rejections and deferrals.</p>
+<div class="tool">
+  <form id="spf-form" autocomplete="off" class="row">
+    <label class="sr" for="spf-domain">Domain</label>
+    <input class="field" id="spf-domain" type="text" spellcheck="false"
+           placeholder="example.com" aria-label="Domain to check">
+    <button class="btn" type="submit" id="spf-run">Count lookups</button>
+  </form>
+  <p class="hint">Try:
+    <a href="?d=salesforce.com">salesforce.com</a>
+    <a href="?d=shopify.com">shopify.com</a>
+    <a href="?d=hubspot.com">hubspot.com</a>
+    <a href="?d=rastu.tech">rastu.tech</a>
+  </p>
+  <div class="report" id="spf-out" aria-live="polite"></div>
+</div>
+
+<h2 class="r">What counts against the ten</h2>
+<p>Each of these costs one lookup, and every <code>include:</code> costs its own lookups on
+top of the one it costs to reach:</p>
+<ul>
+  <li><code>include:</code> and <code>redirect=</code>, recursively</li>
+  <li><code>a</code>, <code>a:</code>, <code>mx</code>, <code>mx:</code>, <code>exists:</code></li>
+  <li><code>ptr</code>, which is deprecated and should not be in a record at all</li>
+</ul>
+<p>These cost nothing, because they need no DNS query: <code>ip4:</code>, <code>ip6:</code>,
+<code>all</code> and <code>exp=</code>. Moving an ESP from an <code>include:</code> to its
+published <code>ip4:</code> ranges is the standard way to buy headroom, and it is also the
+thing that silently breaks six months later.</p>
+
+<h2 class="r">Why this is worth checking</h2>
+<p>It is the failure nobody sees coming. The record resolves. It reads correctly. It passes a
+visual inspection. It has simply stopped authenticating, usually because somebody added one
+more vendor to a record that was already at nine. Across
+<a href="/research/">100,000 domains</a>, 3.4% of every published SPF record had already
+crossed the line.</p>
+
+<h2 class="r">On flattening</h2>
+<p>Flattening means replacing an <code>include:</code> with the IP ranges it currently
+resolves to. It fixes the count today and creates a slower problem: when the provider adds a
+sending range, your record does not know, and mail from the new range fails SPF with no error
+anywhere to tell you. If you flatten, you own a record that has to be re-generated on a
+schedule, and somebody has to still be doing that in a year.</p>
+<p>Cheaper answers first: remove vendors that no longer send, move mail to a subdomain with
+its own record, and collapse two ESPs into one.</p>
 
 </main>
 <footer>
   <div class="cols">
     <div>
       <h2 class="r">Tools</h2>
-            <a href="../../check/">Domain check</a>
-      <a href="../../bounce/">Bounce classifier</a>
-      <a href="../../spf/">SPF lookup counter</a>
-      <a href="../../tools/">All tools</a>
+            <a href="../check/">Domain check</a>
+      <a href="../bounce/">Bounce classifier</a>
+      <a href="../spf/">SPF lookup counter</a>
+      <a href="../tools/">All tools</a>
     </div>
     <div>
       <h2 class="r">Reference</h2>
-      <a href="../../smtp/">SMTP responses</a>
-      <a href="../../smtp/session/">Anatomy of a session</a>
+      <a href="../smtp/">SMTP responses</a>
+      <a href="../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
       <h2 class="r">Research</h2>
-      <a href="../../research/">State of email authentication</a>
+      <a href="../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
@@ -567,7 +593,7 @@ SMTP rejections and deferrals.</p>
       <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
     </div>
   </div>
-  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+  <p class="by">Built and maintained by <a href="../about/">Rastu Singh</a>,
      Infrastructure Engineer, Tallinn.
      Everything here runs in your browser.</p>
 </footer>
@@ -743,6 +769,6 @@ SMTP rejections and deferrals.</p>
 })();
 </script>
 
-
+<script type="module" src="/js/spf.js"></script>
 </body>
 </html>

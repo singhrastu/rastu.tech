@@ -56,7 +56,11 @@ function policyTags(body) {
 }
 
 // ------------------------------------------------------------------------ SPF
-async function countLookups(spf, r, seen, depth = 0) {
+/* `out`, when passed, collects the include tree as a side effect. The return value
+   and the walk order are untouched, so build/parity.mjs keeps passing against the
+   Python implementation; /spf/ gets the tree for free rather than from a second,
+   drifting copy of this logic. */
+async function countLookups(spf, r, seen, depth = 0, out = null) {
   if (depth > 10) return 99;
   let n = 0;
   for (const token of spf.split(/\s+/)) {
@@ -66,16 +70,46 @@ async function countLookups(spf, r, seen, depth = 0) {
       const target = (t.startsWith('include:')
         ? token.slice(token.indexOf(':') + 1)
         : token.slice(token.indexOf('=') + 1)).trim();
-      if (!target || seen.has(target)) continue;
+      const node = out ? { kind: t.startsWith('include:') ? 'include' : 'redirect',
+                           target, cost: 1, record: null, children: [], note: '' } : null;
+      if (node) out.push(node);
+      if (!target || seen.has(target)) {
+        if (node) node.note = target ? 'already counted above' : 'empty target';
+        continue;
+      }
       seen.add(target);
       const sub = (await r.txt(target)).filter(x => x.toLowerCase().startsWith('v=spf1'));
-      if (sub.length) n += await countLookups(sub[0], r, seen, depth + 1);
+      if (node) node.record = sub[0] || null;
+      if (sub.length) {
+        n += await countLookups(sub[0], r, seen, depth + 1, node ? node.children : null);
+      } else if (node) {
+        node.note = 'no SPF record at this name, so it resolves to nothing';
+      }
     } else if (t.startsWith('a:') || t.startsWith('mx:') || t.startsWith('exists:')
                || t === 'a' || t === 'mx' || t === 'ptr') {
       n += 1;
+      if (out) out.push({ kind: 'mechanism', target: token, cost: 1,
+                          record: null, children: [], note: '' });
+    } else if (out && t && !t.startsWith('v=spf1')) {
+      // ip4/ip6/all/exp cost nothing; shown so the record reads as a whole
+      out.push({ kind: 'free', target: token, cost: 0,
+                 record: null, children: [], note: '' });
     }
   }
   return n;
+}
+
+/* The public entry point for /spf/. Returns the record, the tree and the count. */
+export async function spfTree(domain, r) {
+  domain = domain.trim().toLowerCase().replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '').replace(/^.*@/, '').replace(/\.+$/, '');
+  const records = (await r.txt(domain)).filter(t => t.toLowerCase().startsWith('v=spf1'));
+  if (!records.length) return { domain, record: null, records, tree: [], count: 0 };
+  if (records.length > 1) return { domain, record: null, records, tree: [], count: 0 };
+  const tree = [];
+  const count = await countLookups(records[0], r, new Set(), 0, tree);
+  const m = records[0].match(/([-~+?])all\b/);
+  return { domain, record: records[0], records, tree, count, all: m ? m[1] : null };
 }
 
 async function checkSpf(domain, r, rep) {

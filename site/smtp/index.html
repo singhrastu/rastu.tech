@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SMTP response reference: error and deferral codes explained</title>
-<meta name="description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<meta name="description" content="Searchable reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
 <link rel="canonical" href="https://rastu.tech/smtp/">
 <meta property="og:title" content="SMTP response reference: error and deferral codes explained">
-<meta property="og:description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<meta property="og:description" content="Searchable reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://rastu.tech/smtp/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
@@ -208,6 +208,65 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- tool cards ---------------------------------------------------------- */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid a{position:relative}
+.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
 
 /* ---- highlight panel --------------------------------------------------- */
 .panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
@@ -442,28 +501,42 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "SMTP response reference", "author": {"@id": "https://rastu.tech/#person"}, "mainEntityOfPage": "https://rastu.tech/smtp/"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "SMTP response reference", "url": "https://rastu.tech/smtp/", "author": {"@id": "https://rastu.tech/#person"}, "hasPart": [{"@type": "TechArticle", "headline": "Gmail 4.7.28: unusual rate, deferred not blocked", "url": "https://rastu.tech/smtp/gmail-4-7-28/"}, {"@type": "TechArticle", "headline": "Gmail 5.7.26: unauthenticated mail rejected", "url": "https://rastu.tech/smtp/gmail-5-7-26/"}, {"@type": "TechArticle", "headline": "Gmail 5.7.1: message blocked for reputation", "url": "https://rastu.tech/smtp/gmail-5-7-1/"}, {"@type": "TechArticle", "headline": "Microsoft 5.7.606: access denied, banned sending IP", "url": "https://rastu.tech/smtp/microsoft-outlook-5-7-606/"}, {"@type": "TechArticle", "headline": "Microsoft S3140: sending IP reputation block", "url": "https://rastu.tech/smtp/microsoft-outlook-s3140/"}, {"@type": "TechArticle", "headline": "Microsoft 4.7.500: server busy, throttled", "url": "https://rastu.tech/smtp/microsoft-outlook-4-7-500/"}, {"@type": "TechArticle", "headline": "Yahoo TS03: deferred for policy reasons", "url": "https://rastu.tech/smtp/yahoo-ts03/"}, {"@type": "TechArticle", "headline": "SMTP 5.1.1: recipient address does not exist", "url": "https://rastu.tech/smtp/5-1-1/"}, {"@type": "TechArticle", "headline": "SMTP 4.2.2: recipient mailbox is full", "url": "https://rastu.tech/smtp/4-2-2/"}, {"@type": "TechArticle", "headline": "SMTP 5.2.1: mailbox disabled or inactive", "url": "https://rastu.tech/smtp/5-2-1/"}, {"@type": "TechArticle", "headline": "SMTP 5.7.1: delivery not authorized, message refused", "url": "https://rastu.tech/smtp/5-7-1/"}, {"@type": "TechArticle", "headline": "Blocked using Spamhaus: how to diagnose and get delisted", "url": "https://rastu.tech/smtp/spamhaus/"}, {"@type": "TechArticle", "headline": "SMTP 4.4.1: connection timed out or refused", "url": "https://rastu.tech/smtp/4-4-1/"}, {"@type": "TechArticle", "headline": "TLS handshake failures on outbound SMTP", "url": "https://rastu.tech/smtp/tls-handshake/"}]}</script>
 </head>
 <body>
-<div class="wrap">
+<div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
   <a class="mark" href="../">rastu<span>.tech</span></a>
   <a href="../tools/">Tools</a>
-  <a href="../smtp/">Reference</a>
+  <a href="../smtp/" aria-current="page">Reference</a>
   <a href="../research/">Research</a>
   <a href="../about/">About</a>
 </nav>
 
 <main id="main">
 
-<p class="kicker">Reference</p>
 <h1>SMTP response reference</h1>
-<p class="lede">What the responses in your mail log actually mean, whether retrying will help,
-and what to change so they stop. Written from operating these systems, not from the spec.</p>
-<p class="meta">14 responses documented. Categories and recommended actions match
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>.</p>
-<div class="grid"><a href="/smtp/4-2-2/"><strong>4.2.2</strong><br><span>4.2.2 means the recipient&#x27;s mailbox is over quota. It is temporary and the address is still valid, so retry. If it persi...</span></a><a href="/smtp/4-4-1/"><strong>4.4.1</strong><br><span>4.4.1 means your server could not complete a connection to the receiving host. It is a transport problem rather than a p...</span></a><a href="/smtp/5-1-1/"><strong>5.1.1</strong><br><span>5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Conti...</span></a><a href="/smtp/5-2-1/"><strong>5.2.1</strong><br><span>5.2.1 means the mailbox exists but is disabled, suspended or not accepting mail. It is permanent. Suppress it, and treat...</span></a><a href="/smtp/5-7-1/"><strong>5.7.1</strong><br><span>5.7.1 is a policy rejection. The receiving server understood the message and refused it on purpose. The cause sits in th...</span></a><a href="/smtp/spamhaus/"><strong>spamhaus</strong><br><span>This means the receiving server queried Spamhaus, found your sending IP listed, and refused the connection. Delisting is...</span></a><a href="/smtp/tls-handshake/"><strong>tls-handshake</strong><br><span>A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are norm...</span></a><a href="/smtp/gmail-4-7-28/"><strong>4.7.28</strong> &middot; Gmail<br><span>Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or do...</span></a><a href="/smtp/gmail-5-7-1/"><strong>5.7.1</strong> &middot; Gmail<br><span>Gmail 5.7.1 is a hard block. Unlike 4.7.28, this is Gmail refusing the message outright, usually on content or on the re...</span></a><a href="/smtp/gmail-5-7-26/"><strong>5.7.26</strong> &middot; Gmail<br><span>Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignm...</span></a><a href="/smtp/microsoft-outlook-4-7-500/"><strong>4.7.500</strong> &middot; Microsoft / Outlook<br><span>Microsoft 4.7.500 is throttling. The message has not been rejected, it has been deferred because Microsoft is limiting h...</span></a><a href="/smtp/microsoft-outlook-5-7-606/"><strong>5.7.606</strong> &middot; Microsoft / Outlook<br><span>Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentic...</span></a><a href="/smtp/microsoft-outlook-s3140/"><strong>S3140</strong> &middot; Microsoft / Outlook<br><span>S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You wi...</span></a><a href="/smtp/yahoo-ts03/"><strong>TS03</strong> &middot; Yahoo<br><span>Yahoo&#x27;s [TS03] tag marks a deferral for policy or reputation reasons. It arrives as a 4xx, so the message is still queue...</span></a></div>
+<p class="lede">What the responses in your mail log actually mean, whether retrying will
+help, and what to change so they stop. Written from operating these systems, not from the
+spec.</p>
+
+<div class="filter" data-filter>
+  <input class="field" type="search" id="ref-q" autocomplete="off" spellcheck="false"
+         placeholder="Paste a code or search: 4.7.28, blocked, quota, reputation"
+         aria-label="Search the reference">
+  <div class="chips"><button class="chip on" data-group="all" type="button">All</button><button class="chip" data-group="Generic" type="button">Generic</button><button class="chip" data-group="Gmail" type="button">Gmail</button><button class="chip" data-group="Microsoft / Outlook" type="button">Microsoft / Outlook</button><button class="chip" data-group="Yahoo" type="button">Yahoo</button><span class="count"></span></div>
+  <div class="grid"><a href="/smtp/4-2-2/" data-terms="4.2.2 4.2.2 generic mailbox full retry the mailbox is over quota. temporary, and the address is still good. retry with backoff." data-group="Generic"><strong>4.2.2</strong><span class="p">RFC 3463</span><span class="d">The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.</span><span class="act a-retry">retry</span></a><a href="/smtp/4-4-1/" data-terms="4.4.1 4.4.1 generic connection retry a transport failure, not a mail failure. retry, but investigate if it sticks to one route." data-group="Generic"><strong>4.4.1</strong><span class="p">RFC 3463</span><span class="d">A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.</span><span class="act a-retry">retry</span></a><a href="/smtp/5-1-1/" data-terms="5.1.1 5.1.1 generic invalid recipient suppress the mailbox does not exist. permanent. suppress it, because retrying costs reputation." data-group="Generic"><strong>5.1.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-2-1/" data-terms="5.2.1 5.2.1 generic mailbox inactive suppress the mailbox exists but is disabled. suppress it, these turn into spam traps." data-group="Generic"><strong>5.2.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox exists but is disabled. Suppress it, these turn into spam traps.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-7-1/" data-terms="5.7.1 5.7.1 generic policy block review a deliberate policy rejection by the receiver, usually not about your reputation." data-group="Generic"><strong>5.7.1</strong><span class="p">RFC 3463</span><span class="d">A deliberate policy rejection by the receiver, usually not about your reputation.</span><span class="act a-review">review</span></a><a href="/smtp/spamhaus/" data-terms="spamhaus listing spamhaus generic blocklist pause the receiver queried spamhaus and found your ip listed. delist before sending again." data-group="Generic"><strong>Spamhaus listing</strong><span class="p">Blocklist</span><span class="d">The receiver queried Spamhaus and found your IP listed. Delist before sending again.</span><span class="act a-pause">pause</span></a><a href="/smtp/tls-handshake/" data-terms="tls handshake tls-handshake generic connection retry the connection opened but encryption could not be negotiated. usually cipher or certificate." data-group="Generic"><strong>TLS handshake</strong><span class="p">Transport</span><span class="d">The connection opened but encryption could not be negotiated. Usually cipher or certificate.</span><span class="act a-retry">retry</span></a><a href="/smtp/gmail-4-7-28/" data-terms="4.7.28 4.7.28 gmail rate limited throttle a throttle, not a block. slow down for gmail specifically and the mail still goes." data-group="Gmail"><strong>4.7.28</strong><span class="p">Gmail</span><span class="d">A throttle, not a block. Slow down for Gmail specifically and the mail still goes.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/gmail-5-7-1/" data-terms="5.7.1 5.7.1 gmail reputation block pause a hard reputation block. stop sending from this ip or domain and remediate." data-group="Gmail"><strong>5.7.1</strong><span class="p">Gmail</span><span class="d">A hard reputation block. Stop sending from this IP or domain and remediate.</span><span class="act a-pause">pause</span></a><a href="/smtp/gmail-5-7-26/" data-terms="5.7.26 5.7.26 gmail auth failure fix_config authentication failed. spf or dkim has to pass and align, and retrying will not help." data-group="Gmail"><strong>5.7.26</strong><span class="p">Gmail</span><span class="d">Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-4-7-500/" data-terms="4.7.500 4.7.500 microsoft / outlook rate limited throttle throttling. deferred rather than refused, so back off per-provider and retry." data-group="Microsoft / Outlook"><strong>4.7.500</strong><span class="p">Microsoft / Outlook</span><span class="d">Throttling. Deferred rather than refused, so back off per-provider and retry.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-5-7-606/" data-terms="5.7.606 5.7.606 microsoft / outlook reputation block pause your sending ip is on outlook&#x27;s block list. delist, then fix what caused it." data-group="Microsoft / Outlook"><strong>5.7.606</strong><span class="p">Microsoft / Outlook</span><span class="d">Your sending IP is on Outlook&#x27;s block list. Delist, then fix what caused it.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-s3140/" data-terms="s3140 s3140 microsoft / outlook reputation block pause microsoft&#x27;s internal reason code on a block. it points at ip reputation." data-group="Microsoft / Outlook"><strong>S3140</strong><span class="p">Microsoft / Outlook</span><span class="d">Microsoft&#x27;s internal reason code on a block. It points at IP reputation.</span><span class="act a-pause">pause</span></a><a href="/smtp/yahoo-ts03/" data-terms="ts03 ts03 yahoo reputation block pause a 4xx that behaves like a block. retrying on schedule will not clear it." data-group="Yahoo"><strong>TS03</strong><span class="p">Yahoo</span><span class="d">A 4xx that behaves like a block. Retrying on schedule will not clear it.</span><span class="act a-pause">pause</span></a></div>
+  <p class="empty noresult hidden">Nothing matches that. The reference covers
+  14 responses so far and grows from real mail logs; if you have hit
+  something that is missing, it is worth reporting.</p>
+</div>
+
+<h2 class="r">How to read an entry</h2>
+<p>Each page states the answer first, then what the response looks like in a log, why it
+happens, and what to do. The action on each card is the same vocabulary the
+<a href="/bounce/">bounce classifier</a> uses, so a rule in your bounce handling and a page
+here always agree.</p>
 
 </main>
 <footer>
@@ -668,6 +741,6 @@ and what to change so they stop. Written from operating these systems, not from 
 })();
 </script>
 
-
+<script type="module" src="/js/filter.js"></script>
 </body>
 </html>

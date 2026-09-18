@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Open-source email operations tooling</title>
-<meta name="description" content="Small, focused tools for running email infrastructure.">
+<title>Email infrastructure tools: bounce classifier, domain check, SPF counter</title>
+<meta name="description" content="Browser-based tools for email operations: classify a bounce, audit a domain&#x27;s SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. Nothing is uploaded.">
 <link rel="canonical" href="https://rastu.tech/tools/">
-<meta property="og:title" content="Open-source email operations tooling">
-<meta property="og:description" content="Small, focused tools for running email infrastructure.">
+<meta property="og:title" content="Email infrastructure tools: bounce classifier, domain check, SPF counter">
+<meta property="og:description" content="Browser-based tools for email operations: classify a bounce, audit a domain&#x27;s SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. Nothing is uploaded.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://rastu.tech/tools/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
@@ -208,6 +208,65 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- tool cards ---------------------------------------------------------- */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid a{position:relative}
+.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
 
 /* ---- highlight panel --------------------------------------------------- */
 .panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
@@ -445,11 +504,11 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 </head>
 <body>
-<div class="wrap">
+<div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
   <a class="mark" href="../">rastu<span>.tech</span></a>
-  <a href="../tools/">Tools</a>
+  <a href="../tools/" aria-current="page">Tools</a>
   <a href="../smtp/">Reference</a>
   <a href="../research/">Research</a>
   <a href="../about/">About</a>
@@ -457,28 +516,45 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<p class="kicker">Tools</p>
-<h1>Open-source email operations tooling</h1>
-<p class="lede">Small, focused tools for running email infrastructure.</p>
+<h1>Tools</h1>
+<p class="lede">Each one answers a question that turns up in a real incident. They run in
+your browser: nothing you paste or upload is sent anywhere, and there is no account to
+make.</p>
 
-<h2 class="r">smtpsift</h2>
-<p>Classifies SMTP rejections and deferrals into a category and an action. Hard and soft
-bounce is too coarse to act on: a full mailbox, a rate limit and a reputation block all
-arrive as soft bounces and need opposite responses.</p>
-<p><a href="https://github.com/singhrastu/smtpsift">github.com/singhrastu/smtpsift</a>
-&middot; <a href="/#sift">paste a bounce into it</a></p>
+<div class="bento tools"><a class="card" href="/check/"><span class="tag">DNS</span><h3>Domain check</h3><p class="q">Is this domain&#x27;s email authentication set up correctly?</p><p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.</p><span class="go">Open &rarr;</span></a><a class="card" href="/bounce/"><span class="tag">Logs</span><h3>Bounce classifier</h3><p class="q">What is this bounce or deferral telling me?</p><p>Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.</p><span class="go">Open &rarr;</span></a><a class="card" href="/spf/"><span class="tag">DNS</span><h3>SPF lookup counter</h3><p class="q">How close is this SPF record to the ten-lookup limit?</p><p>The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.</p><span class="go">Open &rarr;</span></a></div>
 
-<p>Run it here without installing anything:
-<a href="/check/">the hosted domain check</a> is the same logic compiled to
-JavaScript, and the two are tested against each other on every build.</p>
+<div class="sechead r">
+  <h2 class="r">On the command line</h2>
+  <p>Two of these started as command-line tools and still are. The hosted versions run the
+  same logic, checked against the originals on every build.</p>
+</div>
 
-<h2 class="r">dmarcsight</h2>
-<p>Audits a domain's email authentication posture: SPF including the 10-lookup limit, DKIM,
-DMARC policy strength, MTA-STS policy and MX consistency, TLS-RPT and BIMI, with a composite
-verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
-<p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a>
-&middot; <a href="/check/">run it in your browser</a></p>
+<div class="grid r">
+  <a href="https://github.com/singhrastu/smtpsift">
+    <strong>smtpsift</strong><span class="p">Python</span>
+    <span class="d">Classifies SMTP rejections and deferrals into a category and an
+    action. Powers the <a href="/bounce/">bounce classifier</a>.</span></a>
+  <a href="https://github.com/singhrastu/dmarcsight">
+    <strong>dmarcsight</strong><span class="p">Python</span>
+    <span class="d">Audits a domain's authentication posture end to end. Powers the
+    <a href="/check/">domain check</a> and the <a href="/spf/">SPF counter</a>.</span></a>
+</div>
 
+<div class="sechead r">
+  <h2 class="r">Being built</h2>
+  <p>In order, and shipped when each one is trustworthy rather than when it is
+  demonstrable.</p>
+</div>
+<ul>
+  <li><strong>DMARC report reader</strong> &mdash; drop in an aggregate (rua) report and see
+      which sources are sending as you, what aligned and what did not. Entirely offline:
+      the file never leaves the page, which matters because an aggregate report names every
+      system that sends for a domain.</li>
+  <li><strong>Header analyser</strong> &mdash; paste raw headers for authentication results
+      and hop-by-hop timing, with the parts that cannot be trusted marked as such.</li>
+  <li><strong>Warm-up planner</strong> &mdash; a day-by-day ramp schedule with the
+      reputation checkpoints that gate each step.</li>
+</ul>
 
 </main>
 <footer>

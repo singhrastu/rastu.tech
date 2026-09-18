@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Rastu Singh — Infrastructure Engineer, Email Infrastructure and Deliverability</title>
-<meta name="description" content="Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, SPF, DKIM and DMARC. Includes a live SMTP bounce classifier and an SMTP response reference.">
+<title>Email infrastructure tools: bounce classifier, domain check, SPF counter</title>
+<meta name="description" content="Browser-based tools for email operations: classify an SMTP bounce, audit a domain&#x27;s SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, nothing uploaded. Plus an SMTP response reference and original research.">
 <link rel="canonical" href="https://rastu.tech/">
-<meta property="og:title" content="Rastu Singh — Infrastructure Engineer, Email Infrastructure and Deliverability">
-<meta property="og:description" content="Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, SPF, DKIM and DMARC. Includes a live SMTP bounce classifier and an SMTP response reference.">
+<meta property="og:title" content="Email infrastructure tools: bounce classifier, domain check, SPF counter">
+<meta property="og:description" content="Browser-based tools for email operations: classify an SMTP bounce, audit a domain&#x27;s SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, nothing uploaded. Plus an SMTP response reference and original research.">
 <meta property="og:type" content="profile">
 <meta property="og:url" content="https://rastu.tech/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
@@ -208,6 +208,65 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- tool cards ---------------------------------------------------------- */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid a{position:relative}
+.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
 
 /* ---- highlight panel --------------------------------------------------- */
 .panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
@@ -443,6 +502,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 }
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "description": "Browser-based tools for email infrastructure and deliverability, an SMTP response reference, and original research on email authentication adoption.", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "ItemList", "@id": "https://rastu.tech/#tools", "name": "Email infrastructure tools", "itemListElement": [{"@type": "ListItem", "position": 1, "item": {"@type": "SoftwareApplication", "name": "Domain check", "url": "https://rastu.tech/check/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}}}, {"@type": "ListItem", "position": 2, "item": {"@type": "SoftwareApplication", "name": "Bounce classifier", "url": "https://rastu.tech/bounce/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}}}, {"@type": "ListItem", "position": 3, "item": {"@type": "SoftwareApplication", "name": "SPF lookup counter", "url": "https://rastu.tech/spf/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}}}]}]}</script>
 </head>
 <body>
 <div class="wrap wide">
@@ -457,126 +517,35 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 <main id="main">
 
-<div class="hero">
-  <div class="hero-copy">
-    <p class="kicker">Infrastructure Engineer &middot; Tallinn, Estonia</p>
-    <h1>Rastu Singh</h1>
-    <p class="lede">I am an infrastructure engineer working on email platforms,
-    deliverability and email security. I build and operate the systems that decide
-    whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
-    reputation, and the authentication layer underneath them.</p>
-    <p class="prose">PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
-    production, on estates running to over a thousand sending IPs and millions of
-    messages a day. Queueing, throttling and retry behaviour. IP pool design and warm-up.
-    Bounce, deferral and complaint classification. Blocklist remediation when
-    reputation goes wrong. <a href="/about/">More about me &rarr;</a></p>
-  </div>
-  <img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="152" height="152"
-       loading="eager" decoding="async">
-</div>
+<h1>Tools for running email infrastructure</h1>
+<p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
+or find the mechanism that pushed an SPF record past the lookup limit and quietly
+switched it off.</p>
+<p class="prose">Everything here runs in your browser. Nothing you paste or upload leaves
+the page, and there is no account to make. Built and maintained by
+<a href="/about/">Rastu Singh</a>, an infrastructure engineer in Tallinn who operates
+these systems for a living.</p>
 
-<div class="strip"><div><b>6</b><span>MTA platforms run in production</span></div><div><b>1,000+</b><span>sending IPs in a single estate</span></div><div><b>Millions</b><span>of messages a day</span></div><div><b>100,000</b><span>domains measured for the survey</span></div><div><b>48h</b><span>from Spamhaus listing to delisted</span></div></div>
+<div class="bento tools"><a class="card" href="/check/"><span class="tag">DNS</span><h3>Domain check</h3><p class="q">Is this domain&#x27;s email authentication set up correctly?</p><p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the RFC 7208 ten-lookup limit and whether an MTA-STS policy really exists behind the record that promises one.</p><span class="go">Open domain check &rarr;</span></a><a class="card" href="/bounce/"><span class="tag">Logs</span><h3>Bounce classifier</h3><p class="q">What is this bounce or deferral telling me?</p><p>Paste an SMTP response and get the category and the action it needs: retry, back off, suppress, or stop and fix the sender. Hard and soft bounce is too coarse to act on.</p><span class="go">Open bounce classifier &rarr;</span></a><a class="card" href="/spf/"><span class="tag">DNS</span><h3>SPF lookup counter</h3><p class="q">How close is this SPF record to the ten-lookup limit?</p><p>The full include tree with a running DNS lookup count, and the exact mechanism that tips a record over ten and turns it into a permerror.</p><span class="go">Open spf lookup counter &rarr;</span></a></div>
 
 <div class="sechead r">
-  <p class="kicker">When it works</p>
-  <h2 class="r">One message, all the way through</h2>
-  <p>A real swaks run against Gmail's MX, captured on this machine. Every server
-  response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</code>
-  stops before DATA, so the handshake completes and no message is ever sent, which
-  is how you test a route without touching a recipient. Every line is a place
-  delivery can fail, and most of the work is knowing which one it failed at.</p>
+  <h2 class="r">SMTP response reference</h2>
+  <p>One page per response you actually see in a mail log: what it means, whether
+  retrying helps, and what to change so it stops. Written from operating these
+  systems, not from the spec.</p>
 </div>
-
-<div class="term" id="term" data-session='[{&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --tls --quit-after RCPT&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Trying gmail-smtp-in.l.google.com:25...&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connected to gmail-smtp-in.l.google.com.&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-SIZE 157286400&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-STARTTLS&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-ENHANCEDSTATUSCODES&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; STARTTLS&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 2.0.0 Ready to start TLS&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer[0]   subject=[/CN=mx.google.com]&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer certificate passed CA verification, passed host verification&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; QUIT&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connection closed with remote host.&quot;}]'>
-  <div class="bar"><i></i><i></i><i></i><span>swaks &mdash; gmail-smtp-in.l.google.com:25</span></div>
-  <pre><code id="term-out"></code><span class="cur"></span></pre>
-</div>
-
-<div class="sechead r">
-  <p class="kicker">When it does not</p>
-  <h2 class="r">What is this bounce telling you?</h2>
-  <p>Paste an SMTP response out of your mail log. It is classified against the same
-  ruleset as <a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, which
-  separates the cases that need opposite responses: retry, back off, or stop and
-  fix the sender. Nothing is sent anywhere. It runs in your browser.</p>
-</div>
-
-<div class="tool" id="sift">
-  <label class="lbl-mi" for="sift-in">SMTP response</label>
-  <textarea class="field" id="sift-in" spellcheck="false" autocomplete="off"
-    placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
-  <div class="hint"><button type="button" data-ex="421-4.7.28 Our system has detected an unusual rate of unsolicited mail originating from your IP address. gsmtp">Gmail throttle</button><button type="button" data-ex="550 5.7.606 Access denied, banned sending IP [203.0.113.9] (S3140) protection.outlook.com">Outlook block</button><button type="button" data-ex="554 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org">Spamhaus</button><button type="button" data-ex="550 5.7.26 Unauthenticated email from example.com is not accepted due to domain&#x27;s DMARC policy.">DMARC</button><button type="button" data-ex="550 5.1.1 The email account that you tried to reach does not exist.">Dead address</button></div>
-  <div class="verdict" id="sift-out" aria-live="polite"></div>
-</div>
-
-<div class="sechead r">
-  <p class="kicker">Everything else here</p>
-  <h2 class="r">Reference, research and tools</h2>
-  <p>All of it built from running this infrastructure rather than reading about it:
-  one page per SMTP response, a live authentication check for any domain, a
-  100,000-domain survey published with its raw dataset, two open-source tools, and
-  the background behind all of it.</p>
-</div>
-
-<div class="bento">
-  <a class="card" href="/smtp/">
-    <span class="tag">Reference</span>
-    <h3>SMTP response reference</h3>
-    <p>What each response actually means, whether it is worth retrying, and what to
-    change so it stops happening. One page per response, written from the mail log
-    rather than the specification.</p>
-    <div class="codes"><code>4.7.28</code><code>5.7.26</code><code>5.7.1</code><code>5.7.606</code><code>S3140</code><code>4.7.500</code><code>TS03</code><code>5.1.1</code><code>4.2.2</code><code>5.2.1</code></div>
-    <span class="go">Browse all 14 &rarr;</span>
-  </a>
-  <a class="card" href="/check/">
-    <span class="tag">Tool</span>
-    <h3>Check a domain</h3>
-    <p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the
-    SPF ten-lookup limit and whether an MTA-STS policy actually exists behind the
-    record that promises one. Runs in your browser; the domain never reaches this
-    site.</p>
-    <span class="go">Run a check &rarr;</span>
-  </a>
-  <a class="card" href="/research/">
-    <span class="tag">Research</span>
-    <h3>State of Email Authentication</h3>
-    <p>SPF, DMARC, MTA-STS, TLS-RPT and BIMI adoption measured across 100,000 domains,
-    published with the methodology and the raw dataset so the numbers are checkable.</p>
-    <span class="go">Findings and dataset &rarr;</span>
-  </a>
-  <a class="card" href="/tools/">
-    <span class="tag">Open source</span>
-    <h3>Tools</h3>
-    <p>smtpsift classifies bounces and deferrals into the action they actually need.
-    dmarcsight audits a domain's SPF, DKIM, DMARC, MTA-STS and TLS-RPT posture.</p>
-    <span class="go">Both on GitHub &rarr;</span>
-  </a>
-  <a class="card" href="/about/">
-    <span class="tag">Background</span>
-    <h3>About</h3>
-    <p>Eleven years of it, all of it email: Pipedrive, Adobe, Experiture, Zeta Global
-    and IntraSoft. What each role actually involved, and the stack behind it.</p>
-    <span class="go">The longer version &rarr;</span>
-  </a>
+<div class="chips-row r"><a class="chip" href="/smtp/gmail-4-7-28/">4.7.28</a><a class="chip" href="/smtp/gmail-5-7-1/">5.7.1</a><a class="chip" href="/smtp/5-7-1/">5.7.1</a><a class="chip" href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a><a class="chip" href="/smtp/5-1-1/">5.1.1</a><a class="chip" href="/smtp/yahoo-ts03/">TS03</a><a class="chip" href="/smtp/spamhaus/">Spamhaus listing</a>
+  <a class="chip more" href="/smtp/">All 14 responses &rarr;</a>
 </div>
 
 <div class="panel r">
   <h3>58.7% publish DMARC. 20.9% reach p=reject.</h3>
-  <p>Of the domains that publish DMARC at all, 35.8% leave it at p=none where it blocks
-  nothing, and 20.8% enforce with no rua address, so they enforce without being able to
-  see what they are enforcing. 3.4% of published SPF records are over the ten-lookup
-  limit and therefore permerror: they resolve correctly and no longer function.</p>
-  <p class="doi">doi:10.5281/zenodo.22832936 &middot; CC BY 4.0 &middot; raw dataset included</p>
-  <p><a href="/research/">Read the findings &rarr;</a></p>
-</div>
-
-<div class="sechead r">
-  <p class="kicker">Contact</p>
-  <h2 class="r">Stuck on something?</h2>
-  <p>If you are dealing with a block, a warm-up that has stalled, an authentication
-  problem or a platform migration, I am reachable on
-  <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>. If you think the reference
-  or the dataset is wrong somewhere, tell me and I will fix it.</p>
+  <p>Original measurement across 100,000 domains from the Tranco list. Of those that
+  publish DMARC at all, 35.8% leave it at p=none where it blocks nothing, and 20.8%
+  enforce with no rua address, so they cannot see what they are enforcing. Methodology
+  and the raw dataset are published alongside the findings.</p>
+  <p class="doi">doi:10.5281/zenodo.22832936 &middot; CC BY 4.0</p>
+  <p><a href="/research/">Read the research &rarr;</a></p>
 </div>
 
 </main>
@@ -781,7 +750,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   build(); draw();
 })();
 </script>
-<script src="/sift.js" defer></script>
+
 
 </body>
 </html>

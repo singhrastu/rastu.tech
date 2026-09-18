@@ -257,6 +257,65 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
+/* ---- tool cards ---------------------------------------------------------- */
+.bento.tools{grid-template-columns:repeat(auto-fit,minmax(17rem,1fr))}
+@media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+.bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
+  margin:0 0 .5rem;line-height:1.45}
+.bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
+  border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* ---- chip row (reference shortcuts on the home page) --------------------- */
+.chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
+.chips-row a{text-decoration:none}
+.chip.more{border-color:var(--accent-soft);color:var(--accent)}
+
+/* ---- reference index rows ------------------------------------------------ */
+.grid a{position:relative}
+.grid a .act{position:absolute;right:1rem;top:.9rem;font-size:.66rem;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;border:1px solid currentColor;
+  border-radius:100px;padding:.14rem .5rem}
+.grid a .d{padding-right:5.5rem}
+@media(max-width:34rem){
+  .grid a .act{position:static;display:inline-block;margin-top:.5rem}
+  .grid a .d{padding-right:0}
+}
+
+/* ---- SPF include tree ---------------------------------------------------- */
+.tree{margin:var(--s4) 0 0}
+.tree ul{list-style:none;padding:0;margin:0}
+.tree li{position:relative;padding:.3rem 0 .3rem calc(1.1rem + var(--d) * 1.15rem);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t1);
+  line-height:1.5;border-left:1px solid var(--line-2)}
+.tree li .at{position:absolute;left:0;top:.3rem;width:1.5rem;text-align:right;
+  color:var(--ink-3);font-variant-numeric:tabular-nums;font-size:.7rem}
+.tree li .at.over{color:var(--bad);font-weight:700}
+.tree li code{background:none;padding:0;color:var(--ink-2);font-size:inherit}
+.tree li.s-fail code{color:var(--bad)}
+.tree li.free code{color:var(--ink-3);opacity:.7}
+.tree li .n{display:block;color:var(--warn);font-size:.72rem;
+  font-family:inherit;margin-top:.1rem}
+.tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
+  margin-top:.12rem;word-break:break-all}
+
+/* ---- annotated session --------------------------------------------------- */
+.session{border:1px solid var(--line);border-radius:14px;background:var(--code);
+  padding:var(--s3) 0;margin:var(--s4) 0}
+.session .ln{padding:.05rem var(--s4);position:relative}
+.session .ln code{background:none;padding:0;font-size:.79rem;line-height:1.75;
+  white-space:pre-wrap;word-break:break-word;display:block}
+.session .ln.has-note{background:color-mix(in srgb,var(--accent) 5%,transparent);
+  border-left:2px solid var(--accent-soft);padding-top:.35rem;padding-bottom:.45rem;
+  margin:.25rem 0}
+.session .an{margin:.25rem 0 0;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.55;max-width:46rem}
+.session .cmd{color:var(--accent);font-weight:600}
+.session .info{color:var(--ink-3);opacity:.8}
+.session .c{color:var(--ink)}
+.session .s{color:var(--ink-3)}
+.session .ok{color:var(--ok);font-weight:600}
+@media(max-width:34rem){.session .ln code{font-size:.7rem}}
+
 /* ---- highlight panel --------------------------------------------------- */
 .panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
    background:linear-gradient(140deg,var(--accent-soft),transparent 72%)}
@@ -1099,6 +1158,155 @@ run();
     open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
 
 
+def tool_ld(tool, extra=None):
+    """Every tool page declares itself a free SoftwareApplication authored by the
+    same #person node, which is what ties the toolkit to the entity."""
+    d = {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": tool["name"],
+        "url": f"{SITE}/{tool['slug']}/",
+        "applicationCategory": "SecurityApplication",
+        "operatingSystem": "Any",
+        "description": tool["blurb"],
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"},
+        "author": {"@id": f"{SITE}/#person"},
+        "isAccessibleForFree": True,
+    }
+    if extra:
+        d.update(extra)
+    return d
+
+
+def tool(slug):
+    for t in TOOLS:
+        if t["slug"] == slug:
+            return t
+    raise KeyError(slug)
+
+
+def build_bounce():
+    """The classifier, off the homepage and onto a page of its own.
+
+    It was buried below a personal hero, which meant the one thing on the site a
+    stranger could use immediately was the hardest thing to find.
+    """
+    t = tool("bounce")
+    ex = "".join(
+        f'<button type="button" data-ex="{e(v)}">{e(k)}</button>' for k, v in SIFT_EXAMPLES)
+
+    body = f"""
+<h1>Bounce classifier</h1>
+<p class="lede">{e(t["q"])} Paste the response out of your mail log and get the category
+and the action it needs.</p>
+
+<div class="tool" id="sift">
+  <label class="lbl-mi" for="sift-in">SMTP response</label>
+  <textarea class="field" id="sift-in" spellcheck="false" autocomplete="off"
+    placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
+  <div class="hint">{ex}</div>
+  <div class="verdict" id="sift-out" aria-live="polite"></div>
+</div>
+
+<h2>Why hard and soft bounce is not enough</h2>
+<p>A full mailbox, a rate limit and a reputation block all arrive as soft bounces, and
+they need opposite responses. Retry the full mailbox and it may clear. Retry the rate
+limit and you make it worse. Retry the reputation block and you damage the sending IP
+further while the underlying problem goes unfixed.</p>
+<p>So the classifier answers with an action rather than a severity:</p>
+<ul>
+  <li><strong>retry</strong> &mdash; temporary at the receiving end. The normal schedule handles it.</li>
+  <li><strong>throttle</strong> &mdash; you are sending faster than this provider will accept. Drop
+      concurrency for that provider only, not globally.</li>
+  <li><strong>suppress</strong> &mdash; permanent. Remove the address. Retrying costs reputation and
+      dormant addresses turn into spam traps.</li>
+  <li><strong>pause</strong> &mdash; a reputation or blocklist problem. Stop sending to this provider
+      from this IP and fix the cause before resuming.</li>
+  <li><strong>review</strong> &mdash; a content or recipient-side policy rule. Change the message, not
+      the rate.</li>
+  <li><strong>fix_config</strong> &mdash; an authentication failure. No amount of retrying helps.</li>
+</ul>
+
+<h2>Where the ruleset comes from</h2>
+<p>The same ordered ruleset as <a href="https://github.com/singhrastu/smtpsift">smtpsift</a>,
+exported at build time rather than retyped, so this page and the command-line tool cannot
+disagree about what a response means. Nothing is trained: it is regular expressions matched
+in order, first match wins, because a classifier you cannot explain is the wrong thing to put
+in front of a decision about whether to keep sending.</p>
+<p>Recognised a response the classifier did not? That is a missing rule, and worth telling me
+about.</p>
+"""
+    return page(
+        "SMTP bounce classifier: what a bounce or deferral actually means",
+        "Paste an SMTP bounce or deferral and get the category and the action it needs: "
+        "retry, throttle, suppress, pause, review or fix config. Runs in your browser.",
+        body, "bounce/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Bounce classifier", None)),
+        scripts=("/sift.js",))
+
+
+def build_spf():
+    t = tool("spf")
+    body = """
+<h1>SPF lookup counter</h1>
+<p class="lede">RFC 7208 caps an SPF evaluation at ten DNS lookups. Over the cap it is a
+permerror, and most receivers treat a permerror as no SPF at all. This walks the whole
+include tree and shows you exactly where the count goes.</p>
+
+<div class="tool">
+  <form id="spf-form" autocomplete="off" class="row">
+    <label class="sr" for="spf-domain">Domain</label>
+    <input class="field" id="spf-domain" type="text" spellcheck="false"
+           placeholder="example.com" aria-label="Domain to check">
+    <button class="btn" type="submit" id="spf-run">Count lookups</button>
+  </form>
+  <p class="hint">Try:
+    <a href="?d=salesforce.com">salesforce.com</a>
+    <a href="?d=shopify.com">shopify.com</a>
+    <a href="?d=hubspot.com">hubspot.com</a>
+    <a href="?d=rastu.tech">rastu.tech</a>
+  </p>
+  <div class="report" id="spf-out" aria-live="polite"></div>
+</div>
+
+<h2>What counts against the ten</h2>
+<p>Each of these costs one lookup, and every <code>include:</code> costs its own lookups on
+top of the one it costs to reach:</p>
+<ul>
+  <li><code>include:</code> and <code>redirect=</code>, recursively</li>
+  <li><code>a</code>, <code>a:</code>, <code>mx</code>, <code>mx:</code>, <code>exists:</code></li>
+  <li><code>ptr</code>, which is deprecated and should not be in a record at all</li>
+</ul>
+<p>These cost nothing, because they need no DNS query: <code>ip4:</code>, <code>ip6:</code>,
+<code>all</code> and <code>exp=</code>. Moving an ESP from an <code>include:</code> to its
+published <code>ip4:</code> ranges is the standard way to buy headroom, and it is also the
+thing that silently breaks six months later.</p>
+
+<h2>Why this is worth checking</h2>
+<p>It is the failure nobody sees coming. The record resolves. It reads correctly. It passes a
+visual inspection. It has simply stopped authenticating, usually because somebody added one
+more vendor to a record that was already at nine. Across
+<a href="/research/">100,000 domains</a>, 3.4% of every published SPF record had already
+crossed the line.</p>
+
+<h2>On flattening</h2>
+<p>Flattening means replacing an <code>include:</code> with the IP ranges it currently
+resolves to. It fixes the count today and creates a slower problem: when the provider adds a
+sending range, your record does not know, and mail from the new range fails SPF with no error
+anywhere to tell you. If you flatten, you own a record that has to be re-generated on a
+schedule, and somebody has to still be doing that in a year.</p>
+<p>Cheaper answers first: remove vendors that no longer send, move mail to a subdomain with
+its own record, and collapse two ESPs into one.</p>
+"""
+    return page(
+        "SPF lookup counter: find the mechanism that breaks your SPF record",
+        "Walk a domain's full SPF include tree with a running RFC 7208 DNS lookup count, "
+        "and find the exact mechanism that pushes it past ten and into permerror.",
+        body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("SPF lookup counter", None)),
+        modules=("/js/spf.js",))
+
+
 def build_check():
     """The domain auditor.
 
@@ -1211,171 +1419,167 @@ on every build, so this page cannot tell you something the tool would not.</p>
         "Free in-browser audit of a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI "
         "configuration, including the SPF ten-lookup limit and MTA-STS policy and MX "
         "consistency. Nothing is sent to the server.",
-        body, "check/index.html", extra_ld=ld,
+        body, "check/index.html", extra_ld=ld, wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Domain check", None)),
         modules=("/js/check.js",))
 
 
-def build_home():
-    """The homepage has two readers at once.
+def build_tools():
+    """The tools hub.
 
-    Someone looking for the person, and someone with a bounce in front of them at
-    two in the morning. The identity statement has to land inside the first 150
-    words for the first reader; everything after it is built for the second, on the
-    argument that a page which gets used is a better credential than a page which
-    describes.
-
-    It deliberately does NOT repeat the biography. That is /about/, which is the
-    mainEntityOfPage in the schema, and saying the same thing twice splits the
-    signal instead of doubling it.
+    The old page listed two GitHub repos and asserted they existed; it also linked
+    the smtpsift section at the dmarcsight tool. This one leads with the question
+    each tool answers, because that is the form the visitor's problem arrives in.
     """
-    ex = "".join(
-        f'<button type="button" data-ex="{e(v)}">{e(k)}</button>' for k, v in SIFT_EXAMPLES)
-
-    strip = [
-        ("6", "MTA platforms run in production"),
-        ("1,000+", "sending IPs in a single estate"),
-        ("Millions", "of messages a day"),
-        ("100,000", "domains measured for the survey"),
-        ("48h", "from Spamhaus listing to delisted"),
-    ]
-    strip_html = "".join(f"<div><b>{e(n)}</b><span>{e(l)}</span></div>" for n, l in strip)
-
-    session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
-
-    # The codes themselves are what people search for, so put them on the page.
-    codes_html = "".join(f"<code>{e(c['code'])}</code>" for c in CODES[:10])
-    n_codes = len(CODES)
+    cards = "".join(
+        f'<a class="card" href="/{t["slug"]}/">'
+        f'<span class="tag">{e(t["tag"])}</span>'
+        f'<h3>{e(t["name"])}</h3>'
+        f'<p class="q">{e(t["q"])}</p>'
+        f'<p>{e(t["blurb"])}</p>'
+        f'<span class="go">Open &rarr;</span></a>'
+        for t in TOOLS)
 
     body = f"""
-<div class="hero">
-  <div class="hero-copy">
-    <p class="kicker">{e(PERSON['job_title'])} &middot; {e(PERSON['locality'])}, Estonia</p>
-    <h1>Rastu Singh</h1>
-    <p class="lede">I am an infrastructure engineer working on email platforms,
-    deliverability and email security. I build and operate the systems that decide
-    whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
-    reputation, and the authentication layer underneath them.</p>
-    <p class="prose">PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
-    production, on estates running to over a thousand sending IPs and millions of
-    messages a day. Queueing, throttling and retry behaviour. IP pool design and warm-up.
-    Bounce, deferral and complaint classification. Blocklist remediation when
-    reputation goes wrong. <a href="/about/">More about me &rarr;</a></p>
-  </div>
-  <img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="152" height="152"
-       loading="eager" decoding="async">
-</div>
+<h1>Tools</h1>
+<p class="lede">Each one answers a question that turns up in a real incident. They run in
+your browser: nothing you paste or upload is sent anywhere, and there is no account to
+make.</p>
 
-<div class="strip">{strip_html}</div>
+<div class="bento tools">{cards}</div>
 
 <div class="sechead r">
-  <p class="kicker">When it works</p>
-  <h2>One message, all the way through</h2>
-  <p>A real swaks run against Gmail's MX, captured on this machine. Every server
-  response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</code>
-  stops before DATA, so the handshake completes and no message is ever sent, which
-  is how you test a route without touching a recipient. Every line is a place
-  delivery can fail, and most of the work is knowing which one it failed at.</p>
+  <h2>On the command line</h2>
+  <p>Two of these started as command-line tools and still are. The hosted versions run the
+  same logic, checked against the originals on every build.</p>
 </div>
 
-<div class="term" id="term" data-session='{e(session)}'>
-  <div class="bar"><i></i><i></i><i></i><span>swaks &mdash; gmail-smtp-in.l.google.com:25</span></div>
-  <pre><code id="term-out"></code><span class="cur"></span></pre>
+<div class="grid r">
+  <a href="https://github.com/singhrastu/smtpsift">
+    <strong>smtpsift</strong><span class="p">Python</span>
+    <span class="d">Classifies SMTP rejections and deferrals into a category and an
+    action. Powers the <a href="/bounce/">bounce classifier</a>.</span></a>
+  <a href="https://github.com/singhrastu/dmarcsight">
+    <strong>dmarcsight</strong><span class="p">Python</span>
+    <span class="d">Audits a domain's authentication posture end to end. Powers the
+    <a href="/check/">domain check</a> and the <a href="/spf/">SPF counter</a>.</span></a>
 </div>
 
 <div class="sechead r">
-  <p class="kicker">When it does not</p>
-  <h2>What is this bounce telling you?</h2>
-  <p>Paste an SMTP response out of your mail log. It is classified against the same
-  ruleset as <a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, which
-  separates the cases that need opposite responses: retry, back off, or stop and
-  fix the sender. Nothing is sent anywhere. It runs in your browser.</p>
+  <h2>Being built</h2>
+  <p>In order, and shipped when each one is trustworthy rather than when it is
+  demonstrable.</p>
 </div>
+<ul>
+  <li><strong>DMARC report reader</strong> &mdash; drop in an aggregate (rua) report and see
+      which sources are sending as you, what aligned and what did not. Entirely offline:
+      the file never leaves the page, which matters because an aggregate report names every
+      system that sends for a domain.</li>
+  <li><strong>Header analyser</strong> &mdash; paste raw headers for authentication results
+      and hop-by-hop timing, with the parts that cannot be trusted marked as such.</li>
+  <li><strong>Warm-up planner</strong> &mdash; a day-by-day ramp schedule with the
+      reputation checkpoints that gate each step.</li>
+</ul>
+"""
+    return page(
+        "Email infrastructure tools: bounce classifier, domain check, SPF counter",
+        "Browser-based tools for email operations: classify a bounce, audit a domain's "
+        "SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. Nothing is uploaded.",
+        body, "tools/index.html", wide=True, nav_key="Tools")
 
-<div class="tool" id="sift">
-  <label class="lbl-mi" for="sift-in">SMTP response</label>
-  <textarea class="field" id="sift-in" spellcheck="false" autocomplete="off"
-    placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
-  <div class="hint">{ex}</div>
-  <div class="verdict" id="sift-out" aria-live="polite"></div>
-</div>
+
+def build_home():
+    """The homepage is the toolkit, not the CV.
+
+    Someone arriving here came from a search for a bounce code or a broken SPF
+    record, not for a person. So the tools come first and the biography is one
+    byline line pointing at /about/, which is where the entity signal lives.
+
+    That byline is deliberate rather than vestigial: it sits inside the first 200
+    words, which is the slice retrievers weight, and the JSON-LD below ties every
+    tool on the page back to the same #person node. The footprint is larger than
+    the old personal homepage, not smaller.
+    """
+    cards = "".join(
+        f'<a class="card" href="/{t["slug"]}/">'
+        f'<span class="tag">{e(t["tag"])}</span>'
+        f'<h3>{e(t["name"])}</h3>'
+        f'<p class="q">{e(t["q"])}</p>'
+        f'<p>{e(t["blurb"])}</p>'
+        f'<span class="go">Open {e(t["name"].lower())} &rarr;</span></a>'
+        for t in TOOLS)
+
+    # The responses people actually arrive on, as a way in to the reference.
+    picks = ["4.7.28", "5.7.1", "5.7.606", "5.1.1", "TS03", "spamhaus"]
+    chips = "".join(
+        f'<a class="chip" href="/smtp/{slug(c)}/">{e(c.get("label") or c["code"])}</a>'
+        for code in picks for c in CODES if c["code"] == code)
+
+    ld = {
+        "@context": "https://schema.org",
+        "@graph": [
+            {"@type": "WebSite", "@id": f"{SITE}/#website", "url": SITE + "/",
+             "name": "rastu.tech",
+             "description": "Browser-based tools for email infrastructure and "
+                            "deliverability, an SMTP response reference, and original "
+                            "research on email authentication adoption.",
+             "publisher": {"@id": f"{SITE}/#person"},
+             "inLanguage": "en"},
+            {"@type": "ItemList", "@id": f"{SITE}/#tools",
+             "name": "Email infrastructure tools",
+             "itemListElement": [
+                 {"@type": "ListItem", "position": i + 1,
+                  "item": {"@type": "SoftwareApplication",
+                           "name": t["name"],
+                           "url": f"{SITE}/{t['slug']}/",
+                           "applicationCategory": "SecurityApplication",
+                           "operatingSystem": "Any",
+                           "description": t["blurb"],
+                           "offers": {"@type": "Offer", "price": "0",
+                                      "priceCurrency": "EUR"},
+                           "author": {"@id": f"{SITE}/#person"}}}
+                 for i, t in enumerate(TOOLS)]},
+        ],
+    }
+
+    body = f"""
+<h1>Tools for running email infrastructure</h1>
+<p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
+or find the mechanism that pushed an SPF record past the lookup limit and quietly
+switched it off.</p>
+<p class="prose">Everything here runs in your browser. Nothing you paste or upload leaves
+the page, and there is no account to make. Built and maintained by
+<a href="/about/">Rastu Singh</a>, an infrastructure engineer in Tallinn who operates
+these systems for a living.</p>
+
+<div class="bento tools">{cards}</div>
 
 <div class="sechead r">
-  <p class="kicker">Everything else here</p>
-  <h2>Reference, research and tools</h2>
-  <p>All of it built from running this infrastructure rather than reading about it:
-  one page per SMTP response, a live authentication check for any domain, a
-  100,000-domain survey published with its raw dataset, two open-source tools, and
-  the background behind all of it.</p>
+  <h2>SMTP response reference</h2>
+  <p>One page per response you actually see in a mail log: what it means, whether
+  retrying helps, and what to change so it stops. Written from operating these
+  systems, not from the spec.</p>
 </div>
-
-<div class="bento">
-  <a class="card" href="/smtp/">
-    <span class="tag">Reference</span>
-    <h3>SMTP response reference</h3>
-    <p>What each response actually means, whether it is worth retrying, and what to
-    change so it stops happening. One page per response, written from the mail log
-    rather than the specification.</p>
-    <div class="codes">{codes_html}</div>
-    <span class="go">Browse all {n_codes} &rarr;</span>
-  </a>
-  <a class="card" href="/check/">
-    <span class="tag">Tool</span>
-    <h3>Check a domain</h3>
-    <p>SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI for any domain, including the
-    SPF ten-lookup limit and whether an MTA-STS policy actually exists behind the
-    record that promises one. Runs in your browser; the domain never reaches this
-    site.</p>
-    <span class="go">Run a check &rarr;</span>
-  </a>
-  <a class="card" href="/research/">
-    <span class="tag">Research</span>
-    <h3>State of Email Authentication</h3>
-    <p>SPF, DMARC, MTA-STS, TLS-RPT and BIMI adoption measured across 100,000 domains,
-    published with the methodology and the raw dataset so the numbers are checkable.</p>
-    <span class="go">Findings and dataset &rarr;</span>
-  </a>
-  <a class="card" href="/tools/">
-    <span class="tag">Open source</span>
-    <h3>Tools</h3>
-    <p>smtpsift classifies bounces and deferrals into the action they actually need.
-    dmarcsight audits a domain's SPF, DKIM, DMARC, MTA-STS and TLS-RPT posture.</p>
-    <span class="go">Both on GitHub &rarr;</span>
-  </a>
-  <a class="card" href="/about/">
-    <span class="tag">Background</span>
-    <h3>About</h3>
-    <p>Eleven years of it, all of it email: Pipedrive, Adobe, Experiture, Zeta Global
-    and IntraSoft. What each role actually involved, and the stack behind it.</p>
-    <span class="go">The longer version &rarr;</span>
-  </a>
+<div class="chips-row r">{chips}
+  <a class="chip more" href="/smtp/">All {len(CODES)} responses &rarr;</a>
 </div>
 
 <div class="panel r">
   <h3>58.7% publish DMARC. 20.9% reach p=reject.</h3>
-  <p>Of the domains that publish DMARC at all, 35.8% leave it at p=none where it blocks
-  nothing, and 20.8% enforce with no rua address, so they enforce without being able to
-  see what they are enforcing. 3.4% of published SPF records are over the ten-lookup
-  limit and therefore permerror: they resolve correctly and no longer function.</p>
-  <p class="doi">doi:{e(DOI)} &middot; CC BY 4.0 &middot; raw dataset included</p>
-  <p><a href="/research/">Read the findings &rarr;</a></p>
-</div>
-
-<div class="sechead r">
-  <p class="kicker">Contact</p>
-  <h2>Stuck on something?</h2>
-  <p>If you are dealing with a block, a warm-up that has stalled, an authentication
-  problem or a platform migration, I am reachable on
-  <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>. If you think the reference
-  or the dataset is wrong somewhere, tell me and I will fix it.</p>
+  <p>Original measurement across 100,000 domains from the Tranco list. Of those that
+  publish DMARC at all, 35.8% leave it at p=none where it blocks nothing, and 20.8%
+  enforce with no rua address, so they cannot see what they are enforcing. Methodology
+  and the raw dataset are published alongside the findings.</p>
+  <p class="doi">doi:{e(DOI)} &middot; CC BY 4.0</p>
+  <p><a href="/research/">Read the research &rarr;</a></p>
 </div>
 """
     return page(
-        f"{PERSON['name']} — {PERSON['job_title']}, Email Infrastructure and Deliverability",
-        "Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email "
-        "platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, "
-        "SPF, DKIM and DMARC. Includes a live SMTP bounce classifier and an SMTP response "
-        "reference.",
-        body, "index.html", is_home=True, wide=True, scripts=("/sift.js",))
+        "Email infrastructure tools: bounce classifier, domain check, SPF counter",
+        "Browser-based tools for email operations: classify an SMTP bounce, audit a "
+        "domain's SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, "
+        "nothing uploaded. Plus an SMTP response reference and original research.",
+        body, "index.html", extra_ld=ld, is_home=True, wide=True)
 
 
 def build_code_page(c):
@@ -1429,34 +1633,147 @@ SMTP rejections and deferrals.</p>
 
 
 def build_smtp_index():
-    rows = []
+    """The reference, searchable.
+
+    Everything stays in the DOM and is only hidden by the filter, so a crawler and a
+    reader without JavaScript still get all of it. Grouping is by provider because
+    that is how the question arrives: "why is Microsoft rejecting this", not "show me
+    the 5.7.x family".
+    """
+    groups, seen = [], set()
     for c in sorted(CODES, key=lambda x: (x.get("provider") or "", x["code"])):
-        p = f" &middot; {e(c['provider'])}" if c.get("provider") else ""
-        rows.append(
-            f'<a href="/smtp/{slug(c)}/"><strong>{e(c["code"])}</strong>{p}<br>'
-            f'<span>{e(c["answer"][:120])}...</span></a>'
-        )
+        g = c.get("provider") or "Generic"
+        if g not in seen:
+            seen.add(g)
+            groups.append(g)
+
+    chips = '<button class="chip on" data-group="all" type="button">All</button>' + "".join(
+        f'<button class="chip" data-group="{e(g)}" type="button">{e(g)}</button>'
+        for g in groups)
+
+    items = []
+    for c in sorted(CODES, key=lambda x: (x.get("provider") or "", x["code"])):
+        g = c.get("provider") or "Generic"
+        label = c.get("label") or c["code"]
+        badge = c.get("badge") or c.get("provider") or "RFC 3463"
+        # Everything worth typing into the box: the code, the provider, the category,
+        # the action, and the words in the summary.
+        terms = " ".join([label, c["code"], g, c["category"].replace("_", " "),
+                          c["action"], c["summary"]]).lower()
+        items.append(
+            f'<a href="/smtp/{slug(c)}/" data-terms="{e(terms)}" data-group="{e(g)}">'
+            f'<strong>{e(label)}</strong>'
+            f'<span class="p">{e(badge)}</span>'
+            f'<span class="d">{e(c["summary"])}</span>'
+            f'<span class="act a-{e(c["action"])}">{e(c["action"].replace("_", " "))}</span>'
+            f"</a>")
+
     body = f"""
-<p class="kicker">Reference</p>
 <h1>SMTP response reference</h1>
-<p class="lede">What the responses in your mail log actually mean, whether retrying will help,
-and what to change so they stop. Written from operating these systems, not from the spec.</p>
-<p class="meta">{len(CODES)} responses documented. Categories and recommended actions match
-<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>.</p>
-<div class="grid">{''.join(rows)}</div>
+<p class="lede">What the responses in your mail log actually mean, whether retrying will
+help, and what to change so they stop. Written from operating these systems, not from the
+spec.</p>
+
+<div class="filter" data-filter>
+  <input class="field" type="search" id="ref-q" autocomplete="off" spellcheck="false"
+         placeholder="Paste a code or search: 4.7.28, blocked, quota, reputation"
+         aria-label="Search the reference">
+  <div class="chips">{chips}<span class="count"></span></div>
+  <div class="grid">{"".join(items)}</div>
+  <p class="empty noresult hidden">Nothing matches that. The reference covers
+  {len(CODES)} responses so far and grows from real mail logs; if you have hit
+  something that is missing, it is worth reporting.</p>
+</div>
+
+<h2>How to read an entry</h2>
+<p>Each page states the answer first, then what the response looks like in a log, why it
+happens, and what to do. The action on each card is the same vocabulary the
+<a href="/bounce/">bounce classifier</a> uses, so a rule in your bounce handling and a page
+here always agree.</p>
 """
     ld = {
         "@context": "https://schema.org",
         "@type": "CollectionPage",
         "name": "SMTP response reference",
+        "url": f"{SITE}/smtp/",
         "author": {"@id": f"{SITE}/#person"},
-        "mainEntityOfPage": f"{SITE}/smtp/",
+        "hasPart": [{"@type": "TechArticle", "headline": c["title"],
+                     "url": f"{SITE}/smtp/{slug(c)}/"} for c in CODES],
     }
-    return page("SMTP response reference: error and deferral codes explained",
-                "Reference for SMTP rejection and deferral responses: what each means, whether "
-                "to retry, and how to fix the cause.",
-                body, "smtp/index.html", extra_ld=ld)
+    return page(
+        "SMTP response reference: error and deferral codes explained",
+        "Searchable reference for SMTP rejection and deferral responses: what each means, "
+        "whether to retry, and how to fix the cause.",
+        body, "smtp/index.html", extra_ld=ld, wide=True,
+        nav_key="Reference", modules=("/js/filter.js",))
 
+
+def build_session():
+    """The swaks transcript, annotated.
+
+    It was homepage decoration. As a reference page it answers a real question people
+    search for, and it is the natural companion to the response reference: this is the
+    conversation when nothing goes wrong, so every other page is a deviation from it.
+    """
+    ann = {
+        3: "swaks resolves the MX and opens a TCP connection on port 25.",
+        5: "The 220 greeting. Anything other than 220 here and you never get to send.",
+        6: "EHLO announces who you claim to be. Receivers check this against your rDNS.",
+        7: "Everything after 250- is a capability. The last line uses 250 with a space.",
+        12: "STARTTLS upgrades the existing connection rather than opening a new one.",
+        14: "From here the transcript prefixes change to ~> and <~, meaning inside TLS.",
+        17: "The second EHLO is not a mistake. STARTTLS resets the session, so the "
+            "capability list has to be requested again inside the encrypted channel.",
+        20: "MAIL FROM is the envelope sender, and the domain SPF is checked against. "
+            "It is not the From: header the recipient sees.",
+        22: "RCPT TO is where most rejections land: unknown user, full mailbox, policy.",
+        25: "QUIT, because --quit-after RCPT stopped before DATA. No message was sent.",
+    }
+    rows = []
+    for i, (kind, text) in enumerate(SMTP_SESSION):
+        note = ann.get(i)
+        rows.append(
+            f'<div class="ln{" has-note" if note else ""}">'
+            f'<code class="{kind}">{e(text) or "&nbsp;"}</code>'
+            + (f'<p class="an">{e(note)}</p>' if note else "")
+            + "</div>")
+
+    body = f"""
+<h1>Anatomy of an SMTP session</h1>
+<p class="lede">A real delivery, captured with swaks against Gmail's MX. Every server
+response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</code> stops
+before DATA, so the handshake completes and no message is ever sent, which is how you test
+a route without touching a recipient.</p>
+
+<div class="callout"><p>Reading the prefixes: <code>===</code> is swaks talking to you,
+<code>-&gt;</code> and <code>&lt;-</code> are sent and received in the clear, and
+<code>~&gt;</code> and <code>&lt;~</code> are the same two inside TLS.</p></div>
+
+<div class="session">{"".join(rows)}</div>
+
+<h2>Every line is somewhere delivery can fail</h2>
+<p>That is the reason to read a clean session before reading a broken one. A connection
+refused at the 220 is a different problem from a 550 at RCPT TO, which is a different
+problem again from a 250 at DATA followed by silence. Knowing which line a failure came
+from removes most of the guesswork, and it is the first question worth asking.</p>
+<p>When one of these lines comes back wrong, the
+<a href="/smtp/">response reference</a> covers what it means, and the
+<a href="/bounce/">bounce classifier</a> will tell you which action it needs.</p>
+
+<h2>Reproducing this</h2>
+<p>swaks is the tool worth having installed. <code>--quit-after RCPT</code> is the flag
+worth remembering, because it lets you test a full route, including TLS and recipient
+acceptance, without delivering anything to a real person.</p>
+<pre><code>swaks --to postmaster@gmail.com --from you@example.com \\
+      --server gmail-smtp-in.l.google.com --ehlo example.com \\
+      --tls --quit-after RCPT</code></pre>
+"""
+    return page(
+        "Anatomy of an SMTP session: a real delivery, line by line",
+        "A real swaks SMTP session against Gmail's MX, annotated line by line: the 220 "
+        "greeting, EHLO, STARTTLS, MAIL FROM, RCPT TO, and where each one can fail.",
+        body, "smtp/session/index.html", wide=True, nav_key="Reference",
+        crumbs=(("Reference", "smtp/"), ("Anatomy of a session", None)))
 
 
 def build_about():
@@ -1550,7 +1867,7 @@ operating these systems rather than from the specifications.</p>
         "About Rastu Singh, Email Infrastructure and Deliverability Engineer",
         "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in "
         "MTA platforms, SMTP transport, sender reputation, deliverability and email security.",
-        body, "about/index.html", extra_ld=ld)
+        body, "about/index.html", extra_ld=ld, nav_key="About")
 
 
 
@@ -1732,7 +2049,7 @@ I would like to know.</p>
                 f"Across {n:,} domains, {g['dmarc']}% publish DMARC but only "
                 f"{g['dmarc_reject']}% reject. MTA-STS is at {g['mta_sts']}%. "
                 f"Full methodology and dataset published.",
-                body, "research/index.html", extra_ld=ld)
+                body, "research/index.html", extra_ld=ld, nav_key="Research")
 
 
 def build_stub(path, kicker, title, lede, body_extra=""):
@@ -1791,40 +2108,19 @@ def main():
     os.makedirs(OUT, exist_ok=True)
 
     build_sift()
-    urls = [build_home(), build_about(), build_check(), build_smtp_index()]
+    urls = [build_home(), build_tools(), build_about(),
+            build_check(), build_bounce(), build_spf(),
+            build_smtp_index(), build_session()]
     for c in CODES:
         urls.append(build_code_page(c))
 
     urls.append(build_research())
 
-    urls.append(build_stub(
-        "tools/index.html", "Tools", "Open-source email operations tooling",
-        "Small, focused tools for running email infrastructure.",
-        """
-<h2>smtpsift</h2>
-<p>Classifies SMTP rejections and deferrals into a category and an action. Hard and soft
-bounce is too coarse to act on: a full mailbox, a rate limit and a reputation block all
-arrive as soft bounces and need opposite responses.</p>
-<p><a href="https://github.com/singhrastu/smtpsift">github.com/singhrastu/smtpsift</a>
-&middot; <a href="/#sift">paste a bounce into it</a></p>
-
-<p>Run it here without installing anything:
-<a href="/check/">the hosted domain check</a> is the same logic compiled to
-JavaScript, and the two are tested against each other on every build.</p>
-
-<h2>dmarcsight</h2>
-<p>Audits a domain's email authentication posture: SPF including the 10-lookup limit, DKIM,
-DMARC policy strength, MTA-STS policy and MX consistency, TLS-RPT and BIMI, with a composite
-verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
-<p><a href="https://github.com/singhrastu/dmarcsight">github.com/singhrastu/dmarcsight</a>
-&middot; <a href="/check/">run it in your browser</a></p>
-"""))
-
     # the auditor's modules, copied rather than inlined so the browser can cache
     # them and so build/parity.mjs can import exactly what ships
     jsdir = os.path.join(OUT, "js")
     os.makedirs(jsdir, exist_ok=True)
-    for name in ("audit.js", "doh.js", "check.js"):
+    for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # images
