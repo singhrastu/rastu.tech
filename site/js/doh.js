@@ -12,7 +12,22 @@ const ENDPOINTS = [
   'https://cloudflare-dns.com/dns-query',
   'https://dns.google/resolve',
 ];
-const TYPE = { TXT: 16, MX: 15, A: 1, AAAA: 28 };
+const TYPE = { TXT: 16, MX: 15, A: 1, AAAA: 28, PTR: 12 };
+
+/* Thrown when every resolver failed. This is NOT the same as a domain having no
+   record, and conflating the two is how a checker tells someone their SPF is
+   missing when the truth is that their network blocked DNS-over-HTTPS. An
+   NXDOMAIN is a real answer and returns normally; only a transport failure
+   throws. */
+export class DnsUnavailable extends Error {
+  constructor(name, type) {
+    super(`DNS lookup for ${type} ${name} could not be completed. Every resolver `
+        + `failed, so this is not a result: the record may well exist.`);
+    this.name = 'DnsUnavailable';
+    this.qname = name;
+    this.qtype = type;
+  }
+}
 
 export function resolver() {
   const cache = new Map();          // one audit re-asks for the same name a lot
@@ -30,19 +45,27 @@ export function resolver() {
           if (!r.ok) continue;
           const d = await r.json();
           endpoint = (endpoint + attempt) % ENDPOINTS.length;
-          // NXDOMAIN (3) and NOERROR-with-no-answer both mean "no record here".
-          return (d.Answer || []).filter(a => a.type === TYPE[type]);
+          // NXDOMAIN (3) and NOERROR-with-no-answer are real answers meaning
+          // "no record here". Only a transport failure falls through below.
+          return { ok: true, status: d.Status,
+                   answers: (d.Answer || []).filter(a => a.type === TYPE[type]) };
         } catch (e) { /* try the other resolver */ }
       }
-      return [];
+      return { ok: false, answers: [] };
     })();
     cache.set(key, p);
     return p;
   }
 
+  async function answers(name, type) {
+    const res = await query(name, type);
+    if (!res.ok) throw new DnsUnavailable(name, type);
+    return res.answers;
+  }
+
   return {
     async txt(name) {
-      const rows = await query(name, 'TXT');
+      const rows = await answers(name, 'TXT');
       // DNS splits long TXT into 255-byte chunks and the JSON API hands them back
       // as several quoted strings. They must be rejoined before parsing or a long
       // SPF record or DKIM key looks malformed.
@@ -50,7 +73,7 @@ export function resolver() {
         .map(s => s.replace(/^"|"$/g, '')).join(''));
     },
     async mx(name) {
-      const rows = await query(name, 'MX');
+      const rows = await answers(name, 'MX');
       return rows
         .map(a => {
           const m = a.data.trim().match(/^(\d+)\s+(\S+?)\.?$/);
@@ -60,10 +83,30 @@ export function resolver() {
         .sort((x, y) => x[0] - y[0]);
     },
     async a(name) {
-      const [v4, v6] = await Promise.all([query(name, 'A'), query(name, 'AAAA')]);
+      const [v4, v6] = await Promise.all([answers(name, 'A'), answers(name, 'AAAA')]);
       return [...v4, ...v6].map(x => x.data);
     },
+    /* Reverse lookup, for naming the source IPs in a DMARC aggregate report.
+       Returns [] for an IP with no PTR, which is common and not an error. */
+    async ptr(ip) {
+      const name = ip.includes(':')
+        ? expandV6(ip)
+        : ip.split('.').reverse().join('.') + '.in-addr.arpa';
+      const rows = await answers(name, 'PTR');
+      return rows.map(x => x.data.replace(/\.$/, ''));
+    },
   };
+}
+
+/* IPv6 reverse names are the address in nibbles, reversed, under ip6.arpa. */
+function expandV6(ip) {
+  const [head, tail] = ip.split('::');
+  const h = head ? head.split(':') : [];
+  const t = tail ? tail.split(':') : [];
+  const fill = new Array(8 - h.length - t.length).fill('0');
+  const groups = (ip.includes('::') ? [...h, ...fill, ...t] : ip.split(':'))
+    .map(g => g.padStart(4, '0'));
+  return groups.join('').split('').reverse().join('.') + '.ip6.arpa';
 }
 
 /* The two fetches a page cannot make for itself, proxied by worker/index.js.

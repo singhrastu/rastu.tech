@@ -56,6 +56,28 @@ function policyTags(body) {
 }
 
 // ------------------------------------------------------------------------ SPF
+/* RFC 7208 section 4.6.4: include, a, mx, ptr and exists each cost one DNS lookup,
+   as does the redirect modifier. all, ip4, ip6 and exp cost nothing.
+
+   Every mechanism may carry a qualifier (+ - ~ ?) and a and mx may carry a CIDR
+   suffix (a/24, mx//64). Matching on bare 'a:' and 'a' misses '+a', '-a', 'a/24'
+   and 'ptr:example.com', all legal and all costing a lookup. Undercounting here
+   means telling someone their record is safe when it permerrors. Mirrors
+   dmarcsight/checks.py::_mechanism, and build/parity.mjs holds the two together. */
+const COSTS_A_LOOKUP = /^(include|a|mx|ptr|exists)(?:[:/]|$)/i;
+
+function mechanism(token) {
+  const t = '+-~?'.includes(token[0]) ? token.slice(1) : token;
+  const low = t.toLowerCase();
+  if (low.startsWith('redirect=')) return ['redirect', t.slice(t.indexOf('=') + 1).trim()];
+  const m = COSTS_A_LOOKUP.exec(low);
+  if (!m) return null;
+  const name = m[1];
+  const rest = t.slice(name.length);
+  const target = rest[0] === ':' ? rest.slice(1).split('/')[0].trim() : '';
+  return [name, target];
+}
+
 /* `out`, when passed, collects the include tree as a side effect. The return value
    and the walk order are untouched, so build/parity.mjs keeps passing against the
    Python implementation; /spf/ gets the tree for free rather than from a second,
@@ -64,36 +86,38 @@ async function countLookups(spf, r, seen, depth = 0, out = null) {
   if (depth > 10) return 99;
   let n = 0;
   for (const token of spf.split(/\s+/)) {
-    const t = token.toLowerCase();
-    if (t.startsWith('include:') || t.startsWith('redirect=')) {
-      n += 1;
-      const target = (t.startsWith('include:')
-        ? token.slice(token.indexOf(':') + 1)
-        : token.slice(token.indexOf('=') + 1)).trim();
-      const node = out ? { kind: t.startsWith('include:') ? 'include' : 'redirect',
-                           target, cost: 1, record: null, children: [], note: '' } : null;
-      if (node) out.push(node);
-      if (!target || seen.has(target)) {
-        if (node) node.note = target ? 'already counted above' : 'empty target';
-        continue;
+    if (!token) continue;
+    const mech = mechanism(token);
+    if (!mech) {
+      // ip4/ip6/all/exp and the version tag cost nothing; shown so the record
+      // reads as a whole in the tree.
+      if (out && !token.toLowerCase().startsWith('v=spf1')) {
+        out.push({ kind: 'free', target: token, cost: 0, record: null,
+                   children: [], note: '' });
       }
-      seen.add(target);
-      const sub = (await r.txt(target)).filter(x => x.toLowerCase().startsWith('v=spf1'));
-      if (node) node.record = sub[0] || null;
-      if (sub.length) {
-        n += await countLookups(sub[0], r, seen, depth + 1, node ? node.children : null);
-      } else if (node) {
-        node.note = 'no SPF record at this name, so it resolves to nothing';
-      }
-    } else if (t.startsWith('a:') || t.startsWith('mx:') || t.startsWith('exists:')
-               || t === 'a' || t === 'mx' || t === 'ptr') {
-      n += 1;
-      if (out) out.push({ kind: 'mechanism', target: token, cost: 1,
-                          record: null, children: [], note: '' });
-    } else if (out && t && !t.startsWith('v=spf1')) {
-      // ip4/ip6/all/exp cost nothing; shown so the record reads as a whole
-      out.push({ kind: 'free', target: token, cost: 0,
-                 record: null, children: [], note: '' });
+      continue;
+    }
+    const [name, target] = mech;
+    n += 1;
+    const expands = name === 'include' || name === 'redirect';
+    const node = out ? {
+      kind: expands ? name : 'mechanism',
+      target: expands ? target : token,
+      cost: 1, record: null, children: [], note: '',
+    } : null;
+    if (node) out.push(node);
+    if (!expands) continue;
+    if (!target || seen.has(target)) {
+      if (node) node.note = target ? 'already counted above' : 'empty target';
+      continue;
+    }
+    seen.add(target);
+    const sub = (await r.txt(target)).filter(x => x.toLowerCase().startsWith('v=spf1'));
+    if (node) node.record = sub[0] || null;
+    if (sub.length) {
+      n += await countLookups(sub[0], r, seen, depth + 1, node ? node.children : null);
+    } else if (node) {
+      node.note = 'no SPF record at this name, so it resolves to nothing';
     }
   }
   return n;

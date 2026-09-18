@@ -43,8 +43,13 @@ function main() {
       render(domain, rep);
       history.replaceState(null, '', '?d=' + encodeURIComponent(domain));
     } catch (e) {
-      out.innerHTML = `<p class="note">The audit could not finish: ${esc(e.message || e)}. `
-        + `A blocked DNS-over-HTTPS request is the usual cause.</p>`;
+      // A DNS transport failure is not a finding. Reporting it as one would mean
+      // telling someone their SPF is missing when their network blocked the lookup.
+      out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}`
+        + (e.name === 'DnsUnavailable'
+            ? ` A corporate network, VPN or ad blocker intercepting DNS-over-HTTPS is the
+               usual cause. Nothing above should be read as a verdict on this domain.`
+            : '') + `</p>`;
     } finally {
       running = false;
       runBtn.disabled = false;

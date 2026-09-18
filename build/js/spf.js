@@ -31,7 +31,11 @@ function main() {
       render(await spfTree(domain, resolver()));
       history.replaceState(null, '', '?d=' + encodeURIComponent(domain));
     } catch (e) {
-      out.innerHTML = `<p class="note">Could not finish: ${esc(e.message || e)}.</p>`;
+      out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}`
+        + (e.name === 'DnsUnavailable'
+            ? ` A corporate network, VPN or ad blocker intercepting DNS-over-HTTPS is the
+               usual cause.`
+            : '') + `</p>`;
     } finally {
       running = false; runBtn.disabled = false; runBtn.textContent = 'Count lookups';
     }

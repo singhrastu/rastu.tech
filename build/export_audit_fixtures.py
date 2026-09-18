@@ -48,6 +48,15 @@ SCENARIOS = [
     ("spf include loop", {D: ["v=spf1 include:a.test -all"],
                           "a.test": ["v=spf1 include:b.test -all"],
                           "b.test": ["v=spf1 include:a.test -all"]}, {}, {}, None),
+    # The tokens a naive "a:"/"a" matcher drops: qualifiers, CIDR suffixes and
+    # ptr:domain. All legal SPF, all costing a lookup.
+    ("spf with qualified and cidr mechanisms",
+     {D: ["v=spf1 +include:i1.test -a ~mx ?exists:e.test a/24 mx//64 ptr:p.test "
+          "ip4:1.2.3.4 -all"],
+      "i1.test": ["v=spf1 ip4:10.0.0.1 -all"]}, {}, {}, None),
+    ("spf of only free mechanisms", {D: ["v=spf1 ip4:1.2.3.4 ip6:::1 -all"]}, {}, {}, None),
+    ("spf redirect modifier", {D: ["v=spf1 redirect=r.test"],
+                               "r.test": ["v=spf1 a mx -all"]}, {}, {}, None),
     ("dmarc reject with rua", {D: ["v=spf1 -all"],
         f"_dmarc.{D}": ["v=DMARC1; p=reject; rua=mailto:d@example.com"]}, {}, {}, None),
     ("dmarc quarantine, sp=none", {D: ["v=spf1 -all"],
