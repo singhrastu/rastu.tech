@@ -889,16 +889,16 @@ limit and you make it worse. Retry the reputation block and you damage the sendi
 further while the underlying problem goes unfixed.</p>
 <p>So the classifier answers with an action rather than a severity:</p>
 <ul>
-  <li><strong>retry</strong> &mdash; temporary at the receiving end. The normal schedule handles it.</li>
-  <li><strong>throttle</strong> &mdash; you are sending faster than this provider will accept. Drop
+  <li><strong>retry</strong>: temporary at the receiving end. The normal schedule handles it.</li>
+  <li><strong>throttle</strong>: you are sending faster than this provider will accept. Drop
       concurrency for that provider only, not globally.</li>
-  <li><strong>suppress</strong> &mdash; permanent. Remove the address. Retrying costs reputation and
+  <li><strong>suppress</strong>: permanent. Remove the address. Retrying costs reputation and
       dormant addresses turn into spam traps.</li>
-  <li><strong>pause</strong> &mdash; a reputation or blocklist problem. Stop sending to this provider
+  <li><strong>pause</strong>: a reputation or blocklist problem. Stop sending to this provider
       from this IP and fix the cause before resuming.</li>
-  <li><strong>review</strong> &mdash; a content or recipient-side policy rule. Change the message, not
+  <li><strong>review</strong>: a content or recipient-side policy rule. Change the message, not
       the rate.</li>
-  <li><strong>fix_config</strong> &mdash; an authentication failure. No amount of retrying helps.</li>
+  <li><strong>fix_config</strong>: an authentication failure. No amount of retrying helps.</li>
 </ul>
 
 <h2 class="r">Where the ruleset comes from</h2>

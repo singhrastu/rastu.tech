@@ -170,7 +170,7 @@ function render(a) {
       <td>${r.by ? `<code>${esc(r.by)}</code>` : '<span class="muted">unknown</span>'}
         ${r.ip ? `<span class="ip">${esc(r.ip)}</span>` : ''}
         ${i === 0 && r.from
-          ? `<span class="warnnote">claims to be ${esc(r.from)} &mdash; this is whatever
+          ? `<span class="warnnote">claims to be ${esc(r.from)}, which is whatever
              the connecting client said in EHLO</span>` : ''}</td>
       <td>${r.proto ? `<code>${esc(r.proto)}</code>` : '<span class="muted">&mdash;</span>'}
         ${r.tls === true ? '<span class="tls">TLS</span>' : ''}

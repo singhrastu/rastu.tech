@@ -26,15 +26,10 @@ function init(root) {
       el.classList.toggle('hidden', !on);
       if (on) shown++;
     }
-    if (count) {
-      // The noun comes from the markup. This filter sits under a lookup covering
-      // several hundred responses, and hard-coding "responses" here made the page
-      // announce that the whole reference was fourteen of them.
-      const noun = root.getAttribute('data-noun') || 'items';
-      count.textContent = shown === items.length
-        ? `${items.length} ${noun}`
-        : `${shown} of ${items.length}`;
-    }
+    // Feedback for what the reader just did, not an inventory. Announcing a total
+    // here told every visitor how much of the reference is written up, which is
+    // nobody's business and reads as a shortfall. Silent until a filter narrows it.
+    if (count) count.textContent = shown === items.length ? '' : `${shown} showing`;
     root.querySelector('.noresult')?.classList.toggle('hidden', shown > 0);
   }
 

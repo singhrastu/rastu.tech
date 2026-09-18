@@ -1703,16 +1703,16 @@ limit and you make it worse. Retry the reputation block and you damage the sendi
 further while the underlying problem goes unfixed.</p>
 <p>So the classifier answers with an action rather than a severity:</p>
 <ul>
-  <li><strong>retry</strong> &mdash; temporary at the receiving end. The normal schedule handles it.</li>
-  <li><strong>throttle</strong> &mdash; you are sending faster than this provider will accept. Drop
+  <li><strong>retry</strong>: temporary at the receiving end. The normal schedule handles it.</li>
+  <li><strong>throttle</strong>: you are sending faster than this provider will accept. Drop
       concurrency for that provider only, not globally.</li>
-  <li><strong>suppress</strong> &mdash; permanent. Remove the address. Retrying costs reputation and
+  <li><strong>suppress</strong>: permanent. Remove the address. Retrying costs reputation and
       dormant addresses turn into spam traps.</li>
-  <li><strong>pause</strong> &mdash; a reputation or blocklist problem. Stop sending to this provider
+  <li><strong>pause</strong>: a reputation or blocklist problem. Stop sending to this provider
       from this IP and fix the cause before resuming.</li>
-  <li><strong>review</strong> &mdash; a content or recipient-side policy rule. Change the message, not
+  <li><strong>review</strong>: a content or recipient-side policy rule. Change the message, not
       the rate.</li>
-  <li><strong>fix_config</strong> &mdash; an authentication failure. No amount of retrying helps.</li>
+  <li><strong>fix_config</strong>: an authentication failure. No amount of retrying helps.</li>
 </ul>
 
 <h2>Where the ruleset comes from</h2>
@@ -1824,7 +1824,7 @@ authenticated, and what to fix first.</p>
 <div class="tool">
   <label class="drop" id="rua-drop" for="rua-file">
     <b>Drop a report here</b>
-    <span>or choose a file &mdash; .xml, .xml.gz or .zip, several at once is fine</span>
+    <span>or choose a file: .xml, .xml.gz or .zip, several at once is fine</span>
     <em>Parsed in this tab. The file never reaches this server.</em>
     <input id="rua-file" type="file" multiple accept=".xml,.gz,.zip,text/xml,application/gzip,application/zip">
   </label>
@@ -2050,20 +2050,6 @@ make.</p>
     <span class="d">Audits a domain's authentication posture end to end. Powers the
     <a href="/check/">domain check</a> and the <a href="/spf/">SPF counter</a>.</span></a>
 </div>
-
-<div class="sechead r">
-  <h2>Being built</h2>
-  <p>In order, and shipped when each one is trustworthy rather than when it is
-  demonstrable.</p>
-</div>
-<ul>
-  <li><strong>Warm-up planner</strong> &mdash; a ramp gated on reputation metrics rather
-      than on days elapsed, split by mailbox provider, with a recovery path for the day it
-      goes wrong.</li>
-  <li><strong>Blocklist check</strong> &mdash; every list verified against its own RFC 5782
-      test entries before its answer is trusted, so a dead or refusing list reports "could
-      not determine" instead of quietly reporting you as clean.</li>
-</ul>
 """
     return page(
         "Email infrastructure tools: bounce classifier, domain check, SPF counter",
@@ -2237,7 +2223,7 @@ or find the mechanism that quietly switched off an SPF record.</p>
 
 <div class="term" id="term" data-session='{e(session)}'>
   <div class="bar"><i></i><i></i><i></i>
-    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <span>swaks gmail-smtp-in.l.google.com:25</span>
     <em>click to replay</em></div>
   <pre><code id="term-out"></code><span class="cur"></span></pre>
 </div>
@@ -2250,7 +2236,7 @@ or find the mechanism that quietly switched off an SPF record.</p>
   systems, not from the spec.</p>
 </div>
 <div class="chips-row r">{chips}
-  <a class="chip more" href="/smtp/">All {len(CODES)} responses &rarr;</a>
+  <a class="chip more" href="/smtp/">Look up any response &rarr;</a>
 </div>
 
 <div class="panel r">
@@ -2388,13 +2374,13 @@ registered, and Microsoft's own, which are mostly outside both.</p>
 <div id="lk-browse">
   <div class="sechead r">
     <h2>Written up in full</h2>
-    <p>{len(CODES)} of the {total} have a page of their own: real log samples, why it
-    happens, and what to change. Every other response resolves in the lookup above with
-    its registry definition and the action its class implies.</p>
+    <p>The responses that come up most often, each with real log samples, why it
+    happens, and what to change. Everything else resolves in the lookup above with its
+    registry definition and the action its class implies.</p>
   </div>
 
-  <div class="filter" data-filter data-noun="written up in full">
-    <div class="chips">{chips}<span class="count"></span></div>
+  <div class="filter" data-filter>
+    <div class="chips">{chips}<span class="count" role="status" aria-live="polite"></span></div>
     <div class="grid">{"".join(items)}</div>
     <p class="empty noresult hidden">Nothing matches that filter.</p>
   </div>
@@ -2496,7 +2482,7 @@ a route without touching a recipient.</p>
 
 <div class="term" id="term" data-session='{e(session)}'>
   <div class="bar"><i></i><i></i><i></i>
-    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <span>swaks gmail-smtp-in.l.google.com:25</span>
     <em>click to replay</em></div>
   <pre><code id="term-out"></code><span class="cur"></span></pre>
 </div>
@@ -2882,6 +2868,8 @@ def check_voice():
          "sermon about its own trustworthiness"),
         (r"I hope this helps|feel free to|as mentioned (?:above|earlier)",
          "assistant register"),
+        (r"being built|coming soon|shipped when|on the roadmap",
+         "tells the reader what they cannot have yet"),
     ]
     models = re.compile(r"\b(claude|chatgpt|anthropic|openai|copilot|gpt-[0-9])\b", re.I)
     bad = []
@@ -2897,6 +2885,21 @@ def check_voice():
                 m = re.search(pat, body, re.I)
                 if m:
                     bad.append(f"{rel}: {why} -> {m.group(0)!r}")
+            # An em dash between words is prose and reads as machine-set. An em dash
+            # that is the whole content of an element or a whole string literal means
+            # "no value" in a table, which is ordinary typography. Tell them apart by
+            # what surrounds the dash, not by the character before it: the first cut
+            # at this used \w and missed "</strong> &mdash;", which is the commonest
+            # case there is.
+            for m in re.finditer(r"&mdash;|\u2014", body):
+                before = body[m.start() - 1:m.start()]
+                after = body[m.end():m.end() + 2]
+                placeholder = ((before == ">" and after.startswith("</"))
+                               or (before in "'\"" and after[:1] in "'\""))
+                if not placeholder:
+                    ctx = body[max(0, m.start() - 40):m.end() + 40].replace("\n", " ")
+                    bad.append(f"{rel}: em dash in prose -> ...{ctx.strip()}...")
+
             if not rel.startswith("/about/"):
                 m = models.search(body)
                 if m:
