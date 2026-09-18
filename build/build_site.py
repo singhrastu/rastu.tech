@@ -427,13 +427,49 @@ table.cost tr.s-warn .num{color:var(--warn)}
 table.cost tr.s-fail .num{color:var(--bad)}
 table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 
-/* ---- tool cards ---------------------------------------------------------- */
+/* ---- tool cards ----------------------------------------------------------
+   A card has to read as an instrument, not as an article about one. The icon
+   anchors it, the input example says what you feed it, and the call to action
+   is shaped like a button rather than a link. */
 .bento.tools{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+.bento.tools .card{display:flex;flex-direction:column;padding:1.35rem 1.4rem 1.25rem}
 @media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
+
+.card-top{display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:.9rem}
+.card .ico{width:44px;height:44px;padding:10px;border-radius:11px;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 28%,transparent);
+  transition:background .3s,color .3s,transform .3s,border-color .3s}
+.bento .card:hover .ico{background:var(--accent);color:#08140d;transform:scale(1.06);
+  border-color:var(--accent)}
+.bento .card .tag{margin:0}
+
 .bento .card .q{color:var(--ink);font-size:var(--t3);font-weight:600;
   margin:0 0 .5rem;line-height:1.45}
 .bento .card .q::before{content:"";display:inline-block;width:6px;height:6px;
   border-radius:50%;background:var(--accent);margin-right:.5rem;vertical-align:.18em}
+
+/* What you give it. Nothing else on a card conveys "usable" this cheaply. */
+.card .takes{display:flex;align-items:center;gap:.5rem;margin:.9rem 0 0;
+  padding:.5rem .6rem;border:1px solid var(--line);border-radius:8px;
+  background:var(--code);min-width:0}
+.card .takes span{font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;flex:none}
+.card .takes code{background:none;padding:0;font-size:.74rem;color:var(--ink-2);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+.bento .card .go{display:inline-flex;align-items:center;gap:.55rem;margin-top:auto;
+  padding-top:1.1rem;font-size:var(--t2);color:var(--accent);font-weight:650}
+/* A bordered square with an arrow in it, rather than two crossed gradients
+   pretending to be one. */
+.bento .card .go::after{content:"→";display:grid;place-items:center;
+  width:1.7rem;height:1.7rem;border-radius:7px;font-size:.9rem;line-height:1;
+  background:var(--accent-soft);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 32%,transparent);
+  transition:background .25s,color .25s,transform .25s}
+.bento .card:hover .go::after{background:var(--accent);color:#08140d;
+  transform:translateX(3px)}
 
 /* ---- chip row (reference shortcuts on the home page) --------------------- */
 .chips-row{display:flex;gap:.45rem;flex-wrap:wrap;margin:var(--s3) 0 0;align-items:center}
@@ -930,6 +966,44 @@ FAVICON = (
 )
 
 
+# One glyph per tool, drawn rather than imported. A card with an icon, an input
+# example and a button reads as something you use; the same card as a heading and
+# a paragraph reads as an article about a tool.
+ICON = {
+    # a globe: the domain itself
+    "check": '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18'
+             'a14 14 0 0 1 0-18"/>',
+    # an envelope turning back
+    "bounce": '<rect x="2.5" y="5.5" width="19" height="13" rx="2"/>'
+              '<path d="M3 7l9 6 9-6"/><path d="M8 17l-3-3 3-3"/><path d="M5 14h6"/>',
+    # a document with a bar chart on it
+    "dmarc": '<path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4"/>'
+             '<path d="M9 17v-3M12 17v-6M15 17v-4"/>',
+    # a branching tree, which is what an include chain is
+    "spf": '<circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/>'
+           '<circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/>'
+           '<path d="M7 12h3M10 12V6h7M10 12h7M10 12v6h7"/>',
+    # stacked header lines under a lens
+    "headers": '<path d="M3 5h18M3 9h18M3 13h7M3 17h7"/>'
+               '<circle cx="16" cy="16" r="4"/><path d="M19 19l2.5 2.5"/>',
+    # a ramp
+    "warmup": '<path d="M3 20h18"/><path d="M3 17l5-4 4 3 8-9"/>'
+              '<path d="M17 7h3v3"/>',
+    # a shield with a slash through it
+    "blocklist": '<path d="M12 2.5l8 3v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10v-6z"/>'
+                 '<path d="M8.5 15.5l7-7"/>',
+}
+
+
+def icon(slug):
+    d = ICON.get(slug)
+    if not d:
+        return ""
+    return ('<svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+            'stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" '
+            'aria-hidden="true">' + d + "</svg>")
+
+
 # One registry, four consumers: the nav, the homepage grid, the /tools/ index and
 # the footer. The audit found "Domain check" / "Check a domain" / "Check a domain's
 # email authentication" all naming the same page; a single list is what stops that
@@ -943,6 +1017,7 @@ TOOLS = [
                  "the RFC 7208 ten-lookup limit and whether an MTA-STS policy really "
                  "exists behind the record that promises one.",
         "tag": "DNS",
+        "takes": "example.com",
     },
     {
         "slug": "bounce", "name": "Bounce classifier",
@@ -951,6 +1026,7 @@ TOOLS = [
                  "retry, back off, suppress, or stop and fix the sender. Hard and soft "
                  "bounce is too coarse to act on.",
         "tag": "Logs",
+        "takes": "550 5.7.1 Service unavailable...",
     },
     {
         "slug": "dmarc", "name": "DMARC report reader",
@@ -959,6 +1035,7 @@ TOOLS = [
                  "aligned, what did not, and which ones to fix first. The file is "
                  "parsed in this tab and never uploaded.",
         "tag": "Reports",
+        "takes": "report.xml.gz  ·  report.zip",
     },
     {
         "slug": "spf", "name": "SPF lookup counter",
@@ -966,6 +1043,7 @@ TOOLS = [
         "blurb": "The full include tree with a running DNS lookup count, and the exact "
                  "mechanism that tips a record over ten and turns it into a permerror.",
         "tag": "DNS",
+        "takes": "example.com",
     },
 ]
 
@@ -1421,6 +1499,25 @@ run();
     open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
 
 
+def tool_card(t):
+    """A card that looks like something you operate.
+
+    Icon, the question it answers, an example of what you feed it, and a button.
+    The previous version was a category label, a heading and two paragraphs,
+    which reads as an article about a tool rather than as the tool.
+    """
+    return (
+        f'<a class="card" href="/{t["slug"]}/">'
+        f'<div class="card-top">{icon(t["slug"])}'
+        f'<span class="tag">{e(t["tag"])}</span></div>'
+        f'<h3>{e(t["name"])}</h3>'
+        f'<p class="q">{e(t["q"])}</p>'
+        f'<p>{e(t["blurb"])}</p>'
+        + (f'<p class="takes"><span>takes</span><code>{e(t["takes"])}</code></p>'
+           if t.get("takes") else "")
+        + f'<span class="go">Open {e(t["name"])}</span></a>')
+
+
 def tool_ld(tool, extra=None):
     """Every tool page declares itself a free SoftwareApplication authored by the
     same #person node, which is what ties the toolkit to the entity."""
@@ -1804,14 +1901,7 @@ def build_tools():
     the smtpsift section at the dmarcsight tool. This one leads with the question
     each tool answers, because that is the form the visitor's problem arrives in.
     """
-    cards = "".join(
-        f'<a class="card" href="/{t["slug"]}/">'
-        f'<span class="tag">{e(t["tag"])}</span>'
-        f'<h3>{e(t["name"])}</h3>'
-        f'<p class="q">{e(t["q"])}</p>'
-        f'<p>{e(t["blurb"])}</p>'
-        f'<span class="go">Open &rarr;</span></a>'
-        for t in TOOLS)
+    cards = "".join(tool_card(t) for t in TOOLS)
 
     body = f"""
 <h1>Tools</h1>
@@ -1875,14 +1965,7 @@ def build_home():
     tool on the page back to the same #person node. The footprint is larger than
     the old personal homepage, not smaller.
     """
-    cards = "".join(
-        f'<a class="card" href="/{t["slug"]}/">'
-        f'<span class="tag">{e(t["tag"])}</span>'
-        f'<h3>{e(t["name"])}</h3>'
-        f'<p class="q">{e(t["q"])}</p>'
-        f'<p>{e(t["blurb"])}</p>'
-        f'<span class="go">Open &rarr;</span></a>'
-        for t in TOOLS)
+    cards = "".join(tool_card(t) for t in TOOLS)
 
     # The responses people actually arrive on, as a way in to the reference.
     picks = ["4.7.28", "5.7.1", "5.7.606", "5.1.1", "TS03", "spamhaus"]
