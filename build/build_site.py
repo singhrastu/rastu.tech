@@ -299,6 +299,21 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
   margin-top:.12rem;word-break:break-all}
 
+/* ---- steps under the session -------------------------------------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));
+  gap:var(--s3);margin:var(--s4) 0}
+.steps .step{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:var(--s3) 1rem;transition:border-color .25s}
+.steps .step:hover{border-color:var(--accent)}
+.steps .step h3{margin:0 0 .4rem;font-size:var(--t3)}
+.steps .step code{display:block;background:var(--code);border:1px solid var(--line);
+  border-radius:6px;padding:.4rem .55rem;font-size:.72rem;color:var(--ink-2);
+  margin-bottom:.55rem;white-space:pre-wrap;word-break:break-word}
+.steps .step p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6}
+.term .bar em{margin-left:auto;font-style:normal;font-size:.7rem;color:var(--ink-3);
+  opacity:.6;transition:opacity .2s}
+.term:hover .bar em{opacity:1;color:var(--accent)}
+
 /* ---- annotated session --------------------------------------------------- */
 .session{border:1px solid var(--line);border-radius:14px;background:var(--code);
   padding:var(--s3) 0;margin:var(--s4) 0}
@@ -834,13 +849,44 @@ def person_ld():
 
 def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
          scripts=(), modules=(), nav_key=None, crumbs=()):
-    lds = [person_ld()] if is_home else []
+    """Every page carries the Person node, not just the home page.
+
+    Pages all over the site point their author and publisher at {SITE}/#person by
+    @id. If the node itself is only defined on one page, every other page hands a
+    crawler a dangling reference and no identity at all. Emitting it everywhere is
+    what makes twenty-three pages resolve to one entity instead of one page doing
+    the work and twenty-two pointing at nothing.
+
+    The cost is about 1.2 KB of gzipped JSON per page. The benefit is that a
+    reference page someone lands on from a search for 550 5.7.606 still says, in
+    machine-readable form, who wrote it.
+    """
+    graph = [person_ld(), {
+        "@type": "WebSite", "@id": f"{SITE}/#website", "url": SITE + "/",
+        "name": "rastu.tech", "publisher": {"@id": f"{SITE}/#person"},
+        "inLanguage": "en",
+    }]
+    if crumbs:
+        trail = [("Home", "")] + list(crumbs)
+        graph.append({
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                dict({"@type": "ListItem", "position": i + 1, "name": label},
+                     **({"item": SITE + "/" + href} if href else {}))
+                for i, (label, href) in enumerate(trail)],
+        })
     if extra_ld:
-        lds.append(extra_ld)
-    ld = "\n".join(
-        f'<script type="application/ld+json">{json.dumps(x, ensure_ascii=False)}</script>'
-        for x in lds
-    )
+        # A page's own node joins the graph rather than sitting in its own script,
+        # so @id references resolve inside one document.
+        for node in extra_ld.get("@graph", [extra_ld]):
+            node = {k: v for k, v in node.items() if k != "@context"}
+            node.setdefault("author", {"@id": f"{SITE}/#person"})
+            node.setdefault("isPartOf", {"@id": f"{SITE}/#website"})
+            graph.append(node)
+    ld = ('<script type="application/ld+json">'
+          + json.dumps({"@context": "https://schema.org", "@graph": graph},
+                       ensure_ascii=False)
+          + "</script>")
     canonical = SITE + ("/" if path == "index.html" else "/" + path.replace("index.html", ""))
     depth = path.count("/")
     up = "../" * depth
@@ -868,6 +914,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">
+<meta name="author" content="{e(PERSON['name'])}">
 <link rel="canonical" href="{e(canonical)}">
 <meta property="og:title" content="{e(title)}">
 <meta property="og:description" content="{e(desc)}">
@@ -1516,13 +1563,6 @@ def build_home():
     ld = {
         "@context": "https://schema.org",
         "@graph": [
-            {"@type": "WebSite", "@id": f"{SITE}/#website", "url": SITE + "/",
-             "name": "rastu.tech",
-             "description": "Browser-based tools for email infrastructure and "
-                            "deliverability, an SMTP response reference, and original "
-                            "research on email authentication adoption.",
-             "publisher": {"@id": f"{SITE}/#person"},
-             "inLanguage": "en"},
             {"@type": "ItemList", "@id": f"{SITE}/#tools",
              "name": "Email infrastructure tools",
              "itemListElement": [
@@ -1624,7 +1664,9 @@ def build_code_page(c):
         "about": c["code"],
         "mainEntityOfPage": f"{SITE}/smtp/{s}/",
     }
-    return page(c["title"], c["answer"][:300], body, f"smtp/{s}/index.html", extra_ld=ld)
+    return page(c["title"], c["answer"][:300], body, f"smtp/{s}/index.html",
+                extra_ld=ld, nav_key="Reference",
+                crumbs=(("Reference", "smtp/"), (c.get("label") or c["code"], None)))
 
 
 def build_smtp_index():
@@ -1704,34 +1746,58 @@ here always agree.</p>
 
 
 def build_session():
-    """The swaks transcript, annotated.
+    """The swaks transcript, live and then annotated.
 
-    It was homepage decoration. As a reference page it answers a real question people
-    search for, and it is the natural companion to the response reference: this is the
-    conversation when nothing goes wrong, so every other page is a deviation from it.
+    It plays out as the terminal it came from, because watching a session happen
+    line by line is how the shape of it lands. The annotated breakdown underneath
+    is the part you come back to, and it covers only the lines worth stopping on
+    rather than repeating all twenty-eight.
     """
-    ann = {
-        3: "swaks resolves the MX and opens a TCP connection on port 25.",
-        5: "The 220 greeting. Anything other than 220 here and you never get to send.",
-        6: "EHLO announces who you claim to be. Receivers check this against your rDNS.",
-        7: "Everything after 250- is a capability. The last line uses 250 with a space.",
-        12: "STARTTLS upgrades the existing connection rather than opening a new one.",
-        14: "From here the transcript prefixes change to ~> and <~, meaning inside TLS.",
-        17: "The second EHLO is not a mistake. STARTTLS resets the session, so the "
-            "capability list has to be requested again inside the encrypted channel.",
-        20: "MAIL FROM is the envelope sender, and the domain SPF is checked against. "
-            "It is not the From: header the recipient sees.",
-        22: "RCPT TO is where most rejections land: unknown user, full mailbox, policy.",
-        25: "QUIT, because --quit-after RCPT stopped before DATA. No message was sent.",
-    }
-    rows = []
-    for i, (kind, text) in enumerate(SMTP_SESSION):
-        note = ann.get(i)
-        rows.append(
-            f'<div class="ln{" has-note" if note else ""}">'
-            f'<code class="{kind}">{e(text) or "&nbsp;"}</code>'
-            + (f'<p class="an">{e(note)}</p>' if note else "")
-            + "</div>")
+    ann = [
+        (3, "Connect",
+         "swaks resolves the MX and opens a TCP connection on port 25. A refusal or a "
+         "timeout here is a network problem, not a mail problem, and it is the cheapest "
+         "failure to misdiagnose."),
+        (5, "220 greeting",
+         "The receiver announces itself. Anything other than 220 and you never get to "
+         "send: some receivers return a 421 here when they are shedding load, and a few "
+         "return a 554 when the connecting IP is blocked outright."),
+        (6, "EHLO",
+         "You announce who you claim to be. Receivers check this name against the reverse "
+         "DNS of your connecting IP, and a mismatch costs reputation at several providers "
+         "even though nothing rejects on it directly."),
+        (7, "Capabilities",
+         "Everything after 250- is something the receiver supports. The last line uses "
+         "250 with a space rather than a hyphen, which is how you know the list ended. "
+         "If STARTTLS is absent here, the session cannot be encrypted at all."),
+        (12, "STARTTLS",
+         "Upgrades the connection already open rather than dialling a new one. This is "
+         "the step MTA-STS and DANE exist to protect, because an attacker who can strip "
+         "this line downgrades the whole session to cleartext."),
+        (17, "The second EHLO",
+         "Not a mistake. STARTTLS resets the session state, so the capability list has "
+         "to be asked for again inside the encrypted channel, and it can legitimately "
+         "differ from the first one."),
+        (20, "MAIL FROM",
+         "The envelope sender, and the domain SPF is actually checked against. It is not "
+         "the From: header the recipient sees, and the gap between those two is what "
+         "DMARC alignment is about."),
+        (22, "RCPT TO",
+         "Where most rejections land: unknown user, mailbox full, recipient policy. A "
+         "550 here is about one address. A 550 at MAIL FROM or at connect is about you."),
+        (25, "QUIT",
+         "Because --quit-after RCPT stopped before DATA. The route is proven end to end "
+         "and no message was ever transmitted."),
+    ]
+    by_line = {i: (t, txt) for i, t, txt in ann}
+
+    session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
+
+    steps = "".join(
+        f'<div class="step"><h3>{e(title)}</h3>'
+        f'<code>{e(SMTP_SESSION[i][1].strip())}</code>'
+        f"<p>{e(text)}</p></div>"
+        for i, title, text in ann)
 
     body = f"""
 <h1>Anatomy of an SMTP session</h1>
@@ -1740,34 +1806,54 @@ response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</c
 before DATA, so the handshake completes and no message is ever sent, which is how you test
 a route without touching a recipient.</p>
 
+<div class="term" id="term" data-session='{e(session)}'>
+  <div class="bar"><i></i><i></i><i></i>
+    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <em>click to replay</em></div>
+  <pre><code id="term-out"></code><span class="cur"></span></pre>
+</div>
+
 <div class="callout"><p>Reading the prefixes: <code>===</code> is swaks talking to you,
 <code>-&gt;</code> and <code>&lt;-</code> are sent and received in the clear, and
 <code>~&gt;</code> and <code>&lt;~</code> are the same two inside TLS.</p></div>
 
-<div class="session">{"".join(rows)}</div>
+<h2>What each step is doing</h2>
+<p>Every line is a place delivery can fail, and most of the work is knowing which one it
+failed at. These are the ones worth stopping on.</p>
+<div class="steps">{steps}</div>
 
-<h2>Every line is somewhere delivery can fail</h2>
-<p>That is the reason to read a clean session before reading a broken one. A connection
-refused at the 220 is a different problem from a 550 at RCPT TO, which is a different
-problem again from a 250 at DATA followed by silence. Knowing which line a failure came
-from removes most of the guesswork, and it is the first question worth asking.</p>
-<p>When one of these lines comes back wrong, the
-<a href="/smtp/">response reference</a> covers what it means, and the
+<h2>When a line comes back wrong</h2>
+<p>A connection refused at the 220 is a different problem from a 550 at RCPT TO, which is
+a different problem again from a 250 at DATA followed by silence. That is the reason to
+read a clean session before reading a broken one: it tells you which question to ask.</p>
+<p>The <a href="/smtp/">response reference</a> covers what each response means, and the
 <a href="/bounce/">bounce classifier</a> will tell you which action it needs.</p>
 
 <h2>Reproducing this</h2>
-<p>swaks is the tool worth having installed. <code>--quit-after RCPT</code> is the flag
-worth remembering, because it lets you test a full route, including TLS and recipient
-acceptance, without delivering anything to a real person.</p>
+<p>swaks is the tool worth having installed, and <code>--quit-after RCPT</code> is the flag
+worth remembering: it proves a full route, including TLS and recipient acceptance, without
+delivering anything to a real person.</p>
 <pre><code>swaks --to postmaster@gmail.com --from you@example.com \\
       --server gmail-smtp-in.l.google.com --ehlo example.com \\
       --tls --quit-after RCPT</code></pre>
+<p>Drop <code>--quit-after RCPT</code> and it delivers. Add <code>--tlso</code> instead of
+<code>--tls</code> for implicit TLS on port 465, and <code>-au</code> / <code>-ap</code>
+when you are testing a submission endpoint that requires authentication.</p>
 """
+    ld = {
+        "@context": "https://schema.org",
+        "@type": "TechArticle",
+        "headline": "Anatomy of an SMTP session",
+        "description": "A real swaks SMTP session against Gmail's MX, annotated line by line.",
+        "author": {"@id": f"{SITE}/#person"},
+        "publisher": {"@id": f"{SITE}/#person"},
+        "mainEntityOfPage": f"{SITE}/smtp/session/",
+    }
     return page(
         "Anatomy of an SMTP session: a real delivery, line by line",
         "A real swaks SMTP session against Gmail's MX, annotated line by line: the 220 "
         "greeting, EHLO, STARTTLS, MAIL FROM, RCPT TO, and where each one can fail.",
-        body, "smtp/session/index.html", wide=True, nav_key="Reference",
+        body, "smtp/session/index.html", extra_ld=ld, wide=True, nav_key="Reference",
         crumbs=(("Reference", "smtp/"), ("Anatomy of a session", None)))
 
 

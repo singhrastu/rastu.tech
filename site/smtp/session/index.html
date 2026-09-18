@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Anatomy of an SMTP session: a real delivery, line by line</title>
 <meta name="description" content="A real swaks SMTP session against Gmail&#x27;s MX, annotated line by line: the 220 greeting, EHLO, STARTTLS, MAIL FROM, RCPT TO, and where each one can fail.">
+<meta name="author" content="Rastu Singh">
 <link rel="canonical" href="https://rastu.tech/smtp/session/">
 <meta property="og:title" content="Anatomy of an SMTP session: a real delivery, line by line">
 <meta property="og:description" content="A real swaks SMTP session against Gmail&#x27;s MX, annotated line by line: the 220 greeting, EHLO, STARTTLS, MAIL FROM, RCPT TO, and where each one can fail.">
@@ -250,6 +251,21 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-family:inherit;margin-top:.1rem}
 .tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
   margin-top:.12rem;word-break:break-all}
+
+/* ---- steps under the session -------------------------------------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));
+  gap:var(--s3);margin:var(--s4) 0}
+.steps .step{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:var(--s3) 1rem;transition:border-color .25s}
+.steps .step:hover{border-color:var(--accent)}
+.steps .step h3{margin:0 0 .4rem;font-size:var(--t3)}
+.steps .step code{display:block;background:var(--code);border:1px solid var(--line);
+  border-radius:6px;padding:.4rem .55rem;font-size:.72rem;color:var(--ink-2);
+  margin-bottom:.55rem;white-space:pre-wrap;word-break:break-word}
+.steps .step p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6}
+.term .bar em{margin-left:auto;font-style:normal;font-size:.7rem;color:var(--ink-3);
+  opacity:.6;transition:opacity .2s}
+.term:hover .bar em{opacity:1;color:var(--accent)}
 
 /* ---- annotated session --------------------------------------------------- */
 .session{border:1px solid var(--line);border-radius:14px;background:var(--code);
@@ -502,7 +518,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Reference", "item": "https://rastu.tech/smtp/"}, {"@type": "ListItem", "position": 3, "name": "Anatomy of a session"}]}, {"@type": "TechArticle", "headline": "Anatomy of an SMTP session", "description": "A real swaks SMTP session against Gmail's MX, annotated line by line.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "mainEntityOfPage": "https://rastu.tech/smtp/session/", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
 <div class="wrap wide">
@@ -523,28 +539,39 @@ response is verbatim; only the client IP is replaced. <code>--quit-after RCPT</c
 before DATA, so the handshake completes and no message is ever sent, which is how you test
 a route without touching a recipient.</p>
 
+<div class="term" id="term" data-session='[{&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \\&quot;}, {&quot;k&quot;: &quot;cmd&quot;, &quot;t&quot;: &quot;        --tls --quit-after RCPT&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Trying gmail-smtp-in.l.google.com:25...&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connected to gmail-smtp-in.l.google.com.&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-SIZE 157286400&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-STARTTLS&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250-ENHANCEDSTATUSCODES&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;-  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; -&gt; STARTTLS&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;-  220 2.0.0 Ready to start TLS&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer[0]   subject=[/CN=mx.google.com]&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== TLS peer certificate passed CA verification, passed host verification&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; EHLO rastu.tech&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250-mx.google.com at your service, [198.51.100.24]&quot;}, {&quot;k&quot;: &quot;s&quot;, &quot;t&quot;: &quot;&lt;~  250 SMTPUTF8&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;c&quot;, &quot;t&quot;: &quot; ~&gt; QUIT&quot;}, {&quot;k&quot;: &quot;ok&quot;, &quot;t&quot;: &quot;&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp&quot;}, {&quot;k&quot;: &quot;info&quot;, &quot;t&quot;: &quot;=== Connection closed with remote host.&quot;}]'>
+  <div class="bar"><i></i><i></i><i></i>
+    <span>swaks &mdash; gmail-smtp-in.l.google.com:25</span>
+    <em>click to replay</em></div>
+  <pre><code id="term-out"></code><span class="cur"></span></pre>
+</div>
+
 <div class="callout"><p>Reading the prefixes: <code>===</code> is swaks talking to you,
 <code>-&gt;</code> and <code>&lt;-</code> are sent and received in the clear, and
 <code>~&gt;</code> and <code>&lt;~</code> are the same two inside TLS.</p></div>
 
-<div class="session"><div class="ln"><code class="cmd">$ swaks --to postmaster@gmail.com --from rastu@rastu.tech \</code></div><div class="ln"><code class="cmd">        --server gmail-smtp-in.l.google.com --ehlo rastu.tech \</code></div><div class="ln"><code class="cmd">        --tls --quit-after RCPT</code></div><div class="ln has-note"><code class="info">=== Trying gmail-smtp-in.l.google.com:25...</code><p class="an">swaks resolves the MX and opens a TCP connection on port 25.</p></div><div class="ln"><code class="info">=== Connected to gmail-smtp-in.l.google.com.</code></div><div class="ln has-note"><code class="ok">&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code><p class="an">The 220 greeting. Anything other than 220 here and you never get to send.</p></div><div class="ln has-note"><code class="c"> -&gt; EHLO rastu.tech</code><p class="an">EHLO announces who you claim to be. Receivers check this against your rDNS.</p></div><div class="ln has-note"><code class="s">&lt;-  250-mx.google.com at your service, [198.51.100.24]</code><p class="an">Everything after 250- is a capability. The last line uses 250 with a space.</p></div><div class="ln"><code class="s">&lt;-  250-SIZE 157286400</code></div><div class="ln"><code class="s">&lt;-  250-STARTTLS</code></div><div class="ln"><code class="s">&lt;-  250-ENHANCEDSTATUSCODES</code></div><div class="ln"><code class="s">&lt;-  250 SMTPUTF8</code></div><div class="ln has-note"><code class="c"> -&gt; STARTTLS</code><p class="an">STARTTLS upgrades the existing connection rather than opening a new one.</p></div><div class="ln"><code class="ok">&lt;-  220 2.0.0 Ready to start TLS</code></div><div class="ln has-note"><code class="info">=== TLS started with cipher TLSv1.3:AEAD-CHACHA20-POLY1305-SHA256:256</code><p class="an">From here the transcript prefixes change to ~&gt; and &lt;~, meaning inside TLS.</p></div><div class="ln"><code class="info">=== TLS peer[0]   subject=[/CN=mx.google.com]</code></div><div class="ln"><code class="info">=== TLS peer certificate passed CA verification, passed host verification</code></div><div class="ln has-note"><code class="c"> ~&gt; EHLO rastu.tech</code><p class="an">The second EHLO is not a mistake. STARTTLS resets the session, so the capability list has to be requested again inside the encrypted channel.</p></div><div class="ln"><code class="s">&lt;~  250-mx.google.com at your service, [198.51.100.24]</code></div><div class="ln"><code class="s">&lt;~  250 SMTPUTF8</code></div><div class="ln has-note"><code class="c"> ~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;</code><p class="an">MAIL FROM is the envelope sender, and the domain SPF is checked against. It is not the From: header the recipient sees.</p></div><div class="ln"><code class="ok">&lt;~  250 2.1.0 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code></div><div class="ln has-note"><code class="c"> ~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;</code><p class="an">RCPT TO is where most rejections land: unknown user, full mailbox, policy.</p></div><div class="ln"><code class="ok">&lt;~  250 2.1.5 OK 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code></div><div class="ln"><code class="c"> ~&gt; QUIT</code></div><div class="ln has-note"><code class="ok">&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code><p class="an">QUIT, because --quit-after RCPT stopped before DATA. No message was sent.</p></div><div class="ln"><code class="info">=== Connection closed with remote host.</code></div></div>
+<h2 class="r">What each step is doing</h2>
+<p>Every line is a place delivery can fail, and most of the work is knowing which one it
+failed at. These are the ones worth stopping on.</p>
+<div class="steps"><div class="step"><h3>Connect</h3><code>=== Trying gmail-smtp-in.l.google.com:25...</code><p>swaks resolves the MX and opens a TCP connection on port 25. A refusal or a timeout here is a network problem, not a mail problem, and it is the cheapest failure to misdiagnose.</p></div><div class="step"><h3>220 greeting</h3><code>&lt;-  220 mx.google.com ESMTP 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code><p>The receiver announces itself. Anything other than 220 and you never get to send: some receivers return a 421 here when they are shedding load, and a few return a 554 when the connecting IP is blocked outright.</p></div><div class="step"><h3>EHLO</h3><code>-&gt; EHLO rastu.tech</code><p>You announce who you claim to be. Receivers check this name against the reverse DNS of your connecting IP, and a mismatch costs reputation at several providers even though nothing rejects on it directly.</p></div><div class="step"><h3>Capabilities</h3><code>&lt;-  250-mx.google.com at your service, [198.51.100.24]</code><p>Everything after 250- is something the receiver supports. The last line uses 250 with a space rather than a hyphen, which is how you know the list ended. If STARTTLS is absent here, the session cannot be encrypted at all.</p></div><div class="step"><h3>STARTTLS</h3><code>-&gt; STARTTLS</code><p>Upgrades the connection already open rather than dialling a new one. This is the step MTA-STS and DANE exist to protect, because an attacker who can strip this line downgrades the whole session to cleartext.</p></div><div class="step"><h3>The second EHLO</h3><code>~&gt; EHLO rastu.tech</code><p>Not a mistake. STARTTLS resets the session state, so the capability list has to be asked for again inside the encrypted channel, and it can legitimately differ from the first one.</p></div><div class="step"><h3>MAIL FROM</h3><code>~&gt; MAIL FROM:&lt;rastu@rastu.tech&gt;</code><p>The envelope sender, and the domain SPF is actually checked against. It is not the From: header the recipient sees, and the gap between those two is what DMARC alignment is about.</p></div><div class="step"><h3>RCPT TO</h3><code>~&gt; RCPT TO:&lt;postmaster@gmail.com&gt;</code><p>Where most rejections land: unknown user, mailbox full, recipient policy. A 550 here is about one address. A 550 at MAIL FROM or at connect is about you.</p></div><div class="step"><h3>QUIT</h3><code>&lt;~  221 2.0.0 closing connection 4fb4d7f45d1cf-6aa67d1108csi.33 - gsmtp</code><p>Because --quit-after RCPT stopped before DATA. The route is proven end to end and no message was ever transmitted.</p></div></div>
 
-<h2 class="r">Every line is somewhere delivery can fail</h2>
-<p>That is the reason to read a clean session before reading a broken one. A connection
-refused at the 220 is a different problem from a 550 at RCPT TO, which is a different
-problem again from a 250 at DATA followed by silence. Knowing which line a failure came
-from removes most of the guesswork, and it is the first question worth asking.</p>
-<p>When one of these lines comes back wrong, the
-<a href="/smtp/">response reference</a> covers what it means, and the
+<h2 class="r">When a line comes back wrong</h2>
+<p>A connection refused at the 220 is a different problem from a 550 at RCPT TO, which is
+a different problem again from a 250 at DATA followed by silence. That is the reason to
+read a clean session before reading a broken one: it tells you which question to ask.</p>
+<p>The <a href="/smtp/">response reference</a> covers what each response means, and the
 <a href="/bounce/">bounce classifier</a> will tell you which action it needs.</p>
 
 <h2 class="r">Reproducing this</h2>
-<p>swaks is the tool worth having installed. <code>--quit-after RCPT</code> is the flag
-worth remembering, because it lets you test a full route, including TLS and recipient
-acceptance, without delivering anything to a real person.</p>
+<p>swaks is the tool worth having installed, and <code>--quit-after RCPT</code> is the flag
+worth remembering: it proves a full route, including TLS and recipient acceptance, without
+delivering anything to a real person.</p>
 <pre><code>swaks --to postmaster@gmail.com --from you@example.com \
       --server gmail-smtp-in.l.google.com --ehlo example.com \
       --tls --quit-after RCPT</code></pre>
+<p>Drop <code>--quit-after RCPT</code> and it delivers. Add <code>--tlso</code> instead of
+<code>--tls</code> for implicit TLS on port 465, and <code>-au</code> / <code>-ap</code>
+when you are testing a submission endpoint that requires authentication.</p>
 
 </main>
 <footer>

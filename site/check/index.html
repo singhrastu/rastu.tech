@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Email authentication checker: SPF, DKIM, DMARC, MTA-STS and BIMI</title>
 <meta name="description" content="Free in-browser audit of a domain&#x27;s SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI configuration, including the SPF ten-lookup limit and MTA-STS policy and MX consistency. Nothing is sent to the server.">
+<meta name="author" content="Rastu Singh">
 <link rel="canonical" href="https://rastu.tech/check/">
 <meta property="og:title" content="Email authentication checker: SPF, DKIM, DMARC, MTA-STS and BIMI">
 <meta property="og:description" content="Free in-browser audit of a domain&#x27;s SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI configuration, including the SPF ten-lookup limit and MTA-STS policy and MX consistency. Nothing is sent to the server.">
@@ -250,6 +251,21 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
   font-family:inherit;margin-top:.1rem}
 .tree li .rec{display:block;color:var(--ink-3);font-size:.68rem;opacity:.65;
   margin-top:.12rem;word-break:break-all}
+
+/* ---- steps under the session -------------------------------------------- */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(16rem,1fr));
+  gap:var(--s3);margin:var(--s4) 0}
+.steps .step{border:1px solid var(--line);border-radius:12px;background:var(--surface);
+  padding:var(--s3) 1rem;transition:border-color .25s}
+.steps .step:hover{border-color:var(--accent)}
+.steps .step h3{margin:0 0 .4rem;font-size:var(--t3)}
+.steps .step code{display:block;background:var(--code);border:1px solid var(--line);
+  border-radius:6px;padding:.4rem .55rem;font-size:.72rem;color:var(--ink-2);
+  margin-bottom:.55rem;white-space:pre-wrap;word-break:break-word}
+.steps .step p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6}
+.term .bar em{margin-left:auto;font-style:normal;font-size:.7rem;color:var(--ink-3);
+  opacity:.6;transition:opacity .2s}
+.term:hover .bar em{opacity:1;color:var(--accent)}
 
 /* ---- annotated session --------------------------------------------------- */
 .session{border:1px solid var(--line);border-radius:14px;background:var(--code);
@@ -502,7 +518,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebApplication", "name": "Email authentication checker", "url": "https://rastu.tech/check/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Audits a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI configuration in the browser, including the RFC 7208 ten-lookup limit and MTA-STS policy and MX consistency.", "author": {"@id": "https://rastu.tech/#person"}, "isBasedOn": "https://github.com/singhrastu/dmarcsight"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Tools", "item": "https://rastu.tech/tools/"}, {"@type": "ListItem", "position": 3, "name": "Domain check"}]}, {"@type": "WebApplication", "name": "Email authentication checker", "url": "https://rastu.tech/check/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "description": "Audits a domain's SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI configuration in the browser, including the RFC 7208 ten-lookup limit and MTA-STS policy and MX consistency.", "author": {"@id": "https://rastu.tech/#person"}, "isBasedOn": "https://github.com/singhrastu/dmarcsight", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
 <div class="wrap wide">
