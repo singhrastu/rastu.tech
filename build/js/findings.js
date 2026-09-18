@@ -90,7 +90,11 @@ export function topFixes(findings, limit = 3) {
 export function verdict(findings, noun = 'issue') {
   const c = counts(findings);
   const actionable = c.critical + c.warn;
-  const mine = findings.filter(f => f.owner === 'you' && f.severity !== 'ok').length;
+  // `mine` has to be counted from the same set `actionable` counts, or the line
+  // reads "1 critical and 2 other issues, 4 of them yours" once an info-severity
+  // finding is owned by the reader.
+  const mine = findings.filter(f =>
+    f.owner === 'you' && (f.severity === 'critical' || f.severity === 'warn')).length;
   if (!actionable) return { severity: 'ok', text: 'Nothing to fix.' };
 
   const plural = n => (n === 1 ? noun : noun + 's');
@@ -146,9 +150,16 @@ export function renderFindings(findings, opts = {}) {
     .map(s => `<div class="t s-${s}"><b>${c[s]}</b><span>${SEV_LABEL[s]}</span></div>`)
     .join('');
 
+  // The shortlist is a scannable index, not a second copy of the cards. Only the
+  // first sentence of each fix, because the full version is twenty lines below.
+  const firstSentence = (t) => {
+    const m = t.match(/^[^.]+\./);
+    return m ? m[0] : t;
+  };
   const shortlist = fixes.length > 1 ? `
     <ol class="shortlist">
-      ${fixes.map(f => `<li><strong>${esc(f.title)}</strong> ${esc(f.fix)}</li>`).join('')}
+      ${fixes.map(f => `<li><strong>${esc(f.title)}</strong>${
+        f.fix ? ` ${esc(firstSentence(f.fix))}` : ''}</li>`).join('')}
     </ol>` : '';
 
   if (!list.length) {

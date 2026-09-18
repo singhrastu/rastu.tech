@@ -50,11 +50,12 @@ export async function unzip(buffer) {
       + 'in the last 64 KB.');
   }
 
-  for (let i = eocd - 20; i >= from; i--) {
-    if (view.getUint32(i, true) === SIG_EOCD64_LOC) {
-      throw new ZipError('This is a ZIP64 archive. DMARC reports are never this large, '
-        + 'so something else is going on; unzip it locally and upload the XML.');
-    }
+  // The ZIP64 end-of-central-directory locator, when present, sits at exactly
+  // eocd-20. Scanning backwards for the signature matched random compressed
+  // bytes and refused perfectly valid archives.
+  if (eocd >= 20 && view.getUint32(eocd - 20, true) === SIG_EOCD64_LOC) {
+    throw new ZipError('This is a ZIP64 archive. DMARC reports are never this large, '
+      + 'so something else is going on; unzip it locally and upload the XML.');
   }
 
   if (view.getUint16(eocd + 4, true) !== 0 || view.getUint16(eocd + 6, true) !== 0) {
@@ -78,7 +79,10 @@ export async function unzip(buffer) {
     const extraLen = view.getUint16(p + 30, true);
     const commentLen = view.getUint16(p + 32, true);
     const localOff = view.getUint32(p + 42, true);
-    const name = new TextDecoder(flags & 0x800 ? 'utf-8' : 'utf-8')
+    // Bit 11 declares UTF-8. Without it the spec says CP437, which browsers do
+    // not implement. UTF-8 is the pragmatic fallback and is correct for every
+    // DMARC report, whose member names are ASCII.
+    const name = new TextDecoder('utf-8')
       .decode(bytes.subarray(p + 46, p + 46 + nameLen));
 
     if (flags & 0x1) {
@@ -91,9 +95,20 @@ export async function unzip(buffer) {
 
     // The local header's own name and extra lengths differ from the central
     // directory's, so the data offset has to be computed from the local header.
+    // Every offset here comes out of the file itself, so each one is checked.
+    // An unchecked read surfaces a raw "Offset is outside the bounds of the
+    // DataView" to somebody who only wanted to read a bounce report.
+    if (localOff + 30 > len) {
+      throw new ZipError('"' + name + '" points past the end of the archive. '
+        + 'The file is truncated or malformed.');
+    }
     const lNameLen = view.getUint16(localOff + 26, true);
     const lExtraLen = view.getUint16(localOff + 28, true);
     const start = localOff + 30 + lNameLen + lExtraLen;
+    if (start + compSize > len) {
+      throw new ZipError('"' + name + '" runs past the end of the archive. The '
+        + 'download was probably truncated; fetch the attachment again.');
+    }
     const raw = bytes.subarray(start, start + compSize);
 
     if (!name.endsWith('/')) {
@@ -139,8 +154,15 @@ export async function extractXml(file) {
     }
     const entries = await unzip(buf);
     const xml = entries.filter(x => /\.xml$/i.test(x.name));
-    const use = xml.length ? xml : entries;
-    return use.map(x => ({ name: x.name, text: new TextDecoder().decode(x.bytes) }));
+    if (!xml.length) {
+      // Handing a PDF to the XML parser produces "this is not valid XML", which
+      // is true and the wrong diagnosis.
+      throw new ZipError('This archive contains no XML file, so it is not a DMARC '
+        + 'aggregate report. It holds: '
+        + entries.map(x => x.name).slice(0, 4).join(', ')
+        + (entries.length > 4 ? ', and ' + (entries.length - 4) + ' more.' : '.'));
+    }
+    return xml.map(x => ({ name: x.name, text: new TextDecoder().decode(x.bytes) }));
   }
 
   return [{ name: file.name, text: new TextDecoder().decode(b) }];

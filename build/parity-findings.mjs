@@ -65,6 +65,13 @@ is('warnings only',
    '2 issues worth fixing, none of them yours to fix.');
 is('noun is configurable',
    verdict([f('warn', 'you')], 'problem').text, '1 problem worth fixing, and it is yours.');
+// An info-severity finding the reader owns must not be counted as one of the
+// things needing fixing, or the count exceeds the total and the line is nonsense.
+is('info findings do not inflate the owned count',
+   verdict([f('critical', 'you'), f('warn', 'receiver'), f('info', 'you'), f('info', 'you')]).text,
+   '1 critical and 1 other issue, 1 of them yours.');
+is('a report of only info findings has nothing to fix',
+   verdict([f('info', 'you'), f('info', 'you')]).text, 'Nothing to fix.');
 
 // A typo in a severity would sort silently to the bottom, so it is a hard error.
 throws('rejects an unknown severity', () => f('bad', 'you'), 'unknown severity');
@@ -83,6 +90,17 @@ throws('requires a title', () => finding({ severity: 'warn', owner: 'you' }), 'n
 {
   const html = renderFindings([f('ok', 'you')], { emptyText: 'All good here.' });
   is('empty state uses the given text', html.includes('All good here.'), true);
+}
+{
+  // The shortlist indexes the findings; it must not repeat their full prose.
+  const html = renderFindings([
+    finding({ severity: 'critical', owner: 'you', title: 'A',
+              fix: 'First sentence. Second sentence with much more detail after it.' }),
+    finding({ severity: 'critical', owner: 'you', title: 'B', fix: 'Only one.' }),
+  ]);
+  const list = html.slice(html.indexOf('<ol class="shortlist">'), html.indexOf('</ol>'));
+  is('shortlist keeps the first sentence', list.includes('First sentence.'), true);
+  is('and drops the rest', list.includes('Second sentence'), false);
 }
 {
   const t = findingsText([f('critical', 'you', { fix: 'do it', detail: 'because' })], 'HEAD');

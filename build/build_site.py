@@ -200,7 +200,9 @@ pre code{background:none;padding:0}
 
 /* ---- tables ----------------------------------------------------------- */
 .scroll-x{overflow-x:auto;margin:1.1rem 0;-webkit-overflow-scrolling:touch}
+.scroll-x:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 table{border-collapse:collapse;width:100%;font-size:.93rem;min-width:30rem}
+@media(max-width:34rem){table{min-width:26rem;font-size:.87rem}}
 th,td{text-align:left;padding:.58rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
 th{color:var(--ink-3);font-weight:600;font-size:.79rem;letter-spacing:.045em;
    text-transform:uppercase;border-bottom:1px solid var(--line)}
@@ -229,6 +231,7 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .grid a{display:block;padding:.85rem 1rem;border:1px solid var(--line);border-radius:var(--radius);
         text-decoration:none;background:var(--bg);transition:border-color .16s,transform .16s,background .16s}
 .grid a:hover{border-color:var(--accent);background:var(--surface);transform:translateY(-1px)}
+.grid a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .grid a strong{color:var(--ink);font-size:.97rem}
 .grid a .p{color:var(--ink-3);font-size:.79rem;margin-left:.45rem}
 .grid a span.d{display:block;color:var(--ink-3);font-size:.865rem;margin-top:.22rem;line-height:1.45}
@@ -271,6 +274,7 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
      transition:transform .3s cubic-bezier(.22,.8,.3,1),border-color .3s,box-shadow .3s}
 .bento .card:hover{transform:translateY(-4px);border-color:var(--accent);
      box-shadow:0 16px 38px -20px rgba(0,0,0,.5)}
+.bento .card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .bento .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
      background:linear-gradient(90deg,var(--accent),transparent);opacity:0;transition:opacity .3s}
 .bento .card:hover::before{opacity:1}
@@ -284,6 +288,30 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
   font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
 .bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
+
+/* ---- the p=reject simulation, the headline answer ------------------------- */
+.sim{border:1px solid var(--line);border-radius:14px;padding:var(--s4);margin:var(--s4) 0;
+  background:linear-gradient(140deg,var(--surface),transparent 80%)}
+.sim.s-fail{border-color:color-mix(in srgb,var(--bad) 45%,transparent);
+  background:linear-gradient(140deg,color-mix(in srgb,var(--bad) 8%,transparent),transparent 80%)}
+.sim.s-warn{border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.sim.s-ok{border-color:color-mix(in srgb,var(--ok) 40%,transparent);
+  background:linear-gradient(140deg,var(--accent-soft),transparent 80%)}
+.sim h3{margin:0 0 .6rem;font-size:var(--t4);font-weight:680;color:var(--ink)}
+.sim p{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.65;max-width:44rem}
+.sim-nums{display:flex;gap:var(--s5);flex-wrap:wrap;margin:var(--s3) 0}
+.sim-nums div b{display:block;font-size:2.4rem;line-height:1;font-weight:700;
+  letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--bad)}
+.sim.s-warn .sim-nums div b{color:var(--warn)}
+.sim-nums div.soft b{color:var(--ink-3)}
+.sim-nums div span{display:block;font-size:var(--t1);color:var(--ink-3);margin-top:.35rem;
+  line-height:1.45}
+.sim-note{margin-top:var(--s3)!important;font-size:var(--t1)!important;opacity:.85}
+@media(max-width:34rem){.sim-nums{gap:var(--s4)}.sim-nums div b{font-size:1.9rem}}
+
+/* a toggle button that stays on, for marking a source as yours */
+.btn.ghost.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);
+  font-weight:650}
 
 /* ---- findings: the shared result shape every tool emits -------------------- */
 .findings{display:grid;gap:var(--s2);margin:var(--s3) 0 0}
@@ -332,11 +360,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .shortlist li strong{color:var(--ink);display:block;margin-bottom:.1rem}
 
 /* ---- drop zone ----------------------------------------------------------- */
-.drop{display:block;border:1.5px dashed var(--line);border-radius:12px;
+.drop{display:block;position:relative;border:1.5px dashed var(--line);border-radius:12px;
   padding:var(--s5) var(--s4);text-align:center;cursor:pointer;background:var(--bg);
   transition:border-color .2s,background .2s,transform .2s}
 .drop:hover{border-color:var(--accent);background:var(--accent-soft)}
 .drop.over{border-color:var(--accent);background:var(--accent-soft);transform:scale(1.005)}
+.drop:focus-within{border-color:var(--accent);background:var(--accent-soft);
+  outline:2px solid var(--accent);outline-offset:2px}
 .drop b{display:block;font-size:var(--t4);color:var(--ink);margin-bottom:.3rem}
 .drop span{display:block;font-size:var(--t2);color:var(--ink-3)}
 .drop input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
@@ -351,6 +381,18 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 
 /* ---- report table -------------------------------------------------------- */
 table.rua{min-width:46rem}
+@media(max-width:40rem){
+  /* Below this the table is a scroller you have to drag 400px to reach the
+     verdict in. Stacked cards put the answer next to the question. */
+  table.rua,table.rua tbody,table.rua tr,table.rua td{display:block;width:100%;min-width:0}
+  table.rua thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+  table.rua tr{border:1px solid var(--line);border-radius:10px;padding:.7rem .85rem;
+    margin:0 0 .55rem;background:var(--surface)}
+  table.rua td{border:0;padding:.15rem 0}
+  table.rua td.num{text-align:left}
+  table.rua td.num::before{content:"Messages: ";color:var(--ink-3);font-size:var(--t1)}
+  table.rua .why{max-width:none}
+}
 table.rua td{vertical-align:top}
 table.rua .ip{display:block;font-family:ui-monospace,Menlo,monospace;
   font-size:var(--t1);color:var(--ink-3);margin-top:.15rem}
@@ -471,8 +513,11 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 .stack .row{display:flex;gap:.45rem;flex-wrap:wrap;margin:.45rem 0 1rem}
 .stack .lbl{font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);
    font-weight:650;width:100%;margin-bottom:.15rem}
-.chip{font-size:.815rem;padding:.3rem .68rem;border:1px solid var(--line);border-radius:7px;
-   background:var(--bg);color:var(--ink-2);transition:border-color .22s,color .22s,transform .22s}
+.chip{font-size:.815rem;padding:.4rem .85rem;line-height:1.3;border:1px solid var(--line);
+   border-radius:7px;background:var(--bg);color:var(--ink-2);min-height:44px;
+   display:inline-flex;align-items:center;
+   transition:border-color .22s,color .22s,transform .22s}
+.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .chip:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px)}
 .chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);font-weight:600}
 
@@ -540,7 +585,7 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 
 /* ---- buttons: one definition, three sizes -------------------------------- */
 .btn{font:inherit;font-size:var(--t3);font-weight:650;cursor:pointer;
-  padding:.72rem 1.4rem;border-radius:10px;border:1px solid var(--accent);
+  padding:.72rem 1.4rem;min-height:44px;border-radius:10px;border:1px solid var(--accent);
   background:var(--accent);color:#08140d;
   transition:transform .2s,opacity .2s,border-color .2s,color .2s,background .2s}
 .btn:hover{transform:translateY(-1px)}
@@ -548,16 +593,19 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
 .btn:disabled{opacity:.55;cursor:progress;transform:none}
 .btn.ghost{background:var(--bg);color:var(--ink-2);border-color:var(--line);font-weight:500}
 .btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
-.btn.sm{font-size:var(--t1);padding:.3rem .7rem;border-radius:7px}
+.btn.sm{font-size:var(--t1);padding:.4rem .85rem;border-radius:7px;line-height:1.3;
+  min-height:44px}
 
 /* ---- fields: one definition, one focus ring ------------------------------ */
 .field{width:100%;background:var(--bg);color:var(--ink);
   border:1px solid var(--line);border-radius:10px;padding:.72rem .9rem;
-  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:var(--t3);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:1rem;
   line-height:1.55;transition:border-color .2s,box-shadow .2s}
 .field:focus{outline:0;border-color:var(--accent);
   box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
-textarea.field{min-height:5.2rem;resize:vertical;font-size:var(--t2)}
+/* 16px is the floor: below it iOS Safari zooms the viewport on focus and the
+   user is left scrolled sideways on a page that was fine a moment ago. */
+textarea.field{min-height:5.2rem;resize:vertical;font-size:1rem}
 .lbl-mi{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
   color:var(--ink-3);font-weight:650;margin-bottom:var(--s2)}
 
@@ -572,8 +620,11 @@ textarea.field{min-height:5.2rem;resize:vertical;font-size:var(--t2)}
   font-size:var(--t1);color:var(--ink-3);align-items:center}
 .tool .hint a,.tool .hint button{font:inherit;font-size:var(--t1);cursor:pointer;
   color:var(--ink-2);text-decoration:none;border:1px solid var(--line);
-  border-radius:7px;padding:.2rem .55rem;background:var(--bg);
+  border-radius:7px;padding:.4rem .8rem;background:var(--bg);line-height:1.3;
+  min-height:44px;display:inline-flex;align-items:center;
   transition:border-color .2s,color .2s}
+.tool .hint a:focus-visible,.tool .hint button:focus-visible{outline:2px solid var(--accent);
+  outline-offset:2px}
 .tool .hint a:hover,.tool .hint button:hover{border-color:var(--accent);color:var(--accent)}
 .empty{color:var(--ink-3);font-size:var(--t2);line-height:1.6;margin:var(--s3) 0 0}
 
@@ -643,8 +694,10 @@ button.chip{font:inherit;cursor:pointer}
   border-top:1px solid var(--line);padding-top:1rem}
 /* Severity is a reserved status palette, never reused for anything decorative,
    and every one of them ships with its word so it is never colour alone. */
-.s-fail{color:var(--bad)} .s-warn{color:var(--warn)}
+.s-critical{color:var(--bad)} .s-fail{color:var(--bad)} .s-warn{color:var(--warn)}
 .s-info{color:var(--info)} .s-ok{color:var(--ok)}
+.report .t.s-critical b{color:var(--bad)}
+.report .grp li.s-critical{border-left-color:var(--bad)}
 .report .grp li.s-fail{border-left-color:var(--bad)}
 .report .grp li.s-warn{border-left-color:var(--warn)}
 .report .grp li.s-ok{border-left-color:color-mix(in srgb,var(--ok) 45%,transparent)}
@@ -659,8 +712,9 @@ footer .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(10rem,1fr
   gap:var(--s4) var(--s3);margin-bottom:var(--s4)}
 footer h2{font-size:var(--t0);letter-spacing:.11em;text-transform:uppercase;
   color:var(--ink-3);margin:0 0 .55rem;padding:0;border:0;font-weight:650}
-footer .cols a{display:block;color:var(--ink-2);text-decoration:none;
-  padding:.16rem 0;font-size:var(--t2);transition:color .16s}
+footer .cols a{display:flex;align-items:center;color:var(--ink-2);text-decoration:none;
+  min-height:44px;font-size:var(--t2);line-height:1.4;transition:color .16s}
+footer .cols a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 footer .cols a:hover{color:var(--accent)}
 footer .by{margin:0;line-height:1.6;max-width:44rem}
 
@@ -1443,9 +1497,9 @@ include tree and shows you exactly where the count goes.</p>
 
 <div class="tool">
   <form id="spf-form" autocomplete="off" class="row">
-    <label class="sr" for="spf-domain">Domain</label>
+    <label class="sr" for="spf-domain">Domain to check</label>
     <input class="field" id="spf-domain" type="text" spellcheck="false"
-           placeholder="example.com" aria-label="Domain to check">
+           placeholder="example.com">
     <button class="btn" type="submit" id="spf-run">Count lookups</button>
   </form>
   <p class="hint">Try:
@@ -1535,6 +1589,7 @@ authenticated, and what to fix first.</p>
   </label>
   <details class="paste">
     <summary>or paste the XML</summary>
+    <label class="sr" for="rua-paste">Aggregate report XML</label>
     <textarea class="field" id="rua-paste" spellcheck="false"
       placeholder="&lt;?xml version=&quot;1.0&quot;?&gt;&#10;&lt;feedback&gt;..."></textarea>
     <button type="button" class="btn sm" id="rua-paste-run">Read it</button>
@@ -1643,7 +1698,7 @@ def build_check():
     }
 
     body = """
-<h1>Check a domain's email authentication</h1>
+<h1>Domain check: SPF, DKIM, DMARC, MTA-STS and BIMI</h1>
 <p class="lede">SPF, DKIM, DMARC, MTA-STS, TLS-RPT and BIMI, with the things generic
 checkers miss: the RFC 7208 ten-lookup limit, whether an MTA-STS policy actually
 exists behind the DNS record that promises it, and whether the policy covers the MX
@@ -1651,9 +1706,9 @@ hosts that are live right now.</p>
 
 <div class="tool">
   <form id="check-form" autocomplete="off" class="row">
-    <label class="sr" for="check-domain">Domain</label>
+    <label class="sr" for="check-domain">Domain to check</label>
     <input class="field" id="check-domain" name="d" type="text" spellcheck="false"
-           placeholder="example.com" aria-label="Domain to check">
+           placeholder="example.com">
     <button class="btn" type="submit" id="check-run">Check</button>
   </form>
   <p class="hint">Try:
@@ -1768,14 +1823,16 @@ make.</p>
   demonstrable.</p>
 </div>
 <ul>
-  <li><strong>DMARC report reader</strong> &mdash; drop in an aggregate (rua) report and see
-      which sources are sending as you, what aligned and what did not. Entirely offline:
-      the file never leaves the page, which matters because an aggregate report names every
-      system that sends for a domain.</li>
-  <li><strong>Header analyser</strong> &mdash; paste raw headers for authentication results
-      and hop-by-hop timing, with the parts that cannot be trusted marked as such.</li>
-  <li><strong>Warm-up planner</strong> &mdash; a day-by-day ramp schedule with the
-      reputation checkpoints that gate each step.</li>
+  <li><strong>Header analyser</strong> &mdash; paste raw headers and get the issues, ranked,
+      each one saying whether it is yours to fix, the receiver's, or something a forwarder
+      did in transit. Plus what a p=reject receiver would have done with the message, with
+      the alignment arithmetic shown.</li>
+  <li><strong>Warm-up planner</strong> &mdash; a ramp gated on reputation metrics rather
+      than on days elapsed, split by mailbox provider, with a recovery path for the day it
+      goes wrong.</li>
+  <li><strong>Blocklist check</strong> &mdash; every list verified against its own RFC 5782
+      test entries before its answer is trusted, so a dead or refusing list reports "could
+      not determine" instead of quietly reporting you as clean.</li>
 </ul>
 """
     return page(
@@ -2428,6 +2485,70 @@ def check_copy():
     print(f"  copy ok ({len(NAV)} nav labels resolve, kickers are category labels)")
 
 
+def check_links():
+    """Three things the build could not previously catch, each of which happened.
+
+    1. A module referenced by a page but never copied. This is exactly how
+       headers.js was written, committed, and left unshipped with no warning.
+    2. An internal link to a page that does not exist. A stray href would ship
+       as a 404 in silence.
+    3. A tool whose registry name does not appear on the page it points at. The
+       TOOLS registry exists to stop one destination having three names, and
+       nothing was checking that it worked.
+    """
+    problems = []
+    pages = set()
+    for root, _, files in os.walk(OUT):
+        for name in files:
+            if name == "index.html":
+                rel = os.path.relpath(root, OUT).replace(os.sep, "/")
+                pages.add("/" if rel == "." else "/" + rel + "/")
+
+    assets = set()
+    for root, _, files in os.walk(OUT):
+        for name in files:
+            full = os.path.relpath(os.path.join(root, name), OUT).replace(os.sep, "/")
+            assets.add("/" + full)
+
+    for root, _, files in os.walk(OUT):
+        for name in files:
+            if not name.endswith(".html"):
+                continue
+            rel = os.path.relpath(os.path.join(root, name), OUT)
+            src = open(os.path.join(root, name), encoding="utf8").read()
+
+            for m in re.finditer(r'<script[^>]+src="(/[^"]+)"', src):
+                if m.group(1) not in assets:
+                    problems.append(f"{rel} loads {m.group(1)}, which is not in the build")
+
+            for m in re.finditer(r'<a[^>]+href="(/[^"#?]*)', src):
+                href = m.group(1)
+                if not href.endswith("/") and "." in href.rsplit("/", 1)[-1]:
+                    if href not in assets:
+                        problems.append(f"{rel} links {href}, which is not in the build")
+                elif href not in pages:
+                    problems.append(f"{rel} links {href}, which is not a page")
+
+    for t in TOOLS:
+        path = os.path.join(OUT, t["slug"], "index.html")
+        if not os.path.exists(path):
+            problems.append(f"TOOLS lists {t['slug']} but /{t['slug']}/ was not built")
+            continue
+        html_src = open(path, encoding="utf8").read()
+        h1 = re.search(r"<h1>(.*?)</h1>", html_src, re.S)
+        # The registry name has to be findable in the destination's h1, or the
+        # card, the nav and the page are three different names again.
+        head = t["name"].split(",")[0].lower()
+        if not h1 or head not in h1.group(1).lower():
+            problems.append(
+                f"TOOLS calls /{t['slug']}/ {t['name']!r} but its h1 is "
+                f"{(h1.group(1) if h1 else 'missing')!r}")
+
+    if problems:
+        sys.exit("broken references:\n  " + "\n  ".join(sorted(set(problems))))
+    print(f"  links ok ({len(pages)} pages, {len(TOOLS)} tools resolve)")
+
+
 def check_js():
     """Parse every script the site ships.
 
@@ -2448,6 +2569,7 @@ def check_js():
                 blobs[os.path.relpath(full, OUT)] = open(full, encoding="utf8").read()
     for name, label in (("parity-findings.mjs", "the findings layer is wrong"),
                         ("parity.mjs", "the in-browser auditor has drifted from dmarcsight"),
+                        ("parity-unzip.mjs", "the zip reader is wrong"),
                         ("parity-rua.mjs", "the DMARC report reader is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
@@ -2532,6 +2654,16 @@ def main():
 
     check_js()
     check_copy()
+    check_links()
+
+    # Local browser-test fixtures, restored after the rmtree so an exercise run
+    # is repeatable. Behind a flag, because everything in site/ gets deployed and
+    # a stray test file on the live domain is exactly the kind of thing that sits
+    # there for a year.
+    fixtures = os.path.join(ROOT, "testdata")
+    if os.environ.get("RASTU_DEV") == "1" and os.path.isdir(fixtures):
+        for name in os.listdir(fixtures):
+            shutil.copy2(os.path.join(fixtures, name), os.path.join(OUT, "_" + name))
 
     n = sum(len(files) for _, _, files in os.walk(OUT))
     print(f"built {n} files, {len(urls)} pages -> {OUT}")

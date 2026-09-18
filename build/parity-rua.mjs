@@ -8,7 +8,8 @@
  * wrong reason.
  */
 import { DOMParser } from './xmlshim.mjs';
-import { parseReport, aggregate, aligns, organisational, VERDICT } from './js/rua.js';
+import { parseReport, aggregate, aligns, organisational, VERDICT,
+         simulateReject, findingsFor } from './js/rua.js';
 
 let pass = 0;
 const fails = [];
@@ -153,6 +154,181 @@ is('an empty report parses to zero rows', parse(report('')).rows.length, 0);
   is('two reporters, one source', a.sources.length, 1);
   is('volumes combine', a.sources[0].count, 11);
   is('both reporters named', a.reporters.sort(), ['google.com', 'yahoo.com']);
+}
+
+// ------------------------------------------------- override reasons vs forwarding
+// The worst bug this file has caught. RFC 7489 override reasons split into two
+// groups meaning opposite things: forwarded/mailing_list/trusted_forwarder say a
+// forwarder broke SPF and that is expected; local_policy/sampled_out/other say
+// the receiver declined to apply the policy for reasons of its own. Treating the
+// second group as forwarding renders a completely unauthenticated source as
+// "Expected, not a problem" and hides it.
+{
+  const a = one(row({ ip: '10.0.0.1', count: 400, from: 'example.com',
+                      reasons: ['local_policy'] }));
+  is('local_policy is not forwarding', a.sources[0].verdict, 'none');
+  is('and it still counts as failing', a.totals.failing, 400);
+  is('and it is surfaced as an override', a.totals.overridden, 400);
+}
+{
+  const a = one(row({ ip: '10.0.0.2', count: 7, from: 'example.com',
+                      reasons: ['sampled_out'] }));
+  is('sampled_out is not forwarding', a.sources[0].verdict, 'none');
+}
+{
+  const a = one(row({ ip: '10.0.0.3', count: 7, from: 'example.com',
+                      dkim: [['example.com', 's1', 'pass']], rdkim: 'pass',
+                      reasons: ['mailing_list'] }));
+  is('mailing_list is forwarding', a.sources[0].verdict, 'forward');
+}
+
+// ------------------------------------------------------------- the totals add up
+// DMARC passes on SPF alignment OR DKIM alignment. Counting only 'both' and
+// 'dkim' as aligned left an unexplained remainder in the headline.
+{
+  const a = one(row({ ip: '11.0.0.1', count: 100, from: 'example.com',
+                      spf: [['example.com', 'pass']], rspf: 'pass' })
+              + row({ ip: '11.0.0.2', count: 50, from: 'example.com',
+                      dkim: [['example.com', 's1', 'pass']], rdkim: 'pass' })
+              + row({ ip: '11.0.0.3', count: 25, from: 'example.com' }));
+  is('spf-only counts as aligned, because DMARC passes on it', a.totals.aligned, 150);
+  is('and the remainder is the failing count', a.totals.failing, 25);
+  is('aligned plus failing equals the total',
+     a.totals.aligned + a.totals.failing, a.totals.total);
+}
+
+// --------------------------------------------------- reporter disagreement, per mechanism
+{
+  // The reporter claims spf passed and dkim failed; the evidence says the
+  // opposite on both. Collapsing each side to one boolean called this agreement.
+  const a = one(row({ ip: '12.0.0.1', count: 30, from: 'example.com',
+                      rspf: 'pass', rdkim: 'fail',
+                      dkim: [['example.com', 's1', 'pass']],
+                      spf: [['unrelated.net', 'pass']] }));
+  is('opposite verdicts on both mechanisms is a disagreement',
+     a.totals.disagreements, 30);
+}
+{
+  const a = one(row({ ip: '12.0.0.2', count: 30, from: 'example.com',
+                      rdkim: 'pass', dkim: [['example.com', 's1', 'pass']] }));
+  is('agreement is not flagged', a.totals.disagreements, 0);
+}
+
+// ------------------------------------------------------------------ bad counts
+// A missing or unreadable <count> used to become 0, producing a confident
+// "0 messages from 340 sources, 0% aligned".
+throws('a record with no count is refused',
+  () => parse(report('<record><row><source_ip>1.1.1.1</source_ip>'
+    + '<policy_evaluated><disposition>none</disposition></policy_evaluated></row>'
+    + '<identifiers><header_from>example.com</header_from></identifiers>'
+    + '<auth_results/></record>')), 'unreadable');
+throws('a record with a non-numeric count is refused',
+  () => parse(report(row({ ip: '1.1.1.1', count: 'lots', from: 'example.com' }))),
+  'unreadable');
+is('a legitimate zero count is kept',
+   parse(report(row({ ip: '1.1.1.1', count: 0, from: 'example.com' }))).rows[0].count, 0);
+
+// ---------------------------------------------------------------- p=reject
+// The differentiator, so it gets the most careful tests. The distinction that
+// matters: a forwarded message that kept aligned DKIM still passes DMARC and is
+// not at risk, while a forwarded message that aligned on nothing is at risk but
+// may survive a receiver's local override. Those are three different numbers.
+{
+  const a = one(
+    row({ ip: '1.1.1.1', count: 1000, from: 'example.com',
+          dkim: [['example.com', 's1', 'pass']], rdkim: 'pass',
+          spf: [['example.com', 'pass']], rspf: 'pass' })
+  + row({ ip: '2.2.2.2', count: 100, from: 'example.com' })
+  + row({ ip: '3.3.3.3', count: 50, from: 'example.com', reasons: ['forwarded'] })
+  + row({ ip: '4.4.4.4', count: 30, from: 'example.com',
+          dkim: [['example.com', 's1', 'pass']], rdkim: 'pass',
+          spf: [['fwd.net', 'fail']], reasons: ['forwarded'] }),
+    { p: 'none' });
+  const sim = simulateReject(a);
+  is('certain rejections exclude forwarded', sim.certain, 100);
+  is('possible rejections include forwarded', sim.possible, 150);
+  is('forwarded-but-DKIM-aligned is not at risk', sim.forwarded, 50);
+  is('percentages are of the whole report', sim.pctCertain, 8.5);
+  is('at-risk sources are listed worst first',
+     sim.sources.map(s => s.ip), ['2.2.2.2', '3.3.3.3']);
+}
+{
+  const a = one(row({ ip: '1.1.1.1', count: 10, from: 'example.com',
+                      dkim: [['example.com', 's1', 'pass']], rdkim: 'pass' }));
+  is('a fully aligned report risks nothing', simulateReject(a).possible, 0);
+}
+
+// ---------------------------------------------------------------- findings
+const titles = fs => fs.map(f => f.title);
+const own = (fs, needle) => fs.find(f => f.title.includes(needle))?.owner;
+
+{
+  const a = one(row({ ip: '9.9.9.9', count: 500, from: 'example.com' }), { p: 'none' });
+  const fs = findingsFor(a);
+  is('p=none is reported', Boolean(fs.find(f => f.title.includes('p=none'))), true);
+  is('and it is the reader\'s to fix', own(fs, 'p=none'), 'you');
+  is('an unauthenticated source is critical at volume',
+     fs.find(f => f.scope === 'Source').severity, 'critical');
+  is('and it is theirs', own(fs, 'authenticates as neither'), 'you');
+}
+{
+  // Forwarding must be attributed away from the reader, or they go and "fix"
+  // something that is working exactly as designed.
+  const a = one(row({ ip: '3.3.3.3', count: 40, from: 'example.com',
+                      reasons: ['forwarded'] }), { p: 'reject' });
+  const fs = findingsFor(a);
+  is('forwarding is not the reader\'s problem', own(fs, 'forwarded'), 'intermediary');
+  is('and it carries no action', fs.find(f => f.scope === 'Forwarding').fix.includes('Nothing to change'), true);
+}
+{
+  const a = one(row({ ip: '5.5.5.5', count: 80, from: 'example.com',
+                      spf: [['example.com', 'pass']], rspf: 'pass' }));
+  const fs = findingsFor(a);
+  is('spf-only is flagged', Boolean(fs.find(f => f.scope === 'DKIM')), true);
+  is('as a warning, not a failure', fs.find(f => f.scope === 'DKIM').severity, 'warn');
+}
+{
+  const a = one(row({ ip: '6.6.6.6', count: 5, from: 'example.com',
+                      dkim: [['example.com', 's1', 'pass']], rdkim: 'pass',
+                      spf: [['example.com', 'pass']], rspf: 'pass' }),
+                { p: 'reject' });
+  const fs = findingsFor(a);
+  is('a clean report says so', fs.length, 1);
+  is('and says it is clean', fs[0].severity, 'ok');
+}
+{
+  const a = one(row({ ip: '7.7.7.7', count: 5, from: 'example.com',
+                      dkim: [['example.com', 's1', 'pass']], rdkim: 'pass' }),
+                { p: 'reject' });
+  // sp=none under an enforcing policy is the quietest serious misconfiguration
+  // there is, so it must come out as critical.
+  const withSp = aggregate([parse(report(
+    row({ ip: '7.7.7.7', count: 5, from: 'example.com',
+          dkim: [['example.com', 's1', 'pass']], rdkim: 'pass' }),
+    { p: 'reject' }))]);
+  withSp.policy.sp = 'none';
+  const fs = findingsFor(withSp);
+  is('sp=none while enforcing is critical',
+     fs.find(f => f.title.includes('Subdomains')).severity, 'critical');
+}
+{
+  const a = one(row({ ip: '8.8.8.8', count: 9, from: 'example.com' }));
+  a.policy.pct = '20';
+  const fs = findingsFor(a);
+  is('partial pct is flagged', Boolean(fs.find(f => f.title.includes('pct=20'))), true);
+}
+
+// Source memory: the point is that the second report shows what changed.
+{
+  const a = one(row({ ip: '1.2.3.4', count: 10, from: 'example.com' })
+              + row({ ip: '5.6.7.8', count: 10, from: 'example.com' }));
+  const known = new Set(['1.2.3.4|example.com']);
+  const fs = findingsFor(a, { known });
+  const nu = fs.find(f => f.scope === 'New');
+  is('unseen sources are called out', Boolean(nu), true);
+  is('and only the unseen ones', nu.detail.includes('5.6.7.8') && !nu.detail.includes('1.2.3.4'), true);
+  is('with no memory, nothing is called new',
+     Boolean(findingsFor(a).find(f => f.scope === 'New')), false);
 }
 
 if (fails.length) {
