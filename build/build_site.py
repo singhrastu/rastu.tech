@@ -78,7 +78,7 @@ CSS = """
   --measure:44rem;
 }
 @media(prefers-color-scheme:dark){:root{
-  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8а93a1; --ink-3:#8b93a1;
+  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8b93a1;
   --line:#272c34; --line-2:#1e222a;
   --bg:#101318; --surface:#161a21; --code:#1a1f27;
   --accent:#7fb2e5; --accent-2:#9cc6f0; --accent-soft:#18222e;
@@ -102,6 +102,9 @@ body{
   background:linear-gradient(180deg,transparent 0%,transparent 42%,var(--bg) 94%)}
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
+.wrap.wide{max-width:64rem}
+.wrap.wide .lede,.wrap.wide .prose{max-width:42rem}
+.wrap.wide h2{margin-top:3.4rem}
 
 /* ---- nav -------------------------------------------------------------- */
 nav.top{
@@ -244,6 +247,53 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .tl .org{color:var(--ink-2);font-size:.895rem}
 .tl .yr{color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
 
+/* ---- section heading with a lede --------------------------------------- */
+.sechead{margin:3.4rem 0 1rem}
+.sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
+.sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
+
+/* ---- the classifier ----------------------------------------------------
+   The site's one interactive tool. Same ruleset as smtpsift, exported at build
+   time, so the page and the CLI can never disagree about a response. */
+.sift{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:1.25rem 1.3rem 1.35rem;margin:1.2rem 0 0;position:relative;overflow:hidden}
+.sift::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.sift label{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;margin-bottom:.5rem}
+.sift textarea{width:100%;min-height:5.2rem;resize:vertical;background:var(--bg);
+  color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.8rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.845rem;line-height:1.55;
+  transition:border-color .2s,box-shadow .2s}
+.sift textarea:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.sift .ex{display:flex;gap:.4rem;flex-wrap:wrap;margin:.7rem 0 0}
+.sift .ex button{font-family:inherit;font-size:.775rem;padding:.3rem .66rem;cursor:pointer;
+  border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink-2);
+  transition:border-color .2s,color .2s,transform .2s}
+.sift .ex button:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+
+.verdict{margin-top:1rem;border-top:1px solid var(--line);padding-top:1rem;
+  opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.verdict.on{opacity:1;transform:none}
+.verdict .head{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
+.verdict .act{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.24rem .6rem;border-radius:100px;border:1px solid currentColor}
+.verdict .cat{font-weight:680;font-size:1.06rem;letter-spacing:-.012em}
+.verdict .prov{font-size:.78rem;color:var(--ink-3)}
+.verdict .why{margin:.6rem 0 0;font-size:.93rem;color:var(--ink-2)}
+.verdict .lnk{margin:.7rem 0 0;font-size:.875rem}
+/* Action colours are a status palette, reserved for state and never reused as
+   series colours. Each ships with its word, so it is never colour alone. */
+.a-suppress{color:#b4232a}.a-pause{color:#b4232a}
+.a-throttle{color:#9a6708}.a-review{color:#9a6708}.a-fix_config{color:#9a6708}
+.a-retry{color:#1f6f43}
+@media(prefers-color-scheme:dark){
+  .a-suppress,.a-pause{color:#f08a8f}
+  .a-throttle,.a-review,.a-fix_config{color:#e3b155}
+  .a-retry{color:#6fd39b}
+}
+
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
        color:var(--ink-3);font-size:.885rem}
@@ -265,6 +315,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   html{scroll-behavior:auto}
   #hexcanvas{display:none}
   h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
+  .verdict{transition:none}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
   .grid a:hover{transform:none}
@@ -287,7 +338,7 @@ JS = """
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
   onScroll();
 
-  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats');
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.sift,.tl,.sechead');
   if(!('IntersectionObserver' in window) || reduce){
     targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
   } else {
@@ -454,7 +505,7 @@ def person_ld():
     }
 
 
-def page(title, desc, body, path, extra_ld=None, is_home=False):
+def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False, scripts=()):
     lds = [person_ld()] if is_home else []
     if extra_ld:
         lds.append(extra_ld)
@@ -487,7 +538,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 {ld}
 </head>
 <body>
-<div class="wrap">
+<div class="wrap{' wide' if wide else ''}">
 <nav class="top">
   <a href="{up or '/'}">Rastu Singh</a>
   <a href="{up}about/">About</a>
@@ -505,6 +556,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
 </footer>
 </div>
 <script>{JS}</script>
+{chr(10).join(f'<script src="{x if x.startswith("/") else up+x}" defer></script>' for x in scripts)}
 </body>
 </html>
 """
@@ -520,48 +572,286 @@ def page(title, desc, body, path, extra_ld=None, is_home=False):
     return canonical
 
 
+# Human labels for the smtpsift categories. The category names are machine keys;
+# these are what a person reads.
+CATEGORY_LABEL = {
+    "invalid_recipient": "Invalid recipient",
+    "mailbox_full": "Mailbox full",
+    "mailbox_inactive": "Mailbox inactive",
+    "reputation_block": "Reputation block",
+    "content_block": "Content block",
+    "blocklist": "Blocklist listing",
+    "rate_limited": "Rate limited",
+    "greylisted": "Greylisted",
+    "auth_failure": "Authentication failure",
+    "policy_block": "Recipient policy",
+    "connection": "Connection failure",
+    "transient": "Transient failure",
+    "unknown": "Unrecognised",
+}
+
+# Shown under the box so the tool is usable without a log to hand.
+SIFT_EXAMPLES = [
+    ("Gmail throttle",
+     "421-4.7.28 Our system has detected an unusual rate of unsolicited mail "
+     "originating from your IP address. gsmtp"),
+    ("Outlook block",
+     "550 5.7.606 Access denied, banned sending IP [203.0.113.9] "
+     "(S3140) protection.outlook.com"),
+    ("Spamhaus",
+     "554 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using "
+     "zen.spamhaus.org"),
+    ("DMARC",
+     "550 5.7.26 Unauthenticated email from example.com is not accepted due to "
+     "domain's DMARC policy."),
+    ("Dead address",
+     "550 5.1.1 The email account that you tried to reach does not exist."),
+]
+
+
+def build_sift():
+    """Emit the classifier as a standalone script.
+
+    The ruleset is exported from smtpsift at build time rather than retyped, so
+    the page and the CLI cannot drift apart. Regenerate with:
+        python3 build/export_rules.py
+    """
+    with open(os.path.join(HERE, "sift_rules.json"), encoding="utf8") as fh:
+        rules = json.load(fh)
+
+    # Every response that has its own reference page, longest code first so
+    # "5.7.26" is preferred over a bare "5.7.2" prefix match.
+    pages = sorted(
+        [{"code": c["code"], "provider": c.get("provider"), "url": "/smtp/" + slug(c) + "/",
+          "title": c["title"]} for c in CODES],
+        key=lambda x: -len(x["code"]))
+
+    data = {
+        "rules": rules["rules"],
+        "actions": rules["actions"],
+        "providers": rules["providers"],
+        "labels": CATEGORY_LABEL,
+        "pages": pages,
+    }
+
+    js = "/* Bounce classifier. Ruleset exported from github.com/singhrastu/smtpsift. */\n"
+    js += "(function(){\nvar D=" + json.dumps(data, ensure_ascii=False) + ";\n" + r"""
+var box=document.getElementById('sift-in'), out=document.getElementById('sift-out');
+if(!box||!out) return;
+
+var RX=D.rules.map(function(r){return {c:r.category,p:r.provider,n:r.note,
+  rx:new RegExp(r.pattern,'i')};});
+var PRX=Object.keys(D.providers).map(function(k){
+  return {k:k,rx:new RegExp(D.providers[k],'i')};});
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+function classify(t){
+  for(var i=0;i<RX.length;i++) if(RX[i].rx.test(t)) return RX[i];
+  return {c:'unknown',p:null,n:'No rule matched this response.'};
+}
+function provider(t,hint){
+  if(hint) return hint;
+  for(var i=0;i<PRX.length;i++) if(PRX[i].rx.test(t)) return PRX[i].k;
+  return null;
+}
+function refpage(t){
+  for(var i=0;i<D.pages.length;i++){
+    var p=D.pages[i];
+    if(t.toLowerCase().indexOf(p.code.toLowerCase())>-1) return p;
+  }
+  return null;
+}
+
+var t0=null;
+function run(){
+  var t=box.value.trim();
+  if(!t){out.className='verdict';out.innerHTML='';return;}
+  var hit=classify(t), prov=provider(t,hit.p),
+      act=D.actions[hit.c]||D.actions.unknown, page=refpage(t);
+  var h='<div class="head">'
+      + '<span class="act a-'+esc(act.action)+'">'+esc(act.action.replace('_',' '))+'</span>'
+      + '<span class="cat">'+esc(D.labels[hit.c]||hit.c)+'</span>'
+      + (prov?'<span class="prov">'+esc(prov)+'</span>':'')
+      + '</div>'
+      + '<p class="why">'+esc(hit.n)+'. '+esc(act.advice)+'</p>';
+  if(page) h+='<p class="lnk"><a href="'+esc(page.url)+'">Read the '
+           +esc((page.provider?page.provider+' ':'')+page.code)+' page &rarr;</a></p>';
+  else h+='<p class="lnk"><a href="/smtp/">Browse the SMTP reference &rarr;</a></p>';
+  out.innerHTML=h;
+  out.className='verdict on';
+}
+box.addEventListener('input',function(){clearTimeout(t0);t0=setTimeout(run,140);});
+Array.prototype.forEach.call(document.querySelectorAll('[data-ex]'),function(b){
+  b.addEventListener('click',function(){box.value=b.getAttribute('data-ex');run();box.focus();});
+});
+run();
+})();
+"""
+    open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
+
+
 def build_home():
-    # The identity statement has to land inside the first 150 words.
+    """The homepage has two jobs at once.
+
+    It has to state the identity inside the first 150 words, because that is the
+    part of a page ChatGPT and friends weight most heavily. And it has to be worth
+    landing on for someone who is not looking for a person at all, but for what a
+    bounce means at two in the morning. The classifier is there for the second
+    reader; everything they use makes the first job work better.
+    """
+    ex = "".join(
+        f'<button type="button" data-ex="{e(v)}">{e(k)}</button>' for k, v in SIFT_EXAMPLES)
+
+    strip = [
+        ("6", "MTA platforms run in production"),
+        ("80+", "sending IPs across providers"),
+        ("100,000", "domains measured for the survey"),
+        ("48h", "from Spamhaus listing to delisted"),
+    ]
+    strip_html = "".join(f"<div><b>{e(n)}</b><span>{e(l)}</span></div>" for n, l in strip)
+
+    stack = [
+        ("MTAs", ["PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow"]),
+        ("Authentication", ["SPF", "DKIM", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "ARC"]),
+        ("Reputation", ["IP warm-up", "Pool design", "Spamhaus", "Postmaster Tools",
+                        "SNDS", "Complaint feedback loops"]),
+        ("Filtering", ["Rspamd", "SpamAssassin", "Milter", "Content policy"]),
+        ("Platform", ["Linux", "Terraform", "Ansible", "Python", "Bash", "Prometheus",
+                      "Grafana", "AWS", "Azure"]),
+    ]
+    stack_html = "".join(
+        '<div class="row"><span class="lbl">' + e(lbl) + "</span>"
+        + "".join(f'<span class="chip">{e(c)}</span>' for c in items) + "</div>"
+        for lbl, items in stack)
+
+    tl = [
+        ("Infrastructure Engineer", "Pipedrive", "2022 &ndash; present"),
+        ("Technical Consultant, Email Infrastructure", "Adobe", "2020 &ndash; 2022"),
+        ("Email Infrastructure Lead", "Experiture", "2019 &ndash; 2020"),
+        ("Email Deliverability Specialist", "Zeta Global", "2018 &ndash; 2019"),
+        ("Technology Executive, Email Deliverability",
+         "IntraSoft Technologies (123Greetings.com)", "2015 &ndash; 2018"),
+    ]
+    tl_html = "".join(
+        f'<div class="e"><div class="role">{r}</div>'
+        f'<div class="org">{o}</div><div class="yr">{y}</div></div>'
+        for r, o, y in tl)
+
     body = f"""
-<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="120" height="120"
-     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:30%">
-<p class="kicker">{e(PERSON['job_title'])} &middot; {e(PERSON['locality'])}, Estonia</p>
-<h1>Rastu Singh</h1>
-<p class="lede">I am an infrastructure engineer working on email platforms, deliverability
-and email security. I build and operate the systems that decide whether mail actually
-arrives: MTA clusters, SMTP transport, IP and domain reputation, and the authentication
-layer underneath them.</p>
+<div class="hero">
+  <div class="hero-copy">
+    <p class="kicker">{e(PERSON['job_title'])} &middot; {e(PERSON['locality'])}, Estonia</p>
+    <h1>Rastu Singh</h1>
+    <p class="lede">I am an infrastructure engineer working on email platforms,
+    deliverability and email security. I build and operate the systems that decide
+    whether mail actually arrives: MTA clusters, SMTP transport, IP and domain
+    reputation, and the authentication layer underneath them.</p>
+  </div>
+  <img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="152" height="152"
+       loading="eager" decoding="async">
+</div>
 
-<p>Day to day that means PowerMTA, KumoMTA, Postfix, Haraka, Momentum and GreenArrow in
-production; queueing, throttling and retry behaviour; DNS and the SPF, DKIM, DMARC, MTA-STS
-and TLS-RPT stack; IP pool design and warm-up; bounce, deferral and complaint classification;
-and blocklist remediation when reputation goes wrong. I have run outbound estates on bare
-metal and cloud across several hosting providers, and led the team that operated them.</p>
+<div class="strip">{strip_html}</div>
 
-<p>I write here about the parts of this that are hard to find written down properly.</p>
+<p class="prose r">Day to day that means PowerMTA, KumoMTA, Postfix, Haraka, Momentum and
+GreenArrow in production; queueing, throttling and retry behaviour; DNS and the SPF, DKIM,
+DMARC, MTA-STS and TLS-RPT stack; IP pool design and warm-up; bounce, deferral and complaint
+classification; and blocklist remediation when reputation goes wrong. I have run outbound
+estates on bare metal and cloud across several hosting providers, and led the team that
+operated them.</p>
 
-<h2>SMTP response reference</h2>
-<p>A reference for the responses that actually show up in mail logs, written from operating
-them rather than from the RFCs. What each one means, whether it is worth retrying, and what
-to change so it stops happening.</p>
-<p><a href="/smtp/">Browse the SMTP reference &rarr;</a></p>
+<div class="sechead r">
+  <p class="kicker">Tool</p>
+  <h2>What is this bounce telling you?</h2>
+  <p>Paste an SMTP response out of your mail log. It is classified against the same
+  ruleset as <a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, which
+  separates the cases that need opposite responses: retry, back off, or stop and fix
+  the sender. Nothing is sent anywhere. It runs in your browser.</p>
+</div>
 
-<h2>Research</h2>
-<p>Original measurement of email authentication adoption across the public internet, with
-the methodology and the raw dataset published alongside the findings.</p>
-<p><a href="/research/">Research and datasets &rarr;</a></p>
+<div class="sift">
+  <label for="sift-in">SMTP response</label>
+  <textarea id="sift-in" spellcheck="false" autocomplete="off"
+    placeholder="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org"></textarea>
+  <div class="ex">{ex}</div>
+  <div class="verdict" id="sift-out" aria-live="polite"></div>
+</div>
 
-<h2>Tools</h2>
-<p>Open-source tooling for email operations: bounce and deferral classification, and
-authentication auditing.</p>
-<p><a href="/tools/">Tools &rarr;</a></p>
+<div class="sechead r">
+  <p class="kicker">Reference</p>
+  <h2>Written from operating it, not from the RFCs</h2>
+  <p>The parts of this work that are hard to find written down properly, kept current
+  rather than published once and left.</p>
+</div>
+
+<div class="bento">
+  <a class="card" href="/smtp/">
+    <span class="tag">Reference</span>
+    <h3>SMTP response reference</h3>
+    <p>What each response actually means, whether it is worth retrying, and what to
+    change so it stops happening. Gmail 4.7.28 against 5.7.1, Microsoft S3140,
+    Yahoo TS03, Spamhaus.</p>
+    <span class="go">Browse the reference &rarr;</span>
+  </a>
+  <a class="card" href="/research/">
+    <span class="tag">Research</span>
+    <h3>State of Email Authentication</h3>
+    <p>SPF, DMARC, MTA-STS, TLS-RPT and BIMI adoption measured across 100,000 domains,
+    published with the methodology and the raw dataset so the numbers are checkable.</p>
+    <span class="go">Findings and dataset &rarr;</span>
+  </a>
+  <a class="card" href="/tools/">
+    <span class="tag">Open source</span>
+    <h3>Tools</h3>
+    <p>smtpsift classifies bounces and deferrals into the action they actually need.
+    dmarcsight audits a domain's SPF, DKIM, DMARC, MTA-STS and TLS-RPT posture.</p>
+    <span class="go">Both on GitHub &rarr;</span>
+  </a>
+</div>
+
+<div class="panel r">
+  <h3>58.7% publish DMARC. 20.9% reach p=reject.</h3>
+  <p>Of the domains that publish DMARC at all, 35.8% leave it at p=none where it blocks
+  nothing, and 20.8% enforce with no rua address, so they enforce without being able to
+  see what they are enforcing. 3.4% of published SPF records are over the ten-lookup
+  limit and therefore permerror: they resolve correctly and no longer function.</p>
+  <p class="doi">doi:{e(DOI)} &middot; CC BY 4.0 &middot; raw dataset included</p>
+  <p><a href="/research/">Read the findings &rarr;</a></p>
+</div>
+
+<div class="sechead r">
+  <p class="kicker">Stack</p>
+  <h2>What I work with</h2>
+  <p>Production experience, not a reading list.</p>
+</div>
+<div class="stack r">{stack_html}</div>
+
+<div class="sechead r">
+  <p class="kicker">Background</p>
+  <h2>Where this came from</h2>
+  <p>Eleven years of it, all of it email.</p>
+</div>
+<div class="tl">{tl_html}</div>
+<p class="prose r"><a href="/about/">The longer version &rarr;</a></p>
+
+<div class="sechead r">
+  <p class="kicker">Contact</p>
+  <h2>Stuck on something?</h2>
+  <p>If you are dealing with a block, a warm-up that has stalled, an authentication
+  problem or a platform migration, I am reachable on
+  <a href="https://www.linkedin.com/in/rastu">LinkedIn</a>. If you think the reference
+  or the dataset is wrong somewhere, tell me and I will fix it.</p>
+</div>
 """
     return page(
         f"{PERSON['name']} — {PERSON['job_title']}, Email Infrastructure and Deliverability",
         "Rastu Singh is an infrastructure engineer in Tallinn, Estonia, working on email "
         "platforms, deliverability and email security: MTA clusters, SMTP, sender reputation, "
-        "SPF, DKIM and DMARC.",
-        body, "index.html", is_home=True)
+        "SPF, DKIM and DMARC. Includes a live SMTP bounce classifier and an SMTP response "
+        "reference.",
+        body, "index.html", is_home=True, wide=True, scripts=("/sift.js",))
 
 
 def build_code_page(c):
@@ -932,6 +1222,7 @@ def main():
         shutil.rmtree(OUT)
     os.makedirs(OUT, exist_ok=True)
 
+    build_sift()
     urls = [build_home(), build_about(), build_smtp_index()]
     for c in CODES:
         urls.append(build_code_page(c))

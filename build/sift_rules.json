@@ -1,0 +1,186 @@
+{
+ "actions": {
+  "invalid_recipient": {
+   "action": "suppress",
+   "advice": "Permanent. Remove it. Retrying costs reputation."
+  },
+  "mailbox_full": {
+   "action": "retry",
+   "advice": "Retry with backoff for a few days, then suppress."
+  },
+  "mailbox_inactive": {
+   "action": "suppress",
+   "advice": "Dormant or disabled. Suppress - these turn into spam traps."
+  },
+  "reputation_block": {
+   "action": "pause",
+   "advice": "Stop sending to this provider from this IP/domain and remediate."
+  },
+  "content_block": {
+   "action": "review",
+   "advice": "Content or a linked domain triggered it. Fix the message, not the rate."
+  },
+  "blocklist": {
+   "action": "pause",
+   "advice": "Delist first. Find the emitting source before you request removal."
+  },
+  "rate_limited": {
+   "action": "throttle",
+   "advice": "Drop concurrency and rate for this provider, then retry."
+  },
+  "greylisted": {
+   "action": "retry",
+   "advice": "Expected on first contact. Retry after the window."
+  },
+  "auth_failure": {
+   "action": "fix_config",
+   "advice": "SPF/DKIM/DMARC problem. Retrying will not help."
+  },
+  "policy_block": {
+   "action": "review",
+   "advice": "Recipient-side rule. Usually not your reputation."
+  },
+  "connection": {
+   "action": "retry",
+   "advice": "Network/TLS/DNS. Retry, but investigate if it sticks to one route."
+  },
+  "transient": {
+   "action": "retry",
+   "advice": "Temporary remote condition. Normal retry schedule."
+  },
+  "unknown": {
+   "action": "retry",
+   "advice": "Unrecognised. Retry conservatively and add a rule."
+  }
+ },
+ "rules": [
+  {
+   "category": "blocklist",
+   "provider": null,
+   "pattern": "spamhaus|sbl\\.spamhaus|xbl\\.spamhaus|css\\.spamhaus|pbl\\.spamhaus",
+   "note": "Spamhaus listing"
+  },
+  {
+   "category": "blocklist",
+   "provider": null,
+   "pattern": "spamcop|barracudacentral|sorbs|uceprotect|invaluement|\\bsurbl\\b|\\buribl\\b|dnsbl|\\brbl\\b|blocklist\\.de",
+   "note": "Named DNSBL listing"
+  },
+  {
+   "category": "blocklist",
+   "provider": "proofpoint",
+   "pattern": "blocked using proofpoint|proofpoint.*block",
+   "note": "Proofpoint filtering"
+  },
+  {
+   "category": "blocklist",
+   "provider": "cloudmark",
+   "pattern": "cloudmark|csi\\.cloudmark",
+   "note": "Cloudmark reputation"
+  },
+  {
+   "category": "auth_failure",
+   "provider": null,
+   "pattern": "dmarc.*(fail|reject|polic)|failed dmarc|unauthenticated email|spf.*(fail|softfail|permerror)|dkim.*(fail|invalid|not signed)|5\\.7\\.26",
+   "note": "SPF/DKIM/DMARC alignment or policy failure"
+  },
+  {
+   "category": "reputation_block",
+   "provider": "microsoft",
+   "pattern": "\\bs3140\\b|\\bs3150\\b|unfortunately, messages from|has been blocked by outlook\\.com|5\\.7\\.606|access denied, banned sending ip",
+   "note": "Microsoft/Outlook IP reputation block"
+  },
+  {
+   "category": "reputation_block",
+   "provider": "gmail",
+   "pattern": "likely unsolicited mail|this message has been blocked because|suspicious due to the very low reputation|not accepted from ip",
+   "note": "Gmail sender reputation block"
+  },
+  {
+   "category": "reputation_block",
+   "provider": "yahoo",
+   "pattern": "\\[ts0\\d+\\]|not accepted for policy reasons|mail server ip.*blocked",
+   "note": "Yahoo policy/reputation block"
+  },
+  {
+   "category": "reputation_block",
+   "provider": null,
+   "pattern": "(poor|bad|low) reputation|sender reputation|reputation of the sending",
+   "note": "Sender reputation block"
+  },
+  {
+   "category": "rate_limited",
+   "provider": "gmail",
+   "pattern": "4\\.7\\.28|unusual rate of unsolicited",
+   "note": "Gmail rate limiting"
+  },
+  {
+   "category": "rate_limited",
+   "provider": "microsoft",
+   "pattern": "4\\.7\\.500|4\\.7\\.650|server busy|too many concurrent",
+   "note": "Microsoft throttling"
+  },
+  {
+   "category": "rate_limited",
+   "provider": null,
+   "pattern": "too many (messages|connections|recipients)|rate limited|slow down|throttl|exceeded.*(limit|quota).*(hour|minute|day)|4\\.5\\.3",
+   "note": "Rate limiting"
+  },
+  {
+   "category": "greylisted",
+   "provider": null,
+   "pattern": "grey ?list|gray ?list|try again later.*not previously|450 4\\.7\\.1.*try again",
+   "note": "Greylisted"
+  },
+  {
+   "category": "content_block",
+   "provider": null,
+   "pattern": "spam content|message content|content filter|our content filters|high probability of spam|message (rejected|refused).*content|url.*(blacklist|blocked|reputation)|virus|malware|attachment.*not allowed",
+   "note": "Content or URL reputation"
+  },
+  {
+   "category": "mailbox_full",
+   "provider": null,
+   "pattern": "mailbox (is )?full|over ?quota|quota exceeded|insufficient system storage|5\\.2\\.2|4\\.2\\.2",
+   "note": "Recipient over quota"
+  },
+  {
+   "category": "mailbox_inactive",
+   "provider": null,
+   "pattern": "account (is )?(disabled|inactive|suspended|closed)|mailbox (disabled|inactive|not accepting)|no longer (in use|active|employed)|5\\.2\\.1",
+   "note": "Mailbox disabled or dormant"
+  },
+  {
+   "category": "invalid_recipient",
+   "provider": null,
+   "pattern": "user unknown|unknown user|no such user|recipient (address )?rejected|does not exist|invalid (recipient|mailbox|address)|address (not found|unknown)|5\\.1\\.1|5\\.1\\.3|5\\.1\\.0|mailbox unavailable|no mailbox here",
+   "note": "Recipient does not exist"
+  },
+  {
+   "category": "policy_block",
+   "provider": null,
+   "pattern": "policy (reasons|violation|restriction)|not authori[sz]ed to send|relay (access )?denied|recipient.*not accepting",
+   "note": "Recipient-side policy"
+  },
+  {
+   "category": "connection",
+   "provider": null,
+   "pattern": "connection (timed out|refused|reset|closed)|could not connect|no route to host|\\btls\\b|\\bssl\\b|certificate|handshake|dns (error|failure)|host not found|lost connection|network is unreachable",
+   "note": "Connection, TLS or DNS failure"
+  },
+  {
+   "category": "transient",
+   "provider": null,
+   "pattern": "temporar(y|ily)|try again|resources temporarily|internal error|service unavailable",
+   "note": "Temporary remote condition"
+  }
+ ],
+ "providers": {
+  "gmail": "gmail|googlemail|gsmtp|google\\.com",
+  "microsoft": "outlook|hotmail|office365|protection\\.outlook|microsoft|live\\.com",
+  "yahoo": "yahoo|yahoodns|\\baol\\b",
+  "proofpoint": "proofpoint|pphosted",
+  "mimecast": "mimecast",
+  "apple": "icloud|apple\\.com|\\bme\\.com\\b"
+ }
+}

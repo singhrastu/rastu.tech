@@ -28,7 +28,7 @@
   --measure:44rem;
 }
 @media(prefers-color-scheme:dark){:root{
-  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8а93a1; --ink-3:#8b93a1;
+  --ink:#e8eaee; --ink-2:#b4bcc8; --ink-3:#8b93a1;
   --line:#272c34; --line-2:#1e222a;
   --bg:#101318; --surface:#161a21; --code:#1a1f27;
   --accent:#7fb2e5; --accent-2:#9cc6f0; --accent-soft:#18222e;
@@ -52,6 +52,9 @@ body{
   background:linear-gradient(180deg,transparent 0%,transparent 42%,var(--bg) 94%)}
 
 .wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
+.wrap.wide{max-width:64rem}
+.wrap.wide .lede,.wrap.wide .prose{max-width:42rem}
+.wrap.wide h2{margin-top:3.4rem}
 
 /* ---- nav -------------------------------------------------------------- */
 nav.top{
@@ -194,6 +197,53 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .tl .org{color:var(--ink-2);font-size:.895rem}
 .tl .yr{color:var(--ink-3);font-size:.795rem;font-variant-numeric:tabular-nums;margin-top:.1rem}
 
+/* ---- section heading with a lede --------------------------------------- */
+.sechead{margin:3.4rem 0 1rem}
+.sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
+.sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
+
+/* ---- the classifier ----------------------------------------------------
+   The site's one interactive tool. Same ruleset as smtpsift, exported at build
+   time, so the page and the CLI can never disagree about a response. */
+.sift{border:1px solid var(--line);border-radius:16px;background:var(--surface);
+  padding:1.25rem 1.3rem 1.35rem;margin:1.2rem 0 0;position:relative;overflow:hidden}
+.sift::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;
+  background:linear-gradient(90deg,var(--accent),transparent 65%)}
+.sift label{display:block;font-size:.735rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-3);font-weight:650;margin-bottom:.5rem}
+.sift textarea{width:100%;min-height:5.2rem;resize:vertical;background:var(--bg);
+  color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.8rem .9rem;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.845rem;line-height:1.55;
+  transition:border-color .2s,box-shadow .2s}
+.sift textarea:focus{outline:0;border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+.sift .ex{display:flex;gap:.4rem;flex-wrap:wrap;margin:.7rem 0 0}
+.sift .ex button{font-family:inherit;font-size:.775rem;padding:.3rem .66rem;cursor:pointer;
+  border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink-2);
+  transition:border-color .2s,color .2s,transform .2s}
+.sift .ex button:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+
+.verdict{margin-top:1rem;border-top:1px solid var(--line);padding-top:1rem;
+  opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s}
+.verdict.on{opacity:1;transform:none}
+.verdict .head{display:flex;gap:.55rem;align-items:center;flex-wrap:wrap}
+.verdict .act{font-size:.72rem;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+  padding:.24rem .6rem;border-radius:100px;border:1px solid currentColor}
+.verdict .cat{font-weight:680;font-size:1.06rem;letter-spacing:-.012em}
+.verdict .prov{font-size:.78rem;color:var(--ink-3)}
+.verdict .why{margin:.6rem 0 0;font-size:.93rem;color:var(--ink-2)}
+.verdict .lnk{margin:.7rem 0 0;font-size:.875rem}
+/* Action colours are a status palette, reserved for state and never reused as
+   series colours. Each ships with its word, so it is never colour alone. */
+.a-suppress{color:#b4232a}.a-pause{color:#b4232a}
+.a-throttle{color:#9a6708}.a-review{color:#9a6708}.a-fix_config{color:#9a6708}
+.a-retry{color:#1f6f43}
+@media(prefers-color-scheme:dark){
+  .a-suppress,.a-pause{color:#f08a8f}
+  .a-throttle,.a-review,.a-fix_config{color:#e3b155}
+  .a-retry{color:#6fd39b}
+}
+
 /* ---- footer ----------------------------------------------------------- */
 footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
        color:var(--ink-3);font-size:.885rem}
@@ -215,6 +265,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   html{scroll-behavior:auto}
   #hexcanvas{display:none}
   h1,.lede,.hero img,.strip.reveal div,.bento.reveal .card{animation:none;opacity:1;transform:none}
+  .verdict{transition:none}
   .r{opacity:1;transform:none;transition:none}
   .bar-fill{transition:none;width:var(--w)}
   .grid a:hover{transform:none}
@@ -280,7 +331,7 @@ SMTP rejections and deferrals.</p>
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
   onScroll();
 
-  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats');
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.sift,.tl,.sechead');
   if(!('IntersectionObserver' in window) || reduce){
     targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
   } else {
@@ -387,5 +438,6 @@ SMTP rejections and deferrals.</p>
   build(); draw();
 })();
 </script>
+
 </body>
 </html>
