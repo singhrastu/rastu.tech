@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>About Rastu Singh, Email Infrastructure and Deliverability Engineer</title>
-<meta name="description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
-<link rel="canonical" href="https://rastu.tech/about/">
-<meta property="og:title" content="About Rastu Singh, Email Infrastructure and Deliverability Engineer">
-<meta property="og:description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
+<title>TLS handshake failures on outbound SMTP</title>
+<meta name="description" content="A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are normal. A failure rate concentrated on one destination or one IP range is almost never a certificate problem, it is a reputation problem being expressed at the transport layer.">
+<link rel="canonical" href="https://rastu.tech/smtp/tls-handshake/">
+<meta property="og:title" content="TLS handshake failures on outbound SMTP">
+<meta property="og:description" content="A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are normal. A failure rate concentrated on one destination or one IP range is almost never a certificate problem, it is a reputation problem being expressed at the transport layer.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/about/">
+<meta property="og:url" content="https://rastu.tech/smtp/tls-handshake/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -224,82 +224,42 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "TechArticle", "headline": "TLS handshake failures on outbound SMTP", "description": "A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are normal. A failure rate concentrated on one destination or one IP range is almost never a certificate problem, it is a reputation problem being expressed at the transport layer.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "tls-handshake", "mainEntityOfPage": "https://rastu.tech/smtp/tls-handshake/"}</script>
 </head>
 <body>
 <div class="wrap">
 <nav class="top">
-  <a href="../">Rastu Singh</a>
-  <a href="../about/">About</a>
-  <a href="../smtp/">SMTP reference</a>
-  <a href="../research/">Research</a>
-  <a href="../tools/">Tools</a>
+  <a href="../../">Rastu Singh</a>
+  <a href="../../about/">About</a>
+  <a href="../../smtp/">SMTP reference</a>
+  <a href="../../research/">Research</a>
+  <a href="../../tools/">Tools</a>
 </nav>
 
-<p class="kicker">About</p>
-<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="150" height="150"
-     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:35%">
-<h1>About Rastu Singh</h1>
-
-<p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
-specialises in the systems that carry high-volume email: MTA platforms, SMTP transport, sender
-reputation, and the authentication stack of SPF, DKIM and DMARC. He currently works as an
-Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
-since 2015.</p>
-
-<h2 class="r">What he does</h2>
-<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
-
-<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
-production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
-policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
-backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
-estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
-Python and Bash.</p>
-
-<p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
-high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
-domain warm-up, shared and dedicated pool design, bounce and deferral classification, feedback
-loop processing, suppression and sunset policy, and direct escalation with mailbox providers
-when mail is being throttled or blocked. He has cleared a Spamhaus listing that had stopped
-enterprise delivery outright, restoring it inside 48 hours.</p>
-
-<p><strong>Email security.</strong> SPF, DKIM key rotation, DMARC policy progression toward
-enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin and Rspamd,
-abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
-without breaking legitimate mail flow.</p>
-
-<h2 class="r">Career</h2>
-<div class="scroll-x r"><table>
-<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
-<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
-<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
-<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
-<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
-<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
-</table></div>
-
-<p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
-the authentication layer across all sending domains, and led the IT team and a group of junior
-deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
-300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
-
-<h2 class="r">Open-source work</h2>
-<p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
-deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
-to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
-email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
-consistency, which generic checkers miss.</p>
-
-<h2 class="r">Writing</h2>
-<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
-actually mean, whether retrying helps, and what to change so they stop. It is written from
-operating these systems rather than from the specifications.</p>
-
-<h2 class="r">Contact</h2>
-<p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-   <a href="https://github.com/singhrastu">GitHub</a> &middot;
-   <a href="https://orcid.org/0009-0002-0526-3005">ORCID 0009-0002-0526-3005</a></p>
+<p class="kicker">SMTP reference</p>
+<h1>TLS handshake failures on outbound SMTP</h1>
+<p><span class="badge">RFC 3463</span><span class="badge">connection</span><span class="badge">action: retry</span></p>
+<p class="lede">A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are normal. A failure rate concentrated on one destination or one IP range is almost never a certificate problem, it is a reputation problem being expressed at the transport layer.</p>
+<div class="callout"><p>This one is worth internalising. A near-total TLS failure rate against a single provider from a single IP range looks exactly like a configuration bug and is usually reputation damage. The diagnostic that separates them is comparing separated egress paths to the same destination, which is only possible if the estate was built with that separation in the first place.</p></div>
+<h2 class="r">What it looks like in the log</h2>
+<pre><code>TLS handshake failed</code></pre>
+<pre><code>Cannot start TLS: handshake failure</code></pre>
+<pre><code>SSL routines: ssl3_read_bytes: sslv3 alert handshake failure</code></pre>
+<h2 class="r">Why it happens</h2>
+<ul><li>A genuine mismatch in protocol versions or cipher suites, which is increasingly rare.</li>
+<li>An expired or misconfigured certificate on either end.</li>
+<li>Middleboxes interfering with STARTTLS.</li>
+<li>The receiver declining the connection at handshake time because of the source IP.</li></ul>
+<h2 class="r">What to do</h2>
+<ul><li>Compare handshake outcomes across different egress paths to the same destination. If one range fails and another succeeds, the range is the problem, not the configuration.</li>
+<li>Confirm your own certificate and protocol support before assuming the receiver is at fault.</li>
+<li>If TLS-RPT is published for the destination, read the reports rather than inferring.</li></ul>
+<h2 class="r">Related</h2><p><a href="/smtp/4-4-1/">4.4.1</a> &middot; <a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a></p>
+<h2 class="r">Classifying this automatically</h2>
+<p>This response maps to <code>connection</code> with a recommended action of
+<code>retry</code> in
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>, an open-source classifier for
+SMTP rejections and deferrals.</p>
 
 <footer>
   <p>Rastu Singh, Infrastructure Engineer specialising in

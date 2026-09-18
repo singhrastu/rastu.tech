@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>About Rastu Singh, Email Infrastructure and Deliverability Engineer</title>
-<meta name="description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
-<link rel="canonical" href="https://rastu.tech/about/">
-<meta property="og:title" content="About Rastu Singh, Email Infrastructure and Deliverability Engineer">
-<meta property="og:description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
+<title>SMTP response reference: error and deferral codes explained</title>
+<meta name="description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
+<link rel="canonical" href="https://rastu.tech/smtp/">
+<meta property="og:title" content="SMTP response reference: error and deferral codes explained">
+<meta property="og:description" content="Reference for SMTP rejection and deferral responses: what each means, whether to retry, and how to fix the cause.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/about/">
+<meta property="og:url" content="https://rastu.tech/smtp/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -224,7 +224,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "CollectionPage", "name": "SMTP response reference", "author": {"@id": "https://rastu.tech/#person"}, "mainEntityOfPage": "https://rastu.tech/smtp/"}</script>
 </head>
 <body>
 <div class="wrap">
@@ -236,70 +236,13 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   <a href="../tools/">Tools</a>
 </nav>
 
-<p class="kicker">About</p>
-<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="150" height="150"
-     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:35%">
-<h1>About Rastu Singh</h1>
-
-<p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
-specialises in the systems that carry high-volume email: MTA platforms, SMTP transport, sender
-reputation, and the authentication stack of SPF, DKIM and DMARC. He currently works as an
-Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
-since 2015.</p>
-
-<h2 class="r">What he does</h2>
-<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
-
-<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
-production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
-policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
-backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
-estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
-Python and Bash.</p>
-
-<p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
-high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
-domain warm-up, shared and dedicated pool design, bounce and deferral classification, feedback
-loop processing, suppression and sunset policy, and direct escalation with mailbox providers
-when mail is being throttled or blocked. He has cleared a Spamhaus listing that had stopped
-enterprise delivery outright, restoring it inside 48 hours.</p>
-
-<p><strong>Email security.</strong> SPF, DKIM key rotation, DMARC policy progression toward
-enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin and Rspamd,
-abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
-without breaking legitimate mail flow.</p>
-
-<h2 class="r">Career</h2>
-<div class="scroll-x r"><table>
-<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
-<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
-<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
-<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
-<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
-<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
-</table></div>
-
-<p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
-the authentication layer across all sending domains, and led the IT team and a group of junior
-deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
-300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
-
-<h2 class="r">Open-source work</h2>
-<p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
-deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
-to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
-email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
-consistency, which generic checkers miss.</p>
-
-<h2 class="r">Writing</h2>
-<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
-actually mean, whether retrying helps, and what to change so they stop. It is written from
-operating these systems rather than from the specifications.</p>
-
-<h2 class="r">Contact</h2>
-<p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-   <a href="https://github.com/singhrastu">GitHub</a> &middot;
-   <a href="https://orcid.org/0009-0002-0526-3005">ORCID 0009-0002-0526-3005</a></p>
+<p class="kicker">Reference</p>
+<h1>SMTP response reference</h1>
+<p class="lede">What the responses in your mail log actually mean, whether retrying will help,
+and what to change so they stop. Written from operating these systems, not from the spec.</p>
+<p class="meta">14 responses documented. Categories and recommended actions match
+<a href="https://github.com/singhrastu/smtpsift">smtpsift</a>.</p>
+<div class="grid"><a href="/smtp/4-2-2/"><strong>4.2.2</strong><br><span>4.2.2 means the recipient&#x27;s mailbox is over quota. It is temporary and the address is still valid, so retry. If it persi...</span></a><a href="/smtp/4-4-1/"><strong>4.4.1</strong><br><span>4.4.1 means your server could not complete a connection to the receiving host. It is a transport problem rather than a p...</span></a><a href="/smtp/5-1-1/"><strong>5.1.1</strong><br><span>5.1.1 means the mailbox does not exist at the receiving domain. It is permanent. Suppress the address immediately. Conti...</span></a><a href="/smtp/5-2-1/"><strong>5.2.1</strong><br><span>5.2.1 means the mailbox exists but is disabled, suspended or not accepting mail. It is permanent. Suppress it, and treat...</span></a><a href="/smtp/5-7-1/"><strong>5.7.1</strong><br><span>5.7.1 is a policy rejection. The receiving server understood the message and refused it on purpose. The cause sits in th...</span></a><a href="/smtp/spamhaus/"><strong>spamhaus</strong><br><span>This means the receiving server queried Spamhaus, found your sending IP listed, and refused the connection. Delisting is...</span></a><a href="/smtp/tls-handshake/"><strong>tls-handshake</strong><br><span>A TLS handshake failure means the connection opened but encryption could not be negotiated. Occasional failures are norm...</span></a><a href="/smtp/gmail-4-7-28/"><strong>4.7.28</strong> &middot; Gmail<br><span>Gmail 4.7.28 is a rate limit, not a block. Gmail is telling you it has seen an unusual volume of mail from your IP or do...</span></a><a href="/smtp/gmail-5-7-1/"><strong>5.7.1</strong> &middot; Gmail<br><span>Gmail 5.7.1 is a hard block. Unlike 4.7.28, this is Gmail refusing the message outright, usually on content or on the re...</span></a><a href="/smtp/gmail-5-7-26/"><strong>5.7.26</strong> &middot; Gmail<br><span>Gmail 5.7.26 means the message failed authentication. Gmail requires bulk senders to pass SPF or DKIM with domain alignm...</span></a><a href="/smtp/microsoft-outlook-4-7-500/"><strong>4.7.500</strong> &middot; Microsoft / Outlook<br><span>Microsoft 4.7.500 is throttling. The message has not been rejected, it has been deferred because Microsoft is limiting h...</span></a><a href="/smtp/microsoft-outlook-5-7-606/"><strong>5.7.606</strong> &middot; Microsoft / Outlook<br><span>Microsoft 5.7.606 means your sending IP is on Outlook&#x27;s block list. It is a reputation block, not a content or authentic...</span></a><a href="/smtp/microsoft-outlook-s3140/"><strong>S3140</strong> &middot; Microsoft / Outlook<br><span>S3140 is Microsoft&#x27;s internal reason code attached to a block, and it points at the reputation of the sending IP. You wi...</span></a><a href="/smtp/yahoo-ts03/"><strong>TS03</strong> &middot; Yahoo<br><span>Yahoo&#x27;s [TS03] tag marks a deferral for policy or reputation reasons. It arrives as a 4xx, so the message is still queue...</span></a></div>
 
 <footer>
   <p>Rastu Singh, Infrastructure Engineer specialising in

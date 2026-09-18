@@ -277,23 +277,121 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 
 JS = """
 (function(){
-  var t=false;
-  function sy(){
-    document.documentElement.style.setProperty('--sy',
-      (window.scrollY/Math.max(1,document.body.scrollHeight-innerHeight)).toFixed(4));
-    t=false;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ticking=false, SY=0;
+  function onScroll(){
+    SY = scrollY/Math.max(1, document.body.scrollHeight-innerHeight);
+    document.documentElement.style.setProperty('--sy', SY.toFixed(4));
+    ticking=false;
   }
-  addEventListener('scroll',function(){if(!t){t=true;requestAnimationFrame(sy);}},{passive:true});
-  sy();
+  addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
+  onScroll();
 
-  if(!('IntersectionObserver' in window)){
-    document.querySelectorAll('.r,.bars').forEach(function(n){n.classList.add('reveal');});
-    return;
+  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats');
+  if(!('IntersectionObserver' in window) || reduce){
+    targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
+  } else {
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){
+        if(!e.isIntersecting) return;
+        e.target.classList.add('reveal'); io.unobserve(e.target); countUp(e.target);
+      });
+    },{rootMargin:'0px 0px -6% 0px',threshold:.06});
+    targets.forEach(function(n){io.observe(n);});
   }
-  var io=new IntersectionObserver(function(es){
-    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('reveal'); io.unobserve(e.target);} });
-  },{rootMargin:'0px 0px -8% 0px',threshold:.08});
-  document.querySelectorAll('.r,.bars').forEach(function(n){io.observe(n);});
+
+  function countUp(root){
+    root.querySelectorAll('.n, .strip b, b').forEach(function(el){
+      if(el.dataset.done) return;
+      var raw=el.textContent, m=raw.match(/[\d][\d.,]*/);
+      if(!m) return;
+      el.dataset.done=1;
+      var end=parseFloat(m[0].replace(/,/g,'')), dec=(m[0].split('.')[1]||'').length;
+      var pre=raw.slice(0,m.index), post=raw.slice(m.index+m[0].length), t0=null;
+      function f(ts){
+        if(!t0)t0=ts;
+        var p=Math.min(1,(ts-t0)/950), e=1-Math.pow(1-p,3), v=end*e;
+        el.textContent = pre+(dec?v.toFixed(dec):Math.round(v).toLocaleString())+post;
+        if(p<1) requestAnimationFrame(f);
+      }
+      el.textContent=pre+(dec?'0.0':'0')+post;
+      requestAnimationFrame(f);
+    });
+  }
+
+  /* Living honeycomb: cells brighten near the pointer, and packets route from
+     node to node, which is what this site is about. Pauses when tab is hidden. */
+  if(reduce) return;
+  var cv=document.createElement('canvas');
+  cv.id='hexcanvas'; cv.setAttribute('aria-hidden','true');
+  document.body.insertBefore(cv, document.body.firstChild);
+  var veil=document.createElement('div');
+  veil.className='hexveil'; veil.setAttribute('aria-hidden','true');
+  document.body.insertBefore(veil, cv.nextSibling);
+
+  var ctx=cv.getContext('2d'), DPR=Math.min(2,devicePixelRatio||1);
+  var R=36, nodes=[], packets=[], mx=-1e4, my=-1e4, raf=null;
+  function accent(){return (getComputedStyle(document.documentElement).getPropertyValue('--hex')||'#1f4e79').trim();}
+  function rgb(h){h=h.replace('#','');if(h.length===3)h=h.split('').map(function(c){return c+c}).join('');
+    var n=parseInt(h,16);return [n>>16&255,n>>8&255,n&255].join(',');}
+  var C=rgb(accent());
+
+  function build(){
+    cv.width=innerWidth*DPR; cv.height=innerHeight*DPR;
+    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    var dx=R*Math.sqrt(3), dy=R*1.5; nodes=[];
+    for(var row=-2,y=-dy*2; y<innerHeight+dy*3; row++,y+=dy)
+      for(var x=(row%2?dx/2:0)-dx; x<innerWidth+dx; x+=dx) nodes.push({x:x,y:y,g:0});
+    packets=[]; for(var i=0;i<16;i++) spawn();
+  }
+  function spawn(){ if(!nodes.length)return;
+    var a=nodes[(Math.random()*nodes.length)|0];
+    packets.push({x:a.x,y:a.y,tx:a.x,ty:a.y,t:1,sp:.007+Math.random()*.011,life:0}); }
+  function hex(x,y,r){ctx.beginPath();
+    for(var i=0;i<6;i++){var a=Math.PI/180*(60*i-30),px=x+r*Math.cos(a),py=y+r*Math.sin(a);
+      i?ctx.lineTo(px,py):ctx.moveTo(px,py);} ctx.closePath();}
+
+  function draw(){
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.clearRect(0,0,innerWidth,innerHeight);
+    var drift=SY*-130;
+    for(var i=0;i<nodes.length;i++){
+      var n=nodes[i], y=n.y+drift;
+      if(y<-R*2||y>innerHeight+R*2) continue;
+      var d=Math.hypot(n.x-mx,y-my), near=d<210?(1-d/210):0;
+      n.g+=(near-n.g)*.1;
+      ctx.strokeStyle='rgba('+C+','+(.07+n.g*.5).toFixed(3)+')';
+      ctx.lineWidth=1+n.g*1.1;
+      hex(n.x,y,R*.9); ctx.stroke();
+      if(n.g>.2){ctx.fillStyle='rgba('+C+','+(n.g*.075).toFixed(3)+')';ctx.fill();}
+    }
+    for(var j=packets.length-1;j>=0;j--){
+      var p=packets[j]; p.t+=p.sp;
+      if(p.t>=1){
+        var fx=p.tx, fy=p.ty, cand=null, best=1e9;
+        for(var k=0;k<26;k++){var q=nodes[(Math.random()*nodes.length)|0];
+          var dd=Math.hypot(q.x-fx,q.y-fy);
+          if(dd>R*1.3&&dd<R*2.3&&dd<best){best=dd;cand=q;}}
+        if(!cand||p.life>28){packets.splice(j,1);spawn();continue;}
+        p.x=fx;p.y=fy;p.tx=cand.x;p.ty=cand.y;p.t=0;p.life++;
+      }
+      var e=p.t<.5?2*p.t*p.t:1-Math.pow(-2*p.t+2,2)/2;
+      var cx=p.x+(p.tx-p.x)*e, cy=p.y+(p.ty-p.y)*e+drift;
+      if(cy<-40||cy>innerHeight+40) continue;
+      var g=ctx.createLinearGradient(p.x,p.y+drift,cx,cy);
+      g.addColorStop(0,'rgba('+C+',0)'); g.addColorStop(1,'rgba('+C+',.34)');
+      ctx.strokeStyle=g; ctx.lineWidth=1.5;
+      ctx.beginPath();ctx.moveTo(p.x,p.y+drift);ctx.lineTo(cx,cy);ctx.stroke();
+      ctx.fillStyle='rgba('+C+',.6)';
+      ctx.beginPath();ctx.arc(cx,cy,2,0,7);ctx.fill();
+    }
+    raf=requestAnimationFrame(draw);
+  }
+  addEventListener('pointermove',function(e){mx=e.clientX;my=e.clientY;},{passive:true});
+  addEventListener('resize',build,{passive:true});
+  document.addEventListener('visibilitychange',function(){
+    if(document.hidden){cancelAnimationFrame(raf);raf=null;} else if(!raf){raf=requestAnimationFrame(draw);}});
+  build(); draw();
 })();
 """
 

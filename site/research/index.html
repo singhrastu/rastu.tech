@@ -3,13 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>About Rastu Singh, Email Infrastructure and Deliverability Engineer</title>
-<meta name="description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
-<link rel="canonical" href="https://rastu.tech/about/">
-<meta property="og:title" content="About Rastu Singh, Email Infrastructure and Deliverability Engineer">
-<meta property="og:description" content="Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP transport, sender reputation, deliverability and email security.">
+<title>The state of email authentication, 2026</title>
+<meta name="description" content="Across 100,000 domains, 58.7% publish DMARC but only 20.9% reject. MTA-STS is at 2.0%. Full methodology and dataset published.">
+<link rel="canonical" href="https://rastu.tech/research/">
+<meta property="og:title" content="The state of email authentication, 2026">
+<meta property="og:description" content="Across 100,000 domains, 58.7% publish DMARC but only 20.9% reject. MTA-STS is at 2.0%. Full methodology and dataset published.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/about/">
+<meta property="og:url" content="https://rastu.tech/research/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -224,7 +224,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   h2{margin-top:2.3rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "ProfilePage", "mainEntity": {"@id": "https://rastu.tech/#person"}, "name": "About Rastu Singh", "description": "Rastu Singh is an email infrastructure engineer in Tallinn, Estonia, specialising in MTA platforms, SMTP, deliverability and email security."}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "The state of email authentication, 2026", "description": "Email authentication adoption across 100,000 domains from the Tranco top-1M list: SPF, DMARC, MTA-STS, TLS-RPT and BIMI, with regional and rank-band cuts.", "creator": {"@id": "https://rastu.tech/#person"}, "identifier": "https://doi.org/10.5281/zenodo.22832936", "sameAs": "https://zenodo.org/records/22832936", "license": "https://creativecommons.org/licenses/by/4.0/", "distribution": [{"@type": "DataDownload", "encodingFormat": "application/gzip", "contentUrl": "https://rastu.tech/scan-100000.jsonl.gz"}], "temporalCoverage": "2026-09", "variableMeasured": ["SPF", "DMARC", "MTA-STS", "TLS-RPT", "BIMI", "MX"]}</script>
 </head>
 <body>
 <div class="wrap">
@@ -236,70 +236,122 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   <a href="../tools/">Tools</a>
 </nav>
 
-<p class="kicker">About</p>
-<img src="/rastu-singh-400.jpg" alt="Rastu Singh" width="150" height="150"
-     style="border-radius:8px;float:right;margin:0 0 1rem 1.5rem;max-width:35%">
-<h1>About Rastu Singh</h1>
+<p class="kicker">Research</p>
+<h1>The state of email authentication, 2026</h1>
 
-<p class="lede">Rastu Singh is an email infrastructure engineer based in Tallinn, Estonia. He
-specialises in the systems that carry high-volume email: MTA platforms, SMTP transport, sender
-reputation, and the authentication stack of SPF, DKIM and DMARC. He currently works as an
-Infrastructure Engineer at Pipedrive, and has worked on email infrastructure and deliverability
-since 2015.</p>
+<p class="lede">Most domains that deploy DMARC never turn it on. Across 100,000 domains from the
+Tranco top-1M list, 58.7% publish a DMARC record but only 20.9% actually
+reject anything. More than a third of everyone who has done the work gets none of the
+protection.</p>
 
-<h2 class="r">What he does</h2>
-<p>Three areas, and the combination is the unusual part. Most people in email have one of them.</p>
+<p class="meta">Survey run September 2026 against the Tranco list, ID
+<code>V3YPN</code>. Methodology and raw dataset below.</p>
 
-<p><strong>Email infrastructure.</strong> Building and operating the transport layer. Six MTAs in
-production across his career: PowerMTA, KumoMTA, Momentum, Postfix, Haraka and GreenArrow. Queue
-policy, per-domain and per-provider throttling, connection and concurrency limits, retry and
-backoff strategy, multi-datacenter routing, and the DNS underneath it. He has built sending
-estates from nothing on bare metal and cloud, and automated them with Ansible, Terraform,
-Python and Bash.</p>
+<div class="stats">
+  <div class="stat"><div class="n">58.7%</div><div class="l">publish DMARC</div></div>
+  <div class="stat"><div class="n">20.9%</div><div class="l">actually reject</div></div>
+  <div class="stat"><div class="n">2.0%</div><div class="l">MTA-STS</div></div>
+  <div class="stat"><div class="n">100,000</div><div class="l">domains measured</div></div>
+</div>
 
-<p><strong>Deliverability.</strong> Inbox placement and sender reputation at volume, across both
-high-volume B2C marketing and transactional sending and B2B outbound infrastructure. IP and
-domain warm-up, shared and dedicated pool design, bounce and deferral classification, feedback
-loop processing, suppression and sunset policy, and direct escalation with mailbox providers
-when mail is being throttled or blocked. He has cleared a Spamhaus listing that had stopped
-enterprise delivery outright, restoring it inside 48 hours.</p>
-
-<p><strong>Email security.</strong> SPF, DKIM key rotation, DMARC policy progression toward
-enforcement, ARC, BIMI, MTA-STS and TLS-RPT. Anti-spam tuning with SpamAssassin and Rspamd,
-abuse prevention, open-relay protection, and reducing domain spoofing and phishing exposure
-without breaking legitimate mail flow.</p>
-
-<h2 class="r">Career</h2>
+<h2 class="r">Headline numbers</h2>
 <div class="scroll-x r"><table>
-<tr><th>Role</th><th>Organisation</th><th>Period</th></tr>
-<tr><td>Infrastructure Engineer</td><td>Pipedrive, Tallinn</td><td>2022 to present</td></tr>
-<tr><td>Technical Consultant, Email Infrastructure</td><td>Adobe, Bangalore</td><td>2020 to 2022</td></tr>
-<tr><td>Email Infrastructure Lead</td><td>Experiture Omni-Channel Marketing Platform</td><td>2019 to 2020</td></tr>
-<tr><td>Email Deliverability Specialist</td><td>Zeta Global, Hyderabad</td><td>2018 to 2019</td></tr>
-<tr><td>Technology Executive, Email Deliverability</td><td>IntraSoft Technologies Limited (123Greetings.com), Kolkata</td><td>2015 to 2018</td></tr>
+<tr><th>Mechanism</th><th>Share of domains</th></tr>
+<tr><td>Has MX (receives mail)</td><td>72.7%</td></tr>
+<tr><td>SPF published</td><td>70.7%</td></tr>
+<tr><td>DMARC published</td><td>58.7%</td></tr>
+<tr><td>DMARC at enforcement (quarantine or reject)</td><td>37.6%</td></tr>
+<tr><td>DMARC at p=reject</td><td>20.9%</td></tr>
+<tr><td>MTA-STS</td><td>2.0%</td></tr>
+<tr><td>TLS-RPT</td><td>2.4%</td></tr>
+<tr><td>BIMI</td><td>4.9%</td></tr>
 </table></div>
 
-<p>At Experiture he built the platform's SMTP sending infrastructure from scratch, established
-the authentication layer across all sending domains, and led the IT team and a group of junior
-deliverability consultants. At IntraSoft he ran campaign deployment and queue management at
-300,000 to 400,000 messages per day across US, UK, AU, CA and ROW regions.</p>
+<h2 class="r">The gaps, which are the interesting part</h2>
 
-<h2 class="r">Open-source work</h2>
-<p><a href="https://github.com/singhrastu/smtpsift">smtpsift</a> classifies SMTP rejections and
-deferrals into a category and an action, on the argument that hard and soft bounce is too coarse
-to act on. <a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a> audits a domain's
-email authentication posture, including the SPF ten-lookup limit and MTA-STS policy and MX
-consistency, which generic checkers miss.</p>
+<p>Adoption rates are the least useful thing a survey like this produces. The gap between
+publishing a record and being protected by it is where the real picture is. All figures below
+are shares of the domains that publish the record at all, so they describe people who have
+already done most of the work.</p>
 
-<h2 class="r">Writing</h2>
-<p>He maintains an <a href="/smtp/">SMTP response reference</a>: what the responses in a mail log
-actually mean, whether retrying helps, and what to change so they stop. It is written from
-operating these systems rather than from the specifications.</p>
+<div class="bars"><div class="bar-row"><div class="bar-label">DMARC left at p=none, blocking nothing</div><div class="bar-val">35.8%</div><div class="bar-track"><div class="bar-fill" style="--w:100%"></div></div></div><div class="bar-row"><div class="bar-label">DMARC enforcing with no rua, no visibility</div><div class="bar-val">20.8%</div><div class="bar-track"><div class="bar-fill" style="--w:58%"></div></div></div><div class="bar-row"><div class="bar-label">Enforcing but sp=none, subdomains unprotected</div><div class="bar-val">7.0%</div><div class="bar-track"><div class="bar-fill" style="--w:20%"></div></div></div><div class="bar-row"><div class="bar-label">SPF over the 10-lookup limit, permerror</div><div class="bar-val">3.4%</div><div class="bar-track"><div class="bar-fill" style="--w:9%"></div></div></div><div class="bar-row"><div class="bar-label">DMARC with pct below 100, partially applied</div><div class="bar-val">3.2%</div><div class="bar-track"><div class="bar-fill" style="--w:9%"></div></div></div><div class="bar-row"><div class="bar-label">SPF with no all mechanism</div><div class="bar-val">2.7%</div><div class="bar-track"><div class="bar-fill" style="--w:8%"></div></div></div></div>
 
-<h2 class="r">Contact</h2>
-<p><a href="https://www.linkedin.com/in/rastu">LinkedIn</a> &middot;
-   <a href="https://github.com/singhrastu">GitHub</a> &middot;
-   <a href="https://orcid.org/0009-0002-0526-3005">ORCID 0009-0002-0526-3005</a></p>
+<h3>SPF records that silently do not work</h3>
+<p>3.4% of published SPF records exceed the ten DNS-lookup limit set
+by RFC 7208. Over that limit the evaluation is a permerror, and most receivers treat a permerror
+as no SPF at all. The record still resolves. It still looks correct in a DNS lookup. It has
+simply stopped working, usually because someone added one more vendor to a record that was
+already at nine. Nothing surfaces this except reading the aggregate reports or counting the
+lookups.</p>
+
+<h3>Enforcing blind</h3>
+<p>20.8% of domains at quarantine or reject publish no <code>rua</code>
+address. They are rejecting mail on the basis of a policy whose effects they cannot see. If that
+policy is breaking a legitimate sending source, the only signal is a user complaining.</p>
+
+<h3>The subdomain hole</h3>
+<p>7.0% of enforcing domains set <code>sp=none</code>, which exempts
+every subdomain. An attacker does not need to spoof the apex when
+<code>billing.example.com</code> is unprotected and equally convincing.</p>
+
+<h2 class="r">Adoption tracks popularity, steeply</h2>
+<div class="scroll-x r"><table>
+<tr><th>Rank band</th><th>Domains</th><th>SPF</th><th>DMARC</th><th>Enforcing</th><th>MTA-STS</th></tr>
+<tr><td>Rank 1-1000</td><td>1000</td><td>76.4</td><td>73.0</td><td>61.3</td><td>3.6</td></tr><tr><td>Rank 1001-10000</td><td>9000</td><td>75.0</td><td>66.4</td><td>48.9</td><td>2.6</td></tr><tr><td>Rank 10001-100000</td><td>90000</td><td>70.2</td><td>57.7</td><td>36.2</td><td>1.9</td></tr>
+</table></div>
+<p>DMARC enforcement roughly halves between the top thousand domains and the hundred-thousandth.
+MTA-STS barely exists outside the top tier.</p>
+
+<h2 class="r">By region</h2>
+<p>Grouped by country-code TLD. This is a proxy for geography rather than a measurement of it:
+a <code>.com</code> can be operated from anywhere, so these cuts describe domains that chose a
+national TLD, not all domains in a country.</p>
+<div class="scroll-x r"><table>
+<tr><th>Region</th><th>Domains</th><th>SPF</th><th>DMARC</th><th>Enforcing</th><th>MTA-STS</th></tr>
+<tr><td>Australia</td><td>532</td><td>92.7</td><td>87.2</td><td>67.1</td><td>5.6</td></tr><tr><td>Nordics</td><td>878</td><td>90.0</td><td>82.8</td><td>58.0</td><td>3.5</td></tr><tr><td>Benelux</td><td>939</td><td>89.6</td><td>81.2</td><td>59.6</td><td>5.5</td></tr><tr><td>Baltics</td><td>232</td><td>92.2</td><td>80.6</td><td>56.9</td><td>4.7</td></tr><tr><td>UK</td><td>1385</td><td>86.6</td><td>80.5</td><td>59.7</td><td>10.3</td></tr><tr><td>France</td><td>1004</td><td>89.4</td><td>77.0</td><td>44.0</td><td>1.8</td></tr><tr><td>Southern Europe</td><td>1848</td><td>90.3</td><td>76.4</td><td>44.0</td><td>1.1</td></tr><tr><td>Brazil</td><td>1446</td><td>86.2</td><td>75.4</td><td>45.7</td><td>1.3</td></tr><tr><td>DACH</td><td>2597</td><td>87.9</td><td>75.1</td><td>44.3</td><td>4.4</td></tr><tr><td>CEE</td><td>2159</td><td>91.8</td><td>73.7</td><td>44.0</td><td>1.6</td></tr><tr><td>Japan</td><td>1971</td><td>78.7</td><td>66.3</td><td>22.1</td><td>0.3</td></tr><tr><td>India</td><td>1291</td><td>72.0</td><td>62.7</td><td>45.4</td><td>0.4</td></tr>
+</table></div>
+
+<h2 class="r">Methodology</h2>
+<ul>
+<li><strong>Sample.</strong> The Tranco top-1M list, ID <code>V3YPN</code>. Tranco
+averages several providers over thirty days, so it is far more stable than snapshot rankings,
+and every list is permanently addressable by ID. The same population can be re-derived by
+anyone.</li>
+<li><strong>Method.</strong> DNS only. TXT at the apex for SPF, at <code>_dmarc</code>,
+<code>_mta-sts</code>, <code>_smtp._tls</code> and <code>default._bimi</code>, plus MX. SPF
+lookup counts are computed by walking <code>include</code> and <code>redirect</code> chains.</li>
+<li><strong>Resolvers.</strong> Queries were spread across four public resolvers. A single
+resolver rate-limits long before a sample this size completes, and the resulting failures look
+like absent records rather than failed queries, which would understate adoption.</li>
+<li><strong>DKIM is deliberately not reported.</strong> Selectors are arbitrary strings chosen
+by the sender, so probing a list of common ones and finding nothing proves nothing. Any DKIM
+adoption figure derived that way is a lower bound at best and misleading at worst. Surveys that
+publish one should be read with that in mind.</li>
+<li><strong>Limitations.</strong> DNS presence is not correctness: a published record may still
+be misconfigured in ways DNS cannot reveal. MTA-STS is counted on the DNS record alone; the
+policy file was not fetched for every domain, so the real enforcing figure is lower still.</li>
+</ul>
+
+<h2 class="r">Data</h2>
+<p>The full per-domain dataset and the computed findings are published so the numbers above can
+be checked rather than taken on trust.</p>
+<ul>
+<li><a href="/scan-100000.jsonl.gz">Raw dataset</a>, JSON Lines, one record per domain, gzipped</li>
+<li><a href="/findings.json">Computed findings</a>, JSON</li>
+<li><a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, the checks this survey
+is built on</li>
+</ul>
+<h2 class="r">Citing this</h2>
+<p>The dataset is archived at Zenodo with a permanent DOI, so it stays citable and
+resolvable independently of this site.</p>
+<pre><code>Singh, R. (2026). The State of Email Authentication 2026: SPF, DMARC,
+MTA-STS, TLS-RPT and BIMI adoption across 100,000 domains [Data set].
+Zenodo. https://doi.org/10.5281/zenodo.22832936</code></pre>
+<p><strong>DOI:</strong> <a href="https://doi.org/10.5281/zenodo.22832936">10.5281/zenodo.22832936</a> &middot;
+   <a href="https://zenodo.org/records/22832936">Zenodo record</a> &middot;
+   <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a></p>
+<p class="meta">Licensed CC BY 4.0. Free to reuse with attribution. If you cite it,
+I would like to know.</p>
 
 <footer>
   <p>Rastu Singh, Infrastructure Engineer specialising in
