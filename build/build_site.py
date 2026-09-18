@@ -32,6 +32,7 @@ from codes import CODES
 
 SITE = "https://rastu.tech"
 TRANCO_LIST_ID = "V3YPN"
+DOI = "10.5281/zenodo.22832936"
 INDEXNOW_KEY = "842e66c906302afc62fc2a281224035a"
 
 PERSON = {
@@ -558,7 +559,17 @@ be checked rather than taken on trust.</p>
 <li><a href="https://github.com/singhrastu/dmarcsight">dmarcsight</a>, the checks this survey
 is built on</li>
 </ul>
-<p class="meta">Free to reuse with attribution. If you cite it, I would like to know.</p>
+<h2>Citing this</h2>
+<p>The dataset is archived at Zenodo with a permanent DOI, so it stays citable and
+resolvable independently of this site.</p>
+<pre><code>Singh, R. (2026). The State of Email Authentication 2026: SPF, DMARC,
+MTA-STS, TLS-RPT and BIMI adoption across 100,000 domains [Data set].
+Zenodo. https://doi.org/{DOI}</code></pre>
+<p><strong>DOI:</strong> <a href="https://doi.org/{DOI}">{DOI}</a> &middot;
+   <a href="https://zenodo.org/records/22832936">Zenodo record</a> &middot;
+   <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a></p>
+<p class="meta">Licensed CC BY 4.0. Free to reuse with attribution. If you cite it,
+I would like to know.</p>
 """
     ld = {
         "@context": "https://schema.org",
@@ -569,6 +580,8 @@ is built on</li>
             f"SPF, DMARC, MTA-STS, TLS-RPT and BIMI, with regional and rank-band cuts."
         ),
         "creator": {"@id": f"{SITE}/#person"},
+        "identifier": f"https://doi.org/{DOI}",
+        "sameAs": "https://zenodo.org/records/22832936",
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "distribution": [{
             "@type": "DataDownload",
