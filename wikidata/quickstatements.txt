@@ -1,0 +1,17 @@
+CREATE
+LAST|Len|"Rastu Singh"
+LAST|Den|"email infrastructure engineer"
+LAST|Les|"Rastu Singh"
+LAST|Des|"e-posti taristu insener"
+LAST|P31|Q5
+LAST|P21|Q6581097
+LAST|P27|Q668
+LAST|P106|Q1709010|S854|"https://rastu.tech/about/"|S813|+2026-09-18T00:00:00Z/11
+LAST|P101|Q9158|S854|"https://doi.org/10.5281/zenodo.22832936"|S813|+2026-09-18T00:00:00Z/11
+LAST|P101|Q3510521|S854|"https://doi.org/10.5281/zenodo.22832936"|S813|+2026-09-18T00:00:00Z/11
+LAST|P496|"0009-0002-0526-3005"|S854|"https://orcid.org/0009-0002-0526-3005"|S813|+2026-09-18T00:00:00Z/11
+LAST|P856|"https://rastu.tech/"
+LAST|P2037|"singhrastu"|S854|"https://github.com/singhrastu"|S813|+2026-09-18T00:00:00Z/11
+LAST|P6634|"rastu"|S854|"https://www.linkedin.com/in/rastu"|S813|+2026-09-18T00:00:00Z/11
+LAST|P108|Q24054211|S854|"https://rastu.tech/about/"|S813|+2026-09-18T00:00:00Z/11
+LAST|P937|Q1770|S854|"https://rastu.tech/about/"|S813|+2026-09-18T00:00:00Z/11
