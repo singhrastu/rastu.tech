@@ -45,6 +45,7 @@ PERSON = {
         "https://www.linkedin.com/in/rastu",
         "https://github.com/singhrastu",
         "https://orcid.org/0009-0002-0526-3005",
+        "https://www.wikidata.org/wiki/Q141496706",
     ],
     "orcid": "0009-0002-0526-3005",
     "knows_about": [
