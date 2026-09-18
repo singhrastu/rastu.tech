@@ -1,0 +1,11 @@
+{
+  // Static-only Workers deploy. No "main" entry script: the site is plain HTML,
+  // so Cloudflare serves the assets directly with no Worker code in the path.
+  "name": "rastu-tech",
+  "compatibility_date": "2026-09-15",
+  "assets": {
+    "directory": "./site/",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
