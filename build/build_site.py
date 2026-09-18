@@ -22,6 +22,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -210,6 +211,15 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 
 /* ---- bento ------------------------------------------------------------- */
 .bento{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.8rem;margin:1.3rem 0}
+@media(min-width:56rem){
+  .bento{grid-template-columns:repeat(6,1fr)}
+  .bento .card:nth-child(1){grid-column:span 4}
+  .bento .card:nth-child(2){grid-column:span 2}
+  .bento .card:nth-child(3){grid-column:span 3}
+  .bento .card:nth-child(4){grid-column:span 3}
+  .bento .card:nth-child(1) h3{font-size:1.2rem}
+  .bento .card:nth-child(1) p{font-size:.93rem}
+}
 .bento .card{position:relative;overflow:hidden;background:var(--surface);
      border:1px solid var(--line);border-radius:14px;padding:1.2rem 1.25rem;
      text-decoration:none;color:inherit;display:block;
@@ -224,6 +234,11 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .bento .tag{display:inline-block;font-size:.695rem;letter-spacing:.09em;text-transform:uppercase;
      color:var(--accent);font-weight:650;margin-bottom:.35rem}
 .bento .go{display:inline-block;margin-top:.75rem;font-size:.85rem;color:var(--accent);font-weight:600}
+
+.bento .codes{display:flex;flex-wrap:wrap;gap:.3rem;margin:.85rem 0 0}
+.bento .codes code{background:var(--code);border:1px solid var(--line);color:var(--ink-3);
+  font-size:.735rem;padding:.16rem .45rem;border-radius:5px;transition:color .22s,border-color .22s}
+.bento .card:hover .codes code{color:var(--accent-2);border-color:var(--accent-soft)}
 
 /* ---- highlight panel --------------------------------------------------- */
 .panel{border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.4rem;margin:1.6rem 0;
@@ -257,6 +272,7 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .sechead{margin:3.4rem 0 1rem}
 .sechead h2{margin:.15rem 0 .5rem;border:0;padding:0;font-size:1.5rem;letter-spacing:-.018em}
 .sechead p{margin:0;color:var(--ink-3);font-size:.95rem;max-width:40rem}
+.sechead.reveal h2.r{opacity:1;transform:none}
 
 /* ---- SMTP session panel ------------------------------------------------
    A real handshake, typed out. It is the one thing on the page that says what
@@ -326,7 +342,7 @@ footer{margin-top:4.5rem;padding-top:1.4rem;border-top:1px solid var(--line);
 .strip.reveal div,.bento.reveal .card{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
 .strip.reveal div:nth-child(2),.bento.reveal .card:nth-child(2){animation-delay:.07s}
 .strip.reveal div:nth-child(3),.bento.reveal .card:nth-child(3){animation-delay:.14s}
-.strip.reveal div:nth-child(4){animation-delay:.21s}
+.strip.reveal div:nth-child(4),.bento.reveal .card:nth-child(4){animation-delay:.21s}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
 h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
@@ -406,7 +422,7 @@ JS = """
       return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c];});}
     function whole(){
       out.innerHTML=lines.map(function(l){
-        return '<span class="'+l.k+'">'+esc(l.t)+'</span>';}).join('\n');
+        return '<span class="'+l.k+'">'+esc(l.t)+'</span>';}).join('\\n');
     }
     if(reduce){ whole(); return; }
 
@@ -419,7 +435,7 @@ JS = """
         var l=lines[i++], sp=document.createElement('span');
         sp.className=l.k;
         out.appendChild(sp);
-        out.appendChild(document.createTextNode('\n'));
+        out.appendChild(document.createTextNode('\\n'));
         var typed = (l.k==='c'||l.k==='cmd');
         if(!typed){ sp.textContent=l.t; setTimeout(line, 190+Math.min(340,l.t.length*4)); return; }
         var j=0;
@@ -519,6 +535,16 @@ JS = """
 """
 
 
+FAVICON = (
+    "data:image/svg+xml,"
+    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
+    "%3Crect width='32' height='32' rx='7' fill='%230a0e0d'/%3E"
+    "%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11z' fill='none' "
+    "stroke='%233ddc84' stroke-width='2.4'/%3E"
+    "%3Ccircle cx='16' cy='16' r='2.6' fill='%233ddc84'/%3E%3C/svg%3E"
+)
+
+
 def e(s):
     return html.escape(str(s), quote=True)
 
@@ -606,6 +632,9 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False, scri
 <meta property="og:site_name" content="Rastu Singh">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{SITE}/rastu-singh.jpg">
+<link rel="icon" href="{FAVICON}">
+<link rel="apple-touch-icon" href="/rastu-singh-180.jpg">
+<meta name="theme-color" content="#0a0e0d">
 <style>{CSS}</style>
 {ld}
 </head>
@@ -851,6 +880,10 @@ def build_home():
 
     session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
 
+    # The codes themselves are what people search for, so put them on the page.
+    codes_html = "".join(f"<code>{e(c['code'])}</code>" for c in CODES[:10])
+    n_codes = len(CODES)
+
     body = f"""
 <div class="hero">
   <div class="hero-copy">
@@ -913,9 +946,10 @@ def build_home():
     <span class="tag">Reference</span>
     <h3>SMTP response reference</h3>
     <p>What each response actually means, whether it is worth retrying, and what to
-    change so it stops happening. Gmail 4.7.28 against 5.7.1, Microsoft S3140,
-    Yahoo TS03, Spamhaus.</p>
-    <span class="go">Browse the reference &rarr;</span>
+    change so it stops happening. One page per response, written from the mail log
+    rather than the specification.</p>
+    <div class="codes">{codes_html}</div>
+    <span class="go">Browse all {n_codes} &rarr;</span>
   </a>
   <a class="card" href="/research/">
     <span class="tag">Research</span>
@@ -1333,6 +1367,35 @@ def build_stub(path, kicker, title, lede, body_extra=""):
     return page(title, lede, body, path)
 
 
+def check_js():
+    """Parse every script the site ships.
+
+    JS lives inside a Python triple-quoted string, so a backslash escape that is
+    right for JavaScript can be silently eaten by Python. That failure is invisible
+    until a browser refuses the file, so it is worth catching here. Skipped without
+    complaint if node is not installed; it is a convenience, not a dependency.
+    """
+    if not shutil.which("node"):
+        return
+    home = open(os.path.join(OUT, "index.html"), encoding="utf8").read()
+    m = re.search(r"<script>(.*?)</script>", home, re.S)
+    blobs = {"inline": m.group(1) if m else ""}
+    for name in os.listdir(OUT):
+        if name.endswith(".js"):
+            blobs[name] = open(os.path.join(OUT, name), encoding="utf8").read()
+    for name, src in blobs.items():
+        if not src.strip():
+            continue
+        tmp = os.path.join(OUT, "._check.js")
+        open(tmp, "w", encoding="utf8").write(src)
+        rc = subprocess.run(["node", "--check", tmp],
+                            capture_output=True, text=True)
+        os.remove(tmp)
+        if rc.returncode:
+            sys.exit(f"JS syntax error in {name}:\n{rc.stderr}")
+    print(f"  js ok ({', '.join(sorted(blobs))})")
+
+
 def main():
     if os.path.isdir(OUT):
         shutil.rmtree(OUT)
@@ -1398,6 +1461,8 @@ verdict against the Gmail, Yahoo and Microsoft bulk sender requirements.</p>
     open(os.path.join(OUT, "sitemap.xml"), "w").write("\n".join(sm))
     open(os.path.join(OUT, "robots.txt"), "w").write(
         f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
+
+    check_js()
 
     n = sum(len(files) for _, _, files in os.walk(OUT))
     print(f"built {n} files, {len(urls)} pages -> {OUT}")
