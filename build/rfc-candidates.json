@@ -1,5 +1,12 @@
 [
   {
+    "id": "RFC10041",
+    "num": 10041,
+    "title": "Advertising Unreachable Links in OSPF",
+    "status": "PROPOSED STANDARD",
+    "published": "September 2026"
+  },
+  {
     "id": "RFC10022",
     "num": 10022,
     "title": "IMAP UIDBATCHES Extension",
