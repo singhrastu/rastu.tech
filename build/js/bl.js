@@ -375,12 +375,21 @@ function summarise(subject, rows, kind) {
   const listed = rows.filter(r => r.state === 'listed');
   const clean = rows.filter(r => r.state === 'clean');
   const undetermined = rows.filter(r => r.state === 'undetermined');
+  /* A list that was never asked and a list that could not answer are the same
+     hole in the result. Only the unasked ones were downgrading the verdict, so a
+     refused Spamhaus lookup produced an unqualified "not listed" with the most
+     important row sitting in the table saying it had no idea. */
   const missing = rows.filter(r => r.state === 'not-checked');
-  const names = missing.map(m => m.name);
+  const silent = rows.filter(r => r.state === 'undetermined');
+  const absent = [...missing, ...silent];
+  const names = absent.map(m => m.name);
   const gap = names.length
-    ? ` ${names.join(' and ')} could not be queried from a browser and `
-      + `${names.length === 1 ? 'is' : 'are'} not included in that, which matters `
-      + `because it is the list most receivers actually consult.`
+    ? ` ${names.slice(0, 3).join(', ')}${names.length > 3
+        ? ` and ${names.length - 3} more` : ''} did not answer, so `
+      + `${names.length === 1 ? 'it is' : 'they are'} not included in that.`
+      + (absent.some(a => /spamhaus/i.test(a.name))
+         ? ' Spamhaus is among them, and it is the list most receivers actually '
+           + 'consult.' : '')
     : '';
 
   let verdict;
@@ -400,7 +409,7 @@ function summarise(subject, rows, kind) {
       text: 'No list answered reliably, so this is not a result.' };
   }
   return { ip: subject, subject, kind, supported: true, rows, listed, clean,
-           undetermined, missing, verdict };
+           undetermined, missing, absent, verdict };
 }
 
 /**

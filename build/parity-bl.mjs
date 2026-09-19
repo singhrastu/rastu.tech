@@ -305,6 +305,42 @@ is('every documented code carries an explanation',
   }
 }
 
+// ---------------------------- a list that could not answer is the same hole
+/* A list that was never asked and a list that could not answer leave the same
+   gap in the result. Only the unasked ones were downgrading the verdict, so a
+   refused Spamhaus lookup produced an unqualified "not listed" while the most
+   important row sat in the table saying it had no idea. */
+{
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const refused = async () => 'blocked:challenge required';
+  const r = await checkDomain('bettywins.com', good, undefined, refused);
+  is('a refused Spamhaus lookup qualifies the verdict', r.verdict.state, 'partial');
+  is('and it is a warning, not a pass', r.verdict.severity, 'warn');
+  is('and the gap is named', r.verdict.text.includes('Spamhaus'), true);
+}
+{
+  // A dead ordinary list counts too, not only Spamhaus.
+  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? [] : []);
+  const halfDead = async (n) => (n.startsWith('TEST.dead.test') ? [] :
+    n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const r = await checkDomain('example.com', halfDead,
+    [{ zone: 'dead.test', name: 'Dead list', delist: 'x', note: 'y'.repeat(45) },
+     { zone: 'live.test', name: 'Live list', delist: 'x', note: 'y'.repeat(45) }],
+    dqs);
+  is('a silent ordinary list also qualifies it', r.verdict.state, 'partial');
+  is('and it is named', r.verdict.text.includes('Dead list'), true);
+}
+{
+  // Everything answered and nothing is missing: an unqualified pass is allowed.
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : []);
+  const r = await checkDomain('example.com', good, undefined, dqs);
+  is('with every list answering the verdict is unqualified',
+     r.verdict.state, 'not-listed');
+  is('and it is a pass', r.verdict.severity, 'ok');
+  is('with no gap sentence', r.verdict.text.includes('did not answer'), false);
+}
+
 if (fails.length) {
   console.error('\nblocklist failures:\n  ' + fails.join('\n  '));
   process.exit(1);
