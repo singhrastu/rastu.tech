@@ -470,9 +470,14 @@ def main():
         if e["num"] in NOTES:
             e["note"] = NOTES[e["num"]]
         # Never show a bare number. Every reference carries its title.
+        # Sorted, because a set has no order and this dict is serialised to
+        # rfcs.json. Unsorted, the same input produced the same content in a
+        # different byte order on every run, so the weekly refresh committed a
+        # diff that changed nothing and the history filled with false alarms.
         e["rel_titles"] = {
             r: idx[r]["title"] for r in
-            set(e["obsoletes"] + e["updates"] + e["updated_by"] + e["replaces"])
+            sorted(set(e["obsoletes"] + e["updates"] + e["updated_by"]
+                       + e["replaces"]), key=lambda x: (len(x), x))
             if r in idx
         }
         uses, reqs = requirements(os.path.join(TXT, f"rfc{e['num']}.txt"))
