@@ -36,6 +36,44 @@ MANY_INCLUDES = {D: ["v=spf1 " + " ".join(f"include:i{n}.test" for n in range(11
 for n in range(11):
     MANY_INCLUDES[f"i{n}.test"] = ["v=spf1 ip4:10.0.0.1 -all"]
 
+# A chain fourteen deep. The depth guard used to return 99, which the caller
+# added to the running total and reported as "about 110 of 10 lookups".
+DEEP_CHAIN = {D: ["v=spf1 include:d0.test -all"]}
+for n in range(14):
+    nxt = f"include:d{n + 1}.test" if n < 13 else "ip4:10.0.0.1"
+    DEEP_CHAIN[f"d{n}.test"] = [f"v=spf1 {nxt} -all"]
+
+# The same provider reached down two branches. A receiver queries it twice, so
+# it costs two lookups. A global seen-set counted it once and reported a record
+# at the limit as comfortably inside it.
+REPEATED = {
+    D: ["v=spf1 include:one.test include:two.test -all"],
+    "one.test": ["v=spf1 include:shared.test -all"],
+    "two.test": ["v=spf1 include:shared.test -all"],
+    "shared.test": ["v=spf1 include:deep.test -all"],
+    "deep.test": ["v=spf1 ip4:10.0.0.1 -all"],
+}
+
+# RFC 7208 section 6.1: redirect is ignored when the record has an all mechanism.
+REDIRECT_WITH_ALL = {
+    D: ["v=spf1 include:a.test redirect=elsewhere.test -all"],
+    "a.test": ["v=spf1 ip4:10.0.0.1 -all"],
+    "elsewhere.test": ["v=spf1 " + " ".join(f"include:r{n}.test" for n in range(9)) + " -all"],
+}
+for n in range(9):
+    REDIRECT_WITH_ALL[f"r{n}.test"] = ["v=spf1 ip4:10.0.0.1 -all"]
+
+# redirect with no all mechanism: it is followed, and it costs.
+REDIRECT_NO_ALL = {
+    D: ["v=spf1 include:a.test redirect=elsewhere.test"],
+    "a.test": ["v=spf1 ip4:10.0.0.1 -all"],
+    "elsewhere.test": ["v=spf1 ip4:10.0.0.2 -all"],
+}
+
+# An Ed25519 key per RFC 8463: 32 bytes, 44 base64 characters. The RSA bit
+# estimate read it as roughly 227 bits and failed it.
+KEY_ED25519 = "11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="
+
 SCENARIOS = [
     ("bare domain, nothing published", {}, {}, {}, None),
     ("spf plus all", {D: ["v=spf1 +all"]}, {}, {}, None),
@@ -43,6 +81,20 @@ SCENARIOS = [
     ("spf softfail", {D: ["v=spf1 ip4:1.2.3.4 ~all"]}, {}, {}, None),
     ("spf no all mechanism", {D: ["v=spf1 ip4:1.2.3.4"]}, {}, {}, None),
     ("spf with ptr", {D: ["v=spf1 ptr -all"]}, {}, {}, None),
+    ("spf with a qualified ptr", {D: ["v=spf1 -ptr -all"]}, {}, {}, None),
+    ("include whose name starts with ptr is not ptr usage",
+     {D: ["v=spf1 include:ptr.example.net -all"],
+      "ptr.example.net": ["v=spf1 ip4:10.0.0.1 -all"]}, {}, {}, None),
+    ("spf chain deeper than the limit", DEEP_CHAIN, {}, {}, None),
+    ("same include reached twice costs twice", REPEATED, {}, {}, None),
+    ("redirect is ignored when all is present", REDIRECT_WITH_ALL, {}, {}, None),
+    ("redirect is followed when all is absent", REDIRECT_NO_ALL, {}, {}, None),
+    ("dkim ed25519 key",
+     {D: ["v=spf1 -all"], f"selector1._domainkey.{D}": [f"v=DKIM1; k=ed25519; p={KEY_ED25519}"]},
+     {}, {}, ["selector1"]),
+    ("dkim ed25519 key truncated",
+     {D: ["v=spf1 -all"], f"selector1._domainkey.{D}": ["v=DKIM1; k=ed25519; p=c2hvcnQ="]},
+     {}, {}, ["selector1"]),
     ("two spf records", {D: ["v=spf1 -all", "v=spf1 ip4:1.2.3.4 -all"]}, {}, {}, None),
     ("spf over the lookup limit", MANY_INCLUDES, {}, {}, None),
     ("spf include loop", {D: ["v=spf1 include:a.test -all"],

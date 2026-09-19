@@ -30,10 +30,24 @@ function refpage(t){
   return null;
 }
 
-var t0=null;
-function run(){
-  var t=box.value.trim();
-  if(!t){out.className='verdict';out.innerHTML='';return;}
+/* A pasted mail log is many responses, not one string. Classifying the whole
+   blob returned whichever rule matched first anywhere in it and called that the
+   answer for all of it, which is wrong the moment somebody pastes more than one
+   line. Continuation lines of a multiline reply ("250-first" through "250 last")
+   still belong to one response. */
+function splitResponses(text){
+  var out=[], buf=[], lines=text.split(/\r?\n/), i, l;
+  for(i=0;i<lines.length;i++){
+    l=lines[i].trim();
+    if(!l){ if(buf.length){out.push(buf.join(' '));buf=[];} continue; }
+    buf.push(l);
+    if(!/^\d{3}-/.test(l)){ out.push(buf.join(' ')); buf=[]; }
+  }
+  if(buf.length) out.push(buf.join(' '));
+  return out;
+}
+
+function verdictHtml(t,lead){
   var hit=classify(t), prov=provider(t,hit.p),
       act=D.actions[hit.c]||D.actions.unknown, page=refpage(t);
   var h='<div class="head">'
@@ -42,9 +56,42 @@ function run(){
       + (prov?'<span class="prov">'+esc(prov)+'</span>':'')
       + '</div>'
       + '<p class="why">'+esc(hit.n)+'. '+esc(act.advice)+'</p>';
-  if(page) h+='<p class="lnk"><a href="'+esc(page.url)+'">Read the '
-           +esc((page.provider?page.provider+' ':'')+page.code)+' page &rarr;</a></p>';
-  else h+='<p class="lnk"><a href="/smtp/">Browse the SMTP reference &rarr;</a></p>';
+  if(lead){
+    if(page) h+='<p class="lnk"><a href="'+esc(page.url)+'">Read the '
+             +esc((page.provider?page.provider+' ':'')+page.code)+' page &rarr;</a></p>';
+    else h+='<p class="lnk"><a href="/smtp/">Browse the SMTP reference &rarr;</a></p>';
+  }
+  return h;
+}
+
+var t0=null;
+function run(){
+  var t=box.value.trim();
+  if(!t){out.className='verdict';out.innerHTML='';return;}
+  var items=splitResponses(t);
+  if(items.length<2){
+    out.innerHTML=verdictHtml(t,true);
+    out.className='verdict on';
+    return;
+  }
+  /* Group identical verdicts. An operator pasting a log wants "37 of these,
+     12 of those", not thirty-seven cards. */
+  var groups={}, order=[], i, hit, prov, key;
+  for(i=0;i<items.length;i++){
+    hit=classify(items[i]); prov=provider(items[i],hit.p);
+    key=hit.c+'|'+(prov||'');
+    if(!groups[key]){ groups[key]={n:0,sample:items[i]}; order.push(key); }
+    groups[key].n++;
+  }
+  order.sort(function(a,b){return groups[b].n-groups[a].n;});
+  var h='<p class="multi-head">'+items.length+' responses, '
+      + order.length+(order.length===1?' verdict':' distinct verdicts')+'</p>';
+  for(i=0;i<order.length;i++){
+    var g=groups[order[i]];
+    h+='<div class="grp"><span class="cnt">'+g.n+'</span>'
+      + verdictHtml(g.sample,i===0)
+      + '<p class="sample"><code>'+esc(g.sample.slice(0,150))+'</code></p></div>';
+  }
   out.innerHTML=h;
   out.className='verdict on';
 }

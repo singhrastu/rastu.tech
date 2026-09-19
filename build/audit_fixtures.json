@@ -487,6 +487,783 @@
   ]
  },
  {
+  "name": "spf with a qualified ptr",
+  "txt": {
+   "example.com": [
+    "v=spf1 -ptr -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 -ptr -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 1 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "warn",
+    "SPF uses the ptr mechanism",
+    "ptr is deprecated by RFC 7208 and some receivers ignore it. Remove it.",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "include whose name starts with ptr is not ptr usage",
+  "txt": {
+   "example.com": [
+    "v=spf1 include:ptr.example.net -all"
+   ],
+   "ptr.example.net": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 include:ptr.example.net -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 1 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "spf chain deeper than the limit",
+  "txt": {
+   "example.com": [
+    "v=spf1 include:d0.test -all"
+   ],
+   "d0.test": [
+    "v=spf1 include:d1.test -all"
+   ],
+   "d1.test": [
+    "v=spf1 include:d2.test -all"
+   ],
+   "d2.test": [
+    "v=spf1 include:d3.test -all"
+   ],
+   "d3.test": [
+    "v=spf1 include:d4.test -all"
+   ],
+   "d4.test": [
+    "v=spf1 include:d5.test -all"
+   ],
+   "d5.test": [
+    "v=spf1 include:d6.test -all"
+   ],
+   "d6.test": [
+    "v=spf1 include:d7.test -all"
+   ],
+   "d7.test": [
+    "v=spf1 include:d8.test -all"
+   ],
+   "d8.test": [
+    "v=spf1 include:d9.test -all"
+   ],
+   "d9.test": [
+    "v=spf1 include:d10.test -all"
+   ],
+   "d10.test": [
+    "v=spf1 include:d11.test -all"
+   ],
+   "d11.test": [
+    "v=spf1 include:d12.test -all"
+   ],
+   "d12.test": [
+    "v=spf1 include:d13.test -all"
+   ],
+   "d13.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 include:d0.test -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "fail",
+    "SPF exceeds the 10 DNS-lookup limit (~11)",
+    "Flatten or remove includes. Over 10 lookups is a permerror and SPF stops working even though the record still resolves.",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: SPF, DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "same include reached twice costs twice",
+  "txt": {
+   "example.com": [
+    "v=spf1 include:one.test include:two.test -all"
+   ],
+   "one.test": [
+    "v=spf1 include:shared.test -all"
+   ],
+   "two.test": [
+    "v=spf1 include:shared.test -all"
+   ],
+   "shared.test": [
+    "v=spf1 include:deep.test -all"
+   ],
+   "deep.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 include:one.test include:two.test -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 6 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "redirect is ignored when all is present",
+  "txt": {
+   "example.com": [
+    "v=spf1 include:a.test redirect=elsewhere.test -all"
+   ],
+   "a.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "elsewhere.test": [
+    "v=spf1 include:r0.test include:r1.test include:r2.test include:r3.test include:r4.test include:r5.test include:r6.test include:r7.test include:r8.test -all"
+   ],
+   "r0.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r1.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r2.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r3.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r4.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r5.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r6.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r7.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "r8.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 include:a.test redirect=elsewhere.test -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 1 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "redirect is followed when all is absent",
+  "txt": {
+   "example.com": [
+    "v=spf1 include:a.test redirect=elsewhere.test"
+   ],
+   "a.test": [
+    "v=spf1 ip4:10.0.0.1 -all"
+   ],
+   "elsewhere.test": [
+    "v=spf1 ip4:10.0.0.2 -all"
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": null,
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 include:a.test redirect=elsewhere.test"
+   ],
+   [
+    "SPF",
+    "warn",
+    "No 'all' mechanism",
+    "Add -all (or ~all while testing). Without it the record has no default.",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 2 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "warn",
+    "No DKIM key found on 34 common selectors",
+    "This is inconclusive, not proof of absence - selectors are arbitrary. Pass --selector if you know yours.",
+    "tried: selector1, selector2, google, protonmail, protonmail2, protonmail3, fm1, fm2..."
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "dkim ed25519 key",
+  "txt": {
+   "example.com": [
+    "v=spf1 -all"
+   ],
+   "selector1._domainkey.example.com": [
+    "v=DKIM1; k=ed25519; p=11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo="
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": [
+   "selector1"
+  ],
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 0 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "ok",
+    "Selector 'selector1' publishes an Ed25519 key",
+    "",
+    "k=ed25519"
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
+  "name": "dkim ed25519 key truncated",
+  "txt": {
+   "example.com": [
+    "v=spf1 -all"
+   ],
+   "selector1._domainkey.example.com": [
+    "v=DKIM1; k=ed25519; p=c2hvcnQ="
+   ]
+  },
+  "mx": {},
+  "a": {},
+  "selectors": [
+   "selector1"
+  ],
+  "expected": [
+   [
+    "SPF",
+    "ok",
+    "SPF record present",
+    "",
+    "v=spf1 -all"
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF ends in -all",
+    "",
+    ""
+   ],
+   [
+    "SPF",
+    "ok",
+    "SPF uses about 0 of 10 DNS lookups",
+    "",
+    ""
+   ],
+   [
+    "DKIM",
+    "fail",
+    "Selector 'selector1' Ed25519 key looks truncated",
+    "An Ed25519 public key is 32 bytes, so 44 base64 characters. Republish it.",
+    ""
+   ],
+   [
+    "DMARC",
+    "fail",
+    "No DMARC record",
+    "Publish _dmarc TXT with p=none and rua= first, read the reports, then move to enforcement.",
+    ""
+   ],
+   [
+    "MTA-STS",
+    "info",
+    "No MTA-STS record",
+    "Optional, but it prevents TLS downgrade on inbound mail. Worth publishing.",
+    ""
+   ],
+   [
+    "TLS-RPT",
+    "info",
+    "No TLS-RPT record",
+    "Add one to get reports on TLS negotiation failures against your MX.",
+    ""
+   ],
+   [
+    "BIMI",
+    "info",
+    "No BIMI record",
+    "BIMI needs DMARC at enforcement first. Not worth attempting before then.",
+    ""
+   ],
+   [
+    "MX",
+    "warn",
+    "No MX records",
+    "Fine for a send-only domain, but it cannot receive replies, bounces or FBL mail.",
+    ""
+   ],
+   [
+    "BULK-SENDER",
+    "fail",
+    "Not meeting the Gmail/Yahoo/Microsoft bulk sender requirements",
+    "Senders over 5,000 messages/day need SPF, DKIM and DMARC (p=none minimum), one-click List-Unsubscribe, and a spam complaint rate under 0.3%.",
+    "gaps: DMARC, DMARC (absent)"
+   ]
+  ]
+ },
+ {
   "name": "two spf records",
   "txt": {
    "example.com": [

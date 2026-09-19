@@ -91,9 +91,20 @@ function mechanism(token) {
    and the walk order are untouched, so build/parity.mjs keeps passing against the
    Python implementation; /spf/ gets the tree for free rather than from a second,
    drifting copy of this logic. */
-async function countLookups(spf, r, seen, depth = 0, out = null) {
-  if (depth > 10) return 99;
+/* `path` is the include chain above this record, not every target ever seen. A
+   global set was wrong twice over: it made a domain that includes the same
+   provider from two branches cost one lookup instead of two, which is not what a
+   receiver does, and it was doing cycle detection's job badly. Cycles are a
+   property of the path. */
+async function countLookups(spf, r, path, depth = 0, out = null) {
   let n = 0;
+  // RFC 7208 section 6.1: a redirect modifier is ignored when the record also
+  // has an all mechanism. Counting it inflates the total and can report a record
+  // that passes as one that permerrors.
+  const hasAll = spf.split(/\s+/).some(t => {
+    const x = '+-~?'.includes(t[0]) ? t.slice(1) : t;
+    return x.toLowerCase() === 'all';
+  });
   for (const token of spf.split(/\s+/)) {
     if (!token) continue;
     const mech = mechanism(token);
@@ -107,6 +118,13 @@ async function countLookups(spf, r, seen, depth = 0, out = null) {
       continue;
     }
     const [name, target] = mech;
+    if (name === 'redirect' && hasAll) {
+      if (out) {
+        out.push({ kind: 'free', target: token, cost: 0, record: null, children: [],
+                   note: 'ignored: the record has an all mechanism (RFC 7208 6.1)' });
+      }
+      continue;
+    }
     n += 1;
     const expands = name === 'include' || name === 'redirect';
     const node = out ? {
@@ -116,15 +134,27 @@ async function countLookups(spf, r, seen, depth = 0, out = null) {
     } : null;
     if (node) out.push(node);
     if (!expands) continue;
-    if (!target || seen.has(target)) {
-      if (node) node.note = target ? 'already counted above' : 'empty target';
+    if (!target) {
+      if (node) node.note = 'empty target';
       continue;
     }
-    seen.add(target);
+    if (path.has(target)) {
+      if (node) node.note = 'already on this include chain, so it would loop';
+      continue;
+    }
+    // Past ten levels the record has already spent more than ten lookups, so the
+    // verdict cannot change. Stop walking and say so, rather than returning a
+    // magic number that the caller adds to the running total and reports as 110.
+    if (depth >= 10) {
+      if (node) node.note = 'chain is deeper than the ten-lookup limit allows';
+      continue;
+    }
     const sub = (await r.txt(target)).filter(x => x.toLowerCase().startsWith('v=spf1'));
     if (node) node.record = sub[0] || null;
     if (sub.length) {
-      n += await countLookups(sub[0], r, seen, depth + 1, node ? node.children : null);
+      const below = new Set(path);
+      below.add(target);
+      n += await countLookups(sub[0], r, below, depth + 1, node ? node.children : null);
     } else if (node) {
       node.note = 'no SPF record at this name, so it resolves to nothing';
     }
@@ -192,7 +222,11 @@ async function checkSpf(domain, r, rep) {
     rep.add('SPF', OK, `SPF uses about ${count} of 10 DNS lookups`);
   }
 
-  if (/\bptr\b/.test(spf)) {
+  const usesPtr = spf.split(/\s+/).some(t => {
+    const m = mechanism(t);
+    return m && m[0] === 'ptr';
+  });
+  if (usesPtr) {
     rep.add('SPF', WARN, 'SPF uses the ptr mechanism',
       'ptr is deprecated by RFC 7208 and some receivers ignore it. Remove it.');
   }
@@ -258,8 +292,12 @@ async function checkDmarc(domain, r, rep) {
 async function checkDkim(domain, r, rep, selectors) {
   const sels = selectors && selectors.length ? selectors : COMMON_SELECTORS;
   const found = [];
-  const results = await Promise.all(
+  // allSettled, not all: this fans out over 35 selectors and a single DNS
+  // hiccup was aborting the entire domain check.
+  const settled = await Promise.allSettled(
     sels.map(s => r.txt(`${s}._domainkey.${domain}`).then(v => [s, v])));
+  const results = settled.filter(x => x.status === 'fulfilled').map(x => x.value);
+  const unreachable = settled.length - results.length;
   for (const [s, txts] of results) {
     for (const txt of txts) {
       if (txt.toLowerCase().includes('v=dkim1') || txt.includes('p=')) { found.push([s, txt]); break; }
@@ -274,11 +312,32 @@ async function checkDkim(domain, r, rep, selectors) {
     return;
   }
 
+  if (unreachable) {
+    rep.add('DKIM', INFO, `${unreachable} selector lookups did not resolve`,
+      'Treat this result as partial. It is a resolver problem, not a finding '
+      + 'about the domain.');
+  }
+
   for (const [sel, txt] of found) {
-    const key = tags(txt).p || '';
+    const t = tags(txt);
+    const key = t.p || '';
+    const alg = (t.k || 'rsa').toLowerCase();
     if (!key) {
       rep.add('DKIM', FAIL, `Selector '${sel}' has an empty p= (revoked key)`,
         'An empty p= means the key is revoked. Remove the record or publish a real key.');
+      continue;
+    }
+    // RFC 8463 keys are Ed25519 and 32 bytes, which is 44 base64 characters.
+    // Measuring one in RSA bits reports about 227 and fails a perfectly good
+    // record, so read k= before judging length.
+    if (alg === 'ed25519') {
+      if (key.replace(/\s+/g, '').length >= 40) {
+        rep.add('DKIM', OK, `Selector '${sel}' publishes an Ed25519 key`,
+          '', 'k=ed25519');
+      } else {
+        rep.add('DKIM', FAIL, `Selector '${sel}' Ed25519 key looks truncated`,
+          'An Ed25519 public key is 32 bytes, so 44 base64 characters. Republish it.');
+      }
       continue;
     }
     // rough bit estimate from the base64 length
