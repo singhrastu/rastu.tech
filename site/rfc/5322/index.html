@@ -961,6 +961,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -1014,6 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 1 later RFC has changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/6854/">RFC 6854: Update to Internet Message Format to Allow Group Syntax in the &quot;From:&quot; and &quot;Sender:&quot; Header Fields</a></li></ul></div>
+<div class="explain r"><h2 class="r">What it is</h2><p>The format of the message itself: headers, the blank line, the body, and the rules for folding, comments and addresses.</p><h2 class="r">What it solves</h2><p>The header block looks simple and is not. Folding, obsolete syntax and comment nesting all have to be handled the same way everywhere or messages mean different things to different readers.</p><h2 class="r">What it means to operate</h2><p>Two details cost real time. Headers can be folded across lines and must be unfolded before parsing, so a naive line-by-line read will lose half a Received chain. And a -0000 timezone means the offset is unknown, not UTC, so computing a delay across one is fabrication rather than measurement.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

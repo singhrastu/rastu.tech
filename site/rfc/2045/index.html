@@ -961,6 +961,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -1014,6 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 4 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="https://www.rfc-editor.org/rfc/rfc2184.html">RFC 2184: MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations</a></li><li><a href="/rfc/2231/">RFC 2231: MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc5335.html">RFC 5335: Internationalized Email Headers</a></li><li><a href="/rfc/6532/">RFC 6532: Internationalized Email Headers</a></li></ul></div>
+<div class="explain r"><h2 class="r">What it is</h2><p>The first MIME document: Content-Type, Content-Transfer-Encoding and the header fields that let a message carry something other than plain ASCII text.</p><h2 class="r">What it solves</h2><p>A message was a single block of 7-bit text. No attachments, no character sets, no alternative representations.</p><h2 class="r">What it means to operate</h2><p>Content-Transfer-Encoding is where DKIM signatures die. Any hop that re-encodes a body, quoted-printable to base64 or the reverse, changes the bytes the signature covers. If DKIM fails only for some recipients, look for a gateway doing conversion before you look at your keys.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

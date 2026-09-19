@@ -41,6 +41,11 @@ import urllib.request
 import xml.etree.ElementTree as ET
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+try:
+    from rfc_notes import NOTES
+except ImportError:          # the index still builds without the commentary
+    NOTES = {}
 SRC = os.path.join(HERE, "sources")
 TXT = os.path.join(SRC, "rfc")
 NS = {"r": "https://www.rfc-editor.org/rfc-index"}
@@ -433,6 +438,11 @@ def main():
         e = dict(idx[rid])
         e["category"] = cat
         e["replaces"] = ancestors(idx, rid)
+        # Written commentary, merged here rather than held in the page builder,
+        # so the weekly refresh carries it forward and a new document that
+        # replaces an old one simply has no note until one is written.
+        if e["num"] in NOTES:
+            e["note"] = NOTES[e["num"]]
         # Never show a bare number. Every reference carries its title.
         e["rel_titles"] = {
             r: idx[r]["title"] for r in
@@ -488,6 +498,8 @@ def main():
     print(f"  {amended} are current but amended by a later RFC")
     print(f"  requirements from {withreq}/{len(entries)}: "
           f"{total_reqs} normative sentences")
+    written = sum(1 for e in entries if e.get("note"))
+    print(f"  {written} have a written explanation")
     print(f"  {len(cand)} discovery candidates for review -> build/rfc-candidates.json")
     per = sum(os.path.getsize(os.path.join(reqdir, f))
               for f in os.listdir(reqdir) if f.endswith(".json"))

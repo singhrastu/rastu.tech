@@ -961,6 +961,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -1014,6 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 5 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/3886/">RFC 3886: An Extensible Message Format for Message Tracking Responses</a></li><li><a href="/rfc/4468/">RFC 4468: Message Submission BURL Extension</a></li><li><a href="/rfc/4865/">RFC 4865: SMTP Submission Service Extension for Future Message Release</a></li><li><a href="/rfc/4954/">RFC 4954: SMTP Service Extension for Authentication</a></li><li><a href="/rfc/5248/">RFC 5248: A Registry for SMTP Enhanced Mail System Status Codes</a></li></ul></div>
+<div class="explain r"><h2 class="r">What it is</h2><p>Enhanced mail system status codes: the three-part numbers like 5.1.1 that carry more meaning than a bare 550.</p><h2 class="r">What it solves</h2><p>A 550 tells you the delivery failed permanently and nothing else. Automating on it means parsing free text that every provider writes differently.</p><h2 class="r">What it means to operate</h2><p>The class says what to do and the subject says which subsystem complained, so 5.1.1 is a recipient problem and 5.7.1 is a policy one, and they call for completely different responses. Route your bounce processing on the enhanced code where it exists and fall back to the basic code only when it does not.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

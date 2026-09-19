@@ -1004,6 +1004,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -2547,11 +2558,14 @@ def build_rfc_index():
         for x in items:
             kind, label, _ = _status(x["status"])
             n = sum(x["req_counts"].values())
-            terms = e(f'{x["num"]} {x["title"]} {cat}'.lower())
+            what = (x.get("note") or {}).get("what", "")
+            terms = e(f'{x["num"]} {x["title"]} {cat} {what}'.lower())
             rows.append(
                 f'<a class="rfc-row" href="/rfc/{x["num"]}/" data-terms="{terms}" data-quoted>'
                 f'<code>{x["num"]}</code>'
-                f'<span class="t">{e(x["title"])}</span>'
+                f'<span class="t">{e(x["title"])}'
+                + (f'<em>{e(what)}</em>' if what else "")
+                + f'</span>'
                 f'<span class="st st-{kind}">{e(label)}</span>'
                 f'<span class="n">{n or ""}</span></a>')
         blocks.append(
@@ -2668,6 +2682,19 @@ def build_rfc_pages():
                 f'<div class="warnbox s-info"><p><strong>{e(label)}, not a '
                 f'standard.</strong> {e(note)}</p></div>')
 
+        expl = x.get("note") or {}
+        explain = ""
+        if expl:
+            rows = [("What it is", expl.get("what")),
+                    ("What it solves", expl.get("problem")),
+                    ("What it means to operate", expl.get("operate"))]
+            explain = ('<div class="explain r">'
+                       + "".join(f"<h2>{e(h)}</h2><p>{e(t)}</p>"
+                                 for h, t in rows if t)
+                       + (f'<p class="hist">{e(expl["note"])}</p>'
+                          if expl.get("note") else "")
+                       + "</div>")
+
         hist = ""
         if x.get("replaces"):
             hist = ('<p class="hist"><strong>Replaces</strong> '
@@ -2757,6 +2784,7 @@ def build_rfc_pages():
 </div>
 
 {"".join(warn)}
+{explain}
 {reqblock}
 
 <p class="r"><a href="/rfc/">Every current email RFC</a></p>

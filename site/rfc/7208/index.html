@@ -961,6 +961,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -1014,6 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 3 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/7372/">RFC 7372: Email Authentication Status Codes</a></li><li><a href="/rfc/8553/">RFC 8553: DNS Attrleaf Changes: Fixing Specifications That Use Underscored Node Names</a></li><li><a href="/rfc/8616/">RFC 8616: Email Authentication for Internationalized Mail</a></li></ul></div>
+<div class="explain r"><h2 class="r">What it is</h2><p>SPF: a DNS record listing which hosts may use a domain in the envelope sender, and how a receiver evaluates it.</p><h2 class="r">What it solves</h2><p>Anyone could put any domain in MAIL FROM. There was no way for a domain to say which servers were actually its own.</p><h2 class="r">What it means to operate</h2><p>The ceiling is the thing that bites: ten DNS-querying mechanisms per evaluation, counted across every include you expand, and crossing it is a permerror rather than a soft failure, so SPF stops authenticating entirely. Records break by accretion, one vendor at a time, and the record still looks fine when it does. Note also that SPF authenticates the envelope, which survives nothing: forwarding breaks it by design, which is why DMARC needs DKIM to be useful.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

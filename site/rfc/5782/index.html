@@ -961,6 +961,17 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+.explain{margin:0 0 var(--s5)}
+.explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
+  text-transform:uppercase;letter-spacing:.06em}
+.explain h2:first-child{margin-top:0}
+.explain p{margin:0;font-size:1.02rem;color:var(--ink);line-height:1.72;
+  max-width:var(--measure-text)}
+.explain .hist{margin-top:var(--s3);font-size:var(--t2);color:var(--ink-3)}
+.rfc-row{align-items:start}
+.rfc-row .t em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  line-height:1.5;margin-top:.15rem;white-space:normal}
+.rfc-row .t{white-space:normal;overflow:visible;text-overflow:clip}
 .pagemeta{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:0 0 .6rem}
 .pagemeta code{background:var(--code);border:1px solid var(--line);border-radius:6px;
   padding:.2rem .55rem;font-size:var(--t2);color:var(--ink);font-weight:600}
@@ -1014,6 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-info"><p><strong>Informational, not a standard.</strong> Published for the record and carrying no standards weight. Worth knowing before citing it as a requirement.</p></div>
+<div class="explain r"><h2 class="r">What it is</h2><p>How a DNS blocklist must behave: the query format, the reply convention, and the test entries every conformant list has to carry.</p><h2 class="r">What it solves</h2><p>Blocklists are queried by software that cannot tell a list saying &#x27;not listed&#x27; from a list that has stopped existing. Both look like NXDOMAIN.</p><h2 class="r">What it means to operate</h2><p>The test entries are the useful part. A conformant list must contain 127.0.0.2 and must not contain 127.0.0.1, so you can probe both before trusting an answer. Without that check a decommissioned zone reports every address as clean, which is how checkers kept giving SORBS results for years after it shut down.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>
