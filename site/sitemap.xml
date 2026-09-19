@@ -8,6 +8,7 @@
   <url><loc>https://rastu.tech/dmarc/</loc></url>
   <url><loc>https://rastu.tech/spf/</loc></url>
   <url><loc>https://rastu.tech/blocklist/</loc></url>
+  <url><loc>https://rastu.tech/warmup/</loc></url>
   <url><loc>https://rastu.tech/headers/</loc></url>
   <url><loc>https://rastu.tech/smtp/</loc></url>
   <url><loc>https://rastu.tech/smtp/session/</loc></url>

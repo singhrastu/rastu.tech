@@ -1320,6 +1320,15 @@ TOOLS = [
         "takes": "550 5.7.1 Service unavailable...",
     },
     {
+        "slug": "warmup", "name": "Warm-up planner",
+        "q": "How fast can I ramp this domain or address without getting filtered?",
+        "blurb": "Builds a day-by-day ramp to a volume you name, split across the "
+                 "mailbox providers you actually send to, with the hourly rate and "
+                 "the metric that has to hold before each step.",
+        "tag": "Reputation",
+        "takes": "100,000 a day",
+    },
+    {
         "slug": "blocklist", "name": "Blocklist check",
         "q": "Is this address or domain listed, and is the list still working?",
         "blurb": "Checks a sending address or a domain against the major DNS "
@@ -2040,6 +2049,209 @@ its own record, and collapse two ESPs into one.</p>
         body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("SPF lookup counter", None)),
         modules=("/js/spf.js",))
+
+
+def build_warmup():
+    t = tool("warmup")
+    body = """
+<h1>Warm-up planner</h1>
+<p class="lede">No mailbox provider publishes a ramp schedule. Google, Microsoft, Yahoo
+and Apple publish thresholds and say to increase volume gradually, and that is the whole
+of it. Every day-by-day ladder in circulation belongs to a sending platform, and those
+platforms disagree with each other by a factor of seventeen on how fast to grow. So a
+plan is worth only as much as the schedule it names and the figures it holds you to.</p>
+
+<div class="tool r">
+  <form id="wu-form" autocomplete="off">
+    <div class="row">
+      <div style="flex:1 1 11rem">
+        <label class="lbl-mi" for="wu-brand">Brand <em>optional</em></label>
+        <input class="field" id="wu-brand" type="text" spellcheck="false"
+               autocomplete="off" placeholder="Acme">
+      </div>
+      <div style="flex:1 1 13rem">
+        <label class="lbl-mi" for="wu-domain">Sending domain <em>optional</em></label>
+        <input class="field" id="wu-domain" type="text" spellcheck="false"
+               autocomplete="off" placeholder="mail.example.com">
+      </div>
+    </div>
+
+    <div class="row">
+      <div style="flex:1 1 12rem">
+        <label class="lbl-mi" for="wu-target">Target a day</label>
+        <input class="field" id="wu-target" type="text" inputmode="numeric"
+               spellcheck="false" autocomplete="off" value="100000">
+      </div>
+      <div style="flex:1 1 10rem">
+        <label class="lbl-mi" for="wu-window">Sending hours a day</label>
+        <input class="field" id="wu-window" type="text" inputmode="numeric"
+               spellcheck="false" autocomplete="off" value="12">
+      </div>
+      <div style="flex:0 1 9rem" id="wu-count-wrap">
+        <label class="lbl-mi" for="wu-count">Addresses</label>
+        <input class="field" id="wu-count" type="text" inputmode="numeric"
+               spellcheck="false" autocomplete="off" value="1">
+      </div>
+    </div>
+
+    <p class="lbl-mi" id="wu-lvl-l">What are you warming</p>
+    <div class="chips-row" role="group" aria-labelledby="wu-lvl-l" id="wu-level">
+      <button class="btn ghost sm on" type="button" data-v="ip">An address or pool</button>
+      <button class="btn ghost sm" type="button" data-v="domain">A sending domain</button>
+      <button class="btn ghost sm" type="button" data-v="mailbox">Mailboxes</button>
+    </div>
+
+    <p class="lbl-mi" id="wu-tr-l">What you send</p>
+    <div class="chips-row" role="group" aria-labelledby="wu-tr-l" id="wu-traffic">
+      <button class="btn ghost sm" type="button" data-v="transactional">Transactional</button>
+      <button class="btn ghost sm on" type="button" data-v="promotional">Promotional</button>
+      <button class="btn ghost sm" type="button" data-v="newsletter">Newsletter</button>
+    </div>
+
+    <p class="lbl-mi" id="wu-pace-l">Pace</p>
+    <div class="chips-row" role="group" aria-labelledby="wu-pace-l" id="wu-pace">
+      <button class="btn ghost sm" type="button" data-v="careful">Careful</button>
+      <button class="btn ghost sm on" type="button" data-v="standard">Standard</button>
+      <button class="btn ghost sm" type="button" data-v="fast">Fast</button>
+    </div>
+    <p class="hint-text" id="wu-pace-note"></p>
+
+    <p class="lbl-mi">Where your recipients are, as a rough percentage</p>
+    <div class="row" id="wu-mix"></div>
+    <p class="hint-text" id="wu-mix-note"></p>
+
+    <div class="row-2">
+      <span></span>
+      <div class="actions">
+        <button class="btn ghost" type="button" id="wu-pdf" disabled>Download
+          the PDF</button>
+        <button class="btn" type="submit" id="wu-run">Build the plan</button>
+      </div>
+    </div>
+  </form>
+  <p class="hint"><span>Nothing you type is sent to this site. The plan is built in
+  this tab.</span></p>
+</div>
+<div class="report" id="wu-out" aria-live="polite"></div>
+
+<div class="sechead r">
+  <h2>Where you are now</h2>
+  <p>A schedule that counts days and ignores what came back is the reason people get
+  filtered on day nine and keep sending. Put in the day you are on and what you are
+  seeing, and this says whether to step up, hold, or go back.</p>
+</div>
+
+<div class="tool r" id="wu-ci-panel">
+  <form id="wu-ci" autocomplete="off">
+    <div class="row">
+      <div style="flex:0 1 7rem">
+        <label class="lbl-mi" for="wu-day">Day</label>
+        <input class="field" id="wu-day" type="text" inputmode="numeric"
+               spellcheck="false" autocomplete="off" value="1">
+      </div>
+      <div style="flex:1 1 10rem">
+        <label class="lbl-mi" for="wu-gc">Gmail complaints %
+          <em>of inbox mail to engaged recipients</em></label>
+        <input class="field" id="wu-gc" type="text" inputmode="decimal"
+               spellcheck="false" autocomplete="off" placeholder="0.05">
+      </div>
+      <div style="flex:1 1 10rem">
+        <label class="lbl-mi" for="wu-yc">Yahoo complaints %
+          <em>of inbox mail</em></label>
+        <input class="field" id="wu-yc" type="text" inputmode="decimal"
+               spellcheck="false" autocomplete="off" placeholder="0.05">
+      </div>
+      <div style="flex:1 1 9rem">
+        <label class="lbl-mi" for="wu-b">Hard bounces %</label>
+        <input class="field" id="wu-b" type="text" inputmode="decimal"
+               spellcheck="false" autocomplete="off" placeholder="0.4">
+      </div>
+    </div>
+    <p class="hint-text">The two complaint figures are measured against different
+    things by the providers that report them, so they are asked for separately and
+    compared only against their own source.</p>
+
+    <p class="lbl-mi" id="wu-rep-l">Gmail domain reputation, if you can see it</p>
+    <div class="chips-row" role="group" aria-labelledby="wu-rep-l" id="wu-rep">
+      <button class="btn ghost sm on" type="button" data-v="">Not shown yet</button>
+      <button class="btn ghost sm" type="button" data-v="high">High</button>
+      <button class="btn ghost sm" type="button" data-v="medium">Medium</button>
+      <button class="btn ghost sm" type="button" data-v="low">Low</button>
+      <button class="btn ghost sm" type="button" data-v="bad">Bad</button>
+    </div>
+
+    <p class="lbl-mi" id="wu-sig-l">Anything else happening</p>
+    <div class="chips-row" role="group" aria-labelledby="wu-sig-l" id="wu-signals">
+      <button class="btn ghost sm" type="button" data-v="deferrals">Getting 4xx deferrals</button>
+      <button class="btn ghost sm" type="button" data-v="blocked">Blocked or listed</button>
+    </div>
+
+    <div class="row-2">
+      <span></span>
+      <div class="actions">
+        <button class="btn" type="submit" id="wu-ci-run">Where do I stand</button>
+      </div>
+    </div>
+  </form>
+</div>
+<div class="report" id="wu-ci-out" aria-live="polite"></div>
+
+<div class="sechead r">
+  <h2>What is published, and what is convention</h2>
+  <p>The difference matters when somebody asks you to justify a number.</p>
+</div>
+<ul class="prose-list r">
+  <li><strong>Thresholds are published.</strong> Gmail requires a reported spam rate
+  under 0.3% and advises staying under 0.1%. Yahoo requires 0.3%. Microsoft and Apple
+  publish no complaint threshold at all, so nothing here invents one for them.</li>
+  <li><strong>The percentages are not the same measurement.</strong> Gmail counts
+  reports against mail delivered to the inbox of engaged recipients. Yahoo counts
+  against all inbox mail. Microsoft counts against accepted recipients, and a sending
+  platform counts against mail sent. The same behaviour produces four different
+  numbers, so they are never averaged into one figure here.</li>
+  <li><strong>The green, yellow and red in SNDS are not complaint rates.</strong> They
+  report how much of the mail from an address Microsoft classified as spam: green is
+  under 10%, red is over 90%.</li>
+  <li><strong>The curve is convention.</strong> Each pace above is a schedule a named
+  platform published, reproduced as printed. Where your target runs past the end of a
+  table, the same publisher's rule for continuing is applied and the plan says so.</li>
+  <li><strong>The rollback is derived.</strong> Nobody publishes how far to go back
+  after a bad day. The rule used here is stated in the result rather than presented as
+  someone else's guidance.</li>
+</ul>
+
+<div class="sechead r">
+  <h2>Before the first send</h2>
+</div>
+<div class="steps r">
+  <div class="step">
+    <h3>Authentication has to pass first</h3>
+    <p>SPF, DKIM and a DMARC record are a precondition at both Gmail and Microsoft
+    above 5,000 a day, not an improvement to make later.
+    <a href="/check/">Check the domain</a>.</p>
+  </div>
+  <div class="step">
+    <h3>Start from a clean address</h3>
+    <p>Warming an address that is already listed teaches a provider the wrong thing.
+    <a href="/blocklist/">Check it first</a>.</p>
+  </div>
+  <div class="step">
+    <h3>Gmail counts your whole domain</h3>
+    <p>The 5,000 a day that makes you a bulk sender is counted across the primary
+    domain with every subdomain included, and once it applies it does not lapse.</p>
+  </div>
+</div>
+"""
+    return page(
+        "Email warm-up planner: build an IP and domain ramp to a target volume",
+        "Build a day-by-day warm-up ramp for a sending IP, domain or mailboxes. "
+        "Split by mailbox provider, with the hourly rate and the metric that has to "
+        "hold before each step, and a check-in that says whether to advance or roll "
+        "back.",
+        body, "warmup/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Deliverability tools",
+        crumbs=(("Deliverability tools", "tools/"), ("Warm-up planner", None)),
+        modules=("/js/warmup-ui.js",))
 
 
 def build_blocklist():
@@ -3856,7 +4068,9 @@ def check_js():
                         ("parity-lookup.mjs", "the response lookup is wrong"),
                         ("parity-rfc.mjs", "the RFC index is wrong"),
                         ("parity-domain.mjs", "the domain gate is wrong"),
-                        ("parity-bl.mjs", "the blocklist check is wrong")):
+                        ("parity-bl.mjs", "the blocklist check is wrong"),
+                        ("parity-warmup.mjs", "the warm-up planner is wrong"),
+                        ("parity-warmup-pdf.mjs", "the warm-up PDF is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue
@@ -3908,6 +4122,7 @@ def main():
     urls = [build_home(), build_tools(), build_about(),
             build_check(), build_bounce(), build_dmarc(), build_spf(),
             build_blocklist(),
+            build_warmup(),
             build_headers(),
             build_smtp_index(), build_session(), build_rfc_index()]
     for c in CODES:
@@ -3923,7 +4138,8 @@ def main():
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
                  "unzip.js", "rua.js", "rua-ui.js", "findings.js",
                  "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js",
-                 "rfc.js", "rfc-ui.js", "headers-live.js", "bl.js", "bl-ui.js"):
+                 "rfc.js", "rfc-ui.js", "headers-live.js", "bl.js", "bl-ui.js",
+                 "warmup.js", "warmup-ui.js", "warmup-pdf.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # The response registry, fetched by the lookup rather than inlined: it is
