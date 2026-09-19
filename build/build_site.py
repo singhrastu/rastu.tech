@@ -1359,7 +1359,7 @@ TOOLS = [
 # Destinations, in nav order. The label here is the only name each section has: it is
 # the nav link, the footer link, and the head of the destination's h1.
 NAV = [
-    ("Tools", "tools/"),
+    ("Deliverability tools", "tools/"),
     ("SMTP responses", "smtp/"),
     ("RFC decoded", "rfc/"),
     ("Research", "research/"),
@@ -1965,7 +1965,7 @@ about.</p>
         "Paste an SMTP bounce or deferral and get the category and the action it needs: "
         "retry, throttle, suppress, pause, review or fix config. Runs in your browser.",
         body, "bounce/index.html", extra_ld=tool_ld(t), wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Bounce classifier", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("Bounce classifier", None)),
         scripts=("/sift.js",))
 
 
@@ -2038,7 +2038,7 @@ its own record, and collapse two ESPs into one.</p>
         "Walk a domain's full SPF include tree with a running RFC 7208 DNS lookup count, "
         "and find the exact mechanism that pushes it past ten and into permerror.",
         body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("SPF lookup counter", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("SPF lookup counter", None)),
         modules=("/js/spf.js",))
 
 
@@ -2100,7 +2100,7 @@ from a broken one.</p>
         "that cannot be confirmed as working is reported as unchecked, never as "
         "clean.",
         body, "blocklist/index.html", extra_ld=tool_ld(t), wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Blocklist check", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("Blocklist check", None)),
         modules=("/js/bl-ui.js",),
         scripts=(("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",)
                  if TURNSTILE_SITE_KEY else ()))
@@ -2203,7 +2203,7 @@ reporting means enforcing without being able to see what you are enforcing, whic
         "sending source, SPF and DKIM alignment computed from the auth results, and what "
         "to fix first. Parsed in your browser, never uploaded.",
         body, "dmarc/index.html", extra_ld=tool_ld(t), wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("DMARC report reader", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("DMARC report reader", None)),
         modules=("/js/rua-ui.js",))
 
 
@@ -2313,7 +2313,7 @@ the command-line version, checked against it on every build.</p>
         "configuration, including the SPF ten-lookup limit and MTA-STS policy and MX "
         "consistency. Nothing is sent to the server.",
         body, "check/index.html", extra_ld=ld, wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Domain check", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("Domain check", None)),
         modules=("/js/check.js",))
 
 
@@ -2327,7 +2327,7 @@ def build_tools():
     cards = "".join(tool_card(t) for t in TOOLS)
 
     body = f"""
-<h1>Tools</h1>
+<h1>Email infrastructure and deliverability tools</h1>
 <p class="lede">Each one answers a question that turns up in a real incident. They run in
 your browser: nothing you paste or upload is sent anywhere, and there is no account to
 make.</p>
@@ -2354,10 +2354,11 @@ make.</p>
 </div>
 """
     return page(
-        "Email infrastructure tools: bounce classifier, domain check, SPF counter",
-        "Browser-based tools for email operations: classify a bounce, audit a domain's "
-        "SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. Nothing is uploaded.",
-        body, "tools/index.html", wide=True, nav_key="Tools")
+        "Email deliverability tools: blocklist check, DMARC reader, header analyser",
+        "Browser-based tools for email infrastructure and deliverability: check a "
+        "blocklist listing, read a DMARC report, analyse a message's headers, audit "
+        "SPF, DKIM and MTA-STS, and classify a bounce. Nothing is uploaded.",
+        body, "tools/index.html", wide=True, nav_key="Deliverability tools")
 
 
 def build_headers():
@@ -2469,7 +2470,7 @@ gap is reported as skew rather than as a negative duration.</p>
         "the receiver's or an intermediary's, with the DMARC alignment arithmetic and "
         "DKIM signature tag checks no other analyser runs.",
         body, "headers/index.html", extra_ld=tool_ld(t), wide=True,
-        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Header analyser", None)),
+        nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("Header analyser", None)),
         modules=("/js/headers-ui.js",))
 
 
@@ -2515,7 +2516,7 @@ def build_home():
     }
 
     body = f"""
-<h1>Tools for running email infrastructure</h1>
+<h1>Email infrastructure and deliverability tools</h1>
 <p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
 or find the mechanism that quietly switched off an SPF record.</p>
 
@@ -2557,7 +2558,7 @@ or find the mechanism that quietly switched off an SPF record.</p>
 </div>
 """
     return page(
-        "Email infrastructure tools: bounce classifier, domain check, SPF counter",
+        "Email infrastructure and deliverability tools: SPF, DKIM, DMARC, blocklists",
         "Browser-based tools for email operations: classify an SMTP bounce, audit a "
         "domain's SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, "
         "nothing uploaded. Plus an SMTP response reference and original research.",
