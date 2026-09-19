@@ -6,7 +6,7 @@
  * the ranking wrong would bury the one thing a reader can act on underneath
  * things they cannot.
  */
-import { finding, rank, counts, topFixes, verdict, renderFindings, findingsText, showsOwner }
+import { finding, rank, counts, topFixes, verdict, renderFindings, findingsText, showsOwner, OWNER_LABEL }
   from './js/findings.js';
 
 let pass = 0; const fails = [];
@@ -118,7 +118,7 @@ throws('requires a title', () => finding({ severity: 'warn', owner: 'you' }), 'n
 {
   const t = findingsText([f('critical', 'you', { fix: 'do it', detail: 'because' })], 'HEAD');
   is('text output carries the fix', t.includes('fix: do it'), true);
-  is('text output carries the owner', t.includes('owner: You fix this'), true);
+  is('text output carries the owner', t.includes('owner: Sender side'), true);
 }
 
 // -------------------------------------------------- attribution is for action
@@ -136,6 +136,11 @@ is('and a passing check is not', showsOwner(f('ok', 'you')), false);
   const bad = renderFindings([f('critical', 'you', { title: 'Broken' })], {});
   is('and a failure still says who acts', /class="owner/.test(bad), true);
 }
+
+/* The badge names a side, so every label reads the same way. A verb phrase aimed
+   at the reader is an instruction, not an attribution. */
+is('every owner label is a noun phrase, not a command',
+   Object.values(OWNER_LABEL).filter(v => /^(you|please|go|do|fix)\b/i.test(v)), []);
 
 if (fails.length) {
   console.error('\nfindings layer failures:\n  ' + fails.join('\n  '));

@@ -29,11 +29,18 @@ const OWNER_RANK = { you: 0, intermediary: 1, receiver: 2, unknown: 3 };
    reads as an accusation about a result that is fine, and once it appears on
    every row it stops carrying information at all. Shown on warnings and
    failures; hidden on ok, where nobody is at fault. */
+/* A label, not an instruction. These name which side a finding belongs to, so
+   they are all noun phrases and read the same way: "Sender side", "In transit",
+   "Receiver side". "You fix this" was a command aimed at the reader, which is
+   both a different grammatical shape from its neighbours and a tone nobody wants
+   from a diagnostic. The tooltip carries the explanation; the badge carries the
+   side. "Sender side" is also correct for somebody analysing a message they
+   received rather than one they sent, where "your" would be wrong. */
 export const OWNER_LABEL = {
-  you: 'You fix this',
+  you: 'Sender side',
   intermediary: 'In transit',
   receiver: 'Receiver side',
-  unknown: 'Cannot attribute',
+  unknown: 'Not attributable',
 };
 
 /** Does an attribution tell the reader anything on this finding? */
