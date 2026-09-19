@@ -373,8 +373,8 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .fnd.s-info .pill{color:var(--info)}
 .fnd.s-ok .pill{color:var(--ok)}
 .fnd .scope{font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);color:var(--ink-3)}
-/* Ownership is the thing no other tool in this category tells you, so it gets
-   its own visual slot rather than being buried in the prose. */
+/* Ownership is the part a reader acts on, so it gets its own visual slot
+   rather than being buried in the prose. */
 .fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
   font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
   background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
@@ -1322,10 +1322,9 @@ TOOLS = [
     {
         "slug": "blocklist", "name": "Blocklist check",
         "q": "Is this address or domain listed, and is the list still working?",
-        "blurb": "Checks a sending address or a domain against the lists that are "
-                 "actually answering. Every list is probed against its own RFC 5782 "
-                 "test entries first, because a decommissioned zone reports everyone "
-                 "as clean and a wildcarded one reports everyone as listed.",
+        "blurb": "Checks a sending address or a domain against the major DNS "
+                 "blocklists, and confirms each list is answering correctly before "
+                 "its result is reported.",
         "tag": "Reputation",
         "takes": "203.0.113.9  ·  example.com",
     },
@@ -2062,8 +2061,8 @@ the list about itself first.</p>
     <button class="btn" type="submit" id="bl-run">Check</button>
   </form>
   <p class="hint"><span>An address goes to the address lists and a domain to the
-  domain lists: they answer different questions. Nothing you type is sent here, the
-  lookups go from your browser to a public DNS-over-HTTPS resolver.</span></p>
+  domain lists: they answer different questions. Nothing you type is sent to this
+  site. The lookups run from your browser.</span></p>
 """ + (f'''
   <p class="hint"><span>Checks are rate limited. Run several in quick succession
   and a checkbox may appear below asking you to confirm you are a person. The
@@ -2074,35 +2073,32 @@ the list about itself first.</p>
 <div class="report" id="bl-out" aria-live="polite"></div>
 
 <div class="sechead r">
-  <h2>Why a list gets refused before its answer is read</h2>
-  <p>RFC 5782 gives every list a pair of entries it must answer correctly: an address
-  list has to contain 127.0.0.2 and must not contain 127.0.0.1, and a domain list has
-  to contain TEST and must not contain INVALID. Those two queries separate a list that
-  is working from one that is not, and they are the only way to tell from outside.</p>
+  <h2>Lists that have stopped working</h2>
+  <p>A blocklist that shuts down rarely announces it. The zone is left in place, or
+  withdrawn, or repurposed, and the failure only shows up as an answer that looks
+  ordinary.</p>
 </div>
 <ul class="prose-list r">
-  <li><strong>Answers neither.</strong> The zone is dead or refusing. SORBS was
-  decommissioned in 2024 and its zone stopped answering, so every tool still asking
-  it has been reporting a clean result ever since.</li>
-  <li><strong>Answers both.</strong> The list is returning something other than list
-  data. Spamhaus answers 127.255.255.254 to any query arriving through a public
-  resolver, and a checker counting any answer as a hit reports every address as
-  listed. AHBL went further when it closed in 2015 and wildcarded its domain zone to
-  answer yes to everything, deliberately, to force people to stop querying it. It
-  still does.</li>
-  <li><strong>Answers the wrong one.</strong> The return codes do not mean what a
-  blocklist query means. Some reputation services publish on the same interface
-  without following the same convention.</li>
+  <li><strong>It answers nothing.</strong> SORBS was decommissioned in 2024 and its
+  zone stopped answering. Silence from a dead list is identical to silence meaning
+  you are not listed.</li>
+  <li><strong>It answers everything.</strong> AHBL wildcarded its zone when it closed
+  in 2015, deliberately, to force the remaining traffic away. It still answers yes to
+  every name put to it.</li>
+  <li><strong>It answers on another convention.</strong> Some reputation services
+  publish over the same interface without using the same return codes, so an answer
+  that parses as a listing may not be one.</li>
 </ul>
-<p class="r">In all three cases this reports that it could not determine an answer,
-and says which. A blocklist result you cannot trust is worse than no result,
-because you act on it.</p>
+<p class="r">A list in any of those states is reported here as unchecked rather than
+as clean, and named, so you can see what was and was not covered.
+<a href="/rfc/5782/">RFC 5782</a> defines the entries that separate a working list
+from a broken one.</p>
 """
     return page(
         "Blocklist check: is this IP listed, and is the list still answering",
-        "Check a sending IP against the DNS blocklists that are actually responding. "
-        "Every list is probed against its RFC 5782 test entries first, so a "
-        "decommissioned zone cannot report you as clean.",
+        "Check a sending IP or domain against the major DNS blocklists. A list "
+        "that cannot be confirmed as working is reported as unchecked, never as "
+        "clean.",
         body, "blocklist/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Tools", crumbs=(("Tools", "tools/"), ("Blocklist check", None)),
         modules=("/js/bl-ui.js",),
@@ -2302,7 +2298,7 @@ complaint rate under 0.3%, are not visible from DNS, so the report says so rathe
 guessing.</p>
 
 <h2>Your domain is never sent to this site</h2>
-<p>In your browser. The DNS lookups go from your machine to a public DNS-over-HTTPS
+<p>In your browser. The DNS lookups go from your machine straight to a public
 resolver, not through this site, so the domain you type is never sent here and there
 is nothing to log. The one exception is the MTA-STS policy file: a page cannot fetch
 a URL on another origin, so that single request is proxied, and the endpoint takes a
@@ -3578,6 +3574,19 @@ def check_voice():
         (r"being built|coming soon|shipped when|on the roadmap",
          "tells the reader what they cannot have yet"),
     ]
+    product_voice = [
+        (r"two independent resolvers|independent resolvers returned",
+         "narrates the lookup method instead of stating the result"),
+        (r"DNS-over-HTTPS", "implementation jargon in reader copy"),
+        (r"RFC 5782 (?:test entries|probe)|probed against|probe queries"
+         r"|passed its probes|answered its probes",
+         "internal vocabulary in reader copy"),
+        (r"no other (?:tool|checker|analyser)|every other (?:tool|checker)"
+         r"|(?:tools|checkers) still (?:asking|querying)|most tools ",
+         "compares the site to other products"),
+        (r"would read as|reads as reassurance", "argues with the reader"),
+        (r"which is the honest|the honest thing", "justifies its own design"),
+    ]
     models = re.compile(r"\b(claude|chatgpt|anthropic|openai|copilot|gpt-[0-9])\b", re.I)
     bad = []
 
@@ -3602,6 +3611,25 @@ def check_voice():
                 m = re.search(pat, body, re.I)
                 if m:
                     bad.append(f"{rel}: {why} -> {m.group(0)!r}")
+
+            # Reader-facing copy states the finding and the action. It does not
+            # narrate how the tool reached it, argue with the reader about why the
+            # answer is worded that way, or compare the site to other products.
+            # A result that explains its own method reads as a machine justifying
+            # itself rather than as a professional tool reporting a fact.
+            #
+            # /rfc/ pages are exempt: naming a test address is the subject matter
+            # there, not an implementation detail leaking out. Source comments are
+            # stripped first, since they are developer rationale and never rendered.
+            if not rel.startswith("/rfc/"):
+                prose = body
+                if n.endswith(".js"):
+                    prose = re.sub(r"/\*.*?\*/", " ", prose, flags=re.S)
+                    prose = re.sub(r"(?<![:'\"])//[^\n]*", " ", prose)
+                for pat, why in product_voice:
+                    m = re.search(pat, prose, re.I)
+                    if m:
+                        bad.append(f"{rel}: {why} -> {m.group(0)!r}")
             # An em dash between words is prose and reads as machine-set. An em dash
             # that is the whole content of an element or a whole string literal means
             # "no value" in a table, which is ordinary typography. Tell them apart by

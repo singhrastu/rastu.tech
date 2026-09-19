@@ -49,8 +49,9 @@ function main() {
       // telling someone their SPF is missing when their network blocked the lookup.
       out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}`
         + (e.name === 'DnsUnavailable'
-            ? ` A corporate network, VPN or ad blocker intercepting DNS-over-HTTPS is the
-               usual cause. Nothing above should be read as a verdict on this domain.`
+            ? ` A corporate network, VPN or ad blocker intercepting DNS lookups is
+               the usual cause. Nothing above should be read as a verdict on this
+               domain.`
             : '') + `</p>`;
     } finally {
       running = false;
@@ -97,8 +98,8 @@ function render(domain, rep) {
        <span class="pill">${LABEL[verdict.severity]}</span> ${esc(verdict.finding)}</p>` : ''}
     <div class="tiles">${tiles}</div>
     ${body}
-    <p class="note">Checked from your browser over DNS-over-HTTPS. The domain you
-    typed was never sent to this site. DKIM is reported as inconclusive rather
+    <p class="note">Checked from your browser. The domain you typed was never sent
+    to this site. DKIM is reported as inconclusive rather
     than absent when no key is found: selectors are arbitrary strings chosen by
     the sender, so probing a list of common ones proves nothing either way.</p>`;
 

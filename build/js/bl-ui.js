@@ -112,8 +112,7 @@ function main() {
     runBtn.textContent = 'Checking...';
     out.className = 'report on';
     const corpus = what.kind === 'domain' ? DOMAIN_LISTS : LISTS;
-    out.innerHTML = `<p class="note">Probing ${corpus.length} lists against their own
-      RFC 5782 test entries, then asking each one about
+    out.innerHTML = `<p class="note">Checking
       <code>${esc(what.value || raw)}</code>.</p>`;
     try {
       const r = resolver();
@@ -201,11 +200,9 @@ function render(res, what) {
     <div class="head"><h2 tabindex="-1">${esc(res.ip)}</h2></div>
     <p class="verdict-line s-${v.severity === 'critical' ? 'fail' : v.severity}">
       <span class="pill">${PILL[v.state] || 'no result'}</span> ${esc(v.text)}</p>
-    ${res.undetermined.length ? `<p class="note">${res.undetermined.length} of
-      ${res.rows.length} lists did not pass their own RFC 5782 probe on this run, so
-      nothing they said about this address is reported. A list that has been shut
-      down answers nothing, which is indistinguishable from "not listed" unless you
-      test for it.</p>` : ''}
+    ${res.undetermined.length ? `<p class="note">Some lists could not be confirmed
+      as working on this run. They are marked below, and nothing they returned is
+      counted in the result above.</p>` : ''}
     <div class="scroll-x" tabindex="0" role="region" aria-label="Blocklist results">
       <table class="bl">
         <thead><tr><th>List</th><th>Result</th><th>What it means</th><th></th></tr></thead>
@@ -218,11 +215,7 @@ function render(res, what) {
       you send from is separate, and checking it means pasting the address.</p>` : ''}
     ${res.missing.length ? `<div class="warnbox s-info">
       <p><strong>${esc(res.missing.map(m => m.name).join(' and '))} could not be
-      asked.</strong> Spamhaus refuses every public DNS resolver, answering
-      127.255.255.254 to all of them including the entry RFC 5782 says must never
-      be listed. Reaching it needs a Data Query Service key, which this deployment
-      does not have configured. A checker that does not test for the refusal
-      reports every subject as listed.</p>
+      checked here.</strong> It is not included in the result above.</p>
       <p><a href="${esc(res.missing[0].delist)}">Check it directly at
       Spamhaus</a>.</p>
     </div>` : ''}`;

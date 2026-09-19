@@ -72,9 +72,9 @@ export async function liveCheck(a, r = resolver()) {
       out.findings.push(finding({
         severity: 'info', owner: 'unknown', scope: 'DNS',
         title: 'The sending domain could not be looked up',
-        detail: 'DNS-over-HTTPS did not answer, so everything below is read from the '
-          + 'pasted headers alone. This is a network problem here, not a finding about '
-          + 'the domain.',
+        detail: 'The lookup did not complete, so everything below is read from '
+          + 'the pasted headers alone. This is a network problem here, not a '
+          + 'finding about the domain.',
       }));
       return out;
     }

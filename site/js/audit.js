@@ -500,10 +500,9 @@ export async function audit(domain, r, fetchPolicy, selectors) {
     const state = await r.existence(domain);
     if (state === 'nxdomain') {
       rep.add('Domain', FAIL, `${domain} does not exist`,
-        'Two independent resolvers returned NXDOMAIN for this name, so there is '
-        + 'nothing published here and nothing to fix. Check the spelling, and if '
-        + 'the domain was registered in the last few minutes give it time to '
-        + 'appear.',
+        'There is nothing published here and nothing to fix. Check the '
+        + 'spelling, and if the domain was registered in the last few minutes '
+        + 'give it time to appear.',
         'NXDOMAIN at the apex');
       return rep;
     }

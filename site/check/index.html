@@ -323,8 +323,8 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .fnd.s-info .pill{color:var(--info)}
 .fnd.s-ok .pill{color:var(--ok)}
 .fnd .scope{font-family:ui-monospace,Menlo,monospace;font-size:var(--t1);color:var(--ink-3)}
-/* Ownership is the thing no other tool in this category tells you, so it gets
-   its own visual slot rather than being buried in the prose. */
+/* Ownership is the part a reader acts on, so it gets its own visual slot
+   rather than being buried in the prose. */
 .fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
   font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
   background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
@@ -1095,7 +1095,7 @@ complaint rate under 0.3%, are not visible from DNS, so the report says so rathe
 guessing.</p>
 
 <h2 class="r">Your domain is never sent to this site</h2>
-<p>In your browser. The DNS lookups go from your machine to a public DNS-over-HTTPS
+<p>In your browser. The DNS lookups go from your machine straight to a public
 resolver, not through this site, so the domain you type is never sent here and there
 is nothing to log. The one exception is the MTA-STS policy file: a page cannot fetch
 a URL on another origin, so that single request is proxied, and the endpoint takes a

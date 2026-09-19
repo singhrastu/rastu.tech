@@ -33,8 +33,8 @@ function main() {
     } catch (e) {
       out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}`
         + (e.name === 'DnsUnavailable'
-            ? ` A corporate network, VPN or ad blocker intercepting DNS-over-HTTPS is the
-               usual cause.`
+            ? ` A corporate network, VPN or ad blocker intercepting DNS lookups is
+               the usual cause.`
             : '') + `</p>`;
     } finally {
       running = false; runBtn.disabled = false; runBtn.textContent = 'Count lookups';
@@ -88,9 +88,9 @@ function render(res) {
     out.innerHTML = `<div class="head"><h2>${esc(res.domain)}</h2></div>
       <p class="verdict-line s-fail"><span class="pill">fail</span>
       This domain does not exist</p>
-      <p class="note">Two independent resolvers returned NXDOMAIN for it, so there is
-      nothing published here and nothing to fix. Check the spelling, and if it was
-      registered in the last few minutes, give it time to appear.</p>`;
+      <p class="note">There is nothing published here and nothing to fix. Check the
+      spelling, and if it was registered in the last few minutes, give it time to
+      appear.</p>`;
     return;
   }
   if (res.records.length > 1) {

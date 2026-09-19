@@ -177,8 +177,8 @@ export const SPAMHAUS_CODES = {
   // refusals, which are not listings
   '127.255.255.252': ['Not a listing', 'The zone name in the query was wrong, so '
     + 'this says nothing about the subject.'],
-  '127.255.255.254': ['Not a listing', 'The query arrived through a public '
-    + 'resolver, which Spamhaus refuses.'],
+  '127.255.255.254': ['Not a listing', 'Spamhaus did not accept this query, so '
+    + 'this is not a result about the subject.'],
   '127.255.255.255': ['Not a listing', 'Too many queries from this source.'],
 };
 
@@ -225,8 +225,7 @@ export async function checkSpamhaus(subject, kind, dqs) {
   if (res.answers === null) {
     return { ...cfg, state: 'undetermined', codes: [],
       canary: { ok: false, state: 'unreachable',
-        why: 'The key answered its probes but the query for this subject did '
-           + 'not complete.' } };
+        why: 'This list could not be reached, so its result is not shown.' } };
   }
   return { ...cfg, canary, codes: res.answers, meanings: explainCodes(res.answers),
            state: res.answers.length ? 'listed' : 'clean' };
@@ -237,10 +236,8 @@ export async function checkSpamhaus(subject, kind, dqs) {
    with querying it wrongly. */
 export const UNQUERYABLE = [
   { zone: 'zen.spamhaus.org', name: 'Spamhaus ZEN',
-    reason: 'Spamhaus refuses queries arriving through public DNS resolvers and '
-          + 'answers 127.255.255.254 to every one, including the address RFC 5782 '
-          + 'says must never be listed. A checker that does not probe for that '
-          + 'reports every address as listed.',
+    reason: 'Spamhaus does not accept queries made this way. Check it directly '
+          + 'at the link.',
     delist: 'https://check.spamhaus.org/' },
 ];
 
@@ -278,9 +275,8 @@ export const DOMAIN_LISTS = [
 /* Named rather than silently dropped, same as the IP side. */
 export const UNQUERYABLE_DOMAIN = [
   { zone: 'dbl.spamhaus.org', name: 'Spamhaus DBL',
-    reason: 'Spamhaus refuses queries from public DNS resolvers on its domain '
-          + 'list as well, answering 127.255.255.254 to every one including the '
-          + 'name RFC 5782 says must never be listed.',
+    reason: 'Spamhaus does not accept queries made this way. Check it directly '
+          + 'at the link.',
     delist: 'https://check.spamhaus.org/' },
 ];
 
@@ -290,20 +286,16 @@ export function canaryVerdict(listedProbe, notListedProbe) {
   const down = Array.isArray(notListedProbe) && notListedProbe.length > 0;
   if (listedProbe === null || notListedProbe === null) {
     return { ok: false, state: 'unreachable',
-      why: 'The probe queries did not complete, so nothing this list says can be '
-         + 'trusted right now.' };
+      why: 'This list could not be reached, so its result is not shown.' };
   }
   if (up && down) {
     return { ok: false, state: 'refusing',
-      why: 'The list answered for 127.0.0.1, which RFC 5782 says must never be '
-         + 'listed. It is answering something other than list data, usually a '
-         + 'refusal aimed at the resolver being used.' };
+      why: 'This list is returning something other than list data, so its '
+         + 'result is not shown.' };
   }
   if (!up && !down) {
     return { ok: false, state: 'silent',
-      why: 'The list did not answer for 127.0.0.2, which RFC 5782 says every '
-         + 'conformant list must contain. The zone is dead or refusing, and a '
-         + 'dead zone reports every address as clean.' };
+      why: 'This list is not answering, so its result is not shown.' };
   }
   if (!up && down) {
     return { ok: false, state: 'inverted',
@@ -347,10 +339,8 @@ export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS, dqs, exi
      declare a live domain dead. */
   if (typeof exists === 'function' && await exists(d) === 'nxdomain') {
     return { ip: d, subject: d, kind: 'domain', supported: false, nxdomain: true,
-      reason: 'This domain does not exist. Two independent resolvers returned '
-            + 'NXDOMAIN for it, so there is nothing to be listed and nothing to '
-            + 'check. A blocklist result for a name nobody owns would read as '
-            + 'reassurance about a domain that is not yours.' };
+      reason: 'This domain does not exist, so there is nothing to check. '
+            + 'Check the spelling.' };
   }
   const rows = await Promise.all(lists.map(async (l) => {
     const [listedProbe, notListedProbe, answer] = await Promise.all([
@@ -363,8 +353,7 @@ export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS, dqs, exi
     if (answer === null) {
       return { ...l, state: 'undetermined', codes: [],
         canary: { ok: false, state: 'unreachable',
-          why: 'The list passed its probes but the query for this domain did '
-             + 'not complete.' } };
+          why: 'This list could not be reached, so its result is not shown.' } };
     }
     return { ...l, canary, codes: answer,
              state: answer.length ? 'listed' : 'clean' };
@@ -464,8 +453,7 @@ export async function check(ip, lookup, lists = LISTS, dqs) {
     if (answer === null) {
       return { ...l, state: 'undetermined', codes: [],
         canary: { ok: false, state: 'unreachable',
-          why: 'The list passed its probes but the query for this address did '
-             + 'not complete.' } };
+          why: 'This list could not be reached, so its result is not shown.' } };
     }
     return { ...l, canary, codes: answer,
              state: answer.length ? 'listed' : 'clean' };
