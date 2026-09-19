@@ -3844,6 +3844,26 @@ def check_js():
         os.remove(tmp)
         if rc.returncode:
             sys.exit(f"JS syntax error in {name}:\n{rc.stderr}")
+    # The entry call goes last, so nothing it reaches can be undeclared when it
+    # runs. bl-ui.js called main() in the middle of the module and main() fired a
+    # submit synchronously on a ?q= deep link, which reached a binding declared
+    # further down: a typed check worked, the deep link threw. rua-ui.js had the
+    # same shape before it. Checking the position is reliable; working out what a
+    # start-up path can reach is not.
+    for name in sorted(os.listdir(os.path.join(HERE, "js"))):
+        if not name.endswith(".js"):
+            continue
+        src = open(os.path.join(HERE, "js", name), encoding="utf8").read()
+        call = re.search(r"^(?:if \([^)]*\) )?(?:main|boot)\(\);[ \t]*$", src, re.M)
+        if not call:
+            continue
+        rest = src[call.end():].strip()
+        if rest:
+            raise SystemExit(
+                f"js check failed: {name} calls its entry point with "
+                f"{len(rest.splitlines())} line(s) of module still below it. Move the "
+                "call to the end, so nothing it reaches can be undeclared when it runs.")
+
     print(f"  js ok ({', '.join(sorted(blobs))})")
 
 

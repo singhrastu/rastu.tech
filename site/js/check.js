@@ -7,7 +7,6 @@ const form = document.getElementById('check-form');
 const input = document.getElementById('check-domain');
 const out = document.getElementById('check-out');
 const runBtn = document.getElementById('check-run');
-if (form && input && out) main();
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -117,3 +116,8 @@ function render(domain, rep) {
     });
   });
 }
+
+/* Last, deliberately. Everything above is declared before the entry point
+   runs, so a path that fires synchronously during start up, such as a deep
+   link dispatching a submit, cannot reach a binding that does not exist yet. */
+if (form && input && out) main();

@@ -9,11 +9,16 @@ import { check, checkDomain, classify, LISTS, DOMAIN_LISTS } from './bl.js';
 import { resolver } from './doh.js';
 import { esc } from './findings.js';
 
+/* Declared before main() runs, not after. main() is called at module load and a
+   ?q= deep link dispatches a submit synchronously inside it, so a binding this
+   path touches must already exist. Declaring it lower down is a temporal dead
+   zone error that only appears on the deep link, never on a typed check. */
+let widgetId = null;
+
 const form = document.getElementById('bl-form');
 const input = document.getElementById('bl-in');
 const out = document.getElementById('bl-out');
 const runBtn = document.getElementById('bl-run');
-if (form) main();
 
 /* "Clean" is a claim about every list. What this can honestly say is that the
    lists which answered did not list you, and while Spamhaus cannot be reached
@@ -47,7 +52,6 @@ const STATE_LABEL = {
  * check still runs and the Spamhaus row reports that it was refused rather than
  * pretending the subject was clean.
  */
-let widgetId = null;
 function challengeToken() {
   const el = document.getElementById('bl-turnstile');
   if (!el || !window.turnstile) return Promise.resolve('');
@@ -212,3 +216,8 @@ function render(res, what) {
     </div>` : ''}`;
   out.querySelector('h2')?.focus();
 }
+
+/* Last, deliberately. Everything above is declared before the entry point
+   runs, so a path that fires synchronously during start up, such as a deep
+   link dispatching a submit, cannot reach a binding that does not exist yet. */
+if (form) main();
