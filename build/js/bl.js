@@ -336,8 +336,22 @@ export function classify(input) {
  * addresses, and they catch a failure mode the IP side rarely sees: a zone that
  * was retired by wildcarding every answer to positive.
  */
-export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS, dqs) {
+export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS, dqs, exists) {
   const d = String(domain || '').trim().toLowerCase().replace(/\.+$/, '');
+
+  /* A domain that does not exist is on no blocklist, which is true and useless.
+     "Not listed on the 7 lists that answered" reads as a clean bill of health
+     for a name nobody owns, and somebody checking a typo of their own domain
+     takes the reassurance and leaves. Asked before the lists are, and only
+     claimed when two resolvers agree, so a resolver having a bad minute cannot
+     declare a live domain dead. */
+  if (typeof exists === 'function' && await exists(d) === 'nxdomain') {
+    return { ip: d, subject: d, kind: 'domain', supported: false, nxdomain: true,
+      reason: 'This domain does not exist. Two independent resolvers returned '
+            + 'NXDOMAIN for it, so there is nothing to be listed and nothing to '
+            + 'check. A blocklist result for a name nobody owns would read as '
+            + 'reassurance about a domain that is not yours.' };
+  }
   const rows = await Promise.all(lists.map(async (l) => {
     const [listedProbe, notListedProbe, answer] = await Promise.all([
       lookup(`TEST.${l.zone}`),

@@ -136,7 +136,8 @@ function main() {
         } catch { return null; }
       };
       render(what.kind === 'domain'
-        ? await checkDomain(what.value, lookup, undefined, dqs)
+        ? await checkDomain(what.value, lookup, undefined, dqs,
+                            (d) => r.existence(d))
         : await check(raw, lookup, undefined, dqs), what);
       history.replaceState(null, '', '?q=' + encodeURIComponent(raw));
     } catch (e) {

@@ -340,6 +340,45 @@ is('every documented code carries an explanation',
   is('with no gap sentence', r.verdict.text.includes('did not answer'), false);
 }
 
+// -------------------------------- a name that does not exist is not checked
+/* "Not listed on the 7 lists that answered" is true of every domain nobody
+   owns, and it reads as a clean bill of health. Somebody checking a typo of
+   their own domain takes the reassurance and leaves. The question is asked
+   before any list is, so a name that does not resolve costs nothing and
+   produces no verdict to misread. */
+{
+  let lookups = 0, spamhaus = 0;
+  const counting = async (n) => { lookups++; return n.startsWith('TEST.') ? ['127.0.0.2'] : []; };
+  const dqs = async () => { spamhaus++; return { up: ['127.0.1.2'], down: [], answers: [] }; };
+
+  const gone = await checkDomain('blabla123321.com', counting, undefined, dqs,
+                                 async () => 'nxdomain');
+  is('a non-existent domain is not checked', gone.supported, false);
+  is('and says why', gone.nxdomain, true);
+  is('and no list was queried', lookups, 0);
+  is('and no Spamhaus query was spent', spamhaus, 0);
+  is('and there is no verdict to misread', gone.verdict, undefined);
+
+  lookups = 0; spamhaus = 0;
+  const real = await checkDomain('bettywins.com', counting, undefined, dqs,
+                                 async () => 'exists');
+  is('a real domain is checked', real.supported, true);
+  is('and the lists are queried', lookups > 0, true);
+
+  // A resolver having a bad minute must never declare a live domain dead.
+  lookups = 0;
+  const unsure = await checkDomain('bettywins.com', counting, undefined, dqs,
+                                   async () => 'undetermined');
+  is('an undetermined existence check does not block the run', unsure.supported, true);
+  is('and the lists are still queried', lookups > 0, true);
+
+  // Without the check wired in at all, behaviour is unchanged.
+  lookups = 0;
+  const noGate = await checkDomain('bettywins.com', counting, undefined, dqs);
+  is('no existence check means no change', noGate.supported, true);
+  is('and the lists are queried as before', lookups > 0, true);
+}
+
 if (fails.length) {
   console.error('\nblocklist failures:\n  ' + fails.join('\n  '));
   process.exit(1);
