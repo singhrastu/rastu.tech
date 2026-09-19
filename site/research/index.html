@@ -177,12 +177,13 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 
 /* ---- single-series magnitude bars ------------------------------------- */
 .bars{margin:1.3rem 0 1.8rem}
-.bar-row{display:grid;grid-template-columns:1fr 3.2rem;gap:.85rem;align-items:center;margin:.55rem 0}
+.bar-row{display:grid;grid-template-columns:1fr 3.2rem;gap:.85rem;align-items:center;
+  margin:.55rem 0;scroll-margin-top:6rem}
 .bar-label{font-size:.885rem;color:var(--ink-2);line-height:1.35}
 .bar-track{grid-column:1/-1;height:7px;background:var(--line-2);border-radius:4px;overflow:hidden}
 .bar-fill{height:100%;background:var(--accent);border-radius:4px;
           width:0;transition:width .9s cubic-bezier(.22,.7,.3,1)}
-.reveal .bar-fill{width:var(--w)}
+.bar-row.reveal .bar-fill{width:var(--w)}
 .bar-val{font-size:.885rem;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
 
 /* ---- card grid for the reference index -------------------------------- */
@@ -327,8 +328,12 @@ td:not(:first-child){font-variant-numeric:tabular-nums}
 .fnd .owner{margin-left:auto;font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;
   font-weight:650;padding:.16rem .55rem;border-radius:6px;cursor:help;
   background:var(--code);border:1px solid var(--line);color:var(--ink-3)}
-.fnd.o-you .owner{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);
-  background:var(--accent-soft)}
+/* The severity pill already carries the colour. Attribution is a second,
+   quieter fact: who acts, not how bad it is. Green here read as approval on
+   a row that was reporting a problem. */
+.fnd .owner{color:var(--ink-3);border-color:var(--line);background:transparent}
+.fnd.s-critical .owner{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 35%,transparent)}
+.fnd.s-warn .owner{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 35%,transparent)}
 .fnd h4{margin:0 0 .3rem;font-size:var(--t3);font-weight:650;color:var(--ink);line-height:1.45}
 .fnd .d{margin:0;font-size:var(--t2);color:var(--ink-3);line-height:1.6;max-width:44rem}
 .fnd .fix{margin:.55rem 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.6;
@@ -1173,7 +1178,7 @@ I would like to know.</p>
   addEventListener('scroll',function(){if(!ticking){ticking=true;requestAnimationFrame(onScroll);}},{passive:true});
   onScroll();
 
-  var targets = document.querySelectorAll('.r,.bars,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
+  var targets = document.querySelectorAll('.r,.bar-row,.strip,.bento,.grid,.stats,.tool,.tl,.sechead,.chips-row,.panel,.tree,.session');
   if(!('IntersectionObserver' in window) || reduce){
     targets.forEach(function(n){n.classList.add('reveal'); countUp(n);});
   } else {

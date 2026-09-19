@@ -6,7 +6,7 @@
  * the ranking wrong would bury the one thing a reader can act on underneath
  * things they cannot.
  */
-import { finding, rank, counts, topFixes, verdict, renderFindings, findingsText }
+import { finding, rank, counts, topFixes, verdict, renderFindings, findingsText, showsOwner }
   from './js/findings.js';
 
 let pass = 0; const fails = [];
@@ -118,7 +118,23 @@ throws('requires a title', () => finding({ severity: 'warn', owner: 'you' }), 'n
 {
   const t = findingsText([f('critical', 'you', { fix: 'do it', detail: 'because' })], 'HEAD');
   is('text output carries the fix', t.includes('fix: do it'), true);
-  is('text output carries the owner', t.includes('owner: Your problem'), true);
+  is('text output carries the owner', t.includes('owner: You fix this'), true);
+}
+
+// -------------------------------------------------- attribution is for action
+/* "Your problem" stamped beside "this message passes DMARC" reads as an
+   accusation about a result that is fine, and once the badge appears on every
+   row it stops carrying information. It belongs on the rows somebody must act on. */
+is('a failure is attributed', showsOwner(f('critical', 'you')), true);
+is('a warning is attributed', showsOwner(f('warn', 'intermediary')), true);
+is('a note is not', showsOwner(f('info', 'you')), false);
+is('and a passing check is not', showsOwner(f('ok', 'you')), false);
+{
+  const html = renderFindings([f('ok', 'you', { title: 'This message passes DMARC' })],
+                              { showOk: true });
+  is('so nothing is blamed for a pass', /class="owner/.test(html), false);
+  const bad = renderFindings([f('critical', 'you', { title: 'Broken' })], {});
+  is('and a failure still says who acts', /class="owner/.test(bad), true);
 }
 
 if (fails.length) {

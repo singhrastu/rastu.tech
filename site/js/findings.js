@@ -24,12 +24,22 @@ const SEV_RANK = { critical: 0, warn: 1, info: 2, ok: 3 };
 export const OWNER = ['you', 'intermediary', 'receiver', 'unknown'];
 const OWNER_RANK = { you: 0, intermediary: 1, receiver: 2, unknown: 3 };
 
+/* Attribution answers "who fixes this", so it only means anything when there is
+   something to fix. "Your problem" stamped beside "this message passes DMARC"
+   reads as an accusation about a result that is fine, and once it appears on
+   every row it stops carrying information at all. Shown on warnings and
+   failures; hidden on ok, where nobody is at fault. */
 export const OWNER_LABEL = {
-  you: 'Your problem',
+  you: 'You fix this',
   intermediary: 'In transit',
   receiver: 'Receiver side',
   unknown: 'Cannot attribute',
 };
+
+/** Does an attribution tell the reader anything on this finding? */
+export function showsOwner(f) {
+  return f.severity === 'critical' || f.severity === 'warn';
+}
 const OWNER_HINT = {
   you: 'Something in your sending configuration causes this.',
   intermediary: 'A forwarder or relay between sender and recipient caused this.',
@@ -125,7 +135,10 @@ function renderOne(f) {
     <header>
       <span class="pill">${esc(SEV_LABEL[f.severity])}</span>
       ${f.scope ? `<span class="scope">${esc(f.scope)}</span>` : ''}
-      <span class="owner" title="${esc(OWNER_HINT[f.owner])}">${esc(OWNER_LABEL[f.owner])}</span>
+      ${showsOwner(f)
+        ? `<span class="owner o-${esc(f.owner)}" title="${esc(OWNER_HINT[f.owner])}"
+            >${esc(OWNER_LABEL[f.owner])}</span>`
+        : ''}
     </header>
     <h4>${esc(f.title)}</h4>
     ${f.detail ? `<p class="d">${esc(f.detail)}</p>` : ''}
