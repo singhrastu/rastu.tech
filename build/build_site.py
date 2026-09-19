@@ -119,8 +119,10 @@ body{
     color-mix(in srgb,var(--bg) 72%,transparent) 58%,
     color-mix(in srgb,var(--bg) 92%,transparent) 100%)}
 
-.wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
-.wrap.wide{max-width:64rem}
+.wrap{position:relative;z-index:1;max-width:64rem;margin:0 auto;padding:0 1.35rem 5rem}
+/* The reading column, not the shell. Nav, breadcrumb and footer keep the full
+   width on every page so they do not move when you navigate. */
+.wrap:not(.wide) main{max-width:var(--measure);margin-left:auto;margin-right:auto}
 /* Prose gets the readable measure; anything that is a layout opts out by not
    being in this list. */
 .wrap.wide main > p,
@@ -141,7 +143,7 @@ body{
 .skip:focus{left:0}
 nav.top{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
   padding:1.25rem 0 var(--s5);font-size:1.02rem}
-nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:500;
+nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:600;
   padding:.5rem .85rem;border-radius:9px;border:1px solid transparent;
   transition:color .18s,background .18s,border-color .18s,transform .18s}
 nav.top a:hover{color:var(--ink);background:var(--surface);border-color:var(--line);
@@ -150,7 +152,7 @@ nav.top a:active{transform:translateY(0)}
 nav.top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* The page you are on, and the one you just clicked, both read as accent. */
 nav.top a[aria-current]{color:var(--accent);background:var(--accent-soft);
-  border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:650}
+  border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
 nav.top a[aria-current]:hover{color:var(--accent-2);transform:translateY(-2px)}
 nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   font-weight:700;color:var(--ink);font-size:1.12rem;letter-spacing:-.02em;
@@ -966,10 +968,10 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
 
-.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
   font-size:var(--t2)}
-.meta dt{color:var(--ink-3);font-weight:600}
-.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+dl.meta dt{color:var(--ink-3);font-weight:600}
+dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
 
 .reqsec{margin:0 0 var(--s4)}
@@ -1013,8 +1015,8 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
   .rfc-row .n{display:none}
   .reqs li{grid-template-columns:1fr;gap:.25rem}
-  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
-  .meta dt{margin-top:.5rem}
+  dl.meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  dl.meta dt{margin-top:.5rem}
 }
 """
 
@@ -3402,6 +3404,28 @@ def s_inline_scripts():
     return "\n".join(out)
 
 
+def check_nav_stability():
+    """The current-page marker must not change a nav link's size.
+
+    The bar is right-aligned, so any property that alters a link's width moves
+    every link before it. font-weight:650 against a base of 500 shifted the row
+    by up to 4px on each navigation, which reads as the menu jumping about.
+    Colour, background and border mark the current page without touching layout.
+    """
+    metric = ("font-weight", "font-size", "padding", "letter-spacing",
+              "border-width", "margin", "text-transform")
+    m = re.search(r"nav\.top a\[aria-current\]\s*\{([^}]*)\}", CSS)
+    if not m:
+        raise SystemExit("nav check failed: no current-page rule found")
+    body = m.group(1)
+    hit = [prop for prop in metric if re.search(r"(^|;)\s*" + prop, body)]
+    if hit:
+        raise SystemExit("nav check failed: the current-page state sets "
+                         + ", ".join(hit) + ", which changes the link's width "
+                         "and shifts the whole bar")
+    print("  nav ok (the current-page marker changes no metrics)")
+
+
 def check_html():
     """Structural rules a browser will not report and the page will not survive.
 
@@ -3675,6 +3699,7 @@ def main():
     check_js()
     check_copy()
     check_voice()
+    check_nav_stability()
     check_html()
     check_links()
 

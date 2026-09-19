@@ -76,8 +76,10 @@ body{
     color-mix(in srgb,var(--bg) 72%,transparent) 58%,
     color-mix(in srgb,var(--bg) 92%,transparent) 100%)}
 
-.wrap{position:relative;z-index:1;max-width:var(--measure);margin:0 auto;padding:0 1.35rem 5rem}
-.wrap.wide{max-width:64rem}
+.wrap{position:relative;z-index:1;max-width:64rem;margin:0 auto;padding:0 1.35rem 5rem}
+/* The reading column, not the shell. Nav, breadcrumb and footer keep the full
+   width on every page so they do not move when you navigate. */
+.wrap:not(.wide) main{max-width:var(--measure);margin-left:auto;margin-right:auto}
 /* Prose gets the readable measure; anything that is a layout opts out by not
    being in this list. */
 .wrap.wide main > p,
@@ -98,7 +100,7 @@ body{
 .skip:focus{left:0}
 nav.top{display:flex;gap:.35rem;align-items:center;flex-wrap:wrap;
   padding:1.25rem 0 var(--s5);font-size:1.02rem}
-nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:500;
+nav.top a{color:var(--ink-2);text-decoration:none;position:relative;font-weight:600;
   padding:.5rem .85rem;border-radius:9px;border:1px solid transparent;
   transition:color .18s,background .18s,border-color .18s,transform .18s}
 nav.top a:hover{color:var(--ink);background:var(--surface);border-color:var(--line);
@@ -107,7 +109,7 @@ nav.top a:active{transform:translateY(0)}
 nav.top a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* The page you are on, and the one you just clicked, both read as accent. */
 nav.top a[aria-current]{color:var(--accent);background:var(--accent-soft);
-  border-color:color-mix(in srgb,var(--accent) 35%,transparent);font-weight:650}
+  border-color:color-mix(in srgb,var(--accent) 35%,transparent)}
 nav.top a[aria-current]:hover{color:var(--accent-2);transform:translateY(-2px)}
 nav.top .mark{margin-right:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
   font-weight:700;color:var(--ink);font-size:1.12rem;letter-spacing:-.02em;
@@ -923,10 +925,10 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .rfc-row .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rfc-row .n{color:var(--ink-3);font-size:var(--t1);min-width:2.2rem;text-align:right}
 
-.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
+dl.meta{display:grid;grid-template-columns:auto 1fr;gap:.35rem var(--s4);margin:0;
   font-size:var(--t2)}
-.meta dt{color:var(--ink-3);font-weight:600}
-.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
+dl.meta dt{color:var(--ink-3);font-weight:600}
+dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .hist{margin:var(--s3) 0 0;font-size:var(--t2);color:var(--ink-2);line-height:1.7}
 
 .reqsec{margin:0 0 var(--s4)}
@@ -970,8 +972,8 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
   .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
   .rfc-row .n{display:none}
   .reqs li{grid-template-columns:1fr;gap:.25rem}
-  .meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
-  .meta dt{margin-top:.5rem}
+  dl.meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
+  dl.meta dt{margin-top:.5rem}
 }
 </style>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "RFC decoded", "item": "https://rastu.tech//rfc/"}, {"@type": "ListItem", "position": 3, "name": "RFC 6409"}]}, {"@type": "TechArticle", "headline": "RFC 6409: Message Submission for Mail", "url": "https://rastu.tech/rfc/6409/", "author": {"@id": "https://rastu.tech/#person"}, "about": "Message Submission for Mail", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
