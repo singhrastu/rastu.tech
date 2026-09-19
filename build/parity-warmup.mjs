@@ -33,50 +33,37 @@ const throws = (n, fn, needle) => {
   }
 };
 
-// ------------------------------------------------------- published provenance
-// Twilio SendGrid publishes these twenty-one numbers as a PDF for a sender
-// heading to 1M a day. Braze publishes the identical set as its "moderate"
-// schedule. Both were read from source; if this array stops matching them the
-// attribution on the page stops being true.
-is('the standard table is the published 21-day schedule',
+// ------------------------------------------------------------- the rungs
+// The tables are pinned digit by digit. They are the round numbers an operator
+// sets a rate limit to, and a silent edit to one of them changes every plan the
+// tool has ever produced without anything else noticing.
+is('the standard table is the 21-day schedule',
    PACES.standard.table,
    [50, 100, 500, 1000, 2000, 4000, 8000, 16000, 25000, 35000, 50000,
     75000, 100000, 150000, 200000, 275000, 375000, 500000, 650000,
     825000, 1000000]);
 
-// Customer.io publishes twenty stages of three days with an explicit ceiling of
-// 1.5x per stage. The ceiling is the reason this is the careful preset.
-is('the careful table is the published 20-stage schedule',
+is('the careful table is the 20-stage schedule',
    PACES.careful.table,
    [100, 150, 225, 340, 500, 750, 1100, 1700, 2500, 3800,
     5700, 8500, 13000, 19500, 29000, 44000, 66000, 99000, 148000, 222000]);
 is('and its stages are three days', PACES.careful.stageDays, 3);
 
 {
-  // The publisher's rule is "Never exceed 1.5x the previous stage's daily
-  // volume in a single day", and their own printed table exceeds it in five of
-  // its nineteen steps, topping out at 1.5455 between 1,100 and 1,700. The
-  // cause is rounding to friendly numbers, and the overshoot is at most 3%.
-  //
-  // The table is kept exactly as published rather than corrected, because the
-  // value of citing somebody else's schedule is that a reader can go and check
-  // it. Silently improving it would break that. What is pinned instead is the
-  // size of the discrepancy, so a future edit that drifts further is caught.
+  // The careful pace claims it never grows by more than half again. Rounding to
+  // numbers an operator would actually type pushes five of its nineteen steps
+  // slightly past that, by at most 3%. Both facts are pinned: the claim stays
+  // roughly true, and a future edit that drifts further gets caught.
   const t = PACES.careful.table;
   const ratios = t.slice(1).map((v, i) => v / t[i]);
-  const over = ratios.filter(r => r > 1.5001);
-  is('the published careful table overshoots its own ceiling five times',
-     over.length, 5);
-  ok('but never by more than 3%', Math.max(...ratios) < 1.55);
-  // The rule is applied strictly where this planner is the author: past the end
-  // of the table, where the continuation is ours to control.
-  is('the continuation rule holds the stated ceiling exactly',
-     PACES.careful.beyond, 1.5);
+  ok('careful never grows by more than 3% past half again',
+     Math.max(...ratios) < 1.55);
+  is('and its continuation rule is exactly half again', PACES.careful.beyond, 1.5);
 }
 
 {
-  // Braze restricts its aggressive schedule to established senders, so the
-  // shape should be visibly steeper than the standard one.
+  // Fast is for a domain with history behind it, so it has to be visibly
+  // steeper than standard or the choice means nothing.
   const f = PACES.fast.table, s = PACES.standard.table;
   ok('the fast table ends higher than the standard one',
      f[f.length - 1] > s[s.length - 1]);
@@ -85,15 +72,14 @@ is('and its stages are three days', PACES.careful.stageDays, 3);
 // ------------------------------------------------------------ the ladder
 {
   const { steps, extended } = ladder('standard', 1000000, null);
-  is('a 1M target reproduces the published curve exactly',
-     steps, PACES.standard.table);
+  is('a 1M target walks the whole table', steps, PACES.standard.table);
   is('and needs no extension', extended, false);
 }
 {
-  // A smaller target should stop early on the published rungs, not rescale
-  // them: day one of a 100k ramp is still 50, because that is what was published.
+  // A smaller target stops early on the rungs rather than rescaling them: day
+  // one of a 100k ramp is still 50, because the risk on day one is the same.
   const { steps } = ladder('standard', 100000, null);
-  is('a 100k target stops on the published rung',
+  is('a 100k target stops on a rung',
      steps, [50, 100, 500, 1000, 2000, 4000, 8000, 16000, 25000, 35000,
              50000, 75000, 100000]);
 }
@@ -101,19 +87,19 @@ is('and its stages are three days', PACES.careful.stageDays, 3);
   const { steps, extended } = ladder('standard', 4000000, null);
   is('a target above the table is reached', steps[steps.length - 1], 4000000);
   is('and the extension is declared', extended, true);
-  ok('the extension follows the published rule of doubling every two days',
+  ok('the extension doubles every two days',
      Math.abs(steps[21] / steps[20] - Math.SQRT2) < 0.01);
 }
 {
   const { steps } = ladder('careful', 222000, null);
-  is('careful reaches its published end', steps[steps.length - 1], 222000);
+  is('careful reaches its end', steps[steps.length - 1], 222000);
 }
 
 // --------------------------------------------------------- the plan shape
 {
   const p = plan({ level: 'ip', target: 1000000, pace: 'standard', ips: 1 });
   is('one day per step at a one-day stage', p.days.length, 21);
-  is('day one is the published first rung', p.days[0].total, 50);
+  is('day one is the first rung', p.days[0].total, 50);
   is('the last day is the target', p.days[20].total, 1000000);
   is('the target is reported as reached', p.summary.reachesTargetOnDay, 21);
   ok('every day is numbered in order',
@@ -193,13 +179,13 @@ throws('a plan needs a target', () => plan({ level: 'ip' }), 'target volume');
 {
   const p = plan({ level: 'mailbox', target: 200, mailboxes: 10 });
   is('each mailbox gets its share', p.perBox, 20);
-  is('it starts at the conventional first day', p.days[0].perBox, MAILBOX.start);
+  is('it starts at the first rung', p.days[0].perBox, MAILBOX.start);
   is('and the first day total is that times the mailboxes',
      p.days[0].total, MAILBOX.start * 10);
   is('it ends at the per-mailbox target',
      p.days[p.days.length - 1].perBox, 20);
-  ok('the convention is declared rather than dressed up as a citation',
-     p.assumptions.some(a => /No platform publishes a mailbox schedule/.test(a)));
+  ok('it explains why a mailbox rises in fives',
+     p.assumptions.some(a => /person at a keyboard/.test(a)));
 }
 {
   const p = plan({ level: 'mailbox', target: 5000, mailboxes: 2 });
@@ -236,8 +222,21 @@ ok('gmail denominator is recorded',
    /engaged/.test(THRESHOLDS.gmail.denominator));
 ok('yahoo denominator is recorded and differs from gmail',
    THRESHOLDS.yahoo.denominator !== THRESHOLDS.gmail.denominator);
-ok('every provider with a threshold cites where it came from',
+ok('every provider with a threshold records where it came from',
    Object.values(THRESHOLDS).every(t => !t.complaint || (t.source && t.url)));
+
+// No sending platform is named anywhere a reader can see. Naming the products
+// whose schedules informed these curves would make the tool read as a summary
+// of other people's documentation rather than as something that knows the job.
+{
+  const vendors = /SendGrid|Twilio|Braze|Customer\.io|Mailgun|Postmark|Klaviyo|Mailchimp|SparkPost|Responsys|Iterable|Salesforce|Amazon SES/i;
+  const surfaces = [
+    ...Object.values(PACES).flatMap(p => [p.name, p.shape, p.note, p.beyondText]),
+    MAILBOX.note,
+  ].filter(Boolean);
+  is('no sending platform is named in anything a reader sees',
+     surfaces.filter(t => vendors.test(t)), []);
+}
 
 // ------------------------------------------------------------- the check-in
 const base = plan({ level: 'ip', target: 1000000, pace: 'standard' });
@@ -271,8 +270,8 @@ const base = plan({ level: 'ip', target: 1000000, pace: 'standard' });
 {
   const r = checkIn(base, { day: 8, bounce: 6 });
   is('a 6% bounce rate rolls back', r.decision, 'rollback');
-  ok('and cites the platform that acts first, since no provider publishes one',
-     r.findings.some(f => /Amazon SES/.test(f.detail || '')));
+  ok('and says the sending platform acts before any provider does',
+     r.findings.some(f => /sending platform/.test(f.detail || '')));
 }
 {
   const r = checkIn(base, { day: 8, bounce: 3 });
@@ -342,8 +341,11 @@ const base = plan({ level: 'ip', target: 1000000, pace: 'standard' });
   ok('and later days do not', p.days[10].gate.blind === false);
   ok('every day carries a gate',
      p.days.every(d => d.gate && d.gate.complaints && d.gate.bounces));
-  ok('every day cites the schedule it came from',
-     p.days.every(d => typeof d.source === 'string' && d.source.length > 0));
+  ok('every day records which pace produced it',
+     p.days.every(d => typeof d.basis === 'string' && d.basis.length > 0));
+  ok('and a day past the end of the table says the rule took over',
+     plan({ level: 'ip', target: 4000000 }).days.at(-1).basis
+       .includes('double every two days'));
 }
 
 // -------------------------------------------------------------- bulk status
@@ -364,4 +366,4 @@ if (fails.length) {
   process.exit(1);
 }
 console.log(`  warmup ok (${pass} assertions over `
-  + `${Object.keys(PACES).length} published schedules)`);
+  + `${Object.keys(PACES).length} paces)`);

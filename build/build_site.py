@@ -2197,13 +2197,13 @@ plan is worth only as much as the schedule it names and the figures it holds you
 <div class="report" id="wu-ci-out" aria-live="polite"></div>
 
 <div class="sechead r">
-  <h2>What is published, and what is convention</h2>
-  <p>The difference matters when somebody asks you to justify a number.</p>
+  <h2>What the receivers actually require</h2>
+  <p>The part of a warm-up that is not a judgement call.</p>
 </div>
 <ul class="prose-list r">
-  <li><strong>Thresholds are published.</strong> Gmail requires a reported spam rate
-  under 0.3% and advises staying under 0.1%. Yahoo requires 0.3%. Microsoft and Apple
-  publish no complaint threshold at all, so nothing here invents one for them.</li>
+  <li><strong>Gmail and Yahoo both draw the line at 0.3%.</strong> Gmail advises
+  staying under 0.1%. Microsoft and Apple publish no complaint threshold at all, so
+  nothing here invents one for them.</li>
   <li><strong>The percentages are not the same measurement.</strong> Gmail counts
   reports against mail delivered to the inbox of engaged recipients. Yahoo counts
   against all inbox mail. Microsoft counts against accepted recipients, and a sending
@@ -2212,12 +2212,12 @@ plan is worth only as much as the schedule it names and the figures it holds you
   <li><strong>The green, yellow and red in SNDS are not complaint rates.</strong> They
   report how much of the mail from an address Microsoft classified as spam: green is
   under 10%, red is over 90%.</li>
-  <li><strong>The curve is convention.</strong> Each pace above is a schedule a named
-  platform published, reproduced as printed. Where your target runs past the end of a
-  table, the same publisher's rule for continuing is applied and the plan says so.</li>
-  <li><strong>The rollback is derived.</strong> Nobody publishes how far to go back
-  after a bad day. The rule used here is stated in the result rather than presented as
-  someone else's guidance.</li>
+  <li><strong>The volumes are a route, not a rule.</strong> The three paces differ in
+  how fast volume compounds, not in shape. Pick on the history behind the domain, not
+  on how quickly you would like to arrive.</li>
+  <li><strong>Going back is part of the plan.</strong> Getting filtered on day nine is
+  the case every schedule leaves out, so the check-in above names the day to return to
+  and how long to hold there.</li>
 </ul>
 
 <div class="sechead r">
@@ -3834,6 +3834,22 @@ def check_voice():
             # /rfc/ pages are exempt: naming a test address is the subject matter
             # there, not an implementation detail leaking out. Source comments are
             # stripped first, since they are developer rationale and never rendered.
+            # Naming the sending platforms whose documentation informed a
+            # number makes a tool read as a digest of other people's help pages
+            # rather than as something that knows the work. Two modules are
+            # exempt: they name a platform to identify it in the reader's own
+            # headers or reports, which is the tool doing its job rather than
+            # crediting a source. audit.js is exempt for the same reason: its
+            # list holds DKIM selector names to look up, and "sendgrid" there is
+            # a DNS label, not a citation.
+            if not rel.startswith(("/js/headers", "/js/rua-ui", "/js/audit")):
+                m = re.search(r"\b(SendGrid|Twilio|Braze|Customer\.io|Mailgun"
+                              r"|Postmark|Klaviyo|Mailchimp|SparkPost|Responsys"
+                              r"|Iterable|Amazon SES)\b", body, re.I)
+                if m:
+                    bad.append(f"{rel}: names a sending platform as a source "
+                               f"-> {m.group(0)!r}")
+
             if not rel.startswith("/rfc/"):
                 prose = body
                 if n.endswith(".js"):

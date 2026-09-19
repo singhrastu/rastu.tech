@@ -161,16 +161,23 @@ ok('the title is on the page', shown.includes('Warm-up plan'));
 ok('the brand is carried through', shown.includes('Example'));
 ok('and the domain', shown.includes('example.com'));
 ok('the date appears in the footer', shown.includes('2026-09-20'));
-ok('the schedule is attributed to its publisher',
-   shown.includes('SendGrid') || shown.includes('Braze'));
+{
+  // The document must read as the work of somebody who does this, not as a
+  // digest of other companies' help pages.
+  const vendors = /SendGrid|Twilio|Braze|Customer\.io|Mailgun|Postmark|Klaviyo|Mailchimp|SparkPost|Responsys|Iterable|Salesforce|Amazon SES/i;
+  is('no sending platform is named in the document',
+     vendors.test(shown) ? shown.match(vendors)[0] : null, null);
+}
 ok('the thresholds are stated', shown.includes('0.30%'));
 ok('the recovery section is present', shown.includes('If it goes wrong'));
-ok('the derived rollback is labelled as derived',
-   /worked out rather than quoted|Derived here/.test(shown));
-ok('it says no provider publishes a ramp',
-   shown.includes('No mailbox provider publishes a ramp schedule'));
-ok('Microsoft and Apple are not given an invented threshold',
-   shown.includes('publish no complaint'));
+ok('the rollback is spelled out step by step',
+   /Go back/.test(shown) && /Hold three days/.test(shown));
+ok('the receivers section states what each one asks for',
+   shown.includes('What each receiver asks for'));
+ok('Microsoft is not given an invented threshold',
+   /No complaint threshold published/.test(shown));
+ok('Apple is described as offering no signal but the SMTP response',
+   /no feedback loop/.test(shown));
 
 {
   // Every stage has to survive into the document. A page break that drops a row

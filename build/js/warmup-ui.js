@@ -105,8 +105,7 @@ function showPaceNote(v) {
   if (!paceNote) return;
   const p = PACES[v || pace.value()];
   if (!p) { paceNote.textContent = ''; return; }
-  paceNote.innerHTML = `${esc(p.note)} Schedule published by `
-    + `<a href="${esc(p.url)}" rel="nofollow">${esc(p.source)}</a>.`;
+  paceNote.textContent = `${p.shape} ${p.note}`;
 }
 
 function showLevel(v) {
@@ -216,10 +215,9 @@ function renderPlan(p) {
     <div class="grp">
       <h3>What this plan assumes</h3>
       <ul>${p.assumptions.map(a => `<li class="s-info">${esc(a)}</li>`).join('')}
-        <li class="s-info">The volumes come from a schedule published by
-          <a href="${esc(p.pace.url || '#')}" rel="nofollow">${esc(p.pace.source)}</a>,
-          reproduced as printed. No mailbox provider publishes a ramp, so no part
-          of this curve is a provider requirement.</li>
+        <li class="s-info">${esc(p.pace.shape)} The volumes are a route to the
+          target. What decides whether you keep them is the set of figures
+          above.</li>
       </ul>
     </div>
 
@@ -242,8 +240,8 @@ function planText(p) {
     r.from === r.to ? r.from : `${r.from}-${r.to}`,
     r.total, ...keys.map(k => r.perProvider[k.key] || 0),
   ].join('\t')).join('\n');
-  return `Warm-up plan: ${p.pace.name} ramp to ${fmt(p.target)} a day\n`
-    + `Schedule: ${p.pace.source}\n\n${head}\n${body}\n\n`
+  return `Warm-up plan: ${p.pace.name} ramp to ${fmt(p.target)} a day\n\n`
+    + `${head}\n${body}\n\n`
     + `Before each step: Gmail and Yahoo spam under 0.3%, hard bounces under 2%, `
     + `no new deferrals.\nhttps://rastu.tech/warmup/\n`;
 }

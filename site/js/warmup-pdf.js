@@ -267,13 +267,10 @@ export function planPdf(p, meta = {}) {
   doc.y -= 34;
 
   // ------------------------------------------------------- what this is not
-  heading(doc, 'What this schedule is');
-  doc.para(`The volumes below come from a schedule published by ${p.pace.source}, `
-    + `reproduced as printed. No mailbox provider publishes a ramp schedule: `
-    + `Google, Microsoft, Yahoo and Apple publish thresholds and say to increase `
-    + `volume gradually, and that is the whole of it. Treat the curve as a `
-    + `convention that a named platform is willing to stand behind, and the `
-    + `thresholds further down as the part that is actually required.`,
+  heading(doc, 'How this ramp is built');
+  doc.para(`${p.pace.shape} ${p.pace.note} The volumes are a route to the target, `
+    + `not a quota: what decides whether you get to keep them is the set of `
+    + `figures further down, which are the receivers' and are not negotiable.`,
     'reg', 9.5, 13, 0.15);
   doc.y -= 4;
 
@@ -383,18 +380,19 @@ export function planPdf(p, meta = {}) {
     + '0.3%. Seven days, not seven sends.', 'reg', 9.5, 13, 0.3);
 
   // ------------------------------------------------------------- the source
-  heading(doc, 'Where the numbers come from');
+  heading(doc, 'What each receiver asks for');
   const sources = [
-    ['The ramp', `${p.pace.source}. ${p.pace.url || ''}`],
-    ['Gmail thresholds', 'Google, Email sender guidelines. '
-      + 'support.google.com/a/answer/81126'],
-    ['Yahoo thresholds', 'Yahoo, sender best practices. '
-      + 'senders.yahooinc.com/best-practices'],
-    ['Microsoft', 'Outlook.com postmaster policies and troubleshooting'],
-    ['Apple', 'Postmaster information for iCloud Mail. '
-      + 'support.apple.com/en-us/102322'],
-    ['Bounce limits', 'Amazon SES reputation metrics'],
-    ['The rollback', 'Derived here, not published by any platform'],
+    ['Gmail', 'Reported spam under 0.30%. Above 5,000 a day to personal '
+      + 'accounts you are a bulk sender, counted across the whole primary '
+      + 'domain with subdomains included, and that does not lapse.'],
+    ['Yahoo and AOL', 'Reported spam under 0.30%, and a working one-click '
+      + 'unsubscribe honoured within two days.'],
+    ['Microsoft', 'No complaint threshold published. Above 5,000 a day, SPF, '
+      + 'DKIM and DMARC must all pass or mail is refused outright.'],
+    ['Apple', 'No thresholds and no feedback loop, so the SMTP response is the '
+      + 'only signal you get.'],
+    ['All four', 'SPF, DKIM and an aligned DMARC record before the first send, '
+      + 'not as an improvement to make later.'],
   ];
   for (const [k, v] of sources) {
     const lines = wrap(v, 'reg', 8.5, right - M.left - 112);

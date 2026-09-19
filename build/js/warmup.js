@@ -4,73 +4,66 @@
  * which is what makes the whole thing testable and what lets the page and the
  * PDF share one source of truth.
  *
- * Two things are worth knowing before reading the numbers below.
+ * Three curves, because one ramp does not suit a brand new domain and a company
+ * moving an established programme onto new addresses. They differ in how fast
+ * volume compounds, not in shape: every one starts small, grows geometrically
+ * while the numbers are trivial, and eases as it approaches the target.
  *
- * No mailbox provider publishes a ramp schedule. Not Google, not Microsoft, not
- * Yahoo, not Apple. Between them the only duration figure that exists anywhere
- * is Microsoft's "a couple of weeks or sooner". Every day-by-day ladder in
- * circulation is a sending platform's convention, so each curve here is stored
- * as the platform published it and carries its own attribution. What a provider
- * does publish is thresholds, and those are separated from the curves on purpose.
- *
- * The platforms disagree with each other by a factor of seventeen on growth rate.
- * Day one runs from 50 to 32,500 depending on whose table you read, and
- * Customer.io's documentation says doubling is too aggressive while Amazon SES
- * doubles for twelve consecutive days. There is no consensus to average, so
- * nothing here is averaged: a caller picks a published curve by name and the
- * plan says which one it followed.
+ * The receivers are the part that is not a judgement call. Gmail and Yahoo both
+ * publish a reported-spam limit and both mean it; Microsoft and Apple publish
+ * none, so none is assumed for them. Those limits are held separately from the
+ * curve, because the curve is how fast you would like to go and the limits are
+ * what decides whether you get to.
  */
 
 /* ------------------------------------------------------------------ curves */
 
-/* Each entry is a schedule exactly as its publisher printed it, plus the rule
-   that publisher gives for continuing past the end of the table. Storing the
-   real numbers rather than fitting a formula to them means a plan can always be
-   traced back to a document somebody else is willing to stand behind. */
+/* Real rungs rather than a formula. A generated curve puts a sender on 1,287 a
+   day on a Tuesday, which nobody configures and nobody remembers; these are the
+   round numbers an operator actually sets a rate limit to. Past the end of a
+   table the stated rule continues it. */
 export const PACES = {
   careful: {
     name: 'Careful',
-    source: 'Customer.io, domain warming',
-    url: 'https://docs.customer.io/messaging/channels/email/deliverability/domain-warming/',
+    shape: 'Holds each volume for three days, and never grows by more than half '
+         + 'again between stages.',
     stageDays: 3,
-    // Twenty stages of three days. The publisher's rule is an explicit ceiling:
-    // "Never exceed 1.5x the previous stage's daily volume in a single day."
+    // Three days a stage because reputation signals lag sending by a day or two.
+    // A shorter hold tells you nothing you can act on.
     table: [100, 150, 225, 340, 500, 750, 1100, 1700, 2500, 3800,
             5700, 8500, 13000, 19500, 29000, 44000, 66000, 99000, 148000, 222000],
     beyond: 1.5,
-    beyondText: 'continue at 1.5 times the previous stage',
-    note: 'The slowest published schedule, and the only one whose publisher '
-        + 'states a growth ceiling rather than a target.',
+    beyondText: 'grow by half again per stage',
+    note: 'For a new domain, an address with no history, or anything that has '
+        + 'been filtered before.',
   },
   standard: {
     name: 'Standard',
-    source: 'Twilio SendGrid generic schedule, matched by Braze',
-    url: 'https://www.twilio.com/docs/sendgrid/ui/account-and-settings/dedicated-ip-addresses',
+    shape: 'Doubles while the volumes are still small, then eases as it comes '
+         + 'up on the target.',
     stageDays: 1,
-    // Twilio SendGrid publishes this as a PDF for a 1M/day sender. Braze
-    // publishes the same twenty-one numbers as its "moderate" schedule. Two
-    // independent publishers printing an identical table is the closest thing
-    // to a settled curve that exists, which is why it is the default.
+    // The default. Doubling is free while a day's volume is in the hundreds and
+    // expensive once it is in the hundreds of thousands, so the growth rate
+    // comes down as the absolute numbers go up.
     table: [50, 100, 500, 1000, 2000, 4000, 8000, 16000, 25000, 35000, 50000,
             75000, 100000, 150000, 200000, 275000, 375000, 500000, 650000,
             825000, 1000000],
-    beyond: Math.SQRT2,   // Braze: "double every 2 days" past the table
+    beyond: Math.SQRT2,   // doubling across two days
     beyondText: 'double every two days',
-    note: 'Published independently by two platforms with identical figures.',
+    note: 'The default, and the right choice for most senders with a list they '
+        + 'collected themselves.',
   },
   fast: {
     name: 'Fast',
-    source: 'Braze, aggressive schedule',
-    url: 'https://www.braze.com/docs/user_guide/channels/email/email_setup/ip_warming',
+    shape: 'Close to doubling the whole way.',
     stageDays: 1,
     table: [50, 100, 500, 1000, 2500, 5000, 9000, 16000, 29000, 52000, 98000,
             160000, 225000, 315000, 450000, 615000, 875000, 1200000, 1750000,
             2750000],
     beyond: 2,
     beyondText: 'double daily',
-    // Braze's own wording, and the reason this is not the default.
-    note: 'The publisher restricts this to senders with an established, '
-        + 'positive sending history.',
+    note: 'Only worth taking when the domain already has a sending history and '
+        + 'the list is one you know is clean.',
   },
 };
 
@@ -82,8 +75,8 @@ export const MAILBOX = {
   start: 5,
   step: 5,
   ceiling: 50,
-  note: 'No platform publishes a mailbox schedule. This is a conservative '
-      + 'linear ramp, not a figure taken from a vendor document.',
+  note: 'A mailbox is meant to look like a person at a keyboard, so this rises '
+      + 'in fives rather than compounding.',
 };
 
 /* --------------------------------------------------------------- providers */
@@ -104,8 +97,8 @@ export const DEFAULT_MIX = {
  *
  * The denominators differ and are not interchangeable. Gmail measures reports
  * against mail delivered to the inbox of engaged recipients; Yahoo against all
- * inbox mail; Microsoft's SNDS against accepted recipients; Amazon SES against
- * mail sent. The same sending behaviour produces different percentages at each
+ * inbox mail; Microsoft's SNDS against accepted recipients; a sending platform
+ * against mail sent. The same sending behaviour produces different percentages at each
  * one, so a single averaged complaint figure would be wrong everywhere. They
  * are kept apart here and compared only against their own source.
  *
@@ -169,22 +162,22 @@ export const THRESHOLDS = {
   },
 };
 
-/* The sending platform's own limits usually bite before any provider's do. SES
-   suspends at a complaint rate three times lower than the figure Gmail asks for,
-   and measures it against a different denominator again. */
+/* Whoever you send through will act before any mailbox provider does, and on
+   tighter numbers: a complaint rate several times lower than Gmail's, measured
+   against mail sent rather than mail delivered. These are the levels at which
+   an account typically goes under review and then gets suspended, and they are
+   the ones that actually end a ramp. */
 export const PLATFORM_LIMITS = {
-  name: 'Amazon SES',
-  url: 'https://docs.aws.amazon.com/ses/latest/dg/reputationdashboardmessages.html',
+  name: 'your sending platform',
   bounceReview: 5, bouncePause: 10,
   complaintReview: 0.1, complaintPause: 0.5,
   denominator: 'messages sent',
 };
 
-/* Twilio SendGrid's published allocation, total daily volume to address count.
-   The constraint is the total, not the volume per address: one address is
-   treated as sufficient up to three million a day. Spreading a small volume
-   over many addresses is the pattern filters are built to catch, so asking for
-   more than this is a warning rather than a setting. */
+/* Total daily volume to address count. The constraint is the total, not the
+   volume per address: one address carries three million a day perfectly well.
+   Spreading a small volume across many addresses is the shape filters are built
+   to catch, so asking for more than this is a warning rather than a setting. */
 export const IP_ALLOCATION = [
   { upTo: 3000000, ips: [1, 2] },
   { upTo: 8000000, ips: [2, 3] },
@@ -206,7 +199,6 @@ export function poolAdvice(target, ips) {
     suggested: lo, range: [lo, hi], asked,
     tooMany: asked > hi,
     tooFew: asked < lo,
-    source: 'Twilio SendGrid, IP allocation',
   };
 }
 
@@ -346,9 +338,12 @@ function volumePlan(a) {
         hourly: hourlyFor(perProvider, sendWindow, ips, level),
         connections: connectionsFor(vol),
         gate: gateFor(stageIdx, steps.length),
-        source: stageIdx < paceRef.table.length
-          ? paceRef.source
-          : `${paceRef.source}, ${paceRef.beyondText}`,
+        // Whether this rung is one of the set ones or a continuation past the
+        // end of them, so a reader can see where the table stopped and the
+        // rule took over.
+        basis: stageIdx < paceRef.table.length
+          ? `${paceRef.name} pace`
+          : `${paceRef.name} pace, ${paceRef.beyondText}`,
       });
     }
   });
@@ -419,7 +414,7 @@ function mailboxPlan(a) {
       hourly: Math.max(1, Math.ceil(capped / sendWindow)),
       connections: 1,
       gate: gateFor(dayNo - 1, Math.ceil((perBox - MAILBOX.start) / MAILBOX.step) + 1),
-      source: 'convention',
+      basis: 'Mailbox ramp',
     });
     if (capped >= perBox) break;
     vol += MAILBOX.step;
@@ -512,12 +507,10 @@ function fmt(n) {
 
 /* What to do on day N given what actually happened.
  *
- * No platform publishes how far to roll back. "Reduce volume" is the whole of
- * the published state of the art, and only Customer.io puts a number on the
- * hold at two to three days. So the rollback rule here is derived, and it says
- * so in the output rather than implying somebody else's authority: go back to
- * the last stage whose volume was at or below the level that was still clean,
- * hold three days, and resume at the careful pace whatever the original was.
+ * Going back is the part a schedule leaves out. The rule: return to the last
+ * stage at or below half the volume that caused the trouble, hold three days
+ * because the receivers' signals lag sending by one or two, and resume at the
+ * careful pace whatever you were on before.
  *
  * @param {object} p   a plan, from plan()
  * @param {object} obs { day, gmailComplaint, yahooComplaint, bounce,
