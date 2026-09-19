@@ -4,7 +4,8 @@
  * that something went wrong and they need to know whether it is theirs to fix,
  * so the answer to that goes at the top and the raw material goes underneath it.
  */
-import { analyse } from './headers.js';
+import { analyse, platformOf, decodeWords } from './headers.js';
+import { liveCheck } from './headers-live.js';
 import { renderFindings, findingsText, esc } from './findings.js';
 
 const form = document.getElementById('hdr-form');
@@ -81,6 +82,47 @@ function run(raw) {
   }
   render(last);
   out.querySelector('h2')?.focus();
+  // The offline report is complete and on screen. Looking the sending domain up
+  // is a second, slower pass: it answers what is published right now, which the
+  // headers cannot say, and it must never hold up the part that needs no network.
+  verifyLive(last);
+}
+
+async function verifyLive(a) {
+  const slot = document.getElementById('hdr-live');
+  if (!slot || !a.fromDomain) return;
+  slot.innerHTML = `<p class="note">Looking up what ${esc(a.fromDomain)} publishes `
+    + `right now...</p>`;
+  let res;
+  try {
+    res = await liveCheck(a);
+  } catch {
+    slot.innerHTML = '<p class="note">The sending domain could not be looked up, so '
+      + 'everything above is from the pasted headers alone.</p>';
+    return;
+  }
+  const dm = res.dmarc;
+  slot.innerHTML = `
+    <div class="sechead r"><h3>What ${esc(a.fromDomain)} publishes right now</h3>
+      <p>Read from DNS in your browser a moment ago, not from the message. The headers
+      say what a receiver saw when it accepted this; this says what is true today.</p>
+    </div>
+    ${dm ? `<table class="kv"><tbody>
+        <tr><th>Record</th><td><code>${esc(dm.record)}</code></td></tr>
+        <tr><th>Published at</th><td><code>_dmarc.${esc(dm.at)}</code>
+          ${dm.inherited ? '<span class="warnnote">inherited from the organisational '
+            + 'domain, so sp= governs this subdomain</span>' : ''}</td></tr>
+      </tbody></table>`
+      : `<p class="empty">No DMARC record found for ${esc(a.fromDomain)}.</p>`}
+    ${res.selectors.length ? `<table class="kv"><tbody>${res.selectors.map(sel =>
+      `<tr><th>s=${esc(sel.selector)}</th><td><code>${esc(sel.name)}</code>
+        ${sel.published
+          ? `<span class="tls">${sel.revoked ? 'revoked' : 'key published'}</span>`
+          : '<span class="cleartext">no key</span>'}</td></tr>`).join('')}
+      </tbody></table>` : ''}
+    ${renderFindings(res.findings, { noun: 'issue', showOk: true,
+      emptyText: 'Nothing to change in what this domain publishes.' })}`;
+  for (const el of slot.querySelectorAll('.r')) el.classList.add('reveal');
 }
 
 function dur(s) {
@@ -102,16 +144,32 @@ function alignmentPanel(o) {
   if (!o.determinable) {
     return `<div class="align"><h3>DMARC</h3><p class="empty">${esc(o.reason)}</p></div>`;
   }
+  /* Colour by what the row costs, not by whether its box is ticked. When DMARC
+     already passes, a mechanism that does not align has cost nothing: it is an
+     ESP's own signature, or an envelope domain that was never going to match,
+     and painting it red tells a sender something is broken when nothing is.
+     A red row here should mean "this is why your mail is at risk". */
+  const rowClass = (s) => {
+    if (s.aligned === true) return 's-ok';
+    if (s.aligned === null) return 's-info';
+    return o.pass ? 's-muted' : 's-critical';
+  };
+  const alignText = (s) => {
+    if (s.aligned === true) return 'aligns';
+    if (s.aligned === null) return 'undetermined';
+    return o.pass
+      ? '<span class="why">does not align<em>costs nothing here, the other one does</em></span>'
+      : 'does not align';
+  };
   const rows = o.steps.map(s => `
-    <tr class="${s.aligned === true ? 's-ok' : s.aligned === null ? 's-info' : 's-critical'}">
+    <tr class="${rowClass(s)}">
       <td><strong>${esc(s.mech)}</strong></td>
       <td><span class="pill">${esc(s.result)}</span></td>
-      <td><code>${esc(s.authDomain || '—')}</code></td>
+      <td><code>${esc(s.authDomain || '&mdash;')}</code></td>
       <td class="op">vs</td>
       <td><code>${esc(s.fromDomain)}</code></td>
       <td><code>${s.mech === 'SPF' ? 'aspf' : 'adkim'}=${esc(s.mode)}</code></td>
-      <td>${s.aligned === true ? 'aligns'
-          : s.aligned === null ? 'undetermined' : 'does not align'}</td>
+      <td>${alignText(s)}</td>
     </tr>`).join('');
 
   return `
@@ -182,12 +240,15 @@ function render(a) {
   out.className = 'report on';
   out.innerHTML = `
     <div class="head">
-      <h2 tabindex="-1">${esc(a.subject || '(no subject)')}</h2>
+      <h2 tabindex="-1">${esc(decodeWords(a.subject) || '(no subject)')}</h2>
       <button type="button" id="hdr-copy" class="btn ghost sm">Copy findings</button>
     </div>
 
     <table class="kv"><tbody>
       ${a.from ? `<tr><th>From</th><td>${esc(a.from)}</td></tr>` : ''}
+      ${platformOf(a) ? `<tr><th>Sent via</th><td>${esc(platformOf(a).name)}
+        <span class="warnnote">its own signing domains never align with yours, and are
+        not meant to</span></td></tr>` : ''}
       ${a.returnPath ? `<tr><th>Return-Path</th><td>${esc(a.returnPath)}
         ${a.envelopeDomain && a.fromDomain && a.envelopeDomain !== a.fromDomain
           ? '<span class="warnnote">a different domain from From:, which is what SPF '

@@ -1004,6 +1004,13 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+/* A row that costs nothing is not a failure. Only paint red what a sender has
+   to act on; everything else recedes. */
+.arith tr.s-muted td{color:var(--ink-3)}
+.arith tr.s-muted code{color:var(--ink-3)}
+.arith .why{display:block;color:var(--ink-3)}
+.arith .why em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  opacity:.8;margin-top:.1rem}
 .explain{margin:0 0 var(--s5)}
 .explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
   text-transform:uppercase;letter-spacing:.06em}
@@ -2277,6 +2284,9 @@ the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
     </div>
   </form>
   <div class="report" id="hdr-out" aria-live="polite"></div>
+  <!-- Filled by a second pass once the offline report is on screen. The DNS
+       lookup must never delay the part that needs no network. -->
+  <div id="hdr-live" aria-live="polite"></div>
 </div>
 
 <h2>What it finds that other analysers do not</h2>
@@ -3737,7 +3747,7 @@ def main():
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
                  "unzip.js", "rua.js", "rua-ui.js", "findings.js",
                  "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js",
-                 "rfc.js", "rfc-ui.js"):
+                 "rfc.js", "rfc-ui.js", "headers-live.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # The response registry, fetched by the lookup rather than inlined: it is

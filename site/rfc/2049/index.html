@@ -961,6 +961,13 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .grp .sample{margin:.35rem 0 0}
 .grp .sample code{font-size:var(--t1);color:var(--ink-3);word-break:break-word}
 #rfc-q{font-size:1.05rem;padding:.9rem 1rem}
+/* A row that costs nothing is not a failure. Only paint red what a sender has
+   to act on; everything else recedes. */
+.arith tr.s-muted td{color:var(--ink-3)}
+.arith tr.s-muted code{color:var(--ink-3)}
+.arith .why{display:block;color:var(--ink-3)}
+.arith .why em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
+  opacity:.8;margin-top:.1rem}
 .explain{margin:0 0 var(--s5)}
 .explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
   text-transform:uppercase;letter-spacing:.06em}

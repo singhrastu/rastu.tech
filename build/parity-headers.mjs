@@ -9,7 +9,7 @@
  */
 import {
   unfold, pick, parseDate, parseReceived, parseAuthResults, parseArc,
-  extract, dmarcOutcome, classifyFailure, analyse,
+  extract, dmarcOutcome, classifyFailure, analyse, domainOf, policyFromAR, platformOf, decodeWords
 } from './js/headers.js';
 
 let pass = 0;
@@ -289,16 +289,38 @@ const sig = (tags) => analyse(msg({ dkimSig: tags }), { now: 1758000000000 }).fi
 
 // ------------------------------------------------------------------- TLS
 {
+  // A leg between two separate estates, in the clear. This is a real exposure.
   const raw = [
-    'Received: from a ([192.0.2.1]) by relay.test with ESMTP id x; '
+    'Received: from out.sender.test ([192.0.2.1]) by relay.example.net with ESMTP id x; '
       + 'Tue, 16 Sep 2026 10:00:00 +0000',
-    'Received: from relay.test ([192.0.2.2]) by mx.google.com with ESMTPS id y; '
+    'Received: from relay.example.net ([192.0.2.2]) by mx.google.com with ESMTPS id y; '
       + 'Tue, 16 Sep 2026 10:00:05 +0000',
     'From: a@example.com',
   ].join('\n');
   const f = find(analyse(raw, { now: 1758000000000 }).findings, 'without TLS');
-  is('a cleartext hop is found', Boolean(f), true);
-  is('and belongs to the intermediary', f.owner, 'intermediary');
+  is('a cleartext hop between organisations is found', Boolean(f), true);
+  is('and belongs to the intermediary', f && f.owner, 'intermediary');
+}
+{
+  /* Hops inside one provider's own estate are not an exposed leg. A platform
+     that accepts over its HTTP API and moves the message between its own nodes
+     shows several hops with no TLS marker, and reporting those as "in the clear"
+     tells a sender their mail was readable when it never left one network. This
+     is the shape SendGrid produces, and it was firing a false warning on it. */
+  const raw = [
+    'Received: by recvd-67f7866db.sendgrid.net with SMTP id z; '
+      + 'Tue, 16 Sep 2026 10:00:01 +0000',
+    'Received: from MzU0 (unknown) by geopod-ismtpd-0.sendgrid.net (SG) with HTTP id q; '
+      + 'Tue, 16 Sep 2026 10:00:00 +0000',
+    'Received: from o1.sendgrid.net ([192.0.2.9]) by mx.google.com with ESMTPS id y; '
+      + 'Tue, 16 Sep 2026 10:00:05 +0000',
+    'From: a@example.com',
+  ].join('\n');
+  const fs2 = analyse(raw, { now: 1758000000000 }).findings;
+  is('internal hops raise no cleartext warning',
+     Boolean(find(fs2, 'between organisations carried this without TLS')), false);
+  is('and are reported as fine instead',
+     Boolean(find(fs2, 'Every hop that left the sending platform used TLS')), true);
 }
 {
   const raw = 'Received: from a ([192.0.2.1]) by relay.test with ESMTPA id x; '
@@ -382,6 +404,142 @@ const sig = (tags) => analyse(msg({ dkimSig: tags }), { now: 1758000000000 }).fi
   is('and with it, is not',
      Boolean(find(analyse(ok, { now: 1 }).findings, 'not one-click')), false);
 }
+
+// ------------------------------------------- the envelope sender is a mailbox
+/* An Authentication-Results property is a mailbox, not a domain, and RFC 8601
+   allows it quoted. SendGrid's VERP return path carries a local part longer than
+   the domain. Comparing the whole string against the From: domain reported a
+   record that aligns perfectly as not aligning, in red, on a message that had
+   nothing wrong with it. */
+{
+  is('a quoted VERP mailbox yields its domain',
+     domainOf('"bounces+35448233-8a4a-r=gmail.com@em5167.store.example.com"'),
+     'em5167.store.example.com');
+  is('angle brackets are stripped', domainOf('<user@example.com>'), 'example.com');
+  is('a bare header.i keeps its domain', domainOf('@store.example.com'), 'store.example.com');
+  is('a HELO name has no local part', domainOf('mail.example.com'), 'mail.example.com');
+  is('the null sender yields nothing', domainOf('<>'), '');
+  is('a trailing root label goes', domainOf('EXAMPLE.COM.'), 'example.com');
+
+  const raw = [
+    'Authentication-Results: mx.google.com; dkim=pass header.i=@store.example.com '
+      + 'header.s=ctr; spf=pass (google.com: domain of bounces+1-a=b@em.store.example.com '
+      + 'designates 1.2.3.4 as permitted sender) '
+      + 'smtp.mailfrom="bounces+1-a=b@em.store.example.com"; '
+      + 'dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=example.com',
+    'Return-Path: <bounces+1-a=b@em.store.example.com>',
+    'From: Brand <hello@example.com>',
+  ].join('\n');
+  const a = analyse(raw, { now: 1758000000000 });
+  const spf = a.outcome.steps.find(s => s.mech === 'SPF');
+  is('SPF authenticates the domain, not the mailbox', spf.authDomain,
+     'em.store.example.com');
+  is('and a subdomain aligns under relaxed', spf.aligned, true);
+  is('so the message passes on SPF as well as DKIM', a.outcome.spfAligned, true);
+}
+
+// -------------------------------- the policy the receiver says it applied
+{
+  const a = analyse([
+    'Authentication-Results: mx.google.com; dmarc=pass (p=NONE sp=QUARANTINE dis=NONE) '
+      + 'header.from=example.com',
+    'From: a@example.com',
+  ].join('\n'), { now: 1758000000000 });
+  const pol = policyFromAR(a.authResults[0]);
+  is('the policy is read out of the comment', pol && pol.p, 'none');
+  is('and so is the subdomain policy', pol && pol.sp, 'quarantine');
+  is('p=none is raised as something to change',
+     Boolean(find(a.findings, 'publishes DMARC but enforces nothing')), true);
+}
+
+// ----------------------------------------------- the platform, and its signature
+{
+  const raw = [
+    'Authentication-Results: mx.google.com; dkim=pass header.i=@store.example.com '
+      + 'header.s=ctr; dkim=pass header.i=@sendgrid.info header.s=smtpapi; '
+      + 'spf=pass smtp.mailfrom="b+1@em.store.example.com"; '
+      + 'dmarc=pass (p=NONE) header.from=example.com',
+    'Received: from MzU0 (unknown) by geopod-ismtpd-0 (SG) with HTTP id q; '
+      + 'Tue, 16 Sep 2026 10:00:00 +0000',
+    'From: a@example.com',
+  ].join('\n');
+  const a = analyse(raw, { now: 1758000000000 });
+  is('the platform is named', platformOf(a).name, 'SendGrid');
+  const f = find(a.findings, "is meant not to align");
+  is('its own signature is explained rather than flagged', Boolean(f), true);
+  is('and is not reported as a problem', f && f.severity, 'ok');
+}
+
+// ------------------------------------------------ relaxed-only alignment
+{
+  const a = analyse([
+    'Authentication-Results: mx.google.com; dkim=pass header.i=@mail.example.com '
+      + 'header.s=k1; dmarc=pass (p=NONE) header.from=example.com',
+    'From: a@example.com',
+  ].join('\n'), { now: 1758000000000 });
+  is('a subdomain-only pass warns about strict alignment',
+     Boolean(find(a.findings, 'relaxed alignment only')), true);
+}
+{
+  const a = analyse([
+    'Authentication-Results: mx.google.com; dkim=pass header.i=@example.com '
+      + 'header.s=k1; dmarc=pass (p=REJECT) header.from=example.com',
+    'From: a@example.com',
+  ].join('\n'), { now: 1758000000000 });
+  is('an exact-domain pass does not',
+     Boolean(find(a.findings, 'relaxed alignment only')), false);
+}
+
+// ----------------------------------------------------- structure and hygiene
+{
+  const a = analyse([
+    'From: Real <real@example.com>',
+    'From: Fake <fake@evil.test>',
+    'Subject: x',
+  ].join('\n'), { now: 1758000000000 });
+  const f = find(a.findings, 'From headers');
+  is('two From headers is critical', f && f.severity, 'critical');
+}
+{
+  const a = analyse([
+    'From: a@example.com',
+    'Content-Type: text/html; charset=us-ascii',
+  ].join('\n'), { now: 1758000000000 });
+  is('html with no text part is raised',
+     Boolean(find(a.findings, 'no plain text alternative')), true);
+}
+{
+  const a = analyse([
+    'From: a@example.com',
+    'Content-Type: multipart/alternative; boundary=x',
+  ].join('\n'), { now: 1758000000000 });
+  is('multipart/alternative is not',
+     Boolean(find(a.findings, 'no plain text alternative')), false);
+}
+{
+  const a = analyse([
+    'From: a@example.com',
+    'Message-ID: <abc@geopod-ismtpd-canary-0>',
+  ].join('\n'), { now: 1758000000000 });
+  is('a Message-ID with no domain is raised',
+     Boolean(find(a.findings, 'not anchored to a domain')), true);
+}
+{
+  const a = analyse([
+    'From: a@example.com',
+    'Message-ID: <abc@example.com>',
+  ].join('\n'), { now: 1758000000000 });
+  is('a proper one is not',
+     Boolean(find(a.findings, 'not anchored to a domain')), false);
+}
+
+// ------------------------------------------------------------- the subject
+is('an encoded-word subject is decoded',
+   decodeWords('Edit by R for Rabbit! =?UTF-8?B?8J+RlQ==?='),
+   'Edit by R for Rabbit! \u{1F455}');
+is('quoted-printable encoded-words decode too',
+   decodeWords('=?utf-8?Q?caf=C3=A9?='), 'café');
+is('plain text is left alone', decodeWords('just a subject'), 'just a subject');
 
 if (fails.length) {
   console.error('\nheader analyser failures:\n  ' + fails.join('\n  '));

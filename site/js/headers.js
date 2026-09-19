@@ -165,6 +165,21 @@ export function parseAuthResults(value) {
   return { authserv, methods, raw: value };
 }
 
+/* An Authentication-Results property value is a mailbox, not a domain. RFC 8601
+   section 2.2 allows it quoted, and a bounce address carries a local part that
+   is often longer than the domain: SendGrid's VERP return path is
+   "bounces+35448233-8a4a-recipient=gmail.com@em5167.store.example.com". Comparing
+   that whole string against the From: domain reports a record that aligns
+   perfectly as not aligning, which is worse than saying nothing. */
+export function domainOf(value) {
+  let v = String(value || '').trim();
+  v = v.replace(/^["'<]+|["'>]+$/g, '');          // quoting and angle brackets
+  if (!v || v === '<>') return '';                // the null sender
+  const at = v.lastIndexOf('@');
+  if (at !== -1) v = v.slice(at + 1);
+  return v.toLowerCase().replace(/\.+$/, '');
+}
+
 const tagsOf = (v) => {
   const out = {};
   for (const part of String(v).split(';')) {
@@ -288,8 +303,8 @@ export function dmarcOutcome(f, opts = {}) {
   // SPF authenticates the envelope sender, so it is the Return-Path domain that
   // has to align, not the one the recipient sees.
   const spfMethod = ar && ar.methods.find(m => m.method === 'spf');
-  const spfDomain = (spfMethod && (spfMethod.props['smtp.mailfrom']
-    || spfMethod.props['smtp.helo'])) || f.envelopeDomain;
+  const spfDomain = (spfMethod && (domainOf(spfMethod.props['smtp.mailfrom'])
+    || domainOf(spfMethod.props['smtp.helo']))) || f.envelopeDomain;
 
   if (spfMethod || f.receivedSpf.length) {
     const result = spfMethod
@@ -390,8 +405,91 @@ export function classifyFailure(f, outcome) {
 }
 
 /* -------------------------------------------------------------- findings */
+/* ------------------------------------------------------------------ platform
+
+   Naming the sending platform changes what the rest of the report can say. An
+   ESP signs with its own domain as well as yours, and that signature never
+   aligns, which reads as a failure to anybody who does not already know it is
+   normal. Saying "this is SendGrid's platform signature" turns a frightening
+   red row into a fact. */
+const PLATFORMS = [
+  { name: 'SendGrid', ownDomains: ['sendgrid.info', 'sendgrid.net'],
+    test: f => /sendgrid|smtpapi|\bSG\b|geopod-ismtpd/i.test(f.rawish) },
+  { name: 'Mailchimp', ownDomains: ['mailchimpapp.net', 'rsgsv.net', 'mcsv.net'],
+    test: f => /mailchimp|mcsv\.net|rsgsv\.net|\bmc\.us\d/i.test(f.rawish) },
+  { name: 'Amazon SES', ownDomains: ['amazonses.com'],
+    test: f => /amazonses\.com|\bSES\b/i.test(f.rawish) },
+  { name: 'Mailgun', ownDomains: ['mailgun.org', 'mailgun.net'],
+    test: f => /mailgun/i.test(f.rawish) },
+  { name: 'Postmark', ownDomains: ['pm-bounces.net', 'postmarkapp.com'],
+    test: f => /postmark/i.test(f.rawish) },
+  { name: 'Klaviyo', ownDomains: ['klaviyomail.com'],
+    test: f => /klaviyo/i.test(f.rawish) },
+  { name: 'Braze', ownDomains: ['braze.com', 'sparkpostmail.com'],
+    test: f => /braze|sparkpost/i.test(f.rawish) },
+  { name: 'HubSpot', ownDomains: ['hubspotemail.net'],
+    test: f => /hubspot/i.test(f.rawish) },
+  { name: 'Salesforce Marketing Cloud', ownDomains: ['exacttarget.com', 'et.email'],
+    test: f => /exacttarget|marketingcloud/i.test(f.rawish) },
+  { name: 'Zoho', ownDomains: ['zoho.com', 'zohomail.com'],
+    test: f => /zoho/i.test(f.rawish) },
+];
+
+/** Which platform sent this, and which domains are its own rather than yours. */
+export function platformOf(f) {
+  const rawish = f.headers.map(h => h[0] + ':' + h[1]).join('\n');
+  const probe = { ...f, rawish };
+  for (const p of PLATFORMS) {
+    if (p.test(probe)) return { name: p.name, ownDomains: p.ownDomains };
+  }
+  return null;
+}
+
+/* The receiving server reports the policy it applied, in the comment beside its
+   dmarc= result: "dmarc=pass (p=NONE sp=NONE dis=NONE)". That is the sending
+   domain's own published policy as the receiver read it moments ago, which is
+   better evidence than anything the sender remembers publishing. The method
+   parser strips comments, so read it off the raw line. */
+export function policyFromAR(ar) {
+  if (!ar || !ar.raw) return null;
+  const m = String(ar.raw).match(/dmarc\s*=\s*\w+\s*\(([^)]*)\)/i);
+  if (!m) return null;
+  const t = {};
+  for (const kv of m[1].matchAll(/\b(p|sp|dis|adkim|aspf|pct)\s*=\s*([\w.]+)/gi)) {
+    t[kv[1].toLowerCase()] = kv[2].toLowerCase();
+  }
+  return Object.keys(t).length ? t : null;
+}
+
+/** RFC 2047 encoded-words, decoded, so the reader sees the subject as sent. */
+export function decodeWords(s) {
+  if (!s) return s;
+  return String(s).replace(/=\?([\w-]+)\?([BbQq])\?([^?]*)\?=/g, (all, cs, enc, txt) => {
+    try {
+      let bytes;
+      if (enc.toUpperCase() === 'B') {
+        const bin = atob(txt);
+        bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+      } else {
+        const fixed = txt.replace(/_/g, ' ')
+          .replace(/=([0-9A-Fa-f]{2})/g, (x, h) => String.fromCharCode(parseInt(h, 16)));
+        bytes = Uint8Array.from(fixed, c => c.charCodeAt(0));
+      }
+      return new TextDecoder(cs.toLowerCase()).decode(bytes);
+    } catch { return all; }
+  });
+}
+
+/* RFC 5322 section 3.6: these appear once, or not at all. More than one From is
+   how a message shows a reader one sender while a filter reads another, and the
+   two do not have to agree. */
+const ONCE_ONLY = ['from', 'sender', 'reply-to', 'to', 'cc', 'bcc', 'message-id',
+                   'in-reply-to', 'references', 'subject', 'date'];
+
+
 export function findingsFor(f, opts = {}) {
   const out = [];
+  const fromDomain = f.fromDomain;
   const now = opts.now || null;
   const outcome = dmarcOutcome(f, opts);
   const failure = classifyFailure(f, outcome);
@@ -590,18 +688,41 @@ export function findingsFor(f, opts = {}) {
     }
   });
 
-  // ---- TLS across the path
-  const cleartext = f.received.filter(r => r.proto && r.tls === false);
+  // ---- TLS across the path.
+  // A hop inside one provider's own estate is not an exposed leg. A platform
+  // that accepts over its HTTP API and moves the message between its own nodes
+  // shows several hops with no TLS marker, and calling those "in the clear"
+  // reports a risk that is not there. Only a hop that crosses between
+  // organisations is worth raising, and the one that matters most is the final
+  // delivery to the recipient's server.
+  const crossesOrgs = (r) => {
+    const a = organisational(String(r.from || '').toLowerCase());
+    const b = organisational(String(r.by || '').toLowerCase());
+    return Boolean(a && b && a !== b);
+  };
+  const cleartext = f.received.filter(r => r.proto && r.tls === false && crossesOrgs(r));
+  const internal = f.received.filter(r => r.proto && r.tls === false && !crossesOrgs(r));
   if (cleartext.length) {
     out.push(finding({
       severity: 'warn', owner: 'intermediary', scope: 'TLS',
-      title: `${cleartext.length} hop(s) carried this message without TLS`,
-      detail: 'At least one leg of the journey was in the clear, so the contents were '
-        + 'readable by anything on the path for that leg.',
+      title: `${cleartext.length} hop(s) between organisations carried this without TLS`,
+      detail: 'At least one leg between separate estates was in the clear, so the '
+        + 'contents were readable by anything on the path for that leg.',
       fix: 'You cannot force a third party to use TLS, but MTA-STS stops a downgrade on '
         + 'mail coming to you and TLS-RPT tells you when one is attempted.',
-      evidence: cleartext.map(r => `${r.by || '?'} (${r.proto})`).join(', '),
+      evidence: cleartext.map(r => `${r.from || '?'} to ${r.by || '?'} (${r.proto})`).join(', '),
       ref: ref('/check/', 'Check whether your domain publishes MTA-STS'),
+    }));
+  }
+  if (internal.length && !cleartext.length) {
+    out.push(finding({
+      severity: 'ok', owner: 'intermediary', scope: 'TLS',
+      title: 'Every hop that left the sending platform used TLS',
+      detail: `${internal.length} hop(s) inside the platform's own estate show no TLS `
+        + 'marker, which is normal: an API submission and the moves between its own '
+        + 'nodes do not cross a network anybody else is on. The legs that did cross '
+        + 'were encrypted.',
+      evidence: internal.map(r => r.by || '?').slice(0, 3).join(', '),
     }));
   }
   const plainAuth = f.received.filter(r => r.authenticated && r.tls === false);
@@ -639,6 +760,172 @@ export function findingsFor(f, opts = {}) {
         + 'List-Unsubscribe carries an https URL that accepts a POST.',
       evidence: f.listUnsubscribe.slice(0, 120),
     }));
+  }
+
+  // ---- what the receiver says the sending domain's policy actually is.
+  // The comment beside dmarc= carries the policy as the receiver read it, which
+  // beats asking the sender what they think they published.
+  const arPolicy = policyFromAR(f.authResults[0]);
+  const plat = platformOf(f);
+
+  if (arPolicy && arPolicy.p === 'none') {
+    out.push(finding({
+      severity: 'warn', owner: 'you', scope: 'DMARC',
+      title: 'The sending domain publishes DMARC but enforces nothing',
+      detail: `The receiver applied p=none${arPolicy.sp ? ' and sp=' + arPolicy.sp : ''}, `
+        + 'which means it was asked to take no action whatever authentication said. '
+        + 'Anyone can send as this domain today and it will still be delivered. '
+        + (outcome.pass
+           ? 'This message authenticates correctly, so the work is already done and '
+             + 'only the policy is missing.'
+           : 'Fix the authentication first, then move the policy.'),
+      fix: outcome.pass
+        ? `Move to enforcement in two steps. First p=quarantine with pct=, raising it `
+          + `over a few weeks while reading the aggregate reports, then p=reject. `
+          + `A record to start from: v=DMARC1; p=quarantine; pct=25; `
+          + `rua=mailto:dmarc@${fromDomain}; fo=1`
+        : 'Get an aligned SPF or DKIM pass first. Enforcing now would reject your own mail.',
+      evidence: `_dmarc.${fromDomain}  p=${arPolicy.p}`
+        + (arPolicy.sp ? ` sp=${arPolicy.sp}` : ''),
+      ref: ref('/rfc/9989/', 'RFC 9989, DMARC'),
+    }));
+  }
+
+  // ---- would it survive strict alignment? Nothing else answers this, and it is
+  // the question that decides whether tightening the policy is safe.
+  if (outcome.determinable && outcome.pass) {
+    const strictSurvivors = outcome.steps.filter(s =>
+      s.result === 'pass' && s.authDomain && s.authDomain === fromDomain);
+    const relaxedOnly = outcome.steps.filter(s =>
+      s.aligned && s.authDomain && s.authDomain !== fromDomain);
+    if (!strictSurvivors.length && relaxedOnly.length) {
+      out.push(finding({
+        severity: 'info', owner: 'you', scope: 'DMARC',
+        title: 'This passes under relaxed alignment only',
+        detail: 'Every mechanism that aligns does so through a subdomain, not through '
+          + `${fromDomain} exactly. Relaxed alignment is the default and is fine, but `
+          + 'setting adkim=s or aspf=s would make this message fail DMARC outright.',
+        fix: 'Leave alignment relaxed. If strict alignment is a requirement, sign with '
+          + `d=${fromDomain} and use a bounce domain that is ${fromDomain} itself.`,
+        evidence: relaxedOnly.map(s => `${s.mech}: ${s.authDomain}`).join(', ')
+          + ` vs From: ${fromDomain}`,
+      }));
+    }
+  }
+
+  // ---- a platform signature that does not align is not a fault
+  if (plat) {
+    const theirs = outcome.steps.filter(s => s.mech === 'DKIM' && !s.aligned
+      && s.authDomain && plat.ownDomains.some(d => s.authDomain === d
+        || s.authDomain.endsWith('.' + d)));
+    if (theirs.length && outcome.dkimAligned) {
+      out.push(finding({
+        severity: 'ok', owner: 'you', scope: 'DKIM',
+        title: `The second signature is ${plat.name}'s own, and is meant not to align`,
+        detail: `${plat.name} signs every message it sends with its own domain as well `
+          + 'as yours. That signature is not supposed to match your From: domain and '
+          + 'costs you nothing, because DMARC needs only one aligned pass and yours '
+          + 'already provides it.',
+        evidence: theirs.map(s => `d=${s.authDomain}`).join(', ')
+          + ' (platform), alongside your aligned signature',
+      }));
+    }
+  }
+
+  // ---- the bounce domain, which is what decides whether SPF can ever align
+  if (f.envelopeDomain && fromDomain) {
+    const org = organisational(f.envelopeDomain);
+    const fromOrg = organisational(fromDomain);
+    if (org === fromOrg && f.envelopeDomain !== fromDomain) {
+      out.push(finding({
+        severity: 'ok', owner: 'you', scope: 'SPF',
+        title: 'The bounce domain is under your own domain',
+        detail: 'The Return-Path is a subdomain of the From: domain, which is what lets '
+          + 'SPF align. Senders who leave the platform default here get an SPF pass that '
+          + 'never aligns, and then depend entirely on DKIM.',
+        evidence: `Return-Path: ${f.envelopeDomain}`,
+      }));
+    } else if (plat && org !== fromOrg) {
+      out.push(finding({
+        severity: 'warn', owner: 'you', scope: 'SPF',
+        title: 'The bounce domain belongs to the platform, not to you',
+        detail: `SPF authenticates ${f.envelopeDomain}, which is ${plat.name}'s domain `
+          + `rather than yours, so an SPF pass can never align with ${fromDomain}. `
+          + 'DMARC is carried by DKIM alone, and it fails the moment a signature breaks.',
+        fix: `Configure a custom bounce domain under ${fromDomain}, usually a CNAME the `
+          + 'platform gives you, so the Return-Path is yours.',
+        evidence: `Return-Path: ${f.envelopeDomain}`,
+      }));
+    }
+  }
+
+  // ---- VERP, worth naming because it is what makes a bounce attributable
+  if (f.returnPath && /[+=]/.test(f.returnPath.split('@')[0] || '')) {
+    out.push(finding({
+      severity: 'ok', owner: 'you', scope: 'Bounce',
+      title: 'The return path is per-recipient',
+      detail: 'The bounce address encodes the recipient, so a bounce arriving later can '
+        + 'be attributed to the exact message and address without parsing the body. '
+        + 'This is what makes automated suppression reliable.',
+      evidence: f.returnPath.slice(0, 90),
+    }));
+  }
+
+  // ---- duplicate headers that RFC 5322 says appear once. This is a spoofing
+  // technique: a reader shows one, a filter reads the other.
+  {
+    const seen = {};
+    for (const [k] of f.headers) {
+      const key = k.toLowerCase();
+      if (ONCE_ONLY.includes(key)) seen[key] = (seen[key] || 0) + 1;
+    }
+    const dup = Object.entries(seen).filter(([, n]) => n > 1);
+    for (const [name, count] of dup) {
+      out.push(finding({
+        severity: name === 'from' ? 'critical' : 'warn',
+        owner: 'unknown', scope: 'Structure',
+        title: `${count} ${name.replace(/^./, c => c.toUpperCase())} headers`,
+        detail: 'RFC 5322 section 3.6 allows this field at most once. Clients and '
+          + 'filters disagree about which copy wins, and a duplicated From: is how a '
+          + 'message shows the reader one sender while authentication reads another.',
+        fix: 'Treat this message as suspect and find which hop added the second copy.',
+        ref: ref('/rfc/5322/', 'RFC 5322, message format'),
+      }));
+    }
+  }
+
+  // ---- the Message-ID, which filters do look at
+  if (f.messageId) {
+    const rhs = (f.messageId.replace(/^<|>$/g, '').split('@')[1] || '');
+    if (rhs && !rhs.includes('.')) {
+      out.push(finding({
+        severity: 'info', owner: 'you', scope: 'Hygiene',
+        title: 'The Message-ID is not anchored to a domain',
+        detail: 'The right hand side is an internal hostname rather than a domain name. '
+          + 'RFC 5322 asks for a globally unique identifier, and several filters treat a '
+          + 'non-domain right hand side as a weak signal.',
+        fix: `Generate Message-IDs ending in @${fromDomain}.`,
+        evidence: f.messageId.slice(0, 80),
+      }));
+    }
+  }
+
+  // ---- body shape, from the headers alone
+  {
+    const ct = (f.headers.find(h => h[0].toLowerCase() === 'content-type') || [])[1] || '';
+    if (/^\s*text\/html/i.test(ct)) {
+      out.push(finding({
+        severity: 'warn', owner: 'you', scope: 'Content',
+        title: 'HTML only, with no plain text alternative',
+        detail: 'The top level content type is text/html rather than '
+          + 'multipart/alternative, so this message carries no text part. Filters read '
+          + 'the text part, some clients prefer it, and its absence is a long standing '
+          + 'signal of bulk mail assembled without care.',
+        fix: 'Send multipart/alternative with a real text/plain part. A generated one '
+          + 'that just strips tags is better than none, but a written one is better still.',
+        evidence: `Content-Type: ${ct.slice(0, 70)}`,
+      }));
+    }
   }
 
   // ---- timing, stated honestly
