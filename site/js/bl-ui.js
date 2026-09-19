@@ -16,6 +16,16 @@ const out = document.getElementById('bl-out');
 const runBtn = document.getElementById('bl-run');
 if (form) main();
 
+/* "Clean" is a claim about every list. What this can honestly say is that the
+   lists which answered did not list you, and while Spamhaus cannot be reached
+   from a browser that is a narrower thing. */
+const PILL = {
+  listed: 'listed',
+  'not-listed': 'not listed',
+  partial: 'partly checked',
+  none: 'no result',
+};
+
 const STATE_LABEL = {
   silent: 'not answering',
   refusing: 'refusing this resolver',
@@ -108,8 +118,7 @@ function render(res, what) {
   out.innerHTML = `
     <div class="head"><h2 tabindex="-1">${esc(res.ip)}</h2></div>
     <p class="verdict-line s-${v.severity === 'critical' ? 'fail' : v.severity}">
-      <span class="pill">${v.severity === 'critical' ? 'listed'
-        : v.severity === 'ok' ? 'clean' : 'no result'}</span> ${esc(v.text)}</p>
+      <span class="pill">${PILL[v.state] || 'no result'}</span> ${esc(v.text)}</p>
     ${res.undetermined.length ? `<p class="note">${res.undetermined.length} of
       ${res.rows.length} lists did not pass their own RFC 5782 probe on this run, so
       nothing they said about this address is reported. A list that has been shut

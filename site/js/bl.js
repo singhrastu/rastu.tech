@@ -237,25 +237,44 @@ export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS) {
     return { ...l, canary, codes: answer,
              state: answer.length ? 'listed' : 'clean' };
   }));
-  return summarise(d, rows, 'domain');
+  return summarise(d, rows, 'domain', UNQUERYABLE_DOMAIN);
 }
 
-function summarise(subject, rows, kind) {
+/* A verdict has to account for what was not asked, not only for what answered.
+   Reporting "clean" while the list most receivers actually consult was never
+   queried is the same false confidence this tool exists to refuse, arrived at
+   from the other direction: the canary stops a broken list from speaking, and
+   then the headline forgets it was ever there. Spamhaus is always in this
+   position from a browser, so a clean result is never unqualified. */
+function summarise(subject, rows, kind, missing = []) {
   const listed = rows.filter(r => r.state === 'listed');
   const clean = rows.filter(r => r.state === 'clean');
   const undetermined = rows.filter(r => r.state === 'undetermined');
-  return {
-    ip: subject, subject, kind, supported: true, rows, listed, clean, undetermined,
-    verdict: listed.length
-      ? { severity: 'critical',
-          text: `Listed on ${listed.length} of the ${clean.length + listed.length} `
-              + `lists that answered.` }
-      : clean.length
-        ? { severity: 'ok',
-            text: `Not listed on any of the ${clean.length} lists that answered.` }
-        : { severity: 'warn',
-            text: 'No list answered reliably, so this is not a result.' },
-  };
+  const names = missing.map(m => m.name);
+  const gap = names.length
+    ? ` ${names.join(' and ')} could not be queried from a browser and `
+      + `${names.length === 1 ? 'is' : 'are'} not included in that, which matters `
+      + `because it is the list most receivers actually consult.`
+    : '';
+
+  let verdict;
+  if (listed.length) {
+    verdict = { severity: 'critical', state: 'listed',
+      text: `Listed on ${listed.length} of the ${clean.length + listed.length} `
+          + `lists that answered.` };
+  } else if (clean.length) {
+    // Deliberately not the word "clean". Not listed on what answered is a
+    // narrower claim, and the narrower claim is the true one.
+    verdict = { severity: names.length ? 'warn' : 'ok',
+      state: names.length ? 'partial' : 'not-listed',
+      text: `Not listed on the ${clean.length} `
+          + `${clean.length === 1 ? 'list' : 'lists'} that answered.${gap}` };
+  } else {
+    verdict = { severity: 'warn', state: 'none',
+      text: 'No list answered reliably, so this is not a result.' };
+  }
+  return { ip: subject, subject, kind, supported: true, rows, listed, clean,
+           undetermined, missing, verdict };
 }
 
 /**
@@ -306,5 +325,5 @@ export async function check(ip, lookup, lists = LISTS) {
              state: answer.length ? 'listed' : 'clean' };
   }));
 
-  return summarise(addr, rows, 'ipv4');
+  return summarise(addr, rows, 'ipv4', UNQUERYABLE);
 }

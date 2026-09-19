@@ -89,7 +89,11 @@ const answers = (map) => async (name) => (name in map ? map[name] : []);
   const good = answers({ '2.0.0.127.good.test': ['127.0.0.2'] });
   const r = await check('203.0.113.9', good, zone('good.test'));
   is('a clean address on a working list is clean', r.rows[0].state, 'clean');
-  is('and the verdict is ok', r.verdict.severity, 'ok');
+  /* Not an unqualified pass. Spamhaus ZEN cannot be reached from a browser
+     either, so the same caveat applies to addresses as to domains. */
+  is('but the verdict is qualified, because ZEN was not asked',
+     r.verdict.state, 'partial');
+  is('and it names what was missed', r.verdict.text.includes('Spamhaus'), true);
 }
 {
   // The list is healthy but this one query failed. That is not a clean result.
@@ -168,6 +172,38 @@ is('the Spamhaus domain list is named rather than omitted',
    UNQUERYABLE_DOMAIN.some(l => /spamhaus/i.test(l.zone)), true);
 is('and no Spamhaus zone is queried through a public resolver',
    DOMAIN_LISTS.filter(l => /spamhaus/i.test(l.zone)).map(l => l.zone), []);
+
+// -------------------------------------- a verdict accounts for what was skipped
+/* The canary stops a broken list from speaking. The headline then has to
+   remember it was there at all, or the page reports "clean" while the list that
+   actually decides delivery was never asked. bettywins.com is listed by Spamhaus
+   and by none of the six domain lists reachable from a browser, so the honest
+   answer is "not listed on what answered", not "clean". */
+{
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const r = await checkDomain('bettywins.com', good);
+  is('an unqueryable list downgrades the verdict', r.verdict.state, 'partial');
+  is('and it is not reported as a pass', r.verdict.severity, 'warn');
+  is('the word clean is never used', /\bclean\b/i.test(r.verdict.text), false);
+  is('and the gap is named', r.verdict.text.includes('Spamhaus'), true);
+  is('the skipped lists are carried on the result', r.missing.length > 0, true);
+}
+{
+  // With nothing missing, an unqualified pass is allowed again.
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const r = await checkDomain('example.com', good, DOMAIN_LISTS);
+  const none = { ...r };
+  is('the verdict names the count that answered',
+     r.verdict.text.startsWith('Not listed on the 6'), true);
+}
+{
+  const listing = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2']
+    : n.startsWith('bad.test.') ? ['127.0.1.2'] : []);
+  const r = await checkDomain('bad.test', listing,
+    [{ zone: 'test.', name: 'test', delist: 'x', note: 'y'.repeat(45) }]);
+  is('an actual listing still outranks the caveat', r.verdict.state, 'listed');
+  is('and is critical', r.verdict.severity, 'critical');
+}
 
 if (fails.length) {
   console.error('\nblocklist failures:\n  ' + fails.join('\n  '));
