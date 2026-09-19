@@ -7,7 +7,8 @@
  * rather than about the ways an address is listed.
  */
 import { check, checkDomain, classify, canaryVerdict, reverseV4, isReservedV4,
-         isV6, LISTS, DOMAIN_LISTS, UNQUERYABLE, UNQUERYABLE_DOMAIN }
+         isV6, LISTS, DOMAIN_LISTS, UNQUERYABLE, UNQUERYABLE_DOMAIN,
+         explainCodes, SPAMHAUS_CODES }
   from './js/bl.js';
 
 let pass = 0;
@@ -254,6 +255,36 @@ is('and no Spamhaus zone is queried through a public resolver',
   const r = await check('203.0.113.9', answersIp({ '2.0.0.127.bl.spamcop.net': ['127.0.0.2'] }));
   is('the address path carries Spamhaus ZEN too', /zen/i.test(r.rows[0].name), true);
   is('marked not checked without a key', r.rows[0].state, 'not-checked');
+}
+
+// ------------------------------------------------- the return code is the answer
+/* Being listed is half the information. "Low reputation" and "abused legitimate"
+   are both listings and they mean opposite things about whose fault it is: the
+   first says the domain exists to send spam, the second says somebody broke into
+   a real site and it is now serving it. The remediation differs completely, and
+   printing 127.0.1.2 and stopping throws that away. */
+is('a spam domain code is named', explainCodes(['127.0.1.2'])[0].label, 'Low reputation');
+is('an abused legitimate domain is distinguished from it',
+   explainCodes(['127.0.1.102'])[0].label, 'Abused legitimate');
+is('and says to find the hole first',
+   explainCodes(['127.0.1.102'])[0].detail.includes('close the hole'), true);
+is('PBL is explained as policy rather than reputation',
+   explainCodes(['127.0.0.10'])[0].detail.includes('should not send mail directly'), true);
+is('DROP says a single address cannot be fixed',
+   explainCodes(['127.0.0.9'])[0].detail.includes('whole netblock'), true);
+is('a refusal is not presented as a listing',
+   explainCodes(['127.255.255.254'])[0].label, 'Not a listing');
+is('an unknown code is admitted rather than guessed',
+   explainCodes(['127.0.9.9'])[0].label, 'Unrecognised code');
+is('every documented code carries an explanation',
+   Object.values(SPAMHAUS_CODES).filter(([, d]) => d.length < 25).length, 0);
+{
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? []
+    : ['127.0.1.102']);
+  const r = await checkDomain('compromised.test', good, undefined, dqs);
+  is('a listing carries its decoded meaning', r.rows[0].meanings[0].label,
+     'Abused legitimate');
 }
 
 if (fails.length) {

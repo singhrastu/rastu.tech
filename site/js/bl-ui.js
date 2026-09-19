@@ -111,10 +111,12 @@ function row(r) {
   return `<tr class="${cls}">
     <td><strong>${esc(r.name)}</strong><span class="zone">${esc(r.zone)}</span></td>
     <td>${verdict}</td>
-    <td class="why">${needsWhy
+    <td class="why">${r.meanings && r.meanings.length
+      ? r.meanings.map(m => `<strong>${esc(m.label)}.</strong> ${esc(m.detail)}`).join(' ')
+      : needsWhy
       ? `<strong>${esc(STATE_LABEL[r.canary.state] || r.canary.state)}.</strong>
          ${esc(r.canary.why)}`
-      : esc(r.note)}</td>
+        : esc(r.note)}</td>
     <td>${state === 'listed' || state === 'not-checked'
       ? `<a href="${esc(r.delist)}">${state === 'listed' ? 'Delist' : 'Check there'}</a>`
       : '<span class="muted">&mdash;</span>'}</td>

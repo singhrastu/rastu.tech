@@ -135,6 +135,64 @@ export const DQS = {
                 + 'domain being refused outright rather than filtered.' },
 };
 
+/* The return code is the answer, not the fact of being listed. "Low reputation"
+   and "abused legitimate domain" are both a listing and they mean opposite
+   things about whose fault it is: the first says the domain exists to send spam,
+   the second says somebody else's WordPress got broken into and is now serving
+   it. Showing 127.0.1.2 and leaving the reader to look it up throws away the
+   most useful thing in the response. */
+export const SPAMHAUS_CODES = {
+  // ZEN, the address zones
+  '127.0.0.2': ['SBL', 'On the Spamhaus Block List: a source Spamhaus has listed '
+    + 'directly, usually for sending spam or hosting a spam operation.'],
+  '127.0.0.3': ['SBL CSS', 'Listed automatically by the CSS heuristic, which '
+    + 'catches snowshoe sending across many low-volume addresses.'],
+  '127.0.0.4': ['XBL', 'A compromised machine: an exploited host, an open proxy, '
+    + 'or something infected and now sending on its own.'],
+  '127.0.0.9': ['DROP', 'On the DROP list, meaning the whole netblock is hijacked '
+    + 'or leased to a criminal operation. Nothing you do to one address helps.'],
+  '127.0.0.10': ['PBL, ISP', 'The ISP that owns this range has declared it should '
+    + 'not send mail directly. Normal for residential and dynamic space.'],
+  '127.0.0.11': ['PBL, Spamhaus', 'Spamhaus has declared this range should not '
+    + 'send mail directly. Usually dynamic or end-user space.'],
+  '127.0.0.30': ['BCL', 'On the Botnet Controller List.'],
+  // DBL, the domain zone
+  '127.0.1.2': ['Low reputation', 'Listed as a spam domain: the domain itself is '
+    + 'the problem rather than some host that used it.'],
+  '127.0.1.4': ['Phishing', 'Listed as a phishing domain.'],
+  '127.0.1.5': ['Malware', 'Listed as a malware domain.'],
+  '127.0.1.6': ['Botnet C&C', 'Listed as a botnet command and control domain.'],
+  '127.0.1.102': ['Abused legitimate', 'A real domain that has been compromised. '
+    + 'Spamhaus is not saying you are a spammer, it is saying something on your '
+    + 'site is serving spam content. Find and close the hole before delisting, or '
+    + 'it returns.'],
+  '127.0.1.103': ['Abused redirector', 'A legitimate redirector being used to '
+    + 'launder spam links through your domain.'],
+  '127.0.1.104': ['Abused, phishing', 'A real domain compromised and now serving '
+    + 'a phishing page.'],
+  '127.0.1.105': ['Abused, malware', 'A real domain compromised and now serving '
+    + 'malware.'],
+  '127.0.1.106': ['Abused, C&C', 'A real domain compromised and now hosting '
+    + 'botnet command and control.'],
+  // refusals, which are not listings
+  '127.255.255.252': ['Not a listing', 'The zone name in the query was wrong, so '
+    + 'this says nothing about the subject.'],
+  '127.255.255.254': ['Not a listing', 'The query arrived through a public '
+    + 'resolver, which Spamhaus refuses.'],
+  '127.255.255.255': ['Not a listing', 'Too many queries from this source.'],
+};
+
+/** Decode the return codes on a Spamhaus answer into something readable. */
+export function explainCodes(codes) {
+  return (codes || []).map(c => {
+    const hit = SPAMHAUS_CODES[c];
+    return hit
+      ? { code: c, label: hit[0], detail: hit[1] }
+      : { code: c, label: 'Unrecognised code',
+          detail: 'Not a code Spamhaus documents for this zone.' };
+  });
+}
+
 export async function checkSpamhaus(subject, kind, dqs) {
   const cfg = kind === 'domain' ? DQS.domain : DQS.ipv4;
   if (typeof dqs !== 'function') {
@@ -166,7 +224,7 @@ export async function checkSpamhaus(subject, kind, dqs) {
         why: 'The key answered its probes but the query for this subject did '
            + 'not complete.' } };
   }
-  return { ...cfg, canary, codes: answer,
+  return { ...cfg, canary, codes: answer, meanings: explainCodes(answer),
            state: answer.length ? 'listed' : 'clean' };
 }
 
