@@ -1181,14 +1181,16 @@ JS = """
 """
 
 
-FAVICON = (
-    "data:image/svg+xml,"
-    "%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E"
-    "%3Crect width='32' height='32' rx='7' fill='%230a0e0d'/%3E"
-    "%3Cpath d='M16 5l9.5 5.5v11L16 27l-9.5-5.5v-11z' fill='none' "
-    "stroke='%233ddc84' stroke-width='2.4'/%3E"
-    "%3Ccircle cx='16' cy='16' r='2.6' fill='%233ddc84'/%3E%3C/svg%3E"
-)
+# Real files at stable, crawlable URLs. This was a data: URI, which Googlebot-Image
+# cannot fetch, so Google showed the generic globe next to the result instead.
+# Google's supported formats are BMP, GIF, ICO, PNG, JPEG, PPM and TIFF: an SVG
+# alone would not qualify either.
+FAVICONS = [
+    ("/favicon-512.png", "512x512", "image/png"),
+    ("/favicon-192.png", "192x192", "image/png"),
+    ("/favicon-96.png", "96x96", "image/png"),
+    ("/favicon-48.png", "48x48", "image/png"),
+]
 
 
 # One glyph per tool, drawn rather than imported. A card with an icon, an input
@@ -1350,6 +1352,11 @@ def person_ld():
     }
 
 
+FAVICON_LINKS = "\n".join(
+    f'<link rel="icon" type="{t}" sizes="{sz}" href="{href}">'
+    for href, sz, t in FAVICONS) + '\n<link rel="icon" href="/favicon.ico" sizes="48x48">'
+
+
 def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
          scripts=(), modules=(), nav_key=None, crumbs=()):
     """Every page carries the Person node, not just the home page.
@@ -1429,8 +1436,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 <meta property="og:site_name" content="Rastu Singh">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="{SITE}/rastu-singh.jpg">
-<link rel="icon" href="{FAVICON}">
-<link rel="apple-touch-icon" href="/rastu-singh-180.jpg">
+{FAVICON_LINKS}
+<link rel="apple-touch-icon" href="/favicon-192.png">
 <meta name="theme-color" content="#0a0e0d">
 <style>{CSS}</style>
 {ld}
@@ -3394,6 +3401,19 @@ def check_html():
                 for c in attr.split():
                     if c not in styled and c not in scripted:
                         dead.setdefault(c, "/" + os.path.relpath(f, OUT))
+    # Google shows the generic globe when it cannot crawl the icon, which a data:
+    # URI guarantees. That is how the wrong icon shipped unnoticed.
+    for root2, _, files2 in os.walk(OUT):
+        for n2 in files2:
+            if not n2.endswith(".html"):
+                continue
+            body2 = open(os.path.join(root2, n2), encoding="utf8").read()
+            for m2 in re.finditer(r'<link[^>]*rel="[^"]*icon[^"]*"[^>]*>', body2, re.I):
+                if "data:" in m2.group(0):
+                    dead["(favicon is a data: URI, which Google cannot crawl)"] = \
+                        "/" + os.path.relpath(os.path.join(root2, n2), OUT)
+                    break
+
     if dead:
         raise SystemExit("html check failed: classes that exist nowhere:\n  "
                          + "\n  ".join(f"{c}  (first seen {where})"
@@ -3554,7 +3574,9 @@ def main():
     shutil.copytree(os.path.join(HERE, "rfc"), rfcout)
 
     # images
-    for name in ("rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg",
+    for name in ("favicon.ico", "favicon-48.png", "favicon-96.png",
+                 "favicon-192.png", "favicon-512.png",
+                 "rastu-singh.jpg", "rastu-singh-400.jpg", "rastu-singh-180.jpg",
                  "scan-100000.jsonl.gz", "findings.json"):
         src = os.path.join(ROOT, "assets", name)
         if os.path.exists(src):
