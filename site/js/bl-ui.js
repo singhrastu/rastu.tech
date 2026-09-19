@@ -34,6 +34,50 @@ const STATE_LABEL = {
   unreachable: 'lookup did not complete',
 };
 
+/* Turnstile, rendered explicitly rather than by the script scanning the page.
+ *
+ * The implicit path gives no way to know when a token exists, and there is no
+ * promise-returning accessor in the API: getResponse() returns undefined until
+ * the widget has solved, which for a check fired straight after page load is
+ * most of the time. Rendering by hand hands back a callback, which is something
+ * that can be awaited.
+ *
+ * The widget is invisible until Cloudflare decides a human needs to do something,
+ * which for almost everybody is never. If it is not configured, or it fails, the
+ * check still runs and the Spamhaus row reports that it was refused rather than
+ * pretending the subject was clean.
+ */
+let widgetId = null;
+function challengeToken() {
+  const el = document.getElementById('bl-turnstile');
+  if (!el || !window.turnstile) return Promise.resolve('');
+  const sitekey = el.getAttribute('data-sitekey');
+  if (!sitekey) return Promise.resolve('');
+
+  return new Promise((resolve) => {
+    // A token is single use, so a second check needs a fresh one.
+    if (widgetId !== null) {
+      try { window.turnstile.reset(widgetId); } catch { /* re-render below */ }
+    }
+    let settled = false;
+    const done = (t) => { if (!settled) { settled = true; resolve(t || ''); } };
+    // Never let a challenge that does not come back hold the whole check open.
+    setTimeout(() => done(''), 12000);
+    try {
+      widgetId = window.turnstile.render(el, {
+        sitekey,
+        action: 'blocklist',
+        appearance: 'interaction-only',
+        callback: done,
+        'error-callback': () => done(''),
+        'timeout-callback': () => done(''),
+      });
+    } catch {
+      done('');
+    }
+  });
+}
+
 function main() {
   let running = false;
   form.addEventListener('submit', async ev => {
@@ -71,14 +115,9 @@ function main() {
       /* Spamhaus goes through the Worker, which holds a Data Query Service key
          as a secret. Returns the string 'unconfigured' when there is no key, so
          the row reports that rather than pretending the list was clean. */
-      /* Turnstile, when the page carries a widget. The token is fetched once
-         per check rather than per query, because each one can only be spent
-         once. With appearance set to interaction-only most visitors never see
-         anything; somebody scripting the endpoint has nothing to send. */
-      let token = '';
-      if (document.querySelector('.cf-turnstile') && window.turnstile) {
-        try { token = await window.turnstile.getResponsePromise(); } catch { token = ''; }
-      }
+      // One token per check: each can only be spent once, and all three queries
+      // in a check go out together.
+      const token = await challengeToken();
       const dqs = async (q, zone) => {
         try {
           const r = await fetch('/api/dnsbl?q=' + encodeURIComponent(q)

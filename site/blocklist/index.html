@@ -1055,8 +1055,7 @@ the list about itself first.</p>
   domain lists: they answer different questions. Nothing you type is sent here, the
   lookups go from your browser to a public DNS-over-HTTPS resolver.</span></p>
 
-  <div class="cf-turnstile" data-sitekey="0x4AAAAAAE9IOu1-_ZKl4Asg" data-size="flexible"
-       data-appearance="interaction-only" data-action="blocklist"></div>
+  <div id="bl-turnstile" data-sitekey="0x4AAAAAAE9IOu1-_ZKl4Asg"></div>
 </div>
 <div class="report" id="bl-out" aria-live="polite"></div>
 
@@ -1290,7 +1289,7 @@ because you act on it.</p>
   build(); draw();
 })();
 </script>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer></script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" defer></script>
 <script type="module" src="/js/bl-ui.js"></script>
 </body>
 </html>

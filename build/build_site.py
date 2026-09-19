@@ -2065,8 +2065,7 @@ the list about itself first.</p>
   domain lists: they answer different questions. Nothing you type is sent here, the
   lookups go from your browser to a public DNS-over-HTTPS resolver.</span></p>
 """ + (f'''
-  <div class="cf-turnstile" data-sitekey="{TURNSTILE_SITE_KEY}" data-size="flexible"
-       data-appearance="interaction-only" data-action="blocklist"></div>'''
+  <div id="bl-turnstile" data-sitekey="{TURNSTILE_SITE_KEY}"></div>'''
         if TURNSTILE_SITE_KEY else "") + """
 </div>
 <div class="report" id="bl-out" aria-live="polite"></div>
@@ -2104,7 +2103,7 @@ because you act on it.</p>
         body, "blocklist/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Tools", crumbs=(("Tools", "tools/"), ("Blocklist check", None)),
         modules=("/js/bl-ui.js",),
-        scripts=(("https://challenges.cloudflare.com/turnstile/v0/api.js",)
+        scripts=(("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit",)
                  if TURNSTILE_SITE_KEY else ()))
 
 
