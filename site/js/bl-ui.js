@@ -14,6 +14,7 @@ import { esc } from './findings.js';
    path touches must already exist. Declaring it lower down is a temporal dead
    zone error that only appears on the deep link, never on a typed check. */
 let widgetId = null;
+let settle = null;
 
 const form = document.getElementById('bl-form');
 const input = document.getElementById('bl-in');
@@ -55,9 +56,6 @@ const STATE_LABEL = {
  * not configured, or it fails, the check still runs and the Spamhaus row reports
  * that it was refused rather than pretending the subject was clean.
  */
-let widgetId = null;
-let settle = null;
-
 function challengeToken() {
   const el = document.getElementById('bl-turnstile');
   if (!el || !window.turnstile) return Promise.resolve('');

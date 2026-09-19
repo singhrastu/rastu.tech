@@ -136,9 +136,8 @@ export default {
         const { success } = await env.DNSBL_LIMIT.limit({ key: who });
         if (!success) {
           return json({ error: 'rate limited',
-            reason: 'Too many blocklist checks from this address in the last '
-                  + 'minute. This endpoint runs on a personal Spamhaus query '
-                  + 'allowance, so it is rationed.' }, 429);
+            reason: 'Too many checks from this address in the last minute. '
+                  + 'Wait about a minute and try again.' }, 429);
         }
       }
 
