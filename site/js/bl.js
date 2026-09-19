@@ -15,10 +15,17 @@
  * 127.255.255.254 is an A record and a naive checker counts any A record as a
  * hit.
  *
- * RFC 5782 section 5 gives the way out. A conformant list MUST contain
- * 127.0.0.2 and MUST NOT contain 127.0.0.1. Probing both before trusting a list
- * separates all three cases, and no answer about anybody's address is reported
- * from a list that failed its own probe.
+ * RFC 5782 section 5 gives the way out, for both kinds of list:
+ *
+ *   IPv4      MUST contain 127.0.0.2,  MUST NOT contain 127.0.0.1
+ *   domain    MUST contain "TEST",     MUST NOT contain "INVALID"
+ *
+ * Probing both before trusting a list separates all three cases, and no answer
+ * about anybody's address or domain is reported from a list that failed its own
+ * probe. The domain side is where this matters most: AHBL shut down in 2015 and
+ * deliberately wildcarded its zone so that every query answers positive, to force
+ * people to stop asking. A checker without the probe reports every domain on
+ * earth as listed.
  */
 
 /** Reverse an IPv4 address into DNSBL query order. */
@@ -119,6 +126,46 @@ export const UNQUERYABLE = [
     delist: 'https://check.spamhaus.org/' },
 ];
 
+/* Domain blocklists answer for the name itself rather than for a reversed
+   address, and they are a different corpus from the IP lists: a domain appears
+   here because it was seen in spam, not because a host was compromised. */
+export const DOMAIN_LISTS = [
+  { zone: 'black.uribl.com', name: 'URIBL black',
+    delist: 'https://uribl.com/refresh.shtml',
+    note: 'Domains seen in the body of spam. Listing is about where a message '
+        + 'points a reader, not about who sent it, so a shared link shortener '
+        + 'can put you here.' },
+  { zone: 'dbl.nordspam.com', name: 'NordSpam DBL',
+    delist: 'https://www.nordspam.com/removal/',
+    note: 'Domain reputation list with self-service removal.' },
+  { zone: 'dbl.suomispam.net', name: 'Suomispam DBL',
+    delist: 'https://suomispam.net/removal.html',
+    note: 'Smaller list with a regional focus. A listing here alone rarely '
+        + 'explains a delivery problem on its own.' },
+  { zone: 'rhsbl.rymsho.ru', name: 'Rymsho RHSBL',
+    delist: 'https://rbl.rymsho.ru/',
+    note: 'Right-hand-side list, meaning it matches the domain in an address '
+        + 'rather than a link in the body.' },
+  { zone: 'dob.sibl.support-intelligence.net', name: 'SIBL day-old',
+    delist: 'https://www.support-intelligence.com/',
+    note: 'Lists domains registered in the last day or so. Brand new domains '
+        + 'are listed on age alone, which is why a fresh sending domain needs '
+        + 'warming rather than volume.' },
+  { zone: 'abuse.rfc-clueless.org', name: 'RFC-Clueless',
+    delist: 'http://www.rfc-clueless.org/',
+    note: 'Lists domains whose operators do not follow basic requirements, '
+        + 'commonly a missing or bouncing abuse@ or postmaster@ mailbox.' },
+];
+
+/* Named rather than silently dropped, same as the IP side. */
+export const UNQUERYABLE_DOMAIN = [
+  { zone: 'dbl.spamhaus.org', name: 'Spamhaus DBL',
+    reason: 'Spamhaus refuses queries from public DNS resolvers on its domain '
+          + 'list as well, answering 127.255.255.254 to every one including the '
+          + 'name RFC 5782 says must never be listed.',
+    delist: 'https://check.spamhaus.org/' },
+];
+
 /** The RFC 5782 verdict for one list, from its two probe results. */
 export function canaryVerdict(listedProbe, notListedProbe) {
   const up = Array.isArray(listedProbe) && listedProbe.length > 0;
@@ -147,6 +194,68 @@ export function canaryVerdict(listedProbe, notListedProbe) {
          + 'query means.' };
   }
   return { ok: true, state: 'conformant', why: '' };
+}
+
+/* A domain, loosely. Anything that is not an address and has a dot in it goes
+   to the domain lists and DNS decides whether it exists. */
+export function classify(input) {
+  const v = String(input || '').trim().toLowerCase()
+    .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^.*@/, '')
+    .replace(/\.+$/, '');
+  if (!v) return { kind: 'empty' };
+  if (isV6(v)) return { kind: 'ipv6', value: v };
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(v)) {
+    return reverseV4(v) ? { kind: 'ipv4', value: v } : { kind: 'bad', value: v };
+  }
+  if (!v.includes('.') || /[^a-z0-9.-]/.test(v)) return { kind: 'bad', value: v };
+  return { kind: 'domain', value: v };
+}
+
+/**
+ * Check a domain against the domain lists.
+ *
+ * The probe entries are the reserved names from RFC 2606 rather than loopback
+ * addresses, and they catch a failure mode the IP side rarely sees: a zone that
+ * was retired by wildcarding every answer to positive.
+ */
+export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS) {
+  const d = String(domain || '').trim().toLowerCase().replace(/\.+$/, '');
+  const rows = await Promise.all(lists.map(async (l) => {
+    const [listedProbe, notListedProbe, answer] = await Promise.all([
+      lookup(`TEST.${l.zone}`),
+      lookup(`INVALID.${l.zone}`),
+      lookup(`${d}.${l.zone}`),
+    ]);
+    const canary = canaryVerdict(listedProbe, notListedProbe);
+    if (!canary.ok) return { ...l, state: 'undetermined', canary, codes: [] };
+    if (answer === null) {
+      return { ...l, state: 'undetermined', codes: [],
+        canary: { ok: false, state: 'unreachable',
+          why: 'The list passed its probes but the query for this domain did '
+             + 'not complete.' } };
+    }
+    return { ...l, canary, codes: answer,
+             state: answer.length ? 'listed' : 'clean' };
+  }));
+  return summarise(d, rows, 'domain');
+}
+
+function summarise(subject, rows, kind) {
+  const listed = rows.filter(r => r.state === 'listed');
+  const clean = rows.filter(r => r.state === 'clean');
+  const undetermined = rows.filter(r => r.state === 'undetermined');
+  return {
+    ip: subject, subject, kind, supported: true, rows, listed, clean, undetermined,
+    verdict: listed.length
+      ? { severity: 'critical',
+          text: `Listed on ${listed.length} of the ${clean.length + listed.length} `
+              + `lists that answered.` }
+      : clean.length
+        ? { severity: 'ok',
+            text: `Not listed on any of the ${clean.length} lists that answered.` }
+        : { severity: 'warn',
+            text: 'No list answered reliably, so this is not a result.' },
+  };
 }
 
 /**
@@ -197,20 +306,5 @@ export async function check(ip, lookup, lists = LISTS) {
              state: answer.length ? 'listed' : 'clean' };
   }));
 
-  const listed = rows.filter(r => r.state === 'listed');
-  const clean = rows.filter(r => r.state === 'clean');
-  const undetermined = rows.filter(r => r.state === 'undetermined');
-
-  return {
-    ip: addr, supported: true, rows, listed, clean, undetermined,
-    verdict: listed.length
-      ? { severity: 'critical',
-          text: `Listed on ${listed.length} of the ${clean.length + listed.length} `
-              + `lists that answered.` }
-      : clean.length
-        ? { severity: 'ok',
-            text: `Not listed on any of the ${clean.length} lists that answered.` }
-        : { severity: 'warn',
-            text: 'No list answered reliably, so this is not a result.' },
-  };
+  return summarise(addr, rows, 'ipv4');
 }

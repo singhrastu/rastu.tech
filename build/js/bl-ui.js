@@ -5,7 +5,8 @@
  * the address, because a dead list reports everyone as clean and a refusing one
  * reports everyone as listed.
  */
-import { check, LISTS, UNQUERYABLE } from './bl.js';
+import { check, checkDomain, classify, LISTS, DOMAIN_LISTS,
+         UNQUERYABLE, UNQUERYABLE_DOMAIN } from './bl.js';
 import { resolver } from './doh.js';
 import { esc } from './findings.js';
 
@@ -27,14 +28,25 @@ function main() {
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     if (running) return;
-    const ip = input.value.trim();
-    if (!ip) return;
+    const raw = input.value.trim();
+    if (!raw) return;
+    const what = classify(raw);
+    if (what.kind === 'bad') {
+      out.className = 'report on';
+      out.innerHTML = `<p class="note"><strong>That is neither an address nor a
+        domain.</strong> Paste an IPv4 address such as <code>203.0.113.9</code> to
+        check a sending host, or a domain such as <code>example.com</code> to check
+        the domain itself.</p>`;
+      return;
+    }
     running = true;
     runBtn.disabled = true;
     runBtn.textContent = 'Checking...';
     out.className = 'report on';
-    out.innerHTML = `<p class="note">Probing ${LISTS.length} lists against their own
-      RFC 5782 test entries, then asking each one about <code>${esc(ip)}</code>.</p>`;
+    const corpus = what.kind === 'domain' ? DOMAIN_LISTS : LISTS;
+    out.innerHTML = `<p class="note">Probing ${corpus.length} lists against their own
+      RFC 5782 test entries, then asking each one about
+      <code>${esc(what.value || raw)}</code>.</p>`;
     try {
       const r = resolver();
       // Never throws: a failed lookup is null, which the checker treats as
@@ -42,8 +54,13 @@ function main() {
       const lookup = async (name) => {
         try { return await r.a(name); } catch { return null; }
       };
-      render(await check(ip, lookup));
-      history.replaceState(null, '', '?ip=' + encodeURIComponent(ip));
+      // An address goes to the address lists and a domain to the domain lists.
+      // They are different corpora answering different questions: an address is
+      // listed because a host sent spam, a domain because it appeared in some.
+      render(what.kind === 'domain'
+        ? await checkDomain(what.value, lookup)
+        : await check(raw, lookup), what);
+      history.replaceState(null, '', '?q=' + encodeURIComponent(raw));
     } catch (e) {
       out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}</p>`;
     } finally {
@@ -53,7 +70,8 @@ function main() {
     }
   });
 
-  const q = new URLSearchParams(location.search).get('ip');
+  const params = new URLSearchParams(location.search);
+  const q = params.get('q') || params.get('ip');
   if (q) { input.value = q; form.dispatchEvent(new Event('submit')); }
 }
 
@@ -78,7 +96,8 @@ function row(r) {
   </tr>`;
 }
 
-function render(res) {
+function render(res, what) {
+  const isDomain = res.kind === 'domain';
   if (!res.supported) {
     out.innerHTML = `<div class="head"><h2>${esc(res.ip || 'No address')}</h2></div>
       <p class="verdict-line s-info"><span class="pill">not checked</span>
@@ -102,7 +121,11 @@ function render(res) {
         <tbody>${res.rows.map(row).join('')}</tbody>
       </table>
     </div>
-    ${UNQUERYABLE.map(u => `<div class="warnbox s-info">
+    ${isDomain ? `<p class="note">Domain lists answer a different question from
+      address lists: a domain is listed because it turned up in spam, usually as a
+      link, not because a particular machine sent it. The reputation of the address
+      you send from is separate, and checking it means pasting the address.</p>` : ''}
+    ${(isDomain ? UNQUERYABLE_DOMAIN : UNQUERYABLE).map(u => `<div class="warnbox s-info">
       <p><strong>${esc(u.name)} is not checked here, and cannot be.</strong>
       ${esc(u.reason)}</p>
       <p><a href="${esc(u.delist)}">Check it directly at ${esc(u.name)}</a>.</p>

@@ -6,7 +6,8 @@
  * not answering properly, so most of these are about the ways a list fails
  * rather than about the ways an address is listed.
  */
-import { check, canaryVerdict, reverseV4, isReservedV4, isV6, LISTS, UNQUERYABLE }
+import { check, checkDomain, classify, canaryVerdict, reverseV4, isReservedV4,
+         isV6, LISTS, DOMAIN_LISTS, UNQUERYABLE, UNQUERYABLE_DOMAIN }
   from './js/bl.js';
 
 let pass = 0;
@@ -121,8 +122,56 @@ is('Spamhaus is named rather than quietly omitted',
 is('no Spamhaus zone is queried through a public resolver',
    LISTS.filter(l => /spamhaus|abuseat/i.test(l.zone)).map(l => l.zone), []);
 
+// ------------------------------------------------------------ domain lists
+/* Domain lists use the RFC 2606 reserved names as probes: TEST must be listed,
+   INVALID must not. That catches a failure the IP side rarely produces, because
+   a retired domain zone tends to be wildcarded to positive rather than switched
+   off. AHBL did exactly that in 2015 to force people to stop querying it, so
+   every checker without the probe reports every domain on earth as listed. */
+const dzone = (z) => [{ zone: z, name: z, delist: '', note: '' }];
+
+is('a domain is classified as a domain', classify('example.com').kind, 'domain');
+is('and normalised', classify('HTTPS://Example.COM/path').value, 'example.com');
+is('an address is classified as an address', classify('203.0.113.9').kind, 'ipv4');
+is('v6 is recognised separately', classify('2001:db8::1').kind, 'ipv6');
+is('a bare word is neither', classify('blah').kind, 'bad');
+is('an empty box is empty', classify('   ').kind, 'empty');
+is('an address with a bad octet is not an address', classify('203.0.113.999').kind, 'bad');
+
+{
+  const wildcarded = async (name) => ['127.0.0.2'];   // answers everything
+  const r = await checkDomain('example.com', wildcarded, dzone('ahbl.test'));
+  is('a wildcarded zone is not read as a listing', r.listed.length, 0);
+  is('it is undetermined', r.rows[0].state, 'undetermined');
+  is('because it answered for INVALID', r.rows[0].canary.state, 'refusing');
+}
+{
+  const good = async (name) => (name.startsWith('TEST.') ? ['127.0.0.2']
+    : name.startsWith('bad-domain.test.') ? ['127.0.1.2'] : []);
+  const listed = await checkDomain('bad-domain.test', good, dzone('test.'));
+  is('a real domain listing is reported', listed.rows[0].state, 'listed');
+  is('with its return code', listed.rows[0].codes, ['127.0.1.2']);
+  const cleanRes = await checkDomain('good-domain.test', good, dzone('test.'));
+  is('and a clean domain is clean', cleanRes.rows[0].state, 'clean');
+}
+{
+  const dead = async () => [];
+  const r = await checkDomain('example.com', dead, dzone('dead.test'));
+  is('a silent domain zone yields no clean verdict', r.rows[0].state, 'undetermined');
+  is('and the overall verdict refuses to conclude', r.verdict.severity, 'warn');
+}
+is('every domain list has a delisting route',
+   DOMAIN_LISTS.filter(l => !l.delist).map(l => l.zone), []);
+is('every domain list explains what it means',
+   DOMAIN_LISTS.filter(l => (l.note || '').length < 40).map(l => l.zone), []);
+is('the Spamhaus domain list is named rather than omitted',
+   UNQUERYABLE_DOMAIN.some(l => /spamhaus/i.test(l.zone)), true);
+is('and no Spamhaus zone is queried through a public resolver',
+   DOMAIN_LISTS.filter(l => /spamhaus/i.test(l.zone)).map(l => l.zone), []);
+
 if (fails.length) {
   console.error('\nblocklist failures:\n  ' + fails.join('\n  '));
   process.exit(1);
 }
-console.log(`  blocklist ok (${pass} assertions over ${LISTS.length} lists)`);
+console.log(`  blocklist ok (${pass} assertions over ${LISTS.length} address lists `
+  + `and ${DOMAIN_LISTS.length} domain lists)`);

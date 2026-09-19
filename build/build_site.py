@@ -1314,13 +1314,13 @@ TOOLS = [
     },
     {
         "slug": "blocklist", "name": "Blocklist check",
-        "q": "Is this sending IP on a blocklist, and does the list still work?",
-        "blurb": "Checks an address against the lists that are actually answering. "
-                 "Every list is probed against its own RFC 5782 test entries first, "
-                 "because a decommissioned zone reports everyone as clean and a "
-                 "refusing one reports everyone as listed.",
+        "q": "Is this address or domain listed, and is the list still working?",
+        "blurb": "Checks a sending address or a domain against the lists that are "
+                 "actually answering. Every list is probed against its own RFC 5782 "
+                 "test entries first, because a decommissioned zone reports everyone "
+                 "as clean and a wildcarded one reports everyone as listed.",
         "tag": "Reputation",
-        "takes": "203.0.113.9",
+        "takes": "203.0.113.9  ·  example.com",
     },
     {
         "slug": "dmarc", "name": "DMARC report reader",
@@ -2043,26 +2043,29 @@ def build_blocklist():
 <p class="lede">A blocklist cannot tell you it has stopped working. A zone that was
 shut down answers nothing, which is the same answer it gives for an address that is
 not listed, so every checker still querying it reports the whole internet as clean.
-One that refuses your resolver answers something to everything, which reports the
-whole internet as listed.</p>
+One that was retired by wildcarding answers yes to everything, which reports the
+whole internet as listed. Both are common, and neither is visible without asking
+the list about itself first.</p>
 
 <div class="tool r">
   <form id="bl-form" autocomplete="off" class="row">
-    <label class="lbl-mi" for="bl-in">Sending IP address</label>
-    <input class="field" id="bl-in" type="text" inputmode="decimal" spellcheck="false"
-           autocomplete="off" placeholder="203.0.113.9">
+    <label class="lbl-mi" for="bl-in">An address or a domain</label>
+    <input class="field" id="bl-in" type="text" spellcheck="false"
+           autocomplete="off" placeholder="203.0.113.9 or example.com">
     <button class="btn" type="submit" id="bl-run">Check</button>
   </form>
-  <p class="hint"><span>Your address is never sent here. The lookups go from your
-  browser to a public DNS-over-HTTPS resolver.</span></p>
+  <p class="hint"><span>An address goes to the address lists and a domain to the
+  domain lists: they answer different questions. Nothing you type is sent here, the
+  lookups go from your browser to a public DNS-over-HTTPS resolver.</span></p>
 </div>
 <div class="report" id="bl-out" aria-live="polite"></div>
 
 <div class="sechead r">
   <h2>Why a list gets refused before its answer is read</h2>
-  <p>RFC 5782 requires every conformant list to contain 127.0.0.2 and to not contain
-  127.0.0.1. Those two queries separate a list that is working from one that is not,
-  and they are the only way to tell the difference from outside.</p>
+  <p>RFC 5782 gives every list a pair of entries it must answer correctly: an address
+  list has to contain 127.0.0.2 and must not contain 127.0.0.1, and a domain list has
+  to contain TEST and must not contain INVALID. Those two queries separate a list that
+  is working from one that is not, and they are the only way to tell from outside.</p>
 </div>
 <ul class="prose-list r">
   <li><strong>Answers neither.</strong> The zone is dead or refusing. SORBS was
@@ -2071,7 +2074,9 @@ whole internet as listed.</p>
   <li><strong>Answers both.</strong> The list is returning something other than list
   data. Spamhaus answers 127.255.255.254 to any query arriving through a public
   resolver, and a checker counting any answer as a hit reports every address as
-  listed.</li>
+  listed. AHBL went further when it closed in 2015 and wildcarded its domain zone to
+  answer yes to everything, deliberately, to force people to stop querying it. It
+  still does.</li>
   <li><strong>Answers the wrong one.</strong> The return codes do not mean what a
   blocklist query means. Some reputation services publish on the same interface
   without following the same convention.</li>
