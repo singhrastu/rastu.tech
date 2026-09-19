@@ -1,6 +1,6 @@
 /* SPF lookup counter. Logic lives in audit.js so this page and the domain check
    can never disagree about a count; this module is the view only. */
-import { spfTree } from './audit.js';
+import { spfTree, looksLikeDomain } from './audit.js';
 import { resolver } from './doh.js';
 
 const form = document.getElementById('spf-form');
@@ -18,12 +18,13 @@ function main() {
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     if (running) return;
-    const domain = input.value.trim();
-    if (!domain || !domain.includes('.')) {
+    const v = looksLikeDomain(input.value);
+    if (!v.ok) {
       out.className = 'report on';
-      out.innerHTML = '<p class="note">That does not look like a domain. Try example.com.</p>';
+      out.innerHTML = `<p class="note">${esc(v.reason)}</p>`;
       return;
     }
+    const domain = v.domain;
     running = true; runBtn.disabled = true; runBtn.textContent = 'Counting...';
     out.className = 'report on';
     out.innerHTML = '<p class="note">Walking the include tree. Deeply nested records take a moment.</p>';
@@ -81,6 +82,18 @@ function flatten(nodes, depth, acc) {
 }
 
 function render(res) {
+  // "No SPF record" is a finding about a domain somebody owns. For a name that
+  // does not resolve it is just wrong, and it reads as though the domain is real
+  // and misconfigured.
+  if (res.nxdomain) {
+    out.innerHTML = `<div class="head"><h2>${esc(res.domain)}</h2></div>
+      <p class="verdict-line s-fail"><span class="pill">fail</span>
+      This domain does not exist</p>
+      <p class="note">Two independent resolvers returned NXDOMAIN for it, so there is
+      nothing published here and nothing to fix. Check the spelling, and if it was
+      registered in the last few minutes, give it time to appear.</p>`;
+    return;
+  }
   if (res.records.length > 1) {
     out.innerHTML = `<div class="head"><h2>${esc(res.domain)}</h2></div>
       <p class="verdict-line s-fail"><span class="pill">fail</span>

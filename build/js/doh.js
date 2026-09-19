@@ -12,7 +12,8 @@ const ENDPOINTS = [
   'https://cloudflare-dns.com/dns-query',
   'https://dns.google/resolve',
 ];
-const TYPE = { TXT: 16, MX: 15, A: 1, AAAA: 28, PTR: 12 };
+const TYPE = { TXT: 16, MX: 15, A: 1, AAAA: 28, PTR: 12, NS: 2, SOA: 6 };
+const NXDOMAIN = 3;
 
 /* Thrown when every resolver failed. This is NOT the same as a domain having no
    record, and conflating the two is how a checker tells someone their SPF is
@@ -63,7 +64,47 @@ export function resolver() {
     return res.answers;
   }
 
+  /* Does this name exist at all?
+     *
+     * NXDOMAIN and NOERROR-with-no-answer look identical through the record
+     * accessors above: both come back as an empty list. They mean completely
+     * different things. A domain with no TXT record is ordinary. A domain that
+     * does not exist cannot have one, and reporting "no SPF record" for a
+     * typo is worse than useless because it reads as a finding about a domain
+     * somebody owns.
+     *
+     * Two rules keep this free of false positives. Both resolvers are asked
+     * independently, and absence is only claimed when both say NXDOMAIN: one
+     * resolver's NXDOMAIN against another's answer is a disagreement, and the
+     * safe reading of a disagreement is that the domain exists. And the query
+     * goes to the apex, because NXDOMAIN on _dmarc.example.com says nothing
+     * about example.com.
+     *
+     * Returns 'exists', 'nxdomain', or 'undetermined'.
+     */
+  async function existence(name) {
+    const votes = await Promise.all(ENDPOINTS.map(async (base) => {
+      try {
+        const url = base + '?name=' + encodeURIComponent(name) + '&type=NS';
+        const r = await fetch(url, { headers: { accept: 'application/dns-json' } });
+        if (!r.ok) return null;
+        const d = await r.json();
+        return typeof d.Status === 'number' ? d.Status : null;
+      } catch { return null; }
+    }));
+    const heard = votes.filter(v => v !== null);
+    if (!heard.length) return 'undetermined';
+    // Any resolver that answered without NXDOMAIN means the name resolves for
+    // somebody, which is enough to stop us calling it absent.
+    if (heard.some(v => v !== NXDOMAIN)) return 'exists';
+    // Every resolver that answered said NXDOMAIN. Require more than one voice
+    // before asserting it, so a single rate-limited or filtered resolver cannot
+    // declare a real domain non-existent.
+    return heard.length >= 2 ? 'nxdomain' : 'undetermined';
+  }
+
   return {
+    existence,
     async txt(name) {
       const rows = await answers(name, 'TXT');
       // DNS splits long TXT into 255-byte chunks and the JSON API hands them back

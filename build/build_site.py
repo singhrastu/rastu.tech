@@ -3712,7 +3712,8 @@ def check_js():
                         ("parity-rua.mjs", "the DMARC report reader is wrong"),
                         ("parity-headers.mjs", "the header analyser is wrong"),
                         ("parity-lookup.mjs", "the response lookup is wrong"),
-                        ("parity-rfc.mjs", "the RFC index is wrong")):
+                        ("parity-rfc.mjs", "the RFC index is wrong"),
+                        ("parity-domain.mjs", "the domain gate is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue

@@ -166,6 +166,12 @@ async function countLookups(spf, r, path, depth = 0, out = null) {
 export async function spfTree(domain, r) {
   domain = domain.trim().toLowerCase().replace(/^https?:\/\//, '')
     .replace(/\/.*$/, '').replace(/^.*@/, '').replace(/\.+$/, '');
+  // Same reasoning as the audit: "no SPF record" is the wrong answer for a name
+  // that does not exist, and the two are indistinguishable once the lookup has
+  // returned an empty list.
+  if (typeof r.existence === 'function' && await r.existence(domain) === 'nxdomain') {
+    return { domain, record: null, records: [], tree: [], count: 0, nxdomain: true };
+  }
   const records = (await r.txt(domain)).filter(t => t.toLowerCase().startsWith('v=spf1'));
   if (!records.length) return { domain, record: null, records, tree: [], count: 0 };
   if (records.length > 1) return { domain, record: null, records, tree: [], count: 0 };
@@ -482,6 +488,27 @@ function checkBulkSenderReadiness(rep) {
 export async function audit(domain, r, fetchPolicy, selectors) {
   domain = domain.trim().toLowerCase().replace(/\.+$/, '');
   const rep = new Report(domain);
+
+  /* Ask whether the name exists before reporting on what it publishes.
+     Every check below reads an empty answer as "no record", which is the right
+     reading for a domain somebody owns and the wrong one for a typo: a list of
+     failures against blablablaxyz.com reads as findings about a real domain.
+     Only claimed when two resolvers independently agree, so a rate limit or a
+     filtered resolver cannot produce it. Skipped entirely when the resolver
+     does not offer the check, which keeps the fixture harness unaffected. */
+  if (typeof r.existence === 'function') {
+    const state = await r.existence(domain);
+    if (state === 'nxdomain') {
+      rep.add('Domain', FAIL, `${domain} does not exist`,
+        'Two independent resolvers returned NXDOMAIN for this name, so there is '
+        + 'nothing published here and nothing to fix. Check the spelling, and if '
+        + 'the domain was registered in the last few minutes give it time to '
+        + 'appear.',
+        'NXDOMAIN at the apex');
+      return rep;
+    }
+  }
+
   await checkSpf(domain, r, rep);
   await checkDkim(domain, r, rep, selectors);
   await checkDmarc(domain, r, rep);
@@ -491,4 +518,54 @@ export async function audit(domain, r, fetchPolicy, selectors) {
   await checkMx(domain, r, rep);
   checkBulkSenderReadiness(rep);   // must be last: it reads the findings above
   return rep;
+}
+
+/* Is this even shaped like a domain?
+ *
+ * Cheap, local, and deliberately permissive: the job is to catch an obvious
+ * non-domain before spending two DNS round trips on it, not to police what is
+ * registrable. Anything that might be real gets through and DNS decides.
+ * Rejecting a valid name here would be the worst outcome, so the rules are only
+ * the ones no hostname can break.
+ */
+export function looksLikeDomain(input) {
+  const d = String(input || '').trim().toLowerCase()
+    .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^.*@/, '')
+    .replace(/\.+$/, '');
+  if (!d) return { ok: false, reason: 'Enter a domain.' };
+  if (d.length > 253) {
+    return { ok: false, reason: 'A domain name cannot be longer than 253 characters.' };
+  }
+  if (/\s/.test(d)) {
+    return { ok: false, reason: 'A domain name has no spaces in it.' };
+  }
+  if (!d.includes('.')) {
+    return { ok: false, reason: 'That has no dot in it, so it is a hostname or a '
+      + 'word rather than a domain. Try example.com.' };
+  }
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(d)) {
+    return { ok: false, reason: 'That is an IP address. These records are published '
+      + 'against a domain name, so check the domain that sends from it.' };
+  }
+  for (const label of d.split('.')) {
+    if (!label) return { ok: false, reason: 'That has an empty label in it, which '
+      + 'means two dots together or a leading dot.' };
+    if (label.length > 63) {
+      return { ok: false, reason: 'No part of a domain name can be longer than 63 '
+        + 'characters.' };
+    }
+    if (/^-|-$/.test(label)) {
+      return { ok: false, reason: 'No part of a domain name can start or end with a '
+        + 'hyphen.' };
+    }
+    // Permissive on the character set on purpose: internationalised names arrive
+    // here as punycode, and an unfamiliar but legal character should reach DNS
+    // rather than be turned away by a guess made in the browser.
+    if (/[^a-z0-9-]/.test(label)) {
+      return { ok: false, reason: 'That contains a character a domain name cannot '
+        + 'have. An internationalised domain needs its punycode form, which starts '
+        + 'with xn--.' };
+    }
+  }
+  return { ok: true, domain: d };
 }

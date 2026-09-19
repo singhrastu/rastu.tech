@@ -1,6 +1,6 @@
 /* The domain auditor's user interface. All of the logic lives in audit.js, which
    is verified against the Python package at build time by build/parity.mjs. */
-import { audit } from './audit.js';
+import { audit, looksLikeDomain } from './audit.js';
 import { resolver, policyFetcher } from './doh.js';
 
 const form = document.getElementById('check-form');
@@ -23,13 +23,16 @@ function main() {
   form.addEventListener('submit', async ev => {
     ev.preventDefault();
     if (running) return;
-    const domain = input.value.trim().toLowerCase()
-      .replace(/^https?:\/\//, '').replace(/\/.*$/, '').replace(/^.*@/, '').replace(/\.+$/, '');
-    if (!domain || !domain.includes('.')) {
-      out.innerHTML = '<p class="note">That does not look like a domain. Try example.com.</p>';
+    // One gate, shared with the SPF counter, so both refuse the same things and
+    // say the same thing about why. A dot test alone let an IP address and a
+    // string with spaces through to DNS.
+    const v = looksLikeDomain(input.value);
+    if (!v.ok) {
+      out.innerHTML = `<p class="note">${esc(v.reason)}</p>`;
       out.className = 'report on';
       return;
     }
+    const domain = v.domain;
 
     running = true;
     runBtn.disabled = true;
