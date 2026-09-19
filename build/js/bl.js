@@ -114,7 +114,63 @@ export const LISTS = [
         + 'problem on its own.' },
 ];
 
-/* Not queried, and said so rather than omitted. Leaving Spamhaus off the page
+/* Spamhaus through a Data Query Service key, which is the only way to reach it
+   from infrastructure: the public zones answer 127.255.255.254 to every resolver
+   anybody can use. The key lives as a Worker secret and never reaches the page.
+   Without one this returns a row saying it was not checked, which is the honest
+   state and is not the same as a clean result.
+
+   The canary runs through the same path as the real query. A key that has been
+   revoked or has run past its quota answers just like a working one until you
+   test it, which is the failure this whole tool is about. */
+export const DQS = {
+  ipv4: { zone: 'zen.dq.spamhaus.net', name: 'Spamhaus ZEN',
+          delist: 'https://check.spamhaus.org/',
+          note: 'The list most receivers consult. Listings carry a return code '
+              + 'saying which of SBL, XBL, CSS or PBL matched, and each has its '
+              + 'own removal route.' },
+  domain: { zone: 'dbl.dq.spamhaus.net', name: 'Spamhaus DBL',
+            delist: 'https://check.spamhaus.org/',
+            note: 'Domain reputation, and the one that most often explains a '
+                + 'domain being refused outright rather than filtered.' },
+};
+
+export async function checkSpamhaus(subject, kind, dqs) {
+  const cfg = kind === 'domain' ? DQS.domain : DQS.ipv4;
+  if (typeof dqs !== 'function') {
+    return { ...cfg, state: 'not-checked',
+      canary: { ok: false, state: 'unconfigured',
+        why: 'No Spamhaus Data Query Service key is configured on this '
+           + 'deployment, and the public zones refuse every resolver a browser '
+           + 'can use.' } };
+  }
+  const subjectQuery = kind === 'domain' ? subject : reverseV4(subject);
+  const probeUp = kind === 'domain' ? 'TEST' : '2.0.0.127';
+  const probeDown = kind === 'domain' ? 'INVALID' : '1.0.0.127';
+
+  const [up, down, answer] = await Promise.all([
+    dqs(probeUp, cfg.zone), dqs(probeDown, cfg.zone), dqs(subjectQuery, cfg.zone),
+  ]);
+  if (up === 'unconfigured') {
+    return { ...cfg, state: 'not-checked',
+      canary: { ok: false, state: 'unconfigured',
+        why: 'No Spamhaus Data Query Service key is configured on this '
+           + 'deployment, and the public zones refuse every resolver a browser '
+           + 'can use.' } };
+  }
+  const canary = canaryVerdict(up, down);
+  if (!canary.ok) return { ...cfg, state: 'undetermined', canary, codes: [] };
+  if (answer === null) {
+    return { ...cfg, state: 'undetermined', codes: [],
+      canary: { ok: false, state: 'unreachable',
+        why: 'The key answered its probes but the query for this subject did '
+           + 'not complete.' } };
+  }
+  return { ...cfg, canary, codes: answer,
+           state: answer.length ? 'listed' : 'clean' };
+}
+
+/* Not queried without a key, and said so rather than omitted. Leaving Spamhaus off the page
    without explanation is the same silence that lets other checkers get away
    with querying it wrongly. */
 export const UNQUERYABLE = [
@@ -218,7 +274,7 @@ export function classify(input) {
  * addresses, and they catch a failure mode the IP side rarely sees: a zone that
  * was retired by wildcarding every answer to positive.
  */
-export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS) {
+export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS, dqs) {
   const d = String(domain || '').trim().toLowerCase().replace(/\.+$/, '');
   const rows = await Promise.all(lists.map(async (l) => {
     const [listedProbe, notListedProbe, answer] = await Promise.all([
@@ -237,7 +293,11 @@ export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS) {
     return { ...l, canary, codes: answer,
              state: answer.length ? 'listed' : 'clean' };
   }));
-  return summarise(d, rows, 'domain', UNQUERYABLE_DOMAIN);
+  // Spamhaus sits at the top of the table whether or not it could be asked,
+  // because a table of six green rows with the important one missing from the
+  // page is how somebody concludes they are fine.
+  const sh = await checkSpamhaus(d, 'domain', dqs);
+  return summarise(d, [sh, ...rows], 'domain');
 }
 
 /* A verdict has to account for what was not asked, not only for what answered.
@@ -246,10 +306,11 @@ export async function checkDomain(domain, lookup, lists = DOMAIN_LISTS) {
    from the other direction: the canary stops a broken list from speaking, and
    then the headline forgets it was ever there. Spamhaus is always in this
    position from a browser, so a clean result is never unqualified. */
-function summarise(subject, rows, kind, missing = []) {
+function summarise(subject, rows, kind) {
   const listed = rows.filter(r => r.state === 'listed');
   const clean = rows.filter(r => r.state === 'clean');
   const undetermined = rows.filter(r => r.state === 'undetermined');
+  const missing = rows.filter(r => r.state === 'not-checked');
   const names = missing.map(m => m.name);
   const gap = names.length
     ? ` ${names.join(' and ')} could not be queried from a browser and `
@@ -285,7 +346,7 @@ function summarise(subject, rows, kind, missing = []) {
  *        when the query could not be completed. Never throws.
  * @returns {Promise<Object>}
  */
-export async function check(ip, lookup, lists = LISTS) {
+export async function check(ip, lookup, lists = LISTS, dqs) {
   const addr = String(ip || '').trim();
   if (isV6(addr)) {
     return { ip: addr, supported: false,
@@ -325,5 +386,6 @@ export async function check(ip, lookup, lists = LISTS) {
              state: answer.length ? 'listed' : 'clean' };
   }));
 
-  return summarise(addr, rows, 'ipv4', UNQUERYABLE);
+  const sh = await checkSpamhaus(addr, 'ipv4', dqs);
+  return summarise(addr, [sh, ...rows], 'ipv4');
 }

@@ -5,8 +5,7 @@
  * the address, because a dead list reports everyone as clean and a refusing one
  * reports everyone as listed.
  */
-import { check, checkDomain, classify, LISTS, DOMAIN_LISTS,
-         UNQUERYABLE, UNQUERYABLE_DOMAIN } from './bl.js';
+import { check, checkDomain, classify, LISTS, DOMAIN_LISTS } from './bl.js';
 import { resolver } from './doh.js';
 import { esc } from './findings.js';
 
@@ -27,6 +26,7 @@ const PILL = {
 };
 
 const STATE_LABEL = {
+  unconfigured: 'not checked',
   silent: 'not answering',
   refusing: 'refusing this resolver',
   inverted: 'return codes do not match the spec',
@@ -67,9 +67,22 @@ function main() {
       // An address goes to the address lists and a domain to the domain lists.
       // They are different corpora answering different questions: an address is
       // listed because a host sent spam, a domain because it appeared in some.
+      /* Spamhaus goes through the Worker, which holds a Data Query Service key
+         as a secret. Returns the string 'unconfigured' when there is no key, so
+         the row reports that rather than pretending the list was clean. */
+      const dqs = async (q, zone) => {
+        try {
+          const r = await fetch('/api/dnsbl?q=' + encodeURIComponent(q)
+            + '&zone=' + encodeURIComponent(zone));
+          if (!r.ok) return null;
+          const d = await r.json();
+          if (d.configured === false) return 'unconfigured';
+          return d.ok ? d.answers : null;
+        } catch { return null; }
+      };
       render(what.kind === 'domain'
-        ? await checkDomain(what.value, lookup)
-        : await check(raw, lookup), what);
+        ? await checkDomain(what.value, lookup, undefined, dqs)
+        : await check(raw, lookup, undefined, dqs), what);
       history.replaceState(null, '', '?q=' + encodeURIComponent(raw));
     } catch (e) {
       out.innerHTML = `<p class="note"><strong>No result.</strong> ${esc(e.message || e)}</p>`;
@@ -89,19 +102,21 @@ function row(r) {
   const state = r.state;
   const cls = state === 'listed' ? 's-critical'
     : state === 'clean' ? 's-ok' : 's-warn';
+  const needsWhy = state === 'undetermined' || state === 'not-checked';
   const verdict = state === 'listed'
     ? `<strong>listed</strong> <code>${r.codes.map(esc).join(' ')}</code>`
     : state === 'clean' ? 'not listed'
-      : `<span class="undet">could not determine</span>`;
+      : state === 'not-checked' ? '<span class="undet">not checked</span>'
+        : `<span class="undet">could not determine</span>`;
   return `<tr class="${cls}">
     <td><strong>${esc(r.name)}</strong><span class="zone">${esc(r.zone)}</span></td>
     <td>${verdict}</td>
-    <td class="why">${state === 'undetermined'
+    <td class="why">${needsWhy
       ? `<strong>${esc(STATE_LABEL[r.canary.state] || r.canary.state)}.</strong>
          ${esc(r.canary.why)}`
       : esc(r.note)}</td>
-    <td>${state === 'listed'
-      ? `<a href="${esc(r.delist)}">Delist</a>`
+    <td>${state === 'listed' || state === 'not-checked'
+      ? `<a href="${esc(r.delist)}">${state === 'listed' ? 'Delist' : 'Check there'}</a>`
       : '<span class="muted">&mdash;</span>'}</td>
   </tr>`;
 }
@@ -134,10 +149,15 @@ function render(res, what) {
       address lists: a domain is listed because it turned up in spam, usually as a
       link, not because a particular machine sent it. The reputation of the address
       you send from is separate, and checking it means pasting the address.</p>` : ''}
-    ${(isDomain ? UNQUERYABLE_DOMAIN : UNQUERYABLE).map(u => `<div class="warnbox s-info">
-      <p><strong>${esc(u.name)} is not checked here, and cannot be.</strong>
-      ${esc(u.reason)}</p>
-      <p><a href="${esc(u.delist)}">Check it directly at ${esc(u.name)}</a>.</p>
-    </div>`).join('')}`;
+    ${res.missing.length ? `<div class="warnbox s-info">
+      <p><strong>${esc(res.missing.map(m => m.name).join(' and '))} could not be
+      asked.</strong> Spamhaus refuses every public DNS resolver, answering
+      127.255.255.254 to all of them including the entry RFC 5782 says must never
+      be listed. Reaching it needs a Data Query Service key, which this deployment
+      does not have configured. A checker that does not test for the refusal
+      reports every subject as listed.</p>
+      <p><a href="${esc(res.missing[0].delist)}">Check it directly at
+      Spamhaus</a>.</p>
+    </div>` : ''}`;
   out.querySelector('h2')?.focus();
 }

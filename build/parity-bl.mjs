@@ -50,14 +50,17 @@ is('every failure explains itself',
 // ------------------------------------------------- what each failure produces
 const zone = (z) => [{ zone: z, name: z, delist: '', note: '' }];
 const answers = (map) => async (name) => (name in map ? map[name] : []);
+/* Spamhaus is always prepended to the rows, so a test finds its list by zone
+   rather than by position. */
+const only = (r, z) => r.rows.find(x => x.zone === z);
 
 {
   // A decommissioned zone answers nothing to everything, which is
   // indistinguishable from "you are clean" without the probe. This is what
   // happened to every checker still querying SORBS after June 2024.
   const r = await check('203.0.113.9', answers({}), zone('dead.test'));
-  is('a dead zone yields no clean verdict', r.rows[0].state, 'undetermined');
-  is('and says the zone is silent', r.rows[0].canary.state, 'silent');
+  is('a dead zone yields no clean verdict', only(r, 'dead.test').state, 'undetermined');
+  is('and says the zone is silent', only(r, 'dead.test').canary.state, 'silent');
   is('and the address is not reported as clean', r.clean.length, 0);
   is('and the overall verdict refuses to conclude', r.verdict.severity, 'warn');
 }
@@ -72,8 +75,8 @@ const answers = (map) => async (name) => (name in map ? map[name] : []);
   });
   const r = await check('203.0.113.9', refusing, zone('refuse.test'));
   is('a refusing list is not read as a listing', r.listed.length, 0);
-  is('it is undetermined instead', r.rows[0].state, 'undetermined');
-  is('and the reason names the resolver', r.rows[0].canary.state, 'refusing');
+  is('it is undetermined instead', only(r, 'refuse.test').state, 'undetermined');
+  is('and the reason names the resolver', only(r, 'refuse.test').canary.state, 'refusing');
 }
 {
   const good = answers({
@@ -81,14 +84,14 @@ const answers = (map) => async (name) => (name in map ? map[name] : []);
     '9.113.0.203.good.test': ['127.0.0.4'],
   });
   const r = await check('203.0.113.9', good, zone('good.test'));
-  is('a real listing is reported', r.rows[0].state, 'listed');
-  is('with the return code kept', r.rows[0].codes, ['127.0.0.4']);
+  is('a real listing is reported', only(r, 'good.test').state, 'listed');
+  is('with the return code kept', only(r, 'good.test').codes, ['127.0.0.4']);
   is('and the verdict is critical', r.verdict.severity, 'critical');
 }
 {
   const good = answers({ '2.0.0.127.good.test': ['127.0.0.2'] });
   const r = await check('203.0.113.9', good, zone('good.test'));
-  is('a clean address on a working list is clean', r.rows[0].state, 'clean');
+  is('a clean address on a working list is clean', only(r, 'good.test').state, 'clean');
   /* Not an unqualified pass. Spamhaus ZEN cannot be reached from a browser
      either, so the same caveat applies to addresses as to domains. */
   is('but the verdict is qualified, because ZEN was not asked',
@@ -100,7 +103,7 @@ const answers = (map) => async (name) => (name in map ? map[name] : []);
   const flaky = async (name) => (name.startsWith('9.113.0.203.') ? null
     : name.startsWith('2.0.0.127.') ? ['127.0.0.2'] : []);
   const r = await check('203.0.113.9', flaky, zone('flaky.test'));
-  is('a failed query on a healthy list is undetermined', r.rows[0].state, 'undetermined');
+  is('a failed query on a healthy list is undetermined', only(r, 'flaky.test').state, 'undetermined');
   is('and is never counted as clean', r.clean.length, 0);
 }
 
@@ -146,22 +149,25 @@ is('an address with a bad octet is not an address', classify('203.0.113.999').ki
   const wildcarded = async (name) => ['127.0.0.2'];   // answers everything
   const r = await checkDomain('example.com', wildcarded, dzone('ahbl.test'));
   is('a wildcarded zone is not read as a listing', r.listed.length, 0);
-  is('it is undetermined', r.rows[0].state, 'undetermined');
-  is('because it answered for INVALID', r.rows[0].canary.state, 'refusing');
+  const ahbl = r.rows.find(x => x.zone === 'ahbl.test');
+  is('it is undetermined', ahbl.state, 'undetermined');
+  is('because it answered for INVALID', ahbl.canary.state, 'refusing');
 }
 {
   const good = async (name) => (name.startsWith('TEST.') ? ['127.0.0.2']
     : name.startsWith('bad-domain.test.') ? ['127.0.1.2'] : []);
+  const row = (r, z) => r.rows.find(x => x.zone === z);
   const listed = await checkDomain('bad-domain.test', good, dzone('test.'));
-  is('a real domain listing is reported', listed.rows[0].state, 'listed');
-  is('with its return code', listed.rows[0].codes, ['127.0.1.2']);
+  is('a real domain listing is reported', row(listed, 'test.').state, 'listed');
+  is('with its return code', row(listed, 'test.').codes, ['127.0.1.2']);
   const cleanRes = await checkDomain('good-domain.test', good, dzone('test.'));
-  is('and a clean domain is clean', cleanRes.rows[0].state, 'clean');
+  is('and a clean domain is clean', row(cleanRes, 'test.').state, 'clean');
 }
 {
   const dead = async () => [];
   const r = await checkDomain('example.com', dead, dzone('dead.test'));
-  is('a silent domain zone yields no clean verdict', r.rows[0].state, 'undetermined');
+  is('a silent domain zone yields no clean verdict',
+     r.rows.find(x => x.zone === 'dead.test').state, 'undetermined');
   is('and the overall verdict refuses to conclude', r.verdict.severity, 'warn');
 }
 is('every domain list has a delisting route',
@@ -203,6 +209,51 @@ is('and no Spamhaus zone is queried through a public resolver',
     [{ zone: 'test.', name: 'test', delist: 'x', note: 'y'.repeat(45) }]);
   is('an actual listing still outranks the caveat', r.verdict.state, 'listed');
   is('and is critical', r.verdict.severity, 'critical');
+}
+
+// --------------------------------------------- Spamhaus is a row, not a footnote
+/* Six green rows with the important list missing from the page is how somebody
+   concludes they are fine. It appears in the table either way: as a result when
+   a key is configured, and as "not checked" when there is none. */
+{
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const r = await checkDomain('bettywins.com', good);
+  is('Spamhaus is the first row', /spamhaus/i.test(r.rows[0].name), true);
+  is('and is marked not checked', r.rows[0].state, 'not-checked');
+  is('and is never counted as clean', r.clean.some(x => /spamhaus/i.test(x.name)), false);
+  is('the verdict stays qualified', r.verdict.state, 'partial');
+}
+{
+  // A key that works and reports a listing.
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? [] : ['127.0.1.4']);
+  const r = await checkDomain('bettywins.com', good, undefined, dqs);
+  is('with a key the listing is reported', r.rows[0].state, 'listed');
+  is('and the verdict follows it', r.verdict.state, 'listed');
+  is('and it is critical', r.verdict.severity, 'critical');
+}
+{
+  // A revoked key, or one past its quota, must not read as clean.
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const dead = async () => [];
+  const r = await checkDomain('bettywins.com', good, undefined, dead);
+  is('a key that fails its own probe is undetermined', r.rows[0].state, 'undetermined');
+  is('and is not counted as clean', r.clean.some(x => /spamhaus/i.test(x.name)), false);
+}
+{
+  // The canary runs through the key too: a key answering everything is as
+  // dangerous as the public zone doing it.
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  const wild = async () => ['127.255.255.254'];
+  const r = await checkDomain('bettywins.com', good, undefined, wild);
+  is('a key answering everything is caught', r.rows[0].state, 'undetermined');
+  is('as a refusal', r.rows[0].canary.state, 'refusing');
+}
+{
+  const answersIp = (map) => async (name) => (name in map ? map[name] : []);
+  const r = await check('203.0.113.9', answersIp({ '2.0.0.127.bl.spamcop.net': ['127.0.0.2'] }));
+  is('the address path carries Spamhaus ZEN too', /zen/i.test(r.rows[0].name), true);
+  is('marked not checked without a key', r.rows[0].state, 'not-checked');
 }
 
 if (fails.length) {

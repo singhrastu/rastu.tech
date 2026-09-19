@@ -19,6 +19,9 @@
 const HOSTNAME = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/i;
 /* The only zones /api/dnsbl will assemble a query for. */
 const DQS_ZONES = ['zen.dq.spamhaus.net', 'dbl.dq.spamhaus.net'];
+/* A sequence of DNS labels and nothing else: no empty labels, no leading or
+   trailing dot, nothing that could alter where the assembled name points. */
+const LABELS = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)*$/;
 const MAX_BYTES = 64 * 1024;
 const TIMEOUT_MS = 8000;
 
@@ -120,13 +123,18 @@ export default {
         return json({ configured: false,
           reason: 'No Spamhaus DQS key is configured on this deployment.' });
       }
-      const ip = (url.searchParams.get('ip') || '').trim();
+      /* `q` is either a reversed IPv4 address for the address list or a domain
+         for the domain list. Both are label sequences; neither can escape the
+         zone, because the query is assembled here from a zone off a fixed list. */
+      const q = (url.searchParams.get('q') || '').trim().toLowerCase()
+        .replace(/\.+$/, '');
       const zone = (url.searchParams.get('zone') || '').trim().toLowerCase();
       if (!DQS_ZONES.includes(zone)) return json({ error: 'unknown zone' }, 400);
-      if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) return json({ error: 'bad address' }, 400);
-      if (ip.split('.').some(o => Number(o) > 255)) return json({ error: 'bad address' }, 400);
+      if (!q || q.length > 253 || !LABELS.test(q)) {
+        return json({ error: 'bad query' }, 400);
+      }
 
-      const name = `${ip}.${key}.${zone}`;
+      const name = `${q}.${key}.${zone}`;
       try {
         const r = await fetch(
           'https://cloudflare-dns.com/dns-query?type=A&name=' + encodeURIComponent(name),
