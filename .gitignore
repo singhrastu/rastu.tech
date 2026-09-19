@@ -7,3 +7,9 @@ research/data/scan-*.jsonl
 research/data/*.log
 testdata/
 .wrangler/
+
+# Never. A secret belongs in a Worker secret or a password manager.
+.env
+.env.*
+.dev.vars
+.dev.vars.*
