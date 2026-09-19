@@ -195,44 +195,41 @@ export function explainCodes(codes) {
 
 export async function checkSpamhaus(subject, kind, dqs) {
   const cfg = kind === 'domain' ? DQS.domain : DQS.ipv4;
-  if (typeof dqs !== 'function') {
-    return { ...cfg, state: 'not-checked',
-      canary: { ok: false, state: 'unconfigured',
-        why: 'No Spamhaus Data Query Service key is configured on this '
-           + 'deployment, and the public zones refuse every resolver a browser '
-           + 'can use.' } };
-  }
-  const subjectQuery = kind === 'domain' ? subject : reverseV4(subject);
-  const probeUp = kind === 'domain' ? 'TEST' : '2.0.0.127';
-  const probeDown = kind === 'domain' ? 'INVALID' : '1.0.0.127';
+  const unconfigured = {
+    ...cfg, state: 'not-checked',
+    canary: { ok: false, state: 'unconfigured',
+      why: 'No Spamhaus Data Query Service key is configured on this deployment, '
+         + 'and the public zones refuse every resolver a browser can use.' } };
+  if (typeof dqs !== 'function') return unconfigured;
 
-  const [up, down, answer] = await Promise.all([
-    dqs(probeUp, cfg.zone), dqs(probeDown, cfg.zone), dqs(subjectQuery, cfg.zone),
-  ]);
-  if (typeof up === 'string' && up.startsWith('blocked:')) {
+  /* One call, returning both probes and the subject together. A Turnstile token
+     is spent the first time it is verified, so three separate calls with one
+     token had the first pass and the rest rejected as replays. */
+  const res = await dqs(subject, cfg.zone);
+  if (res === 'unconfigured') return unconfigured;
+  if (typeof res === 'string' && res.startsWith('blocked:')) {
     return { ...cfg, state: 'undetermined', codes: [],
       canary: { ok: false, state: 'throttled',
         why: 'The Spamhaus lookup was refused before it ran, either because too '
            + 'many checks came from this address in the last minute or because '
            + 'the page challenge was not completed. Reload and try again.' } };
   }
-  if (up === 'unconfigured') {
-    return { ...cfg, state: 'not-checked',
-      canary: { ok: false, state: 'unconfigured',
-        why: 'No Spamhaus Data Query Service key is configured on this '
-           + 'deployment, and the public zones refuse every resolver a browser '
-           + 'can use.' } };
+  if (!res) {
+    return { ...cfg, state: 'undetermined', codes: [],
+      canary: { ok: false, state: 'unreachable',
+        why: 'The Spamhaus lookup did not complete.' } };
   }
-  const canary = canaryVerdict(up, down);
+
+  const canary = canaryVerdict(res.up, res.down);
   if (!canary.ok) return { ...cfg, state: 'undetermined', canary, codes: [] };
-  if (answer === null) {
+  if (res.answers === null) {
     return { ...cfg, state: 'undetermined', codes: [],
       canary: { ok: false, state: 'unreachable',
         why: 'The key answered its probes but the query for this subject did '
            + 'not complete.' } };
   }
-  return { ...cfg, canary, codes: answer, meanings: explainCodes(answer),
-           state: answer.length ? 'listed' : 'clean' };
+  return { ...cfg, canary, codes: res.answers, meanings: explainCodes(res.answers),
+           state: res.answers.length ? 'listed' : 'clean' };
 }
 
 /* Not queried without a key, and said so rather than omitted. Leaving Spamhaus off the page

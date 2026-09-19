@@ -122,6 +122,8 @@ function main() {
       // One token per check: each can only be spent once, and all three queries
       // in a check go out together.
       const token = await challengeToken();
+      /* One request per check, carrying the token once, and returning both
+         probes and the subject together. */
       const dqs = async (q, zone) => {
         try {
           const r = await fetch('/api/dnsbl?q=' + encodeURIComponent(q)
@@ -130,7 +132,7 @@ function main() {
           const d = await r.json().catch(() => null);
           if (!r.ok) return d && d.error ? 'blocked:' + d.error : null;
           if (d.configured === false) return 'unconfigured';
-          return d.ok ? d.answers : null;
+          return d.ok ? { up: d.up, down: d.down, answers: d.answers } : null;
         } catch { return null; }
       };
       render(what.kind === 'domain'

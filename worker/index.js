@@ -173,41 +173,46 @@ export default {
         return json({ configured: false,
           reason: 'No Spamhaus DQS key is configured on this deployment.' });
       }
-      /* `q` is either a reversed IPv4 address for the address list or a domain
-         for the domain list. Both are label sequences; neither can escape the
-         zone, because the query is assembled here from a zone off a fixed list. */
-      const q = (url.searchParams.get('q') || '').trim().toLowerCase()
+      /* One request per check, not three.
+         A Turnstile token is spent the first time siteverify sees it, so sending
+         the same one with three separate lookups meant the first passed and the
+         other two were rejected as replays. The probes and the subject are
+         resolved together here: the challenge is verified once, the rate limiter
+         counts one check as one, and the caller cannot ask for the probes and
+         the subject separately and get an inconsistent pair. */
+      const subject = (url.searchParams.get('q') || '').trim().toLowerCase()
         .replace(/\.+$/, '');
       const zone = (url.searchParams.get('zone') || '').trim().toLowerCase();
       if (!DQS_ZONES.includes(zone)) return json({ error: 'unknown zone' }, 400);
-      if (!q || q.length > 253 || !LABELS.test(q)) {
+      if (!subject || subject.length > 253 || !LABELS.test(subject)) {
         return json({ error: 'bad query' }, 400);
       }
 
-      /* The two probe queries are identical for every visitor and every subject,
-         so asking Spamhaus for them on each check is pure waste against a
-         hundred thousand a day. Cached at the edge they cost one query an hour
-         between everybody, which turns three queries per check into one. The
-         subject itself gets a short cache so a page reload or a second look at
-         the same domain does not spend the allowance twice. */
-      const isProbe = q === 'test' || q === 'invalid'
-        || q === '2.0.0.127' || q === '1.0.0.127';
-      const ttl = isProbe ? 3600 : 300;
+      // RFC 5782 gives domain lists reserved names and address lists reserved
+      // addresses. The zone decides which pair applies, so the caller cannot
+      // pick the wrong one.
+      const domainZone = zone.startsWith('dbl.');
+      const probeUp = domainZone ? 'TEST' : '2.0.0.127';
+      const probeDown = domainZone ? 'INVALID' : '1.0.0.127';
 
-      const name = `${q}.${key}.${zone}`;
-      try {
-        const r = await fetch(
-          'https://cloudflare-dns.com/dns-query?type=A&name=' + encodeURIComponent(name),
-          { headers: { accept: 'application/dns-json' },
-            cf: { cacheTtl: ttl, cacheEverything: true } });
-        if (!r.ok) return json({ configured: true, ok: false });
-        const d = await r.json();
-        return json({ configured: true, ok: true, status: d.Status,
-          answers: (d.Answer || []).filter(a => a.type === 1).map(a => a.data) },
-          200, ttl);
-      } catch {
-        return json({ configured: true, ok: false });
-      }
+      const ask = async (label, ttl) => {
+        try {
+          const r = await fetch('https://cloudflare-dns.com/dns-query?type=A&name='
+            + encodeURIComponent(`${label}.${key}.${zone}`),
+            { headers: { accept: 'application/dns-json' },
+              cf: { cacheTtl: ttl, cacheEverything: true } });
+          if (!r.ok) return null;
+          const d = await r.json();
+          return (d.Answer || []).filter(a => a.type === 1).map(a => a.data);
+        } catch { return null; }
+      };
+
+      // The probes are the same for every visitor and every subject, so they are
+      // cached for an hour and shared; the subject gets five minutes.
+      const [up, down, answers] = await Promise.all([
+        ask(probeUp, 3600), ask(probeDown, 3600), ask(subject, 300),
+      ]);
+      return json({ configured: true, ok: true, up, down, answers }, 200, 300);
     }
 
     if (url.pathname === '/api/status') {

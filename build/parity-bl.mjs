@@ -227,7 +227,7 @@ is('and no Spamhaus zone is queried through a public resolver',
 {
   // A key that works and reports a listing.
   const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
-  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? [] : ['127.0.1.4']);
+  const dqs = async () => ({ up: ['127.0.1.2'], down: [], answers: ['127.0.1.4'] });
   const r = await checkDomain('bettywins.com', good, undefined, dqs);
   is('with a key the listing is reported', r.rows[0].state, 'listed');
   is('and the verdict follows it', r.verdict.state, 'listed');
@@ -236,7 +236,7 @@ is('and no Spamhaus zone is queried through a public resolver',
 {
   // A revoked key, or one past its quota, must not read as clean.
   const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
-  const dead = async () => [];
+  const dead = async () => ({ up: [], down: [], answers: [] });
   const r = await checkDomain('bettywins.com', good, undefined, dead);
   is('a key that fails its own probe is undetermined', r.rows[0].state, 'undetermined');
   is('and is not counted as clean', r.clean.some(x => /spamhaus/i.test(x.name)), false);
@@ -245,7 +245,7 @@ is('and no Spamhaus zone is queried through a public resolver',
   // The canary runs through the key too: a key answering everything is as
   // dangerous as the public zone doing it.
   const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
-  const wild = async () => ['127.255.255.254'];
+  const wild = async () => ({ up: ['127.255.255.254'], down: ['127.255.255.254'], answers: ['127.255.255.254'] });
   const r = await checkDomain('bettywins.com', good, undefined, wild);
   is('a key answering everything is caught', r.rows[0].state, 'undetermined');
   is('as a refusal', r.rows[0].canary.state, 'refusing');
@@ -280,8 +280,7 @@ is('every documented code carries an explanation',
    Object.values(SPAMHAUS_CODES).filter(([, d]) => d.length < 25).length, 0);
 {
   const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
-  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? []
-    : ['127.0.1.102']);
+  const dqs = async () => ({ up: ['127.0.1.2'], down: [], answers: ['127.0.1.102'] });
   const r = await checkDomain('compromised.test', good, undefined, dqs);
   is('a listing carries its decoded meaning', r.rows[0].meanings[0].label,
      'Abused legitimate');
@@ -320,7 +319,7 @@ is('every documented code carries an explanation',
 }
 {
   // A dead ordinary list counts too, not only Spamhaus.
-  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : q === 'INVALID' ? [] : []);
+  const dqs = async () => ({ up: ['127.0.1.2'], down: [], answers: [] });
   const halfDead = async (n) => (n.startsWith('TEST.dead.test') ? [] :
     n.startsWith('TEST.') ? ['127.0.0.2'] : []);
   const r = await checkDomain('example.com', halfDead,
@@ -333,7 +332,7 @@ is('every documented code carries an explanation',
 {
   // Everything answered and nothing is missing: an unqualified pass is allowed.
   const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
-  const dqs = async (q) => (q === 'TEST' ? ['127.0.1.2'] : []);
+  const dqs = async () => ({ up: ['127.0.1.2'], down: [], answers: [] });
   const r = await checkDomain('example.com', good, undefined, dqs);
   is('with every list answering the verdict is unqualified',
      r.verdict.state, 'not-listed');
