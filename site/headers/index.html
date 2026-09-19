@@ -1016,9 +1016,11 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 <main id="main">
 
 <h1>Header analyser: what went wrong, and whose problem it is</h1>
-<p class="lede">Paste the raw headers of a message. You get the issues ranked, each one
-marked as yours to fix, the receiver's, or something an intermediary did in transit, plus
-the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
+<p class="lede">Headers are the only account of what a receiver actually decided, and
+almost every line in them can be typed by anyone. Only the Authentication-Results written
+by your own boundary means anything, and from a pasted message there is no way to tell
+which one that is. This reads them with that in mind: the DMARC arithmetic worked through,
+and each finding placed on the side that has to act on it.</p>
 
 <div class="tool">
   <form id="hdr-form" autocomplete="off">

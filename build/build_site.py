@@ -1880,8 +1880,10 @@ def build_bounce():
 
     body = f"""
 <h1>Bounce classifier</h1>
-<p class="lede">{e(t["q"])} Paste the response out of your mail log and get the category
-and the action it needs.</p>
+<p class="lede">Hard and soft is the wrong split. A 4xx that repeats for three days is
+a block wearing a retry code, and a 5xx for a full mailbox will clear on its own. What
+decides your next move is the enhanced code and the text beside it, not the first
+digit.</p>
 
 <div class="tool" id="sift">
   <label class="lbl-mi" for="sift-in">SMTP response</label>
@@ -2231,8 +2233,10 @@ make.</p>
 
 <div class="sechead r">
   <h2>On the command line</h2>
-  <p>Two of these started as command-line tools and still are. The hosted versions run the
-  same logic, checked against the originals on every build.</p>
+  <p>Two of these started on the command line and still belong there. Classifying a
+  day of bounces or auditing a domain is something you want in a cron job and a
+  pipeline, not in a browser tab, so the hosted versions are ports of the originals
+  rather than the other way round.</p>
 </div>
 
 <div class="grid r">
@@ -2264,9 +2268,11 @@ def build_headers():
     t = tool("headers")
     body = """
 <h1>Header analyser: what went wrong, and whose problem it is</h1>
-<p class="lede">Paste the raw headers of a message. You get the issues ranked, each one
-marked as yours to fix, the receiver's, or something an intermediary did in transit, plus
-the DMARC arithmetic a receiver actually ran to reach its verdict.</p>
+<p class="lede">Headers are the only account of what a receiver actually decided, and
+almost every line in them can be typed by anyone. Only the Authentication-Results written
+by your own boundary means anything, and from a pasted message there is no way to tell
+which one that is. This reads them with that in mind: the DMARC arithmetic worked through,
+and each finding placed on the side that has to act on it.</p>
 
 <div class="tool">
   <form id="hdr-form" autocomplete="off">
@@ -2429,9 +2435,9 @@ or find the mechanism that quietly switched off an SPF record.</p>
 
 <div class="sechead r">
   <h2>SMTP response reference</h2>
-  <p>One page per response you actually see in a mail log: what it means, whether
-  retrying helps, and what to change so it stops. Written from operating these
-  systems, not from the spec.</p>
+  <p>A 550 tells you the delivery failed and nothing else. The enhanced code beside
+  it says which subsystem refused and whether anything you change will alter the
+  answer, which is the whole difference between retrying and suppressing.</p>
 </div>
 <div class="chips-row r">{chips}
   <a class="chip more" href="/smtp/">Look up any response &rarr;</a>
@@ -2590,10 +2596,12 @@ def build_rfc_index():
     body = f"""
 <div class="sechead">
   <h1>RFC decoded</h1>
-  <p class="lede">What each email RFC actually requires, and which one you should
-  be reading. {total} current documents, with the {amended} that are current but
-  amended by something later, and the normative requirements pulled out section
-  by section.</p>
+  <p class="lede">Finding the right document is harder than reading it. Search for
+  the SMTP specification and you land on RFC 821, which still calls itself an
+  Internet Standard while the document that replaced it twice over is labelled
+  one rung lower. {total} current documents here, the {amended} that have been
+  quietly amended since publication, and every sentence in each that actually
+  binds an implementation.</p>
 </div>
 
 <div class="tool r">
@@ -2617,9 +2625,10 @@ def build_rfc_index():
 <div id="rfc-browse">
   <div class="sechead r">
     <h2>Every current email RFC</h2>
-    <p>Grouped the way you look for them rather than by number. {aliases}
-    replaced documents resolve to whatever took their place, so an old number
-    still finds the right answer.</p>
+    <p>Most of the email stack never leaves Proposed Standard and never needs to.
+    Maturity level says how far a document travelled through the process, not
+    whether it is the one in force, and the two come apart often enough that the
+    label is the last thing worth reading on an RFC.</p>
   </div>
   <div class="filter r" data-filter>
     <label class="lbl-mi" for="rfc-f">Filter the list</label>
@@ -2889,9 +2898,10 @@ registered, and Microsoft's own, which are mostly outside both.</p>
 <div id="lk-browse">
   <div class="sechead r">
     <h2>Written up in full</h2>
-    <p>The responses that come up most often, each with real log samples, why it
-    happens, and what to change. Everything else resolves in the lookup above with its
-    registry definition and the action its class implies.</p>
+    <p>The ones that come back most often, and the ones whose wording hides what
+    actually happened. The same 550 means a dead mailbox at one provider and a
+    reputation block at another, and the text beside it is where that lives rather
+    than in the number. Everything else resolves in the lookup above.</p>
   </div>
 
   <div class="filter" data-filter>
