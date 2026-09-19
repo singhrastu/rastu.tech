@@ -921,7 +921,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .rfc-cat{margin:0 0 var(--s4)}
 .rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
 .rfc-list{display:flex;flex-direction:column;gap:2px}
-.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto;gap:.7rem;
   align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
   text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
 .rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
@@ -993,7 +993,6 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .ex .dim{color:var(--ink-3);opacity:.8}
 @media(max-width:620px){
   .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
-  .rfc-row .n{display:none}
   .reqs li{grid-template-columns:1fr;gap:.25rem}
   dl.meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
   dl.meta dt{margin-top:.5rem}
@@ -1042,7 +1041,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>
   <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
-  came from. 1 must, 0 should, 0 may.</p>
+  came from.</p>
 </div>
 <div class="filter r" data-filter>
   <div class="chips">

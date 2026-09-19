@@ -10,7 +10,6 @@ import { esc } from './findings.js';
 const box = document.getElementById('rfc-q');
 const out = document.getElementById('rfc-out');
 const browse = document.getElementById('rfc-browse');
-const count = document.getElementById('rfc-count');
 
 let index = null;
 let aliases = {};
@@ -24,7 +23,6 @@ async function boot() {
     const data = await (await fetch('/rfcs.json')).json();
     index = buildIndex(data);
     aliases = data.aliases || {};
-    if (count) count.textContent = `${index.length} current email RFCs`;
   } catch {
     out.className = 'report on';
     out.innerHTML = '<p class="empty">The index could not be loaded, so the lookup '

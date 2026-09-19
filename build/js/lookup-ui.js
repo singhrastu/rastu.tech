@@ -10,7 +10,6 @@ import { esc } from './findings.js';
 const box = document.getElementById('lk-q');
 const out = document.getElementById('lk-out');
 const browse = document.getElementById('lk-browse');
-const count = document.getElementById('lk-count');
 
 /* Codes with a written page, injected by the build so the lookup can link to
    the deep version where one exists. */
@@ -43,7 +42,6 @@ async function boot() {
   try {
     const reg = await (await fetch('/registry.json')).json();
     index = buildIndex(reg);
-    if (count) count.textContent = `${index.length} responses`;
   } catch (e) {
     out.className = 'report on';
     out.innerHTML = '<p class="empty">The response registry could not be loaded, so '

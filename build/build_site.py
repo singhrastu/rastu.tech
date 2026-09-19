@@ -964,7 +964,7 @@ h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .rfc-cat{margin:0 0 var(--s4)}
 .rfc-cat h3{font-size:var(--t3);font-weight:650;margin:0 0 .5rem;color:var(--ink)}
 .rfc-list{display:flex;flex-direction:column;gap:2px}
-.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto auto;gap:.7rem;
+.rfc-row{display:grid;grid-template-columns:4.2rem 1fr auto;gap:.7rem;
   align-items:center;padding:.5rem .7rem;border:1px solid transparent;border-radius:8px;
   text-decoration:none;color:var(--ink-2);font-size:var(--t2)}
 .rfc-row:hover{background:var(--surface);border-color:var(--line);color:var(--ink)}
@@ -1036,7 +1036,6 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .ex .dim{color:var(--ink-3);opacity:.8}
 @media(max-width:620px){
   .rfc-row{grid-template-columns:3.6rem 1fr auto;gap:.5rem}
-  .rfc-row .n{display:none}
   .reqs li{grid-template-columns:1fr;gap:.25rem}
   dl.meta{grid-template-columns:1fr;gap:.1rem var(--s2)}
   dl.meta dt{margin-top:.5rem}
@@ -2578,7 +2577,6 @@ def build_rfc_index():
         rows = []
         for x in items:
             kind, label, _ = _status(x["status"])
-            n = sum(x["req_counts"].values())
             what = (x.get("note") or {}).get("what", "")
             terms = e(f'{x["num"]} {x["title"]} {cat} {what}'.lower())
             rows.append(
@@ -2587,8 +2585,7 @@ def build_rfc_index():
                 f'<span class="t">{e(x["title"])}'
                 + (f'<em>{e(what)}</em>' if what else "")
                 + f'</span>'
-                f'<span class="st st-{kind}">{e(label)}</span>'
-                f'<span class="n">{n or ""}</span></a>')
+                f'<span class="st st-{kind}">{e(label)}</span></a>')
         blocks.append(
             f'<section class="rfc-cat"><h3>{e(cat)}</h3>'
             f'<div class="rfc-list">{"".join(rows)}</div></section>')
@@ -2599,15 +2596,15 @@ def build_rfc_index():
   <p class="lede">Finding the right document is harder than reading it. Search for
   the SMTP specification and you land on RFC 821, which still calls itself an
   Internet Standard while the document that replaced it twice over is labelled
-  one rung lower. {total} current documents here, the {amended} that have been
-  quietly amended since publication, and every sentence in each that actually
-  binds an implementation.</p>
+  one rung lower. Every current email RFC here, the ones that have been quietly
+  amended since publication, and every sentence in each that actually binds an
+  implementation.</p>
 </div>
 
 <div class="tool r">
   <label class="lbl-mi" for="rfc-q">A number, a name, or what you are trying to do
-    <em><span id="rfc-count">{total} current email RFCs</span>, resolved against the
-    RFC Editor index</em></label>
+    <em>resolved against the RFC Editor index, including numbers that have been
+    replaced</em></label>
   <input class="field" id="rfc-q" type="search" autocomplete="off" spellcheck="false"
          placeholder="A number, a name, or what you are trying to do: 5321, DKIM, MTA-STS">
   <p class="ex">Try
@@ -2660,9 +2657,9 @@ def build_rfc_index():
     }
     return page(
         "RFC decoded: every current email RFC and what it requires",
-        f"Look up any email RFC by number or name. {total} current documents with "
-        "status, what replaced what, what amends them, and every normative "
-        "requirement extracted section by section.",
+        "Look up any email RFC by number or name: status, what replaced what, what "
+        "amends it since publication, and every normative requirement extracted "
+        "section by section.",
         body, "rfc/index.html", extra_ld=ld, wide=True, nav_key="RFC decoded",
         modules=("/js/filter.js", "/js/rfc-ui.js"))
 
@@ -2767,7 +2764,7 @@ def build_rfc_pages():
 <div class="sechead r">
   <h2>Normative requirements</h2>
   <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
-  came from. {c["must"]} must, {c["should"]} should, {c["may"]} may.</p>
+  came from.</p>
 </div>
 <div class="filter r" data-filter>
   <div class="chips">
@@ -2875,13 +2872,12 @@ def build_smtp_index():
     body = f"""
 <h1>SMTP responses: what each one means and what to do</h1>
 <p class="lede">Paste a bounce out of your mail log, or type any part of a code.
-{total} responses: every reply code in RFC 5321, every enhanced status code IANA has
-registered, and Microsoft's own, which are mostly outside both.</p>
+Every reply code in RFC 5321, every enhanced status code IANA has registered, and
+Microsoft's own, which are mostly outside both.</p>
 
 <div class="tool">
   <label class="lbl-mi" for="lk-q">Response, code, or fragment of one
-    <em><span id="lk-count">loading</span> from RFC 5321, the IANA registry and
-    Microsoft&rsquo;s own</em></label>
+    <em>from RFC 5321, the IANA registry and Microsoft&rsquo;s own</em></label>
   <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
          placeholder="Loading the registry...">
   <p class="hint">Try:
