@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 2 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="https://www.rfc-editor.org/rfc/rfc2184.html">RFC 2184: MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations</a></li><li><a href="/rfc/2231/">RFC 2231: MIME Parameter Value and Encoded Word Extensions: Character Sets, Languages, and Continuations</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Content-Disposition: whether a part should be shown inline or offered as an attachment, and what to call it.</p><h2 class="r">What it solves</h2><p>A client could not tell an embedded image apart from a file the user is meant to save.</p><h2 class="r">What it means to operate</h2><p>Filename handling is the sharp edge. Filenames with non-ASCII characters need RFC 2231 encoding, and getting it wrong produces either a mangled name or, in older clients, a security problem.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

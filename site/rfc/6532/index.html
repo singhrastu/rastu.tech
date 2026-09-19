@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Allows UTF-8 directly in message headers, rather than encoded into ASCII with RFC 2047 encoded-words.</p><h2 class="r">What it solves</h2><p>Encoded-words are ugly, size-limited and frequently mishandled.</p><h2 class="r">What it means to operate</h2><p>Only valid in a session that negotiated SMTPUTF8. A message with raw UTF-8 headers handed to a hop that did not negotiate it is a protocol violation, and the usual symptom is mojibake in the subject rather than a clean failure.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

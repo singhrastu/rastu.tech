@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 2 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/8314/">RFC 8314: Cleartext Considered Obsolete: Use of Transport Layer Security (TLS) for Email Submission and Access</a></li><li><a href="/rfc/8553/">RFC 8553: DNS Attrleaf Changes: Fixing Specifications That Use Underscored Node Names</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>SRV records that tell a mail client where to find submission and access services for a domain.</p><h2 class="r">What it solves</h2><p>Every client asked the user for hostnames and ports, and every user got them wrong.</p><h2 class="r">What it means to operate</h2><p>Publish these and autoconfiguration works in clients that look for them. Cheap to do and it removes a category of support ticket. Note that the major providers largely use their own autodiscovery instead.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

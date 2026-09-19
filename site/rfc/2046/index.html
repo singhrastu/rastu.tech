@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 5 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="https://www.rfc-editor.org/rfc/rfc2646.html">RFC 2646: The Text/Plain Format Parameter</a></li><li><a href="https://www.rfc-editor.org/rfc/rfc3798.html">RFC 3798: Message Disposition Notification</a></li><li><a href="/rfc/5147/">RFC 5147: URI Fragment Identifiers for the text/plain Media Type</a></li><li><a href="/rfc/6657/">RFC 6657: Update to MIME regarding &quot;charset&quot; Parameter Handling in Textual Media Types</a></li><li><a href="/rfc/8098/">RFC 8098: Message Disposition Notification</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>The MIME media types: text, image, audio, multipart and the rules for each.</p><h2 class="r">What it solves</h2><p>A message needed a way to carry more than one thing, and to say what each thing was.</p><h2 class="r">What it means to operate</h2><p>multipart/alternative is the one that matters for senders: the plain text part is not decoration. Filters read it, some clients render it, and an empty or auto-generated one is a content signal that works against you.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

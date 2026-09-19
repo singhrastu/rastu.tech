@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Updated rules for checking the certificate a mail server presents: which names count as a match and which no longer do.</p><h2 class="r">What it solves</h2><p>Certificate identity checking for mail grew out of web practice and was applied inconsistently, including reliance on the deprecated common name field.</p><h2 class="r">What it means to operate</h2><p>This is the check MTA-STS and DANE depend on. A certificate that carries the hostname only in the common name and not in a subject alternative name fails modern verification, which is a common cause of enforcement breaking after a renewal.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

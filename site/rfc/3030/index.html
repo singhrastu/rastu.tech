@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>CHUNKING and BDAT: transferring a message as sized chunks instead of as dot-terminated text.</p><h2 class="r">What it solves</h2><p>The dot-stuffing convention means scanning and rewriting every line of every message, which is pure overhead on large messages.</p><h2 class="r">What it means to operate</h2><p>Faster for large messages and worth enabling where both ends support it. Be aware that some filtering appliances handle BDAT badly, so it is a reasonable thing to suspect when large messages fail and small ones do not.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

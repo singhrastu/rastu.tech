@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 1 later RFC has changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/8314/">RFC 8314: Cleartext Considered Obsolete: Use of Transport Layer Security (TLS) for Email Submission and Access</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Message submission: why mail from a user&#x27;s client goes to port 587 under authentication, separately from server-to-server relay on 25.</p><h2 class="r">What it solves</h2><p>Submission and relay were the same port with the same rules, so a server could not apply different policy to a user sending mail and a foreign server delivering it.</p><h2 class="r">What it means to operate</h2><p>The split is what lets a submission service authenticate, rewrite, add a Message-ID and enforce rate limits per user, while port 25 stays open for inbound delivery. A network blocking outbound 25 and allowing 587 is relying on this. If your users are submitting on 25, you have no per-user accountability.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

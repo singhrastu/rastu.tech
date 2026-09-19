@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>REQUIRETLS: lets a sender mark an individual message as one that must not be delivered without TLS, even if that means bouncing it.</p><h2 class="r">What it solves</h2><p>MTA-STS is a receiver policy and applies to everything. There was no way for a sender to say that one particular message must never travel in the clear.</p><h2 class="r">What it means to operate</h2><p>Rarely deployed, worth knowing for regulated traffic. The trade-off is explicit and should be a deliberate choice: a message marked this way bounces rather than downgrades.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

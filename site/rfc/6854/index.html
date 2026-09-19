@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Amends RFC 5322 to allow group syntax in the From: and Sender: header fields.</p><h2 class="r">What it solves</h2><p>Group syntax, such as an empty group used to hide recipients, was legal in To: and Cc: but not in From:, and real messages used it anyway.</p><h2 class="r">What it means to operate</h2><p>A small amendment with a real consequence for parsers: a From: field may legally contain a group construct, so a parser assuming a single mailbox can fail on valid mail. It is also an example of why the amendment list on an RFC matters: RFC 5322 is current and this changed part of it.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

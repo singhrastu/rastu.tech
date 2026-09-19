@@ -399,4 +399,355 @@ NOTES = {
                    "unclear, because most arguments about whose problem a failure is "
                    "come down to which boundary it crossed.",
     },
+    # ------------------------------------------------------ batch two
+    7505: {
+        "what": "The null MX record: a single MX pointing at \".\" to say a domain "
+                "accepts no mail at all.",
+        "problem": "A domain with no mail service either had no MX, which makes "
+                   "senders fall back to the A record, or pointed somewhere that "
+                   "discarded mail silently.",
+        "operate": "Publish this on every domain you own that does not receive, "
+                   "including parked and redirect-only domains. It stops senders "
+                   "queueing against you for days and it removes a spoofing surface, "
+                   "because a domain that obviously accepts no mail is a poorer "
+                   "choice for a forger.",
+    },
+    3207: {
+        "what": "STARTTLS: the SMTP extension that upgrades a plaintext session to "
+                "TLS after the connection is open.",
+        "problem": "SMTP was specified in the clear. Everything on the wire, "
+                   "including credentials on submission, was readable in transit.",
+        "operate": "Opportunistic by design, which is its weakness: an attacker who "
+                   "can strip the EHLO advertisement gets plaintext, and the sender "
+                   "cannot distinguish that from a server that genuinely does not "
+                   "support TLS. MTA-STS and DANE exist to close that gap. On "
+                   "submission the fix is different: use implicit TLS on 465 rather "
+                   "than starting in the clear at all.",
+    },
+    8689: {
+        "what": "REQUIRETLS: lets a sender mark an individual message as one that "
+                "must not be delivered without TLS, even if that means bouncing it.",
+        "problem": "MTA-STS is a receiver policy and applies to everything. There was "
+                   "no way for a sender to say that one particular message must never "
+                   "travel in the clear.",
+        "operate": "Rarely deployed, worth knowing for regulated traffic. The "
+                   "trade-off is explicit and should be a deliberate choice: a "
+                   "message marked this way bounces rather than downgrades.",
+    },
+    8997: {
+        "what": "Deprecates TLS 1.0 and 1.1 for mail submission and access, leaving "
+                "1.2 as the floor.",
+        "problem": "Old TLS versions stayed enabled long after they stopped being "
+                   "defensible, because turning them off breaks old clients.",
+        "operate": "Check what your submission service still accepts. This is the "
+                   "document to cite when somebody asks why an old device stopped "
+                   "connecting.",
+    },
+    6409: {
+        "what": "Message submission: why mail from a user's client goes to port 587 "
+                "under authentication, separately from server-to-server relay on 25.",
+        "problem": "Submission and relay were the same port with the same rules, so "
+                   "a server could not apply different policy to a user sending mail "
+                   "and a foreign server delivering it.",
+        "operate": "The split is what lets a submission service authenticate, rewrite, "
+                   "add a Message-ID and enforce rate limits per user, while port 25 "
+                   "stays open for inbound delivery. A network blocking outbound 25 "
+                   "and allowing 587 is relying on this. If your users are submitting "
+                   "on 25, you have no per-user accountability.",
+    },
+    4954: {
+        "what": "The AUTH extension: how a client authenticates to a submission "
+                "server, and which mechanisms are offered.",
+        "problem": "There was no standard way to say who was sending, so submission "
+                   "was authorised by IP address alone.",
+        "operate": "AUTH must only be offered over TLS, because PLAIN and LOGIN put "
+                   "the password on the wire. The operational value is "
+                   "accountability: an authenticated submission is attributable to an "
+                   "account, which is what makes a compromised account containable "
+                   "rather than a mystery.",
+    },
+    5068: {
+        "what": "Operational guidance on submission: what a network, a provider and a "
+                "sender should each do so that mail is accountable.",
+        "problem": "Compromised machines sent directly to port 25 worldwide, and "
+                   "nothing in the protocol made that hard.",
+        "operate": "This is the reasoning behind residential port 25 blocking and "
+                   "behind requiring authentication on submission. Best Current "
+                   "Practice, so it carries operational weight rather than protocol "
+                   "weight.",
+    },
+    6531: {
+        "what": "SMTPUTF8: the extension that allows non-ASCII addresses in the "
+                "envelope.",
+        "problem": "Mail addresses were ASCII. Most of the world does not write its "
+                   "name in ASCII.",
+        "operate": "It is end to end or it is nothing: every hop has to support it, "
+                   "and a hop that does not must reject rather than mangle. Test your "
+                   "bounce processing against internationalised addresses before you "
+                   "accept them, because a suppression list that cannot represent an "
+                   "address cannot suppress it.",
+    },
+    6530: {
+        "what": "The framework for internationalised email: what has to change across "
+                "the whole stack for non-ASCII addresses to work.",
+        "problem": "Internationalisation touches the envelope, the headers, delivery "
+                   "notifications and every retrieval protocol. Changing one in "
+                   "isolation produces mail nobody can reply to.",
+        "operate": "Read this before the individual documents. It is the map of which "
+                   "other RFCs you need and why they cannot be adopted one at a time.",
+    },
+    6532: {
+        "what": "Allows UTF-8 directly in message headers, rather than encoded into "
+                "ASCII with RFC 2047 encoded-words.",
+        "problem": "Encoded-words are ugly, size-limited and frequently mishandled.",
+        "operate": "Only valid in a session that negotiated SMTPUTF8. A message with "
+                   "raw UTF-8 headers handed to a hop that did not negotiate it is a "
+                   "protocol violation, and the usual symptom is mojibake in the "
+                   "subject rather than a clean failure.",
+    },
+    6522: {
+        "what": "The multipart/report media type: the container every delivery "
+                "notification and abuse report is built from.",
+        "problem": "Reports needed a structure a machine could read and a person "
+                   "could also open.",
+        "operate": "Three parts: a human-readable explanation, a machine-readable "
+                   "status part, and the original message or its headers. Parse the "
+                   "middle part. The first one is prose and changes whenever a "
+                   "provider edits its wording.",
+    },
+    2034: {
+        "what": "The ENHANCEDSTATUSCODES extension, by which a server advertises "
+                "that its replies carry RFC 3463 codes.",
+        "problem": "Enhanced codes are only useful if a client knows to expect them.",
+        "operate": "If a server advertises this and its replies do not carry enhanced "
+                   "codes, that is a bug worth reporting. If it does not advertise "
+                   "it, do not assume the numbers you find in the text are enhanced "
+                   "codes.",
+    },
+    3030: {
+        "what": "CHUNKING and BDAT: transferring a message as sized chunks instead of "
+                "as dot-terminated text.",
+        "problem": "The dot-stuffing convention means scanning and rewriting every "
+                   "line of every message, which is pure overhead on large messages.",
+        "operate": "Faster for large messages and worth enabling where both ends "
+                   "support it. Be aware that some filtering appliances handle BDAT "
+                   "badly, so it is a reasonable thing to suspect when large messages "
+                   "fail and small ones do not.",
+    },
+    2369: {
+        "what": "The List-Help, List-Unsubscribe, List-Post and related headers that "
+                "let a mail client offer list commands directly.",
+        "problem": "Unsubscribing meant reading the footer and following instructions "
+                   "written differently by every sender.",
+        "operate": "List-Unsubscribe is the one that matters commercially. Publish "
+                   "both a mailto: and an https: form, and pair it with RFC 8058 "
+                   "one-click, which the mailbox providers require of bulk senders.",
+    },
+    2919: {
+        "what": "List-Id: a stable identifier for a mailing list that survives the "
+                "list changing address.",
+        "problem": "Filtering on the posting address breaks the moment a list moves.",
+        "operate": "Useful for filing and for diagnosis: it is the reliable way to "
+                   "tell that a DMARC failure came through a list rather than from a "
+                   "forger.",
+    },
+    6591: {
+        "what": "How to report an authentication failure using the abuse reporting "
+                "format, as distinct from reporting spam.",
+        "problem": "A DMARC failure report and a spam complaint are different events "
+                   "and were being carried in the same shape.",
+        "operate": "This is the format behind DMARC failure reports. Most large "
+                   "receivers do not send them, for privacy reasons, so do not build "
+                   "a process that depends on them arriving.",
+    },
+    6650: {
+        "what": "How feedback loops should be created and consumed: who subscribes, "
+                "what is redacted, and what a sender is expected to do.",
+        "problem": "Feedback loops grew provider by provider with no shared "
+                   "expectations on either side.",
+        "operate": "The obligation is the part senders skip: a complaint must result "
+                   "in suppression, quickly. A feedback loop you receive and do not "
+                   "act on is worse than not having one, because the provider can see "
+                   "you were told.",
+    },
+    6449: {
+        "what": "Operational recommendations for running and consuming complaint "
+                "feedback loops at scale.",
+        "problem": "Senders and providers had no common ground on volume, format or "
+                   "response time.",
+        "operate": "Informational and written by the industry rather than by the "
+                   "IETF, so it states no RFC 2119 requirements, which is why this "
+                   "page lists none. Useful as the shared vocabulary in a conversation "
+                   "with a provider.",
+    },
+    6647: {
+        "what": "Greylisting: temporarily rejecting a first delivery attempt from an "
+                "unknown sender and accepting the retry.",
+        "problem": "A great deal of abuse came from software that never retried, so a "
+                   "temporary failure separated real MTAs from the rest cheaply.",
+        "operate": "Less effective than it was, and it costs every legitimate sender "
+                   "a delay measured in minutes on first contact. From the sending "
+                   "side it is a common and benign cause of 4xx on first attempt: "
+                   "retry on the normal schedule and do not treat it as a reputation "
+                   "signal.",
+    },
+    6471: {
+        "what": "How a DNS blocklist should be operated: listing criteria, delisting, "
+                "transparency and how to shut one down.",
+        "problem": "Lists were run to wildly different standards and some "
+                   "disappeared without warning, leaving queries answering into "
+                   "nothing.",
+        "operate": "The shutdown guidance is the operationally important part, and it "
+                   "is why RFC 5782's test entries matter: a list that stops "
+                   "existing looks identical to a list saying you are clean.",
+    },
+    6377: {
+        "what": "What mailing lists do to DKIM signatures, and which list behaviours "
+                "preserve a signature.",
+        "problem": "Lists modify messages by design, and every modification risks "
+                   "breaking the signature that authenticates them.",
+        "operate": "Sign with a relaxed canonicalisation and a minimal header set if "
+                   "your mail goes through lists, and do not use l=. The broader "
+                   "answer is ARC, but this documents what actually survives.",
+    },
+    5863: {
+        "what": "Deployment guidance for DKIM: key management, selector strategy, "
+                "and what to sign.",
+        "problem": "The protocol specification says how to sign. It does not say how "
+                   "to run signing as an ongoing operation.",
+        "operate": "The rotation advice is the useful part. Use a dated selector, "
+                   "keep the previous key published until the last message signed "
+                   "with it has aged out, and remember that removing a selector "
+                   "retroactively invalidates every message it signed.",
+    },
+    8553: {
+        "what": "Cleans up the convention of putting underscores in DNS names, such "
+                "as _dmarc and _domainkey, and registers them properly.",
+        "problem": "Underscore-prefixed names grew ad hoc across many specifications "
+                   "with no registry, so collisions were possible.",
+        "operate": "Mostly housekeeping. It matters if you run DNS tooling that "
+                   "validates hostnames, because underscore labels are legal here and "
+                   "some validators reject them.",
+    },
+    1939: {
+        "what": "POP3: downloading mail from a server, usually deleting it as it goes.",
+        "problem": "Users needed to read mail on a machine that is not the server and "
+                   "is not always connected.",
+        "operate": "Still current, still widely deployed, and the source of the "
+                   "recurring support case where mail vanishes from the server "
+                   "because a client is configured to delete on retrieval. IMAP is "
+                   "the answer for anyone with more than one device.",
+    },
+    9051: {
+        "what": "IMAP version 4rev2: reading and managing mail that stays on the "
+                "server, across multiple clients.",
+        "problem": "POP3 assumes one device and one copy. That stopped matching how "
+                   "anybody reads mail.",
+        "operate": "By far the largest document in this index, with over four hundred "
+                   "normative requirements, which is why partial IMAP implementations "
+                   "are common and interoperate badly. If a client misbehaves against "
+                   "your server, the answer is usually in here.",
+    },
+    6186: {
+        "what": "SRV records that tell a mail client where to find submission and "
+                "access services for a domain.",
+        "problem": "Every client asked the user for hostnames and ports, and every "
+                   "user got them wrong.",
+        "operate": "Publish these and autoconfiguration works in clients that look "
+                   "for them. Cheap to do and it removes a category of support "
+                   "ticket. Note that the major providers largely use their own "
+                   "autodiscovery instead.",
+    },
+    2046: {
+        "what": "The MIME media types: text, image, audio, multipart and the rules "
+                "for each.",
+        "problem": "A message needed a way to carry more than one thing, and to say "
+                   "what each thing was.",
+        "operate": "multipart/alternative is the one that matters for senders: the "
+                   "plain text part is not decoration. Filters read it, some clients "
+                   "render it, and an empty or auto-generated one is a content signal "
+                   "that works against you.",
+    },
+    2183: {
+        "what": "Content-Disposition: whether a part should be shown inline or "
+                "offered as an attachment, and what to call it.",
+        "problem": "A client could not tell an embedded image apart from a file the "
+                   "user is meant to save.",
+        "operate": "Filename handling is the sharp edge. Filenames with non-ASCII "
+                   "characters need RFC 2231 encoding, and getting it wrong produces "
+                   "either a mangled name or, in older clients, a security problem.",
+    },
+    8098: {
+        "what": "Message Disposition Notifications: the read receipt, and the rules "
+                "for asking for one and answering.",
+        "problem": "Senders wanted to know a message had been opened, and there was "
+                   "no interoperable way to ask.",
+        "operate": "A request, never a guarantee: a client may refuse and most do, "
+                   "usually by asking the user. Do not build reporting that treats "
+                   "an absent MDN as evidence of anything.",
+    },
+    9057: {
+        "what": "An Author header field, distinguishing who wrote a message from who "
+                "sent it.",
+        "problem": "DMARC alignment forces mailing lists to rewrite From:, which "
+                   "loses the original author.",
+        "operate": "Experimental, so treat it as a direction rather than something to "
+                   "deploy. Worth knowing because it is one of the answers being "
+                   "explored for the From: rewriting that DMARC enforcement forces on "
+                   "lists.",
+    },
+    1123: {
+        "what": "The 1989 host requirements document, which includes the mail "
+                "section that much later practice still rests on.",
+        "problem": "Specifications said what a protocol was. They did not say what an "
+                   "implementation had to do to interoperate.",
+        "operate": "Old, still cited, and still amended: retry intervals, the "
+                   "expectation that a server accepts mail for postmaster, and much "
+                   "of the queueing behaviour people treat as folklore is written "
+                   "down here.",
+    },
+    5248: {
+        "what": "The IANA registry of enhanced mail system status codes, and the "
+                "process for adding one.",
+        "problem": "RFC 3463 defined the shape of the codes. Something had to hold "
+                   "the authoritative list as it grew.",
+        "operate": "This registry is the source of the enhanced codes in the SMTP "
+                   "reference on this site. If a code you are looking at is not in "
+                   "it, it is a provider's private extension, and you should read the "
+                   "provider's documentation rather than infer meaning from the "
+                   "number.",
+    },
+    7817: {
+        "what": "Updated rules for checking the certificate a mail server presents: "
+                "which names count as a match and which no longer do.",
+        "problem": "Certificate identity checking for mail grew out of web practice "
+                   "and was applied inconsistently, including reliance on the "
+                   "deprecated common name field.",
+        "operate": "This is the check MTA-STS and DANE depend on. A certificate that "
+                   "carries the hostname only in the common name and not in a subject "
+                   "alternative name fails modern verification, which is a common "
+                   "cause of enforcement breaking after a renewal.",
+    },
+    6533: {
+        "what": "Delivery status notifications for internationalised mail, so a "
+                "bounce can carry a non-ASCII address.",
+        "problem": "A bounce format that cannot represent the address that failed is "
+                   "useless for any address outside ASCII.",
+        "operate": "Directly relevant to bounce processing. If you accept "
+                   "internationalised addresses and your suppression list cannot "
+                   "store what comes back, you will keep sending to an address that "
+                   "has already failed.",
+    },
+    6854: {
+        "what": "Amends RFC 5322 to allow group syntax in the From: and Sender: "
+                "header fields.",
+        "problem": "Group syntax, such as an empty group used to hide recipients, "
+                   "was legal in To: and Cc: but not in From:, and real messages used "
+                   "it anyway.",
+        "operate": "A small amendment with a real consequence for parsers: a From: "
+                   "field may legally contain a group construct, so a parser assuming "
+                   "a single mailbox can fail on valid mail. It is also an example of "
+                   "why the amendment list on an RFC matters: RFC 5322 is current and "
+                   "this changed part of it.",
+    },
 }

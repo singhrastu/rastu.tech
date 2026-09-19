@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 
-
+<div class="explain r"><h2 class="r">What it is</h2><p>The null MX record: a single MX pointing at &quot;.&quot; to say a domain accepts no mail at all.</p><h2 class="r">What it solves</h2><p>A domain with no mail service either had no MX, which makes senders fall back to the A record, or pointed somewhere that discarded mail silently.</p><h2 class="r">What it means to operate</h2><p>Publish this on every domain you own that does not receive, including parked and redirect-only domains. It stops senders queueing against you for days and it removes a spoofing surface, because a domain that obviously accepts no mail is a poorer choice for a forger.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

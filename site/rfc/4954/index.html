@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 1 later RFC has changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/5248/">RFC 5248: A Registry for SMTP Enhanced Mail System Status Codes</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>The AUTH extension: how a client authenticates to a submission server, and which mechanisms are offered.</p><h2 class="r">What it solves</h2><p>There was no standard way to say who was sending, so submission was authorised by IP address alone.</p><h2 class="r">What it means to operate</h2><p>AUTH must only be offered over TLS, because PLAIN and LOGIN put the password on the wire. The operational value is accountability: an authenticated submission is attributable to an account, which is what makes a compromised account containable rather than a mystery.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

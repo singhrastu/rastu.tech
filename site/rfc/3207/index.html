@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 1 later RFC has changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/7817/">RFC 7817: Updated Transport Layer Security (TLS) Server Identity Check Procedure for Email-Related Protocols</a></li></ul></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>STARTTLS: the SMTP extension that upgrades a plaintext session to TLS after the connection is open.</p><h2 class="r">What it solves</h2><p>SMTP was specified in the clear. Everything on the wire, including credentials on submission, was readable in transit.</p><h2 class="r">What it means to operate</h2><p>Opportunistic by design, which is its weakness: an attacker who can strip the EHLO advertisement gets plaintext, and the sender cannot distinguish that from a server that genuinely does not support TLS. MTA-STS and DANE exist to close that gap. On submission the fix is different: use implicit TLS on 465 rather than starting in the clear at all.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>

@@ -1025,7 +1025,7 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 </div>
 
 <div class="warnbox s-info"><p><strong>Informational, not a standard.</strong> Published for the record and carrying no standards weight. Worth knowing before citing it as a requirement.</p></div>
-
+<div class="explain r"><h2 class="r">What it is</h2><p>Deployment guidance for DKIM: key management, selector strategy, and what to sign.</p><h2 class="r">What it solves</h2><p>The protocol specification says how to sign. It does not say how to run signing as an ongoing operation.</p><h2 class="r">What it means to operate</h2><p>The rotation advice is the useful part. Use a dated selector, keep the previous key published until the last message signed with it has aged out, and remember that removing a selector retroactively invalidates every message it signed.</p></div>
 
 <div class="sechead r">
   <h2 class="r">Normative requirements</h2>
