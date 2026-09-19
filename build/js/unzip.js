@@ -27,9 +27,41 @@ export function canInflate() {
   try { new DecompressionStream('deflate-raw'); return true; } catch { return false; }
 }
 
+/* A compressed member declares nothing trustworthy about how large it becomes.
+   Aggregate reports are XML and compress well, but a few hundred kilobytes of
+   deflate can expand to gigabytes, and buffering that takes the tab down. These
+   arrive by mail from third parties, so the input is not the reader's own.
+   Read the stream in chunks and stop the moment it goes past what a real report
+   could plausibly be. */
+export const MAX_INFLATED = 256 * 1024 * 1024;
+
+async function inflate(bytes, format) {
+  const stream = new Blob([bytes]).stream()
+    .pipeThrough(new DecompressionStream(format));
+  const reader = stream.getReader();
+  const chunks = [];
+  let total = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    total += value.length;
+    if (total > MAX_INFLATED) {
+      await reader.cancel();
+      throw new ZipError('This file expands to more than '
+        + (MAX_INFLATED / 1048576) + ' MB, which no aggregate report does. '
+        + 'It has been stopped rather than loaded. If it came from a reporter '
+        + 'you recognise, ask them for it uncompressed.');
+    }
+    chunks.push(value);
+  }
+  const out = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) { out.set(c, at); at += c.length; }
+  return out;
+}
+
 async function inflateRaw(bytes) {
-  const s = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-  return new Uint8Array(await new Response(s).arrayBuffer());
+  return inflate(bytes, 'deflate-raw');
 }
 
 /** Entries in a ZIP, as { name, bytes }. Throws ZipError with a readable reason. */
@@ -136,9 +168,11 @@ export async function extractXml(file) {
         + 'locally and paste or upload the XML.');
     }
     try {
-      const s = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      // Same cap as the ZIP path: a .gz is just as capable of expanding without
+      // bound, and this one is the commonest way a report arrives.
+      const out = await inflate(buf, 'gzip');
       return [{ name: file.name.replace(/\.gz$/i, ''),
-                text: await new Response(s).text() }];
+                text: new TextDecoder().decode(out) }];
     } catch (e) {
       // The spec allows only one gzip member and the TypeError message differs in
       // every engine, so the message is never branched on.

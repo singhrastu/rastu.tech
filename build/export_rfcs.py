@@ -38,7 +38,12 @@ import re
 import sys
 import time
 import urllib.request
-import xml.etree.ElementTree as ET
+# defusedxml would be the textbook answer and it is a dependency this project
+# does not have and does not want. The exposure it addresses is entity
+# expansion, and DOCTYPE below refuses any document declaring a DTD or an
+# entity at all, which is a stricter rule than defusedxml applies. The only
+# input is the RFC Editor index, fetched over https, which declares neither.
+import xml.etree.ElementTree as ET  # nosemgrep: use-defused-xml
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -104,9 +109,17 @@ def rfcid(n):
     return f"RFC{n}"
 
 
+def _https(url):
+    """urllib will happily open file:// and ftp://. These fetchers only ever
+    want one scheme, so say so rather than trusting every future caller."""
+    if not url.startswith("https://"):
+        sys.exit(f"refusing to fetch a non-https URL: {url}")
+    return url
+
+
 def fetch_index():
     os.makedirs(SRC, exist_ok=True)
-    req = urllib.request.Request(INDEX_URL, headers={"User-Agent": UA})
+    req = urllib.request.Request(_https(INDEX_URL), headers={"User-Agent": UA})
     with urllib.request.urlopen(req, timeout=180) as r:
         data = r.read()
     with open(os.path.join(SRC, "rfc-index.xml"), "wb") as fh:
@@ -124,7 +137,7 @@ def fetch_texts(numbers):
             continue
         url = f"https://www.rfc-editor.org/rfc/rfc{n}.txt"
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            req = urllib.request.Request(_https(url), headers={"User-Agent": UA})
             with urllib.request.urlopen(req, timeout=90) as r:
                 body = r.read()
             with open(p, "wb") as fh:
@@ -136,11 +149,24 @@ def fetch_texts(numbers):
     print(f"  texts: {got} cached, {new} downloaded")
 
 
+# ElementTree expands internal entities, so a document carrying a nest of them
+# can exhaust the machine parsing it. The RFC index has no DTD and never has, so
+# refusing one outright removes the whole class without taking on a dependency
+# this project does not otherwise need. A real index will never trip it; a
+# substituted one will.
+DOCTYPE = re.compile(rb"<!\s*(DOCTYPE|ENTITY)\b", re.I)
+
+
 def load_index():
     p = os.path.join(SRC, "rfc-index.xml")
     if not os.path.exists(p):
         sys.exit("rfc-index.xml is not cached. Run with --fetch once.")
-    root = ET.parse(p).getroot()
+    with open(p, "rb") as fh:
+        head = fh.read(65536)
+    if DOCTYPE.search(head):
+        sys.exit("rfc-index.xml declares a DTD or an entity. The published index "
+                 "does not, so this copy is not the published index. Refusing it.")
+    root = ET.parse(p).getroot()  # nosemgrep: use-defused-xml-parse
     out = {}
     for e in root.findall("r:rfc-entry", NS):
         i = e.findtext("r:doc-id", default="", namespaces=NS)

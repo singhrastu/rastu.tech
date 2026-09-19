@@ -162,6 +162,29 @@ await rejects('an archive holding no XML',
   is('a zip named .dat is still unzipped', out[0].text, XML);
 }
 
+// ---------------------------------------------------------- decompression cap
+// A compressed member declares nothing trustworthy about how large it becomes,
+// and these files arrive by mail from third parties.
+{
+  const { MAX_INFLATED } = await import('./js/unzip.js');
+  is('there is a cap on inflated output', typeof MAX_INFLATED, 'number');
+  is('and it is large enough for a real report', MAX_INFLATED >= 64 * 1024 * 1024, true);
+  is('and small enough to protect the tab', MAX_INFLATED <= 512 * 1024 * 1024, true);
+
+  // A highly compressible payload: 8 MB of zeroes deflates to a few kilobytes.
+  const big = new Uint8Array(8 * 1024 * 1024);
+  const gz = new Blob([big]).stream().pipeThrough(new CompressionStream('gzip'));
+  const packed = new Uint8Array(await new Response(gz).arrayBuffer());
+  is('a highly compressible payload really is small', packed.length < big.length / 100, true);
+
+  const { extractXml } = await import('./js/unzip.js');
+  const file = new File([packed], 'report.xml.gz');
+  let threw = null;
+  try { await extractXml(file); } catch (e) { threw = e; }
+  // 8 MB is under the cap, so this must succeed rather than be refused.
+  is('a large but plausible report is still accepted', threw, null);
+}
+
 if (fails.length) {
   console.error('\nzip reader failures:\n  ' + fails.join('\n  '));
   process.exit(1);

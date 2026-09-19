@@ -46,13 +46,24 @@ function normalise(res) {
   return res;
 }
 
+/* An IP literal is not a hostname. The regex below accepts one, because every
+   label of 127.0.0.1 is alphanumeric, and a BIMI logo is never served from a
+   bare address. Rejecting them closes the one path by which a caller could aim
+   a subrequest at an address rather than at a name. */
+const IP_LITERAL = /^\d{1,3}(\.\d{1,3}){3}$|^\[?[0-9a-f:]+\]?$/i;
+
 async function get(url, { bodyWanted }) {
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), TIMEOUT_MS);
   try {
     const r = await fetch(url, {
       method: 'GET',
-      redirect: 'follow',
+      /* Not 'follow'. RFC 8461 section 3.3 is explicit that 3xx redirects MUST
+         NOT be followed when fetching a policy, so following one would report a
+         policy as valid that a conformant sender would refuse. It would also
+         step around the scheme and hostname checks above, which are applied to
+         the URL given and not to wherever it points. */
+      redirect: 'manual',
       signal: ctl.signal,
       headers: { 'user-agent': 'dmarcsight/rastu.tech (+https://rastu.tech/check/)' },
     });
@@ -82,8 +93,15 @@ export default {
         return json({ status: r.status, body: r.status === 200 ? await r.text() : '' });
       }
       // Otherwise the URL is built here, never supplied by the caller.
-      return json(normalise(
-        await get(`https://mta-sts.${d}/.well-known/mta-sts.txt`, { bodyWanted: true })));
+      const r = normalise(
+        await get(`https://mta-sts.${d}/.well-known/mta-sts.txt`, { bodyWanted: true }));
+      if (r.status >= 300 && r.status < 400) {
+        return json({ status: r.status, body: '',
+          note: 'The policy is served through a redirect. RFC 8461 section 3.3 '
+              + 'says redirects must not be followed, so a conformant sender '
+              + 'treats this as no policy at all.' });
+      }
+      return json(r);
     }
 
     if (url.pathname === '/api/status') {
@@ -92,6 +110,7 @@ export default {
       try { parsed = new URL(u); } catch { return json({ error: 'bad url' }, 400); }
       if (parsed.protocol !== 'https:') return json({ error: 'https only' }, 400);
       if (!HOSTNAME.test(parsed.hostname)) return json({ error: 'bad host' }, 400);
+      if (IP_LITERAL.test(parsed.hostname)) return json({ error: 'host must be a name' }, 400);
       return json(normalise(await get(parsed.toString(), { bodyWanted: false })));  // status only
     }
 

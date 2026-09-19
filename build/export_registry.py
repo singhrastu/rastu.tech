@@ -199,6 +199,8 @@ PROVIDER = [
 def fetch():
     os.makedirs(SRC, exist_ok=True)
     for name, url in SOURCES.items():
+        if not url.startswith("https://"):
+            sys.exit(f"refusing to fetch a non-https URL: {url}")
         req = urllib.request.Request(url, headers={"User-Agent":
             "rastu.tech-registry/1.0 (+https://rastu.tech)"})
         with urllib.request.urlopen(req, timeout=60) as r:
