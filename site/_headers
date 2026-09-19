@@ -1,5 +1,5 @@
 /*
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-FkSA3HhGD8xUk23FFWtr9E8glijD3pqP0aAE9lqyugE=' 'sha256-XZWc34vLdYB1ngZUjfFMUH3mqr3Hlf2PwYaFB1N2Md4='; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://cloudflare-dns.com https://dns.google; frame-src 'self' 'none'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com 'sha256-FkSA3HhGD8xUk23FFWtr9E8glijD3pqP0aAE9lqyugE=' 'sha256-XZWc34vLdYB1ngZUjfFMUH3mqr3Hlf2PwYaFB1N2Md4='; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://cloudflare-dns.com https://dns.google https://challenges.cloudflare.com; frame-src 'self' https://challenges.cloudflare.com; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY

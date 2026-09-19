@@ -40,7 +40,8 @@ INDEXNOW_KEY = "842e66c906302afc62fc2a281224035a"
 # visitor. The matching secret is a Worker secret and never appears here. Empty
 # means the widget is not rendered and the endpoint does not ask for a token, so
 # the tool works either way.
-TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "")
+TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY",
+                                    "0x4AAAAAAE9IOu1-_ZKl4Asg")
 
 PERSON = {
     "name": "Rastu Singh",
