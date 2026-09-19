@@ -122,6 +122,15 @@ export default {
          invitation, so it is rationed before it is used. Keyed on the caller's
          address: a person checking a handful of domains never notices, a script
          in a loop stops at the first minute. */
+      /* Surfaced rather than silent. A rate limit that failed to deploy looks
+         exactly like one that is working until somebody counts, and a guard you
+         cannot see the absence of is not a guard. */
+      const guarded = Boolean(env.DNSBL_LIMIT);
+      if (url.searchParams.get('diag') === '1') {
+        return json({ rateLimiter: guarded,
+                      challenge: Boolean(env.TURNSTILE_SECRET),
+                      dqs: Boolean(env.SPAMHAUS_DQS_KEY) }, 200, 0);
+      }
       if (env.DNSBL_LIMIT) {
         const who = request.headers.get('cf-connecting-ip') || 'unknown';
         const { success } = await env.DNSBL_LIMIT.limit({ key: who });
