@@ -287,6 +287,24 @@ is('every documented code carries an explanation',
      'Abused legitimate');
 }
 
+// ------------------------------------------- a refusal is not a clean result
+/* The endpoint can decline before it looks anything up: too many checks from one
+   address, or a missing challenge token. Both come back as an error rather than
+   as an empty answer set, and an empty answer set is what "not listed" looks
+   like. Reading one as the other is the whole failure this tool exists to stop,
+   so a refusal is undetermined. */
+{
+  const good = async (n) => (n.startsWith('TEST.') ? ['127.0.0.2'] : []);
+  for (const refusal of ['blocked:rate limited', 'blocked:challenge required']) {
+    const dqs = async () => refusal;
+    const r = await checkDomain('example.com', good, undefined, dqs);
+    is(`${refusal} is undetermined`, r.rows[0].state, 'undetermined');
+    is('and never clean', r.clean.some(x => /spamhaus/i.test(x.name)), false);
+    is('and says it was refused rather than asked',
+       r.rows[0].canary.state, 'throttled');
+  }
+}
+
 if (fails.length) {
   console.error('\nblocklist failures:\n  ' + fails.join('\n  '));
   process.exit(1);

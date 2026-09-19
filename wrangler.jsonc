@@ -7,6 +7,15 @@
   // without the Worker running at all.
   "main": "./worker/index.js",
   "compatibility_date": "2026-09-15",
+  "ratelimits": [
+    {
+      // Twelve checks a minute from one address. A person looking at a handful
+      // of domains never meets this; a loop meets it immediately.
+      "name": "DNSBL_LIMIT",
+      "namespace_id": "1001",
+      "simple": { "limit": 12, "period": 60 }
+    }
+  ],
   "assets": {
     "directory": "./site/",
     "binding": "ASSETS",

@@ -27,6 +27,7 @@ const PILL = {
 
 const STATE_LABEL = {
   unconfigured: 'not checked',
+  throttled: 'refused, not asked',
   silent: 'not answering',
   refusing: 'refusing this resolver',
   inverted: 'return codes do not match the spec',
@@ -70,12 +71,21 @@ function main() {
       /* Spamhaus goes through the Worker, which holds a Data Query Service key
          as a secret. Returns the string 'unconfigured' when there is no key, so
          the row reports that rather than pretending the list was clean. */
+      /* Turnstile, when the page carries a widget. The token is fetched once
+         per check rather than per query, because each one can only be spent
+         once. With appearance set to interaction-only most visitors never see
+         anything; somebody scripting the endpoint has nothing to send. */
+      let token = '';
+      if (document.querySelector('.cf-turnstile') && window.turnstile) {
+        try { token = await window.turnstile.getResponsePromise(); } catch { token = ''; }
+      }
       const dqs = async (q, zone) => {
         try {
           const r = await fetch('/api/dnsbl?q=' + encodeURIComponent(q)
-            + '&zone=' + encodeURIComponent(zone));
-          if (!r.ok) return null;
-          const d = await r.json();
+            + '&zone=' + encodeURIComponent(zone)
+            + (token ? '&t=' + encodeURIComponent(token) : ''));
+          const d = await r.json().catch(() => null);
+          if (!r.ok) return d && d.error ? 'blocked:' + d.error : null;
           if (d.configured === false) return 'unconfigured';
           return d.ok ? d.answers : null;
         } catch { return null; }

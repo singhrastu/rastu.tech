@@ -209,6 +209,13 @@ export async function checkSpamhaus(subject, kind, dqs) {
   const [up, down, answer] = await Promise.all([
     dqs(probeUp, cfg.zone), dqs(probeDown, cfg.zone), dqs(subjectQuery, cfg.zone),
   ]);
+  if (typeof up === 'string' && up.startsWith('blocked:')) {
+    return { ...cfg, state: 'undetermined', codes: [],
+      canary: { ok: false, state: 'throttled',
+        why: 'The Spamhaus lookup was refused before it ran, either because too '
+           + 'many checks came from this address in the last minute or because '
+           + 'the page challenge was not completed. Reload and try again.' } };
+  }
   if (up === 'unconfigured') {
     return { ...cfg, state: 'not-checked',
       canary: { ok: false, state: 'unconfigured',

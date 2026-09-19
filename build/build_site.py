@@ -36,6 +36,12 @@ TRANCO_LIST_ID = "V3YPN"
 DOI = "10.5281/zenodo.22832936"
 INDEXNOW_KEY = "842e66c906302afc62fc2a281224035a"
 
+# Turnstile's site key is public by design: it is read out of the page by every
+# visitor. The matching secret is a Worker secret and never appears here. Empty
+# means the widget is not rendered and the endpoint does not ask for a token, so
+# the tool works either way.
+TURNSTILE_SITE_KEY = os.environ.get("TURNSTILE_SITE_KEY", "")
+
 PERSON = {
     "name": "Rastu Singh",
     "job_title": "Infrastructure Engineer",
@@ -1550,7 +1556,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 </footer>
 </div>
 <script>{JS}</script>
-{chr(10).join(f'<script src="{x if x.startswith("/") else up+x}" defer></script>' for x in scripts)}
+{chr(10).join(f'<script src="{x if x.startswith(("/", "https://")) else up+x}" defer></script>' for x in scripts)}
 {chr(10).join(f'<script type="module" src="{x}"></script>' for x in modules)}
 </body>
 </html>
@@ -2057,6 +2063,10 @@ the list about itself first.</p>
   <p class="hint"><span>An address goes to the address lists and a domain to the
   domain lists: they answer different questions. Nothing you type is sent here, the
   lookups go from your browser to a public DNS-over-HTTPS resolver.</span></p>
+""" + (f'''
+  <div class="cf-turnstile" data-sitekey="{TURNSTILE_SITE_KEY}" data-size="flexible"
+       data-appearance="interaction-only" data-action="blocklist"></div>'''
+        if TURNSTILE_SITE_KEY else "") + """
 </div>
 <div class="report" id="bl-out" aria-live="polite"></div>
 
@@ -2092,7 +2102,9 @@ because you act on it.</p>
         "decommissioned zone cannot report you as clean.",
         body, "blocklist/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Tools", crumbs=(("Tools", "tools/"), ("Blocklist check", None)),
-        modules=("/js/bl-ui.js",))
+        modules=("/js/bl-ui.js",),
+        scripts=(("https://challenges.cloudflare.com/turnstile/v0/api.js",)
+                 if TURNSTILE_SITE_KEY else ()))
 
 
 def build_dmarc():
@@ -3498,13 +3510,18 @@ def write_headers():
         return "'sha256-" + base64.b64encode(
             hashlib.sha256(t.encode()).digest()).decode() + "'"
 
+    # Turnstile loads its own script and runs in an iframe, so it needs naming
+    # in three directives. Only added when a site key exists, so the policy stays
+    # as tight as it can be for a deployment that is not using it.
+    ts = " https://challenges.cloudflare.com" if TURNSTILE_SITE_KEY else ""
     csp = "; ".join([
         "default-src 'self'",
-        "script-src 'self' " + " ".join(sorted(sha(x) for x in scripts)),
+        "script-src 'self'" + ts + " " + " ".join(sorted(sha(x) for x in scripts)),
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self'",
         # The two DNS-over-HTTPS resolvers the tools query, and nothing else.
-        "connect-src 'self' https://cloudflare-dns.com https://dns.google",
+        "connect-src 'self' https://cloudflare-dns.com https://dns.google" + ts,
+        "frame-src 'self'" + (ts or " 'none'"),
         "font-src 'self'",
         "object-src 'none'",
         "base-uri 'none'",

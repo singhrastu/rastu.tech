@@ -25,11 +25,11 @@ const LABELS = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a
 const MAX_BYTES = 64 * 1024;
 const TIMEOUT_MS = 8000;
 
-const json = (obj, status = 200) => new Response(JSON.stringify(obj), {
+const json = (obj, status = 200, maxAge = 300) => new Response(JSON.stringify(obj), {
   status,
   headers: {
     'content-type': 'application/json; charset=utf-8',
-    'cache-control': 'public, max-age=300',
+    'cache-control': `public, max-age=${maxAge}`,
     'access-control-allow-origin': 'https://rastu.tech',
   },
 });
@@ -118,6 +118,47 @@ export default {
        and a zone name from a fixed list; the query is assembled here, so there
        is no name a caller can reach that is not a Spamhaus DQS lookup. */
     if (url.pathname === '/api/dnsbl') {
+      /* A public endpoint backed by somebody's personal query allowance is an
+         invitation, so it is rationed before it is used. Keyed on the caller's
+         address: a person checking a handful of domains never notices, a script
+         in a loop stops at the first minute. */
+      if (env.DNSBL_LIMIT) {
+        const who = request.headers.get('cf-connecting-ip') || 'unknown';
+        const { success } = await env.DNSBL_LIMIT.limit({ key: who });
+        if (!success) {
+          return json({ error: 'rate limited',
+            reason: 'Too many blocklist checks from this address in the last '
+                  + 'minute. This endpoint runs on a personal Spamhaus query '
+                  + 'allowance, so it is rationed.' }, 429);
+        }
+      }
+
+      /* Turnstile, when it is configured. A rate limit slows one address down;
+         a challenge stops the whole category of unattended traffic, which is
+         what actually threatens a fair-use allowance. Gated on the secret being
+         present so the endpoint keeps working before the keys exist. */
+      if (env.TURNSTILE_SECRET) {
+        const token = url.searchParams.get('t') || '';
+        if (!token) return json({ error: 'challenge required' }, 403);
+        const body = new FormData();
+        body.append('secret', env.TURNSTILE_SECRET);
+        body.append('response', token);
+        const ip = request.headers.get('cf-connecting-ip');
+        if (ip) body.append('remoteip', ip);
+        let ok = false;
+        try {
+          const v = await fetch(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            { method: 'POST', body });
+          ok = v.ok && ((await v.json()).success === true);
+        } catch { ok = false; }
+        if (!ok) {
+          return json({ error: 'challenge failed',
+            reason: 'The challenge token was missing, reused or expired. '
+                  + 'Reload the page and try the check again.' }, 403);
+        }
+      }
+
       const key = env.SPAMHAUS_DQS_KEY;
       if (!key) {
         return json({ configured: false,
@@ -134,15 +175,27 @@ export default {
         return json({ error: 'bad query' }, 400);
       }
 
+      /* The two probe queries are identical for every visitor and every subject,
+         so asking Spamhaus for them on each check is pure waste against a
+         hundred thousand a day. Cached at the edge they cost one query an hour
+         between everybody, which turns three queries per check into one. The
+         subject itself gets a short cache so a page reload or a second look at
+         the same domain does not spend the allowance twice. */
+      const isProbe = q === 'test' || q === 'invalid'
+        || q === '2.0.0.127' || q === '1.0.0.127';
+      const ttl = isProbe ? 3600 : 300;
+
       const name = `${q}.${key}.${zone}`;
       try {
         const r = await fetch(
           'https://cloudflare-dns.com/dns-query?type=A&name=' + encodeURIComponent(name),
-          { headers: { accept: 'application/dns-json' } });
+          { headers: { accept: 'application/dns-json' },
+            cf: { cacheTtl: ttl, cacheEverything: true } });
         if (!r.ok) return json({ configured: true, ok: false });
         const d = await r.json();
         return json({ configured: true, ok: true, status: d.Status,
-          answers: (d.Answer || []).filter(a => a.type === 1).map(a => a.data) });
+          answers: (d.Answer || []).filter(a => a.type === 1).map(a => a.data) },
+          200, ttl);
       } catch {
         return json({ configured: true, ok: false });
       }
