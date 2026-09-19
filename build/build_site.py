@@ -2932,7 +2932,7 @@ Microsoft's own, which are mostly outside both.</p>
     }
     return page(
         "SMTP response reference: error and deferral codes explained",
-        f"Look up any SMTP response from any part of it: {total} codes from RFC 5321, "
+        "Look up any SMTP response from any part of it: every reply code in RFC 5321, "
         "the IANA enhanced status code registry and Microsoft's NDR reference. What each "
         "one means, whether retrying helps, and what to change.",
         body, "smtp/index.html", extra_ld=ld, wide=True,
