@@ -1016,6 +1016,28 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .arith .why{display:block;color:var(--ink-3)}
 .arith .why em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
   opacity:.8;margin-top:.1rem}
+.prose-list{margin:var(--s3) 0 var(--s4);padding-left:1.1rem;
+  max-width:var(--measure-text)}
+.prose-list li{margin:.55rem 0;font-size:var(--t3);color:var(--ink-2);line-height:1.7}
+.prose-list li strong{color:var(--ink)}
+
+/* A list that could not be trusted gets a row of its own reasoning rather than a
+   verdict, so the table has to carry an explanation column without it becoming
+   the widest thing on the page. */
+table.bl{width:100%;border-collapse:collapse;font-size:var(--t2);margin:var(--s3) 0}
+table.bl th{text-align:left;font-size:var(--t1);text-transform:uppercase;
+  letter-spacing:.06em;color:var(--ink-3);font-weight:650;padding:.5rem .7rem;
+  border-bottom:1px solid var(--line)}
+table.bl td{padding:.62rem .7rem;border-bottom:1px solid var(--line);
+  vertical-align:top;color:var(--ink-2)}
+table.bl tr.s-critical td:first-child strong{color:var(--bad)}
+table.bl tr.s-ok td:first-child strong{color:var(--ok)}
+table.bl tr.s-warn td{color:var(--ink-3)}
+table.bl .zone{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:var(--t1);color:var(--ink-3);margin-top:.12rem}
+table.bl .why{max-width:30rem;font-size:var(--t1);line-height:1.6;color:var(--ink-3)}
+table.bl .undet{color:var(--warn)}
+table.bl code{font-size:var(--t1)}
 .explain{margin:0 0 var(--s5)}
 .explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
   text-transform:uppercase;letter-spacing:.06em}
@@ -1240,6 +1262,8 @@ ICON = {
     "dmarc": '<path d="M6 2.5h8l4 4v15H6z"/><path d="M14 2.5v4h4"/>'
              '<path d="M9 17v-3M12 17v-6M15 17v-4"/>',
     # a branching tree, which is what an include chain is
+    "blocklist": '<path d="M12 3l7 3v5c0 4-3 7-7 8-4-1-7-4-7-8V6z"/>'
+                 '<path d="M9 12h6"/>',
     "spf": '<circle cx="5" cy="12" r="2"/><circle cx="19" cy="6" r="2"/>'
            '<circle cx="19" cy="12" r="2"/><circle cx="19" cy="18" r="2"/>'
            '<path d="M7 12h3M10 12V6h7M10 12h7M10 12v6h7"/>',
@@ -1287,6 +1311,16 @@ TOOLS = [
                  "bounce is too coarse to act on.",
         "tag": "Logs",
         "takes": "550 5.7.1 Service unavailable...",
+    },
+    {
+        "slug": "blocklist", "name": "Blocklist check",
+        "q": "Is this sending IP on a blocklist, and does the list still work?",
+        "blurb": "Checks an address against the lists that are actually answering. "
+                 "Every list is probed against its own RFC 5782 test entries first, "
+                 "because a decommissioned zone reports everyone as clean and a "
+                 "refusing one reports everyone as listed.",
+        "tag": "Reputation",
+        "takes": "203.0.113.9",
     },
     {
         "slug": "dmarc", "name": "DMARC report reader",
@@ -2000,6 +2034,60 @@ its own record, and collapse two ESPs into one.</p>
         body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Tools", crumbs=(("Tools", "tools/"), ("SPF lookup counter", None)),
         modules=("/js/spf.js",))
+
+
+def build_blocklist():
+    t = tool("blocklist")
+    body = """
+<h1>Blocklist check</h1>
+<p class="lede">A blocklist cannot tell you it has stopped working. A zone that was
+shut down answers nothing, which is the same answer it gives for an address that is
+not listed, so every checker still querying it reports the whole internet as clean.
+One that refuses your resolver answers something to everything, which reports the
+whole internet as listed.</p>
+
+<div class="tool r">
+  <form id="bl-form" autocomplete="off" class="row">
+    <label class="lbl-mi" for="bl-in">Sending IP address</label>
+    <input class="field" id="bl-in" type="text" inputmode="decimal" spellcheck="false"
+           autocomplete="off" placeholder="203.0.113.9">
+    <button class="btn" type="submit" id="bl-run">Check</button>
+  </form>
+  <p class="hint"><span>Your address is never sent here. The lookups go from your
+  browser to a public DNS-over-HTTPS resolver.</span></p>
+</div>
+<div class="report" id="bl-out" aria-live="polite"></div>
+
+<div class="sechead r">
+  <h2>Why a list gets refused before its answer is read</h2>
+  <p>RFC 5782 requires every conformant list to contain 127.0.0.2 and to not contain
+  127.0.0.1. Those two queries separate a list that is working from one that is not,
+  and they are the only way to tell the difference from outside.</p>
+</div>
+<ul class="prose-list r">
+  <li><strong>Answers neither.</strong> The zone is dead or refusing. SORBS was
+  decommissioned in 2024 and its zone stopped answering, so every tool still asking
+  it has been reporting a clean result ever since.</li>
+  <li><strong>Answers both.</strong> The list is returning something other than list
+  data. Spamhaus answers 127.255.255.254 to any query arriving through a public
+  resolver, and a checker counting any answer as a hit reports every address as
+  listed.</li>
+  <li><strong>Answers the wrong one.</strong> The return codes do not mean what a
+  blocklist query means. Some reputation services publish on the same interface
+  without following the same convention.</li>
+</ul>
+<p class="r">In all three cases this reports that it could not determine an answer,
+and says which. A blocklist result you cannot trust is worse than no result,
+because you act on it.</p>
+"""
+    return page(
+        "Blocklist check: is this IP listed, and is the list still answering",
+        "Check a sending IP against the DNS blocklists that are actually responding. "
+        "Every list is probed against its RFC 5782 test entries first, so a "
+        "decommissioned zone cannot report you as clean.",
+        body, "blocklist/index.html", extra_ld=tool_ld(t), wide=True,
+        nav_key="Tools", crumbs=(("Tools", "tools/"), ("Blocklist check", None)),
+        modules=("/js/bl-ui.js",))
 
 
 def build_dmarc():
@@ -3713,7 +3801,8 @@ def check_js():
                         ("parity-headers.mjs", "the header analyser is wrong"),
                         ("parity-lookup.mjs", "the response lookup is wrong"),
                         ("parity-rfc.mjs", "the RFC index is wrong"),
-                        ("parity-domain.mjs", "the domain gate is wrong")):
+                        ("parity-domain.mjs", "the domain gate is wrong"),
+                        ("parity-bl.mjs", "the blocklist check is wrong")):
         path = os.path.join(HERE, name)
         if not os.path.exists(path):
             continue
@@ -3744,6 +3833,7 @@ def main():
     build_sift()
     urls = [build_home(), build_tools(), build_about(),
             build_check(), build_bounce(), build_dmarc(), build_spf(),
+            build_blocklist(),
             build_headers(),
             build_smtp_index(), build_session(), build_rfc_index()]
     for c in CODES:
@@ -3759,7 +3849,7 @@ def main():
     for name in ("audit.js", "doh.js", "check.js", "spf.js", "filter.js",
                  "unzip.js", "rua.js", "rua-ui.js", "findings.js",
                  "headers.js", "headers-ui.js", "lookup.js", "lookup-ui.js",
-                 "rfc.js", "rfc-ui.js", "headers-live.js"):
+                 "rfc.js", "rfc-ui.js", "headers-live.js", "bl.js", "bl-ui.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
 
     # The response registry, fetched by the lookup rather than inlined: it is

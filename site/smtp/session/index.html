@@ -973,6 +973,28 @@ dl.meta dd{margin:0;color:var(--ink-2);line-height:1.6}
 .arith .why{display:block;color:var(--ink-3)}
 .arith .why em{display:block;font-style:normal;font-size:var(--t1);color:var(--ink-3);
   opacity:.8;margin-top:.1rem}
+.prose-list{margin:var(--s3) 0 var(--s4);padding-left:1.1rem;
+  max-width:var(--measure-text)}
+.prose-list li{margin:.55rem 0;font-size:var(--t3);color:var(--ink-2);line-height:1.7}
+.prose-list li strong{color:var(--ink)}
+
+/* A list that could not be trusted gets a row of its own reasoning rather than a
+   verdict, so the table has to carry an explanation column without it becoming
+   the widest thing on the page. */
+table.bl{width:100%;border-collapse:collapse;font-size:var(--t2);margin:var(--s3) 0}
+table.bl th{text-align:left;font-size:var(--t1);text-transform:uppercase;
+  letter-spacing:.06em;color:var(--ink-3);font-weight:650;padding:.5rem .7rem;
+  border-bottom:1px solid var(--line)}
+table.bl td{padding:.62rem .7rem;border-bottom:1px solid var(--line);
+  vertical-align:top;color:var(--ink-2)}
+table.bl tr.s-critical td:first-child strong{color:var(--bad)}
+table.bl tr.s-ok td:first-child strong{color:var(--ok)}
+table.bl tr.s-warn td{color:var(--ink-3)}
+table.bl .zone{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:var(--t1);color:var(--ink-3);margin-top:.12rem}
+table.bl .why{max-width:30rem;font-size:var(--t1);line-height:1.6;color:var(--ink-3)}
+table.bl .undet{color:var(--warn)}
+table.bl code{font-size:var(--t1)}
 .explain{margin:0 0 var(--s5)}
 .explain h2{font-size:var(--t2);font-weight:650;color:var(--ink-3);margin:var(--s4) 0 .35rem;
   text-transform:uppercase;letter-spacing:.06em}
@@ -1061,6 +1083,7 @@ when you are testing a submission endpoint that requires authentication.</p>
       <h2>Tools</h2>
             <a href="../../check/">Domain check</a>
       <a href="../../bounce/">Bounce classifier</a>
+      <a href="../../blocklist/">Blocklist check</a>
       <a href="../../dmarc/">DMARC report reader</a>
       <a href="../../headers/">Header analyser</a>
       <a href="../../spf/">SPF lookup counter</a>

@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RFC 1939: Post Office Protocol - Version 3 explained</title>
-<meta name="description" content="RFC 1939, Internet Standard. The Post Office Protocol - Version 3 (POP3) is intended to permit a workstation to dynamically access a maildrop on a server host in a useful fashion.">
+<title>Blocklist check: is this IP listed, and is the list still answering</title>
+<meta name="description" content="Check a sending IP against the DNS blocklists that are actually responding. Every list is probed against its RFC 5782 test entries first, so a decommissioned zone cannot report you as clean.">
 <meta name="author" content="Rastu Singh">
-<link rel="canonical" href="https://rastu.tech/rfc/1939/">
-<meta property="og:title" content="RFC 1939: Post Office Protocol - Version 3 explained">
-<meta property="og:description" content="RFC 1939, Internet Standard. The Post Office Protocol - Version 3 (POP3) is intended to permit a workstation to dynamically access a maildrop on a server host in a useful fashion.">
+<link rel="canonical" href="https://rastu.tech/blocklist/">
+<meta property="og:title" content="Blocklist check: is this IP listed, and is the list still answering">
+<meta property="og:description" content="Check a sending IP against the DNS blocklists that are actually responding. Every list is probed against its RFC 5782 test entries first, so a decommissioned zone cannot report you as clean.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/rfc/1939/">
+<meta property="og:url" content="https://rastu.tech/blocklist/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -1020,88 +1020,84 @@ table.bl code{font-size:var(--t1)}
   dl.meta dt{margin-top:.5rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "RFC decoded", "item": "https://rastu.tech//rfc/"}, {"@type": "ListItem", "position": 3, "name": "RFC 1939"}]}, {"@type": "TechArticle", "headline": "RFC 1939: Post Office Protocol - Version 3", "url": "https://rastu.tech/rfc/1939/", "author": {"@id": "https://rastu.tech/#person"}, "about": "Post Office Protocol - Version 3", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home"}, {"@type": "ListItem", "position": 2, "name": "Tools", "item": "https://rastu.tech/tools/"}, {"@type": "ListItem", "position": 3, "name": "Blocklist check"}]}, {"@type": "SoftwareApplication", "name": "Blocklist check", "url": "https://rastu.tech/blocklist/", "applicationCategory": "SecurityApplication", "operatingSystem": "Any", "description": "Checks an address against the lists that are actually answering. Every list is probed against its own RFC 5782 test entries first, because a decommissioned zone reports everyone as clean and a refusing one reports everyone as listed.", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "author": {"@id": "https://rastu.tech/#person"}, "isAccessibleForFree": true, "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
 <div class="wrap wide">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
-  <a class="mark" href="../../">rastu<span>.tech</span></a>
-  <a href="../../tools/">Tools</a>
-  <a href="../../smtp/">SMTP responses</a>
-  <a href="../../rfc/" aria-current="page">RFC decoded</a>
-  <a href="../../research/">Research</a>
-  <a href="../../about/">About</a>
+  <a class="mark" href="../">rastu<span>.tech</span></a>
+  <a href="../tools/" aria-current="page">Tools</a>
+  <a href="../smtp/">SMTP responses</a>
+  <a href="../rfc/">RFC decoded</a>
+  <a href="../research/">Research</a>
+  <a href="../about/">About</a>
 </nav>
-<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../..//rfc/">RFC decoded</a><span>/</span>RFC 1939</nav>
+<nav class="crumb" aria-label="Breadcrumb"><a href="../">Home</a><span>/</span><a href="../tools/">Tools</a><span>/</span>Blocklist check</nav>
 <main id="main">
 
-<div class="sechead">
-  <p class="pagemeta"><code>RFC 1939</code> <span class="st st-std">Internet Standard</span>
-     <span class="cat">Submission and access</span></p>
-  <h1 data-quoted>Post Office Protocol - Version 3</h1>
-  <p class="lede" data-quoted>The Post Office Protocol - Version 3 (POP3) is intended to permit a workstation to dynamically access a maildrop on a server host in a useful fashion. [STANDARDS-TRACK]</p>
-</div>
+<h1>Blocklist check</h1>
+<p class="lede">A blocklist cannot tell you it has stopped working. A zone that was
+shut down answers nothing, which is the same answer it gives for an address that is
+not listed, so every checker still querying it reports the whole internet as clean.
+One that refuses your resolver answers something to everything, which reports the
+whole internet as listed.</p>
 
-<div class="panel r">
-  <dl class="meta">
-    <dt>Status</dt><dd>Internet Standard. The top of the standards track. An old document can hold this label while the document that replaced it holds a lower one, which is the single most misleading thing about RFC status.</dd>
-    <dt>Published</dt><dd>May 1996</dd>
-    <dt>Authors</dt><dd>J. Myers, M. Rose</dd>
-    <dt>Read it</dt><dd>
-      <a href="https://www.rfc-editor.org/rfc/rfc1939.html">rfc-editor.org</a>
-       &middot; <a href="https://www.rfc-editor.org/errata/rfc1939">errata</a>
-       &middot; <a href="https://doi.org/10.17487/RFC1939">DOI</a>
-    </dd>
-  </dl>
-  <p class="hist"><strong>Replaces</strong> <a href="https://www.rfc-editor.org/rfc/rfc1081.html">RFC 1081: Post Office Protocol: Version 3</a>, <a href="https://www.rfc-editor.org/rfc/rfc1225.html">RFC 1225: Post Office Protocol: Version 3</a>, <a href="https://www.rfc-editor.org/rfc/rfc1460.html">RFC 1460: Post Office Protocol - Version 3</a>, <a href="https://www.rfc-editor.org/rfc/rfc1725.html">RFC 1725: Post Office Protocol - Version 3</a>.</p>
+<div class="tool r">
+  <form id="bl-form" autocomplete="off" class="row">
+    <label class="lbl-mi" for="bl-in">Sending IP address</label>
+    <input class="field" id="bl-in" type="text" inputmode="decimal" spellcheck="false"
+           autocomplete="off" placeholder="203.0.113.9">
+    <button class="btn" type="submit" id="bl-run">Check</button>
+  </form>
+  <p class="hint"><span>Your address is never sent here. The lookups go from your
+  browser to a public DNS-over-HTTPS resolver.</span></p>
 </div>
-
-<div class="warnbox s-warn"><p><strong>This document is current and has been amended.</strong> 4 later RFCs have changed part of it. Nothing on the RFC itself tells you this.</p><ul><li><a href="/rfc/1957/">RFC 1957: Some Observations on Implementations of the Post Office Protocol (POP3)</a></li><li><a href="/rfc/2449/">RFC 2449: POP3 Extension Mechanism</a></li><li><a href="/rfc/6186/">RFC 6186: Use of SRV Records for Locating Email Submission/Access Services</a></li><li><a href="/rfc/8314/">RFC 8314: Cleartext Considered Obsolete: Use of Transport Layer Security (TLS) for Email Submission and Access</a></li></ul></div>
-<div class="explain r"><h2 class="r">What it is</h2><p>POP3: downloading mail from a server, usually deleting it as it goes.</p><h2 class="r">What it solves</h2><p>Users needed to read mail on a machine that is not the server and is not always connected.</p><h2 class="r">What it means to operate</h2><p>Still current, still widely deployed, and the source of the recurring support case where mail vanishes from the server because a client is configured to delete on retrieval. IMAP is the answer for anyone with more than one device.</p></div>
+<div class="report" id="bl-out" aria-live="polite"></div>
 
 <div class="sechead r">
-  <h2 class="r">Normative requirements</h2>
-  <p>Every sentence in this RFC carrying an RFC 2119 keyword, with the section it
-  came from.</p>
+  <h2 class="r">Why a list gets refused before its answer is read</h2>
+  <p>RFC 5782 requires every conformant list to contain 127.0.0.2 and to not contain
+  127.0.0.1. Those two queries separate a list that is working from one that is not,
+  and they are the only way to tell the difference from outside.</p>
 </div>
-<div class="filter r" data-filter>
-  <div class="chips">
-    <button class="chip on" data-group="all" type="button">All</button>
-    <button class="chip" data-group="must" type="button">Must</button>
-    <button class="chip" data-group="should" type="button">Should</button>
-    <button class="chip" data-group="may" type="button">May</button>
-    <span class="count" role="status" aria-live="polite"></span>
-  </div>
-  <label class="lbl-mi" for="rq-f">Filter the requirements</label>
-  <input class="field" id="rq-f" type="search" placeholder="Filter by wording" autocomplete="off">
-  <section class="reqsec" id="s3"><h3>3 Basic Operation</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="servers must send the &quot;+ok&quot; and &quot;-err&quot; in upper case."><span class="kw kw-must">MUST</span><span class="rq">Servers MUST send the &quot;+OK&quot; and &quot;-ERR&quot; in upper case.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="a server must respond to an unrecognized, unimplemented, or syntactically invalid command by responding with a negative status indicator."><span class="kw kw-must">MUST</span><span class="rq">A server MUST respond to an unrecognized, unimplemented, or syntactically invalid command by responding with a negative status indicator.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="a server must respond to a command issued when the session is in an incorrect state by responding with a negative status indicator."><span class="kw kw-must">MUST</span><span class="rq">A server MUST respond to a command issued when the session is in an incorrect state by responding with a negative status indicator.</span></li><li class="lv-may" data-group="may" data-quoted data-terms="a pop3 server may have an inactivity autologout timer."><span class="kw kw-may">MAY</span><span class="rq">A POP3 server MAY have an inactivity autologout timer.</span></li><li class="lv-must" data-group="must" data-quoted data-terms="such a timer must be of at least 10 minutes&#x27; duration."><span class="kw kw-must">MUST</span><span class="rq">Such a timer MUST be of at least 10 minutes&#x27; duration.</span></li></ul></section><section class="reqsec" id="s6"><h3>6 The UPDATE State</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="if a session terminates for some reason other than a client-issued quit command, the pop3 session does not enter the update state and must not remove any messages from the maildrop."><span class="kw kw-must">MUST</span><span class="rq">If a session terminates for some reason other than a client-issued QUIT command, the POP3 session does NOT enter the UPDATE state and MUST not remove any messages from the maildrop.</span></li></ul></section><section class="reqsec" id="s7"><h3>7 Optional POP3 Commands</h3><ul class="reqs"><li class="lv-must" data-group="must" data-quoted data-terms="the syntax of the timestamp corresponds to the `msg-id&#x27; in [rfc822], and must be different each time the pop3 server issues a banner greeting."><span class="kw kw-must">MUST</span><span class="rq">The syntax of the timestamp corresponds to the `msg-id&#x27; in [RFC822], and MUST be different each time the POP3 server issues a banner greeting.</span></li></ul></section>
-  <p class="empty noresult hidden">Nothing matches that filter.</p>
-</div>
-
-<p class="r"><a href="/rfc/">Every current email RFC</a></p>
+<ul class="prose-list r">
+  <li><strong>Answers neither.</strong> The zone is dead or refusing. SORBS was
+  decommissioned in 2024 and its zone stopped answering, so every tool still asking
+  it has been reporting a clean result ever since.</li>
+  <li><strong>Answers both.</strong> The list is returning something other than list
+  data. Spamhaus answers 127.255.255.254 to any query arriving through a public
+  resolver, and a checker counting any answer as a hit reports every address as
+  listed.</li>
+  <li><strong>Answers the wrong one.</strong> The return codes do not mean what a
+  blocklist query means. Some reputation services publish on the same interface
+  without following the same convention.</li>
+</ul>
+<p class="r">In all three cases this reports that it could not determine an answer,
+and says which. A blocklist result you cannot trust is worse than no result,
+because you act on it.</p>
 
 </main>
 <footer>
   <div class="cols">
     <div>
       <h2>Tools</h2>
-            <a href="../../check/">Domain check</a>
-      <a href="../../bounce/">Bounce classifier</a>
-      <a href="../../blocklist/">Blocklist check</a>
-      <a href="../../dmarc/">DMARC report reader</a>
-      <a href="../../headers/">Header analyser</a>
-      <a href="../../spf/">SPF lookup counter</a>
-      <a href="../../tools/">All tools</a>
+            <a href="../check/">Domain check</a>
+      <a href="../bounce/">Bounce classifier</a>
+      <a href="../blocklist/">Blocklist check</a>
+      <a href="../dmarc/">DMARC report reader</a>
+      <a href="../headers/">Header analyser</a>
+      <a href="../spf/">SPF lookup counter</a>
+      <a href="../tools/">All tools</a>
     </div>
     <div>
       <h2>SMTP responses</h2>
-      <a href="../../smtp/">All responses</a>
-      <a href="../../smtp/session/">Anatomy of a session</a>
+      <a href="../smtp/">All responses</a>
+      <a href="../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
       <h2>Research</h2>
-      <a href="../../research/">State of email authentication</a>
+      <a href="../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
@@ -1111,7 +1107,7 @@ table.bl code{font-size:var(--t1)}
       <a href="https://orcid.org/0009-0002-0526-3005">ORCID</a>
     </div>
   </div>
-  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
+  <p class="by">Built and maintained by <a href="../about/">Rastu Singh</a>,
      Infrastructure Engineer, Tallinn.
      Everything here runs in your browser.</p>
 </footer>
@@ -1287,6 +1283,6 @@ table.bl code{font-size:var(--t1)}
 })();
 </script>
 
-<script type="module" src="/js/filter.js"></script>
+<script type="module" src="/js/bl-ui.js"></script>
 </body>
 </html>

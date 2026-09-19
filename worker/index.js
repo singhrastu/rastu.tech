@@ -17,6 +17,8 @@
  * launder a request. Everything else falls through to the static assets.
  */
 const HOSTNAME = /^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?(\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)+$/i;
+/* The only zones /api/dnsbl will assemble a query for. */
+const DQS_ZONES = ['zen.dq.spamhaus.net', 'dbl.dq.spamhaus.net'];
 const MAX_BYTES = 64 * 1024;
 const TIMEOUT_MS = 8000;
 
@@ -102,6 +104,40 @@ export default {
               + 'treats this as no policy at all.' });
       }
       return json(r);
+    }
+
+    /* Spamhaus refuses every public DNS resolver and answers 127.255.255.254
+       to all of them, so a browser cannot ask it anything true. A Data Query
+       Service key moves the query to a private zone that does answer. The key
+       is a secret and never reaches the page.
+
+       Deliberately not a DNS proxy. The caller supplies a reversed IPv4 address
+       and a zone name from a fixed list; the query is assembled here, so there
+       is no name a caller can reach that is not a Spamhaus DQS lookup. */
+    if (url.pathname === '/api/dnsbl') {
+      const key = env.SPAMHAUS_DQS_KEY;
+      if (!key) {
+        return json({ configured: false,
+          reason: 'No Spamhaus DQS key is configured on this deployment.' });
+      }
+      const ip = (url.searchParams.get('ip') || '').trim();
+      const zone = (url.searchParams.get('zone') || '').trim().toLowerCase();
+      if (!DQS_ZONES.includes(zone)) return json({ error: 'unknown zone' }, 400);
+      if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) return json({ error: 'bad address' }, 400);
+      if (ip.split('.').some(o => Number(o) > 255)) return json({ error: 'bad address' }, 400);
+
+      const name = `${ip}.${key}.${zone}`;
+      try {
+        const r = await fetch(
+          'https://cloudflare-dns.com/dns-query?type=A&name=' + encodeURIComponent(name),
+          { headers: { accept: 'application/dns-json' } });
+        if (!r.ok) return json({ configured: true, ok: false });
+        const d = await r.json();
+        return json({ configured: true, ok: true, status: d.Status,
+          answers: (d.Answer || []).filter(a => a.type === 1).map(a => a.data) });
+      } catch {
+        return json({ configured: true, ok: false });
+      }
     }
 
     if (url.pathname === '/api/status') {
