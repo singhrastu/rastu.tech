@@ -39,19 +39,25 @@ const STATE_LABEL = {
   unreachable: 'lookup did not complete',
 };
 
-/* Turnstile, rendered explicitly rather than by the script scanning the page.
+/* Turnstile, rendered once and reset thereafter.
  *
- * The implicit path gives no way to know when a token exists, and there is no
- * promise-returning accessor in the API: getResponse() returns undefined until
- * the widget has solved, which for a check fired straight after page load is
- * most of the time. Rendering by hand hands back a callback, which is something
- * that can be awaited.
+ * The widget owns its container. Calling render() on an element that already
+ * holds one is invalid, and doing it on every check produced "Verification
+ * failed" on the second and every check after it. reset() is the supported way
+ * to ask for a fresh token, and it fires the same callback again.
  *
- * The widget is invisible until Cloudflare decides a human needs to do something,
- * which for almost everybody is never. If it is not configured, or it fails, the
- * check still runs and the Spamhaus row reports that it was refused rather than
- * pretending the subject was clean.
+ * There is no promise-returning accessor in the API either: getResponse()
+ * returns undefined until the widget has solved, which for a check fired
+ * straight after page load is most of the time. So the callback is captured and
+ * a promise is resolved from it.
+ *
+ * Invisible unless Cloudflare decides a person needs to do something. If it is
+ * not configured, or it fails, the check still runs and the Spamhaus row reports
+ * that it was refused rather than pretending the subject was clean.
  */
+let widgetId = null;
+let settle = null;
+
 function challengeToken() {
   const el = document.getElementById('bl-turnstile');
   if (!el || !window.turnstile) return Promise.resolve('');
@@ -59,25 +65,30 @@ function challengeToken() {
   if (!sitekey) return Promise.resolve('');
 
   return new Promise((resolve) => {
-    // A token is single use, so a second check needs a fresh one.
-    if (widgetId !== null) {
-      try { window.turnstile.reset(widgetId); } catch { /* re-render below */ }
-    }
-    let settled = false;
-    const done = (t) => { if (!settled) { settled = true; resolve(t || ''); } };
-    // Never let a challenge that does not come back hold the whole check open.
-    setTimeout(() => done(''), 12000);
+    let done = false;
+    const finish = (t) => { if (!done) { done = true; settle = null; resolve(t || ''); } };
+    settle = finish;
+    // A challenge that never comes back must not hold the whole check open.
+    setTimeout(() => finish(''), 12000);
+
     try {
-      widgetId = window.turnstile.render(el, {
-        sitekey,
-        action: 'blocklist',
-        appearance: 'interaction-only',
-        callback: done,
-        'error-callback': () => done(''),
-        'timeout-callback': () => done(''),
-      });
+      if (widgetId === null) {
+        widgetId = window.turnstile.render(el, {
+          sitekey,
+          action: 'blocklist',
+          appearance: 'interaction-only',
+          callback: (t) => { if (settle) settle(t); },
+          'error-callback': () => { if (settle) settle(''); },
+          'timeout-callback': () => { if (settle) settle(''); },
+          'expired-callback': () => { if (settle) settle(''); },
+        });
+      } else {
+        // A token is spent once, so every later check needs a fresh one. reset()
+        // re-runs the challenge and calls the same callback again.
+        window.turnstile.reset(widgetId);
+      }
     } catch {
-      done('');
+      finish('');
     }
   });
 }
