@@ -4046,6 +4046,16 @@ def check_voice():
             # /rfc/ pages are exempt: naming a test address is the subject matter
             # there, not an implementation detail leaking out. Source comments are
             # stripped first, since they are developer rationale and never rendered.
+            # A link that stays on the site keeps the tab. Only offsite links
+            # get a new one, and a tool opening in a new tab every time somebody
+            # clicked a card would leave a trail of them behind.
+            for m in re.finditer(r'<a\b([^>]*target="_blank"[^>]*)>', body):
+                href = re.search(r'href="([^"]+)"', m.group(1))
+                if href and (href.group(1).startswith(("/", "#"))
+                             or "rastu.tech" in href.group(1)):
+                    bad.append(f"{rel}: an internal link opens a new tab "
+                               f"-> {href.group(1)!r}")
+
             # Naming the sending platforms whose documentation informed a
             # number makes a tool read as a digest of other people's help pages
             # rather than as something that knows the work. Two modules are
