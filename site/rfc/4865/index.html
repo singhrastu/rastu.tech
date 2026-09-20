@@ -851,18 +851,47 @@ footer .cols a:hover{color:var(--accent)}
 footer .by{margin:0;line-height:1.6;max-width:44rem}
 
 /* ---- scroll reveal ---------------------------------------------------- */
-.r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
+.r{transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
+/* Hidden only where a script exists to reveal it again.
+ *
+ * Every revealed element started at opacity:0 unconditionally, so a browser with
+ * scripting off, or one where the script simply failed to run, was shown a page
+ * of invisible content. Nothing announced that; it just looked broken.
+ *
+ * The cards had the opposite fault. They carried no hidden state at all: the
+ * animation only applied once .reveal landed, so on the home page, where the
+ * grid sits inside the first screen, they painted fully visible and then either
+ * animated in the same frame the page appeared or flashed out and back. Either
+ * way there was nothing to see, which is exactly what it looked like.
+ *
+ * A browser too old for this media feature ignores the block and renders
+ * everything, which is the failure to have. */
+@media (scripting: enabled){
+  .r{opacity:0;transform:translateY(16px)}
+  .bento .card,.strip div{opacity:0}
+}
 .r.reveal{opacity:1;transform:none}
 /* The cascade is driven by an index the card carries, not by nth-child rules.
    There were three of those, covering cards 2, 3 and 4, written when the grid
    held four. At seven tools the fifth onwards fell back to a zero delay and
    popped together with the first, so the cascade visibly broke halfway across
    the grid. An index scales to however many tools exist. */
+/* The base delay is the whole point of the effect. The grid sits inside the first
+   screen on the home page, so the observer reveals it the moment the script runs:
+   without a pause the first card moves in the same frame the page appears, and a
+   movement that coincides with the page arriving is not read as a movement at
+   all. Waiting lets the page settle, and then the cards arrive.
+
+   The middle keyframe is what makes it a pop rather than a fade. The card rises
+   past its resting place and scales a little beyond full size before settling,
+   which is the overshoot the eye reads as something landing. */
 .strip.reveal div,.bento.reveal .card{
-  animation:pop .5s cubic-bezier(.22,.9,.3,1) both;
-  animation-delay:calc(var(--i,0) * .065s)}
-@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.965)}
-               to{opacity:1;transform:none}}
+  animation:pop .66s cubic-bezier(.21,.9,.26,1) both;
+  animation-delay:calc(.28s + var(--i,0) * .09s)}
+@keyframes pop{
+  0%{opacity:0;transform:translateY(26px) scale(.9)}
+  62%{opacity:1;transform:translateY(-4px) scale(1.014)}
+  100%{opacity:1;transform:none}}
 h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
 .hero img{animation:rise .85s cubic-bezier(.22,.8,.3,1) .18s both}
