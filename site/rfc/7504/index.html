@@ -3,6 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<script>/* A reload starts at the top. Back and forward still return you to
+   where you were.
+
+   scrollRestoration lives on the history entry, and a reload reuses that entry,
+   so the browser has already decided what to do by the time a script in this
+   page runs. Setting it here during the load is too late: measured, a reload
+   with it set during load came back at 800px, and the same reload with it set
+   beforehand came back at 0. It has to already be manual when the reload is
+   triggered, which means always.
+
+   Turning restoration off entirely would cost the back button its position, so
+   that case is handled here instead: the offset is kept as the page is hidden
+   and put back when the reader returns through history. A link to an anchor is
+   left alone, since the anchor is the destination. */
+(function(){
+if(!("scrollRestoration" in history)) return;
+history.scrollRestoration="manual";
+var key="y:"+location.pathname+location.search;
+addEventListener("pagehide",function(){
+  try{sessionStorage.setItem(key,String(scrollY));}catch(e){}
+});
+addEventListener("DOMContentLoaded",function(){
+  if(location.hash) return;
+  var n=window.performance&&performance.getEntriesByType
+    &&performance.getEntriesByType("navigation")[0];
+  if(n&&n.type==="back_forward"){
+    var y=null; try{y=sessionStorage.getItem(key);}catch(e){}
+    if(y) scrollTo(0,+y);
+  }
+});
+})();</script>
 <title>RFC 7504: SMTP 521 and 556 Reply Codes explained</title>
 <meta name="description" content="RFC 7504, Proposed Standard. This memo defines two Simple Mail Transfer Protocol (SMTP) reply codes, 521 and 556. The 521 code was originally described in an Experimental RFC in 1">
 <meta name="author" content="Rastu Singh">
