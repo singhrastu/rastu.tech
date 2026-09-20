@@ -202,6 +202,19 @@ pre code{background:none;padding:0}
        margin:0 .4rem .4rem 0;font-weight:500}
 
 /* ---- callout ---------------------------------------------------------- */
+/* An action, not a note. .callout carries caveats about the document and wears a
+   left accent bar; this wears a full border and an arrow, so the two do not read
+   as the same kind of thing when they sit a paragraph apart. */
+.toolcue{display:flex;gap:.8rem;align-items:baseline;margin:1.6rem 0;
+  padding:.9rem 1.15rem;border:1px solid var(--line);border-radius:var(--radius);
+  background:var(--surface);font-size:.95rem;color:var(--ink-2);
+  transition:border-color .2s}
+.toolcue:hover{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.toolcue .cue{color:var(--accent);flex:0 0 auto;font-weight:700;line-height:1.5}
+.toolcue p{margin:0}
+.toolcue strong{color:var(--ink);font-weight:650}
+.toolcue a{font-weight:600;white-space:nowrap}
+
 .callout{border-left:3px solid var(--accent);background:var(--accent-soft);
          padding:.9rem 1.1rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;
          color:var(--ink-2);font-size:.96rem}
@@ -890,11 +903,16 @@ footer .by{margin:0;line-height:1.6;max-width:44rem}
 /* ---- scroll reveal ---------------------------------------------------- */
 .r{opacity:0;transform:translateY(16px);transition:opacity .7s ease,transform .7s cubic-bezier(.22,.7,.3,1)}
 .r.reveal{opacity:1;transform:none}
-.strip.reveal div,.bento.reveal .card{animation:pop .55s cubic-bezier(.22,.9,.3,1) both}
-.strip.reveal div:nth-child(2),.bento.reveal .card:nth-child(2){animation-delay:.07s}
-.strip.reveal div:nth-child(3),.bento.reveal .card:nth-child(3){animation-delay:.14s}
-.strip.reveal div:nth-child(4),.bento.reveal .card:nth-child(4){animation-delay:.21s}
-@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+/* The cascade is driven by an index the card carries, not by nth-child rules.
+   There were three of those, covering cards 2, 3 and 4, written when the grid
+   held four. At seven tools the fifth onwards fell back to a zero delay and
+   popped together with the first, so the cascade visibly broke halfway across
+   the grid. An index scales to however many tools exist. */
+.strip.reveal div,.bento.reveal .card{
+  animation:pop .5s cubic-bezier(.22,.9,.3,1) both;
+  animation-delay:calc(var(--i,0) * .065s)}
+@keyframes pop{from{opacity:0;transform:translateY(14px) scale(.965)}
+               to{opacity:1;transform:none}}
 h1{animation:rise .85s cubic-bezier(.22,.8,.3,1) both}
 .lede{animation:rise .85s cubic-bezier(.22,.8,.3,1) .1s both}
 .hero img{animation:rise .85s cubic-bezier(.22,.8,.3,1) .18s both}
@@ -1871,15 +1889,18 @@ run();
     open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
 
 
-def tool_card(t):
+def tool_card(t, i=0):
     """A card that looks like something you operate.
 
     Icon, the question it answers, an example of what you feed it, and a button.
     The previous version was a category label, a heading and two paragraphs,
     which reads as an article about a tool rather than as the tool.
     """
+    # --i is the card's position, which the cascade in the stylesheet turns into
+    # its delay. Doing it here rather than with nth-child rules means adding an
+    # eighth tool needs no CSS change.
     return (
-        f'<a class="card" href="/{t["slug"]}/">'
+        f'<a class="card" href="/{t["slug"]}/" style="--i:{i}">'
         f'<div class="card-top">{icon(t["slug"])}'
         f'<span class="tag">{e(t["tag"])}</span></div>'
         f'<h3>{e(t["name"])}</h3>'
@@ -2577,7 +2598,7 @@ def build_tools():
     the smtpsift section at the dmarcsight tool. This one leads with the question
     each tool answers, because that is the form the visitor's problem arrives in.
     """
-    cards = "".join(tool_card(t) for t in TOOLS)
+    cards = "".join(tool_card(t, i) for i, t in enumerate(TOOLS))
 
     body = f"""
 <h1>Email infrastructure and deliverability tools</h1>
@@ -2739,7 +2760,7 @@ def build_home():
     tool on the page back to the same #person node. The footprint is larger than
     the old personal homepage, not smaller.
     """
-    cards = "".join(tool_card(t) for t in TOOLS)
+    cards = "".join(tool_card(t, i) for i, t in enumerate(TOOLS))
     session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
 
     # The responses people actually arrive on, as a way in to the reference.
@@ -2836,6 +2857,9 @@ def build_code_page(c):
         if links:
             rel = f"<h2>Related</h2><p>{' &middot; '.join(links)}</p>"
 
+    pick = TOOL_FOR_SMTP.get(s)
+    prompt = tool_prompt(*pick) if pick else ""
+
     body = f"""
 <h1>{e(c['title'])}</h1>
 <p>{prov}<span class="badge">{e(c['category'])}</span><span class="badge">action: {e(c['action'])}</span></p>
@@ -2848,6 +2872,7 @@ def build_code_page(c):
 <h2>What to do</h2>
 <ul>{fixes}</ul>
 {rel}
+{prompt}
 <p class="meta">Classified as <code>{e(c['category'])}</code>, action
 <code>{e(c['action'])}</code>. Paste a response into the
 <a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
@@ -3022,6 +3047,113 @@ def build_rfc_index():
         modules=("/js/filter.js", "/js/rfc-ui.js"))
 
 
+# A reader who has just understood what a standard requires is one step from
+# wanting to know whether their own domain meets it, and 99 of the 114 deep pages
+# offered them nothing but a footer. A footer list of every tool is wallpaper; a
+# sentence naming the one tool that answers the question this page raises is not.
+#
+# Curated rather than generated. Each entry says what the tool does with this
+# specific document, because "here is a tool" is the generic prompt people have
+# learned to skip. Where no tool genuinely applies, nothing is shown.
+TOOL_FOR_RFC = {
+    # Authentication
+    "5863": ("check", "resolves the selectors a domain actually publishes, which is "
+                      "the deployment step this document is about"),
+    "6008": ("headers", "reads the authentication results in a pasted message and "
+                        "names which mechanism produced each one"),
+    "6376": ("headers", "reads the signature tags in a real message, including the "
+                        "body-length limit, the expiry and which headers were signed, "
+                        "none of which a DNS lookup can see"),
+    "6377": ("headers", "shows whether a list rewrote the message in a way that broke "
+                        "the signature"),
+    "6541": ("check", "reports the DKIM records a domain publishes today"),
+    "7208": ("spf", "counts a domain's lookups against the ten this document allows, "
+                    "including the void lookups that also count"),
+    "7372": ("bounce", "turns one of these status codes into the action it calls for"),
+    "7960": ("dmarc", "shows which of your sources are indirect flows, which is the "
+                      "problem this document describes"),
+    "8301": ("check", "reports the key size and algorithm behind each selector, which "
+                      "is what this update changed"),
+    "8463": ("check", "reports which signing algorithm a selector publishes"),
+    "8553": ("check", "resolves the underscored names email actually uses, so a "
+                      "missing one shows up as missing"),
+    "8601": ("headers", "parses this header out of a real message and says which "
+                        "boundary wrote it"),
+    "8616": ("headers", "decodes encoded header fields back to readable text"),
+    "8617": ("headers", "reads the ARC chain and shows where it was sealed"),
+    "9989": ("dmarc", "reads an aggregate report and computes alignment from the "
+                      "authentication results rather than trusting the summary"),
+    "9990": ("dmarc", "reads the aggregate reports this document defines"),
+    "9991": ("dmarc", "reads the failure reports this document defines"),
+    # Anti-abuse and operations
+    "2142": ("blocklist", "checks the lists that record domains with no working "
+                          "abuse or postmaster mailbox"),
+    "5782": ("blocklist", "tests every list against the entries this document "
+                          "requires before trusting a single answer from it"),
+    "6471": ("blocklist", "detects the retired and wildcarded zones this document "
+                          "warns about, and reports them as unusable"),
+    "6647": ("bounce", "tells a greylisting deferral apart from a refusal"),
+    # Reporting and feedback
+    "5965": ("dmarc", "reads reports in this format"),
+    "6449": ("warmup", "gates each step of a ramp on the complaint rate a feedback "
+                       "loop reports"),
+    "6591": ("dmarc", "reads the failure reports this document defines"),
+    "6650": ("dmarc", "reads feedback reports and groups them by source"),
+    "8058": ("warmup", "treats this header as a precondition, because Gmail and "
+                       "Yahoo both require it above five thousand a day"),
+    # Transport security
+    "8460": ("check", "fetches a domain's TLS-RPT record and reports where reports "
+                      "are actually being sent"),
+    "8461": ("check", "fetches the policy file itself, so a record promising a "
+                      "policy that does not exist is caught"),
+}
+
+# Used where no specific entry applies. Deliberately narrow: a weak link is the
+# wallpaper this exists to avoid.
+TOOL_FOR_CATEGORY = {
+    "Authentication": ("check", "audits a domain's SPF, DKIM and DMARC as published"),
+    "Transport security": ("check", "reports what a domain publishes for TLS, and "
+                                    "whether the policy behind it resolves"),
+    "Transport": ("bounce", "turns an SMTP response into the action it calls for"),
+    "Message format": ("headers", "parses a real message and says what each header "
+                                  "is claiming"),
+}
+
+
+# Keyed on the page slug. The bounce classifier is already linked from every one
+# of these pages; this is the second, more specific link, added only where the
+# refusal points at something another tool can actually answer.
+TOOL_FOR_SMTP = {
+    "spamhaus": ("blocklist", "checks the address against the lists that produced "
+                              "this refusal, and confirms each list is answering "
+                              "correctly first"),
+    "microsoft-outlook-5-7-606": ("blocklist",
+                              "checks whether the address is listed anywhere else "
+                              "as well, which usually explains why it was banned"),
+    "5-7-1": ("check", "audits the sending domain's SPF, DKIM and DMARC, which is "
+                       "what a policy refusal is usually about"),
+    "gmail-5-7-1": ("check", "audits the authentication Gmail is refusing on"),
+    "gmail-5-7-26": ("check", "audits the authentication this refusal names"),
+    "gmail-4-7-28": ("warmup", "builds a ramp gated on the complaint rate, which is "
+                               "what Gmail is reacting to when it throttles"),
+    "yahoo-ts03": ("warmup", "builds a ramp that grows at a rate Yahoo will accept "
+                             "rather than one that spikes"),
+    "microsoft-outlook-4-7-500": ("warmup",
+                             "sets the hourly rate per address, which is the "
+                             "control Microsoft throttles on"),
+    "tls-handshake": ("check", "reports what the domain publishes for TLS, and "
+                               "whether the policy behind it resolves"),
+}
+
+
+def tool_prompt(slug, reason):
+    """One line pointing at the tool that answers the question a page raises."""
+    t = tool(slug)
+    return (f'<div class="toolcue r"><span class="cue" aria-hidden="true">&rarr;</span>'
+            f'<p><strong>{e(t["name"])}</strong> {e(reason)}. '
+            f'<a href="/{e(slug)}/">Open {e(t["name"].lower())}</a></p></div>')
+
+
 def build_rfc_pages():
     """One page per RFC, rendered at build time.
 
@@ -3138,6 +3270,9 @@ def build_rfc_pages():
   <p class="empty noresult hidden">Nothing matches that filter.</p>
 </div>"""
 
+        pick = TOOL_FOR_RFC.get(str(num)) or TOOL_FOR_CATEGORY.get(x["category"])
+        prompt = tool_prompt(*pick) if pick else ""
+
         body = f"""
 <div class="sechead">
   <p class="pagemeta"><code>RFC {num}</code> <span class="st st-{kind}">{e(label)}</span>
@@ -3164,6 +3299,7 @@ def build_rfc_pages():
 
 {"".join(warn)}
 {explain}
+{prompt}
 {reqblock}
 
 <p class="r"><a href="/rfc/">Every current email RFC</a></p>
