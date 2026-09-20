@@ -9,7 +9,7 @@ read; somebody who has never deployed anything should still follow what is going
 | | |
 |---|---|
 | Pages | 127, all pre-built |
-| Script modules | 22, no bundler |
+| Script modules | 21, no bundler |
 | Server code | 229 lines, three endpoints |
 | Dependencies | none, in either Python or JavaScript |
 | Hosting cost | nothing |
@@ -206,7 +206,7 @@ Two layers, both configured in the Worker:
 
 | Binding | Type | Value |
 |---|---|---|
-| `ASSETS` | static assets | the 265 built files |
+| `ASSETS` | static assets | the 266 built files |
 | `DNSBL_LIMIT` | rate limiter | 12 requests per 60 seconds, per IP |
 | `SPAMHAUS_DQS_KEY` | secret | Spamhaus query key, free tier, 100k/day |
 | `TURNSTILE_SECRET` | secret | verifies the human challenge |
@@ -362,8 +362,8 @@ ingest_logs.py          ------>  reference pages         from real bounce logs
 
                     build_site.py
                           |
-                    site/  265 files
-                    127 pages, 22 modules, _headers, sitemap.xml
+                    site/  266 files
+                    127 pages, 21 modules, _headers, sitemap.xml
 ```
 
 The generators run rarely and their output is committed. `build_site.py` runs on every
