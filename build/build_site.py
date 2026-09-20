@@ -1591,6 +1591,40 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 """
     # wrap tables so wide data scrolls inside its own container rather than
     # forcing the page to scroll sideways
+    def open_offsite_in_a_new_tab(html_src):
+        """Send links that leave the site to a new tab, and keep this one.
+
+        A reader following the RFC Editor link from a summary wants the source
+        alongside what they were reading, not instead of it, and somebody who
+        clicks through to LinkedIn from the footer has not asked to be finished
+        with the site. Applied here rather than at 906 call sites so a new link
+        gets the behaviour without anybody remembering.
+
+        Three things this has to be careful about: absolute links back to this
+        site are not offsite and must be left alone; an anchor that already
+        declares a rel keeps it, with noopener added rather than substituted;
+        and noopener is not decoration, it stops the opened page reaching back
+        through window.opener to the tab it came from.
+        """
+        def fix(m):
+            attrs, href = m.group(1), m.group(2)
+            if href.startswith(SITE) or "//rastu.tech" in href:
+                return m.group(0)
+            if "target=" in attrs:
+                return m.group(0)
+            rel = re.search(r'rel="([^"]*)"', attrs)
+            if rel:
+                vals = rel.group(1).split()
+                if "noopener" not in vals:
+                    vals.append("noopener")
+                attrs = attrs.replace(rel.group(0), 'rel="%s"' % " ".join(vals))
+            else:
+                attrs += ' rel="noopener"'
+            return '<a%s href="%s" target="_blank">' % (attrs, href)
+
+        return re.sub(r'<a((?:(?!href=)[^>])*)href="(https?://[^"]+)"',
+                      fix, html_src)
+
     def wrap_tables(html_src):
         out, at = [], 0
         for m in re.finditer(r"<table\b[^>]*>", html_src):
@@ -1614,6 +1648,7 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
         return "".join(rebuilt)
 
     doc = wrap_tables(doc)
+    doc = open_offsite_in_a_new_tab(doc)
     # Scroll-reveal only inside <main>. The footer's column headings are <h2> too,
     # and the observer never reaches them, so a blanket replace hid them for good.
     head, sep, rest = doc.partition('<main id="main">')
