@@ -13,3 +13,6 @@ testdata/
 .env.*
 .dev.vars
 .dev.vars.*
+
+# local tooling venv
+.venv-seo/

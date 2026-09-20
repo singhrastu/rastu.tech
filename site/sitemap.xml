@@ -27,6 +27,12 @@
   <url><loc>https://rastu.tech/smtp/spamhaus/</loc><lastmod>2026-09-20</lastmod></url>
   <url><loc>https://rastu.tech/smtp/4-4-1/</loc><lastmod>2026-09-20</lastmod></url>
   <url><loc>https://rastu.tech/smtp/tls-handshake/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-rp-001/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-rp-002/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-rp-003/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-sc-001/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-sc-004/</loc><lastmod>2026-09-20</lastmod></url>
+  <url><loc>https://rastu.tech/smtp/microsoft-outlook-dy-001/</loc><lastmod>2026-09-20</lastmod></url>
   <url><loc>https://rastu.tech/rfc/1123/</loc><lastmod>2026-09-20</lastmod></url>
   <url><loc>https://rastu.tech/rfc/1870/</loc><lastmod>2026-09-20</lastmod></url>
   <url><loc>https://rastu.tech/rfc/1939/</loc><lastmod>2026-09-20</lastmod></url>

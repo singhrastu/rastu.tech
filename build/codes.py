@@ -488,6 +488,222 @@ CODES = [
             "estate was built with that separation in the first place."
         ),
     },
+    # ---------------------------------------------------------------------
+    # Outlook.com postmaster codes.
+    #
+    # A different set from the Exchange Online codes above, and the ones people
+    # actually paste into a search box. They were missing entirely, and what
+    # currently answers them is largely generic "fix Outlook error" pages from
+    # file-recovery vendors that never mention SMTP.
+    #
+    # Sourced from Microsoft's own postmaster troubleshooting and policy pages.
+    # ---------------------------------------------------------------------
+    {
+        "code": "RP-001",
+        "summary": "Outlook is rate limiting your address because of its "
+                   "reputation, not because of a fixed cap.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 421 RP-001: rate limited by Outlook.com",
+        "answer": "421 RP-001 means Outlook.com accepted the connection and then "
+                  "refused to take more mail from your address for now. Microsoft "
+                  "ties this to reputation rather than to a published number, so "
+                  "there is no volume you can stay under to avoid it.",
+        "category": "rate_limited",
+        "action": "throttle",
+        "seen_as": [
+            "421 4.7.0 [TSS04] Messages from x.x.x.x temporarily deferred",
+            "421 RP-001 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Sending faster than the reputation of the address supports, which "
+            "is the usual cause on a new or recently quiet address.",
+            "A volume increase that arrived as a step rather than a ramp.",
+            "Complaints from Outlook, Hotmail or Live recipients pushing the "
+            "address into a band where less mail is accepted.",
+        ],
+        "fix": [
+            "Lower the hourly rate to Microsoft specifically rather than the "
+            "daily total. The limit is applied per connection and per hour, so "
+            "a daily quota spread evenly is what clears it.",
+            "Let the queue drain before sending more. Retrying immediately is "
+            "what turns a deferral into a block.",
+            "Enrol in SNDS and JMRP so there is data behind the next change.",
+            "If this started when volume grew, the ramp was too steep. Rebuild "
+            "it gated on the metrics rather than on the calendar.",
+        ],
+        "related": ["RP-002", "RP-003", "4.7.500", "5.7.606"],
+        "note": "The common advice is to wait and retry, and that is only half "
+                "right. A 421 that repeats at the same volume is not a queue "
+                "problem, it is Microsoft telling you the address has not earned "
+                "that rate. Waiting without lowering the rate produces the same "
+                "deferral tomorrow.",
+    },
+    {
+        "code": "RP-002",
+        "summary": "The same rate limit as RP-001, applied to one connection "
+                   "rather than to the address.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 421 RP-002: too much mail on one connection",
+        "answer": "421 RP-002 means Outlook.com took as many messages as it will "
+                  "accept on that single connection. Microsoft attributes it to "
+                  "reputation, the same as RP-001, but the unit being limited is "
+                  "the connection rather than the address.",
+        "category": "rate_limited",
+        "action": "throttle",
+        "seen_as": [
+            "421 RP-002 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Too many messages pipelined down one connection before closing it.",
+            "A pool that opens few connections and drives all volume through them.",
+        ],
+        "fix": [
+            "Cap messages per connection and let the MTA open a fresh one. Most "
+            "MTAs expose this separately from the rate limit and it is often left "
+            "unbounded.",
+            "Do not answer this by opening more connections at once. That is the "
+            "next code down, RP-003.",
+        ],
+        "related": ["RP-001", "RP-003"],
+        "note": "RP-001 and RP-002 look identical in a log and have opposite "
+                "fixes: one wants fewer messages per hour, the other wants fewer "
+                "messages per connection. Changing the wrong one moves nothing.",
+    },
+    {
+        "code": "RP-003",
+        "summary": "Too many connections open to Outlook.com at once.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 421 RP-003: too many simultaneous connections",
+        "answer": "421 RP-003 means your address has more connections open to "
+                  "Outlook.com than it is allowed. Microsoft publishes a ceiling "
+                  "of 500 simultaneous connections and ties the practical limit "
+                  "to reputation below that.",
+        "category": "connection",
+        "action": "throttle",
+        "seen_as": [
+            "421 RP-003 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Concurrency configured for total throughput rather than per "
+            "destination, so every worker opens its own connection to Microsoft.",
+            "Retries stacking on top of live traffic after a deferral.",
+        ],
+        "fix": [
+            "Set a per-destination connection limit for Microsoft. During a "
+            "warm-up one or two is enough and costs nothing.",
+            "Make retries share the same connection budget as new mail, rather "
+            "than running alongside it.",
+        ],
+        "related": ["RP-001", "RP-002"],
+        "note": "Microsoft's published ceiling is 500 simultaneous connections, "
+                "and almost nobody who sees this code is near it. The limit that "
+                "bit is the reputation-derived one below it, which is not "
+                "published.",
+    },
+    {
+        "code": "SC-001",
+        "summary": "Outlook refused the message on policy: content or the "
+                   "reputation of the address behind it.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 550 SC-001: rejected for policy reasons",
+        "answer": "550 SC-001 is Outlook.com refusing a message outright. "
+                  "Microsoft attributes it either to content with spam-like "
+                  "characteristics or to the reputation of the sending address "
+                  "or domain, and does not say which.",
+        "category": "policy_block",
+        "action": "review",
+        "seen_as": [
+            "550 SC-001 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Content that resembles mail Microsoft already filters, which can be "
+            "a link, an attachment type, or a template shared with a worse sender.",
+            "The address or domain carrying reputation that has not recovered.",
+        ],
+        "fix": [
+            "Check whether it is every message or one campaign. One campaign "
+            "points at content; everything points at reputation.",
+            "Audit the sending domain's authentication before assuming content: "
+            "a policy refusal on an unauthenticated domain is usually the "
+            "authentication.",
+            "Enrol in SNDS to see what Microsoft thinks of the address.",
+        ],
+        "related": ["SC-004", "5.7.1", "5.7.606"],
+        "note": "SC-001 and SC-004 are both 550 and read the same in a log, but "
+                "SC-004 names complaints and SC-001 does not. If you are getting "
+                "SC-001 with clean complaint figures, look at the message rather "
+                "than the address.",
+    },
+    {
+        "code": "SC-004",
+        "summary": "Blocked because Outlook recipients complained about mail "
+                   "from this address.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 550 SC-004: blocked on complaints",
+        "answer": "550 SC-004 means Microsoft has placed a block on your address "
+                  "after receiving complaints about mail from it. Unlike SC-001, "
+                  "this one names its cause, and Microsoft's own remedy is to "
+                  "enrol in the Junk Email Reporting Program.",
+        "category": "reputation_block",
+        "action": "pause",
+        "seen_as": [
+            "550 SC-004 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Recipients marking the mail as junk at a rate Microsoft acts on.",
+            "A list segment that was never engaged, or addresses acquired rather "
+            "than collected.",
+        ],
+        "fix": [
+            "Stop sending to Microsoft domains from this address until the cause "
+            "is removed. Continuing deepens the block.",
+            "Enrol in JMRP, which is what Microsoft names in the refusal, so "
+            "complaints arrive as feedback rather than only as a block.",
+            "Suppress everyone who complained, then cut to recipients who opened "
+            "something recently before resuming.",
+            "Submit a delisting request only after the cause is fixed.",
+        ],
+        "related": ["SC-001", "5.7.606", "spamhaus"],
+        "note": "Microsoft publishes no complaint threshold, so there is no "
+                "figure to stay under. The colour bands in SNDS do not help "
+                "either: they report how much of your mail the filter classified "
+                "as spam, not how often it was reported, which is the fact most "
+                "often repeated wrongly about this.",
+    },
+    {
+        "code": "DY-001",
+        "summary": "The connecting address looks like consumer or dynamic space.",
+        "provider": "Microsoft / Outlook",
+        "title": "Microsoft 550 DY-001: mail from dynamic address space",
+        "answer": "550 DY-001 means Outlook.com will not accept mail directly "
+                  "from an address that appears to be in dynamic or residential "
+                  "space. It is not about your message or your reputation; the "
+                  "address itself is the problem.",
+        "category": "policy_block",
+        "action": "fix_config",
+        "seen_as": [
+            "550 DY-001 Mail rejected by Outlook.com for policy reasons",
+        ],
+        "causes": [
+            "Sending directly from a home or office connection.",
+            "A provider whose address range is classified as dynamic regardless "
+            "of how it is actually assigned.",
+            "No reverse DNS, or reverse DNS that still carries the provider's "
+            "generic naming.",
+        ],
+        "fix": [
+            "Send through a relay on address space intended for mail, or move to "
+            "a provider whose ranges are not classified this way.",
+            "Set a reverse DNS record that matches the name used in EHLO. A "
+            "generic provider-assigned name reads as dynamic even when it is not.",
+            "Check whether the address is also on the policy lists that record "
+            "dynamic space, because those follow the same classification.",
+        ],
+        "related": ["DY-002", "spamhaus", "5.7.606"],
+        "note": "This is the one Microsoft code that no amount of warming fixes. "
+                "The classification follows the address range, so the answer is "
+                "different infrastructure rather than better behaviour.",
+    },
 ]
 
 

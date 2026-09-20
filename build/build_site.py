@@ -3315,6 +3315,24 @@ TOOL_FOR_SMTP = {
                              "control Microsoft throttles on"),
     "tls-handshake": ("check", "reports what the domain publishes for TLS, and "
                                "whether the policy behind it resolves"),
+    "microsoft-outlook-rp-001": ("warmup",
+        "sets the hourly rate per address rather than a daily total, which is "
+        "the control this deferral responds to"),
+    "microsoft-outlook-rp-002": ("warmup",
+        "gives a rate per address and per provider, so the volume going to "
+        "Microsoft can be brought down on its own"),
+    "microsoft-outlook-rp-003": ("warmup",
+        "sets the connection count alongside the rate, which is the pair this "
+        "refusal is about"),
+    "microsoft-outlook-sc-001": ("check",
+        "audits the sending domain's authentication, which is what a policy "
+        "refusal usually turns out to be"),
+    "microsoft-outlook-sc-004": ("blocklist",
+        "checks whether the address is listed elsewhere as well, since the "
+        "complaints behind this rarely stop at one receiver"),
+    "microsoft-outlook-dy-001": ("blocklist",
+        "checks the policy lists that record dynamic space, which classify an "
+        "address the same way Microsoft just did"),
 }
 
 

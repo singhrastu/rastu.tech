@@ -433,7 +433,7 @@
  },
  "https://rastu.tech/smtp/": {
   "date": "2026-09-20",
-  "hash": "5a39c31c12b1c8e1"
+  "hash": "82da15eb8e389c04"
  },
  "https://rastu.tech/smtp/4-2-2/": {
   "date": "2026-09-20",
@@ -475,9 +475,33 @@
   "date": "2026-09-20",
   "hash": "aab56be1ff056756"
  },
+ "https://rastu.tech/smtp/microsoft-outlook-dy-001/": {
+  "date": "2026-09-20",
+  "hash": "dc3aced8e2b9b47e"
+ },
+ "https://rastu.tech/smtp/microsoft-outlook-rp-001/": {
+  "date": "2026-09-20",
+  "hash": "f80e91258a66a12e"
+ },
+ "https://rastu.tech/smtp/microsoft-outlook-rp-002/": {
+  "date": "2026-09-20",
+  "hash": "69e069a627d92637"
+ },
+ "https://rastu.tech/smtp/microsoft-outlook-rp-003/": {
+  "date": "2026-09-20",
+  "hash": "9c93f78e611fd65e"
+ },
  "https://rastu.tech/smtp/microsoft-outlook-s3140/": {
   "date": "2026-09-20",
   "hash": "1102fc174332a057"
+ },
+ "https://rastu.tech/smtp/microsoft-outlook-sc-001/": {
+  "date": "2026-09-20",
+  "hash": "55c0ec2797514d5f"
+ },
+ "https://rastu.tech/smtp/microsoft-outlook-sc-004/": {
+  "date": "2026-09-20",
+  "hash": "3aa39c0ee53bd52b"
  },
  "https://rastu.tech/smtp/session/": {
   "date": "2026-09-20",

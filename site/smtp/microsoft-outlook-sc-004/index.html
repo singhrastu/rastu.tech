@@ -34,14 +34,14 @@ addEventListener("DOMContentLoaded",function(){
   }
 });
 })();</script>
-<title>SMTP response reference: error and deferral codes explained</title>
-<meta name="description" content="Look up any SMTP response from any part of it: every reply code in RFC 5321, the IANA enhanced status code registry and Microsoft&#x27;s NDR reference. What each one means, whether retrying helps, and what to change.">
+<title>Microsoft 550 SC-004: blocked on complaints</title>
+<meta name="description" content="550 SC-004 means Microsoft has placed a block on your address after receiving complaints about mail from it. Unlike SC-001, this one names its cause, and Microsoft&#x27;s own remedy is to enrol in the Junk Email Reporting Program.">
 <meta name="author" content="Rastu Singh">
-<link rel="canonical" href="https://rastu.tech/smtp/">
-<meta property="og:title" content="SMTP response reference: error and deferral codes explained">
-<meta property="og:description" content="Look up any SMTP response from any part of it: every reply code in RFC 5321, the IANA enhanced status code registry and Microsoft&#x27;s NDR reference. What each one means, whether retrying helps, and what to change.">
+<link rel="canonical" href="https://rastu.tech/smtp/microsoft-outlook-sc-004/">
+<meta property="og:title" content="Microsoft 550 SC-004: blocked on complaints">
+<meta property="og:description" content="550 SC-004 means Microsoft has placed a block on your address after receiving complaints about mail from it. Unlike SC-001, this one names its cause, and Microsoft&#x27;s own remedy is to enrol in the Junk Email Reporting Program.">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://rastu.tech/smtp/">
+<meta property="og:url" content="https://rastu.tech/smtp/microsoft-outlook-sc-004/">
 <meta property="og:image" content="https://rastu.tech/rastu-singh.jpg">
 <meta property="og:image:width" content="1024">
 <meta property="og:image:height" content="1024">
@@ -1123,95 +1123,64 @@ table.bl code{font-size:var(--t1)}
   dl.meta dt{margin-top:.5rem}
 }
 </style>
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "CollectionPage", "name": "SMTP response reference", "url": "https://rastu.tech/smtp/", "author": {"@id": "https://rastu.tech/#person"}, "hasPart": [{"@type": "TechArticle", "headline": "Gmail 4.7.28: unusual rate, deferred not blocked", "url": "https://rastu.tech/smtp/gmail-4-7-28/"}, {"@type": "TechArticle", "headline": "Gmail 5.7.26: unauthenticated mail rejected", "url": "https://rastu.tech/smtp/gmail-5-7-26/"}, {"@type": "TechArticle", "headline": "Gmail 5.7.1: message blocked for reputation", "url": "https://rastu.tech/smtp/gmail-5-7-1/"}, {"@type": "TechArticle", "headline": "Microsoft 5.7.606: access denied, banned sending IP", "url": "https://rastu.tech/smtp/microsoft-outlook-5-7-606/"}, {"@type": "TechArticle", "headline": "Microsoft S3140: sending IP reputation block", "url": "https://rastu.tech/smtp/microsoft-outlook-s3140/"}, {"@type": "TechArticle", "headline": "Microsoft 4.7.500: server busy, throttled", "url": "https://rastu.tech/smtp/microsoft-outlook-4-7-500/"}, {"@type": "TechArticle", "headline": "Yahoo TS03: deferred for policy reasons", "url": "https://rastu.tech/smtp/yahoo-ts03/"}, {"@type": "TechArticle", "headline": "SMTP 5.1.1: recipient address does not exist", "url": "https://rastu.tech/smtp/5-1-1/"}, {"@type": "TechArticle", "headline": "SMTP 4.2.2: recipient mailbox is full", "url": "https://rastu.tech/smtp/4-2-2/"}, {"@type": "TechArticle", "headline": "SMTP 5.2.1: mailbox disabled or inactive", "url": "https://rastu.tech/smtp/5-2-1/"}, {"@type": "TechArticle", "headline": "SMTP 5.7.1: delivery not authorized, message refused", "url": "https://rastu.tech/smtp/5-7-1/"}, {"@type": "TechArticle", "headline": "Blocked using Spamhaus: how to diagnose and get delisted", "url": "https://rastu.tech/smtp/spamhaus/"}, {"@type": "TechArticle", "headline": "SMTP 4.4.1: connection timed out or refused", "url": "https://rastu.tech/smtp/4-4-1/"}, {"@type": "TechArticle", "headline": "TLS handshake failures on outbound SMTP", "url": "https://rastu.tech/smtp/tls-handshake/"}, {"@type": "TechArticle", "headline": "Microsoft 421 RP-001: rate limited by Outlook.com", "url": "https://rastu.tech/smtp/microsoft-outlook-rp-001/"}, {"@type": "TechArticle", "headline": "Microsoft 421 RP-002: too much mail on one connection", "url": "https://rastu.tech/smtp/microsoft-outlook-rp-002/"}, {"@type": "TechArticle", "headline": "Microsoft 421 RP-003: too many simultaneous connections", "url": "https://rastu.tech/smtp/microsoft-outlook-rp-003/"}, {"@type": "TechArticle", "headline": "Microsoft 550 SC-001: rejected for policy reasons", "url": "https://rastu.tech/smtp/microsoft-outlook-sc-001/"}, {"@type": "TechArticle", "headline": "Microsoft 550 SC-004: blocked on complaints", "url": "https://rastu.tech/smtp/microsoft-outlook-sc-004/"}, {"@type": "TechArticle", "headline": "Microsoft 550 DY-001: mail from dynamic address space", "url": "https://rastu.tech/smtp/microsoft-outlook-dy-001/"}], "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@context": "https://schema.org", "@type": "Person", "@id": "https://rastu.tech/#person", "name": "Rastu Singh", "url": "https://rastu.tech", "jobTitle": ["Infrastructure Engineer", "Email Infrastructure Engineer", "Email Deliverability Engineer", "Email Security Engineer", "SMTP Engineer", "Deliverability Consultant"], "description": "Rastu Singh is an Infrastructure Engineer specialising in email platforms, deliverability and security, based in Tallinn, Estonia.", "address": {"@type": "PostalAddress", "addressLocality": "Tallinn", "addressCountry": "EE"}, "knowsAbout": ["Email infrastructure", "Email deliverability", "Email security", "SMTP", "Message Transfer Agent", "MTA", "PowerMTA", "KumoMTA", "Postfix", "Haraka", "Momentum", "GreenArrow", "Sender reputation", "IP reputation", "IP warm-up", "Domain warm-up", "Inbox placement", "SPF", "DKIM", "DMARC", "ARC", "MTA-STS", "TLS-RPT", "BIMI", "Blocklist remediation", "Spamhaus", "Bounce classification", "Deferral handling", "Feedback loops", "Anti-spam", "SpamAssassin", "Rspamd", "Email authentication", "Bulk email", "High-volume email sending", "Mail relay", "DNS", "Linux", "Ansible", "Terraform", "Prometheus"], "sameAs": ["https://www.linkedin.com/in/rastu", "https://github.com/singhrastu", "https://orcid.org/0009-0002-0526-3005", "https://www.wikidata.org/wiki/Q141496706"], "identifier": {"@type": "PropertyValue", "propertyID": "ORCID", "value": "0009-0002-0526-3005", "url": "https://orcid.org/0009-0002-0526-3005"}, "worksFor": {"@type": "Organization", "name": "Pipedrive"}, "alumniOf": [{"@type": "Organization", "name": "Adobe"}, {"@type": "Organization", "name": "Experiture"}, {"@type": "Organization", "name": "Zeta Global"}, {"@type": "Organization", "name": "IntraSoft Technologies Limited"}], "nationality": {"@type": "Country", "name": "India"}, "mainEntityOfPage": "https://rastu.tech/about/", "image": {"@type": "ImageObject", "url": "https://rastu.tech/rastu-singh.jpg", "width": 1024, "height": 1024}}, {"@type": "WebSite", "@id": "https://rastu.tech/#website", "url": "https://rastu.tech/", "name": "rastu.tech", "publisher": {"@id": "https://rastu.tech/#person"}, "inLanguage": "en"}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://rastu.tech/"}, {"@type": "ListItem", "position": 2, "name": "SMTP responses", "item": "https://rastu.tech/smtp/"}, {"@type": "ListItem", "position": 3, "name": "SC-004", "item": "https://rastu.tech/smtp/microsoft-outlook-sc-004/"}]}, {"@type": "TechArticle", "headline": "Microsoft 550 SC-004: blocked on complaints", "description": "550 SC-004 means Microsoft has placed a block on your address after receiving complaints about mail from it. Unlike SC-001, this one names its cause, and Microsoft's own remedy is to enrol in the Junk Email Reporting Program.", "author": {"@id": "https://rastu.tech/#person"}, "publisher": {"@id": "https://rastu.tech/#person"}, "about": "SC-004", "mainEntityOfPage": "https://rastu.tech/smtp/microsoft-outlook-sc-004/", "isPartOf": {"@id": "https://rastu.tech/#website"}}]}</script>
 </head>
 <body>
-<div class="wrap wide">
+<div class="wrap">
 <a class="skip" href="#main">Skip to content</a>
 <nav class="top" aria-label="Primary">
-  <a class="mark" href="../">rastu<span>.tech</span></a>
-  <a href="../tools/">Deliverability tools</a>
-  <a href="../smtp/" aria-current="page">SMTP responses</a>
-  <a href="../rfc/">RFC decoded</a>
-  <a href="../research/">Research</a>
-  <a href="../about/">About</a>
+  <a class="mark" href="../../">rastu<span>.tech</span></a>
+  <a href="../../tools/">Deliverability tools</a>
+  <a href="../../smtp/" aria-current="page">SMTP responses</a>
+  <a href="../../rfc/">RFC decoded</a>
+  <a href="../../research/">Research</a>
+  <a href="../../about/">About</a>
 </nav>
-
+<nav class="crumb" aria-label="Breadcrumb"><a href="../../">Home</a><span>/</span><a href="../../smtp/">SMTP responses</a><span>/</span>SC-004</nav>
 <main id="main">
 
-<h1>SMTP responses: what each one means and what to do</h1>
-<p class="lede">Paste a bounce out of your mail log, or type any part of a code.
-Every reply code in RFC 5321, every enhanced status code IANA has registered, and
-Microsoft's own, which are mostly outside both.</p>
-
-<div class="tool">
-  <label class="lbl-mi" for="lk-q">Response, code, or fragment of one
-    <em>from RFC 5321, the IANA registry and Microsoft&rsquo;s own</em></label>
-  <input class="field" id="lk-q" type="search" spellcheck="false" autocomplete="off"
-         placeholder="Loading the registry...">
-  <p class="hint">Try:
-    <button type="button" data-lk="550 5.7.1 Service unavailable; Client host [203.0.113.9] blocked using zen.spamhaus.org">a whole bounce</button>
-    <button type="button" data-lk="5.7.620">a code inside a range</button>
-    <button type="button" data-lk="512">three digits</button>
-    <button type="button" data-lk="4.2.2">a transient code</button>
-    <button type="button" data-lk="mailbox full">what it said</button>
-  </p>
-  <div class="report" id="lk-out" aria-live="polite"></div>
-</div>
-<script type="application/json" id="lk-pages">{"4.7.28": "/smtp/gmail-4-7-28/", "5.7.26": "/smtp/gmail-5-7-26/", "5.7.1": "/smtp/5-7-1/", "5.7.606": "/smtp/microsoft-outlook-5-7-606/", "S3140": "/smtp/microsoft-outlook-s3140/", "4.7.500": "/smtp/microsoft-outlook-4-7-500/", "TS03": "/smtp/yahoo-ts03/", "5.1.1": "/smtp/5-1-1/", "4.2.2": "/smtp/4-2-2/", "5.2.1": "/smtp/5-2-1/", "spamhaus": "/smtp/spamhaus/", "4.4.1": "/smtp/4-4-1/", "tls-handshake": "/smtp/tls-handshake/", "RP-001": "/smtp/microsoft-outlook-rp-001/", "RP-002": "/smtp/microsoft-outlook-rp-002/", "RP-003": "/smtp/microsoft-outlook-rp-003/", "SC-001": "/smtp/microsoft-outlook-sc-001/", "SC-004": "/smtp/microsoft-outlook-sc-004/", "DY-001": "/smtp/microsoft-outlook-dy-001/"}</script>
-
-<div id="lk-browse">
-  <div class="sechead r">
-    <h2 class="r">Written up in full</h2>
-    <p>The ones that come back most often, and the ones whose wording hides what
-    actually happened. The same 550 means a dead mailbox at one provider and a
-    reputation block at another, and the text beside it is where that lives rather
-    than in the number. Everything else resolves in the lookup above.</p>
-  </div>
-
-  <div class="filter" data-filter>
-    <div class="chips"><button class="chip on" data-group="all" type="button">All</button><button class="chip" data-group="Generic" type="button">Generic</button><button class="chip" data-group="Gmail" type="button">Gmail</button><button class="chip" data-group="Microsoft / Outlook" type="button">Microsoft / Outlook</button><button class="chip" data-group="Yahoo" type="button">Yahoo</button><span class="count" role="status" aria-live="polite"></span></div>
-    <div class="grid"><a href="/smtp/4-2-2/" data-terms="4.2.2 4.2.2 generic mailbox full retry the mailbox is over quota. temporary, and the address is still good. retry with backoff." data-group="Generic"><strong>4.2.2</strong><span class="p">RFC 3463</span><span class="d">The mailbox is over quota. Temporary, and the address is still good. Retry with backoff.</span><span class="act a-retry">retry</span></a><a href="/smtp/4-4-1/" data-terms="4.4.1 4.4.1 generic connection retry a transport failure, not a mail failure. retry, but investigate if it sticks to one route." data-group="Generic"><strong>4.4.1</strong><span class="p">RFC 3463</span><span class="d">A transport failure, not a mail failure. Retry, but investigate if it sticks to one route.</span><span class="act a-retry">retry</span></a><a href="/smtp/5-1-1/" data-terms="5.1.1 5.1.1 generic invalid recipient suppress the mailbox does not exist. permanent. suppress it, because retrying costs reputation." data-group="Generic"><strong>5.1.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox does not exist. Permanent. Suppress it, because retrying costs reputation.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-2-1/" data-terms="5.2.1 5.2.1 generic mailbox inactive suppress the mailbox exists but is disabled. suppress it, these turn into spam traps." data-group="Generic"><strong>5.2.1</strong><span class="p">RFC 3463</span><span class="d">The mailbox exists but is disabled. Suppress it, these turn into spam traps.</span><span class="act a-suppress">suppress</span></a><a href="/smtp/5-7-1/" data-terms="5.7.1 5.7.1 generic policy block review a deliberate policy rejection by the receiver, usually not about your reputation." data-group="Generic"><strong>5.7.1</strong><span class="p">RFC 3463</span><span class="d">A deliberate policy rejection by the receiver, usually not about your reputation.</span><span class="act a-review">review</span></a><a href="/smtp/spamhaus/" data-terms="spamhaus listing spamhaus generic blocklist pause the receiver queried spamhaus and found your ip listed. delist before sending again." data-group="Generic"><strong>Spamhaus listing</strong><span class="p">Blocklist</span><span class="d">The receiver queried Spamhaus and found your IP listed. Delist before sending again.</span><span class="act a-pause">pause</span></a><a href="/smtp/tls-handshake/" data-terms="tls handshake tls-handshake generic connection retry the connection opened but encryption could not be negotiated. usually cipher or certificate." data-group="Generic"><strong>TLS handshake</strong><span class="p">Transport</span><span class="d">The connection opened but encryption could not be negotiated. Usually cipher or certificate.</span><span class="act a-retry">retry</span></a><a href="/smtp/gmail-4-7-28/" data-terms="4.7.28 4.7.28 gmail rate limited throttle a throttle, not a block. slow down for gmail specifically and the mail still goes." data-group="Gmail"><strong>4.7.28</strong><span class="p">Gmail</span><span class="d">A throttle, not a block. Slow down for Gmail specifically and the mail still goes.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/gmail-5-7-1/" data-terms="5.7.1 5.7.1 gmail reputation block pause a hard reputation block. stop sending from this ip or domain and remediate." data-group="Gmail"><strong>5.7.1</strong><span class="p">Gmail</span><span class="d">A hard reputation block. Stop sending from this IP or domain and remediate.</span><span class="act a-pause">pause</span></a><a href="/smtp/gmail-5-7-26/" data-terms="5.7.26 5.7.26 gmail auth failure fix_config authentication failed. spf or dkim has to pass and align, and retrying will not help." data-group="Gmail"><strong>5.7.26</strong><span class="p">Gmail</span><span class="d">Authentication failed. SPF or DKIM has to pass and align, and retrying will not help.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-4-7-500/" data-terms="4.7.500 4.7.500 microsoft / outlook rate limited throttle throttling. deferred rather than refused, so back off per-provider and retry." data-group="Microsoft / Outlook"><strong>4.7.500</strong><span class="p">Microsoft / Outlook</span><span class="d">Throttling. Deferred rather than refused, so back off per-provider and retry.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-5-7-606/" data-terms="5.7.606 5.7.606 microsoft / outlook reputation block pause your sending ip is on outlook&#x27;s block list. delist, then fix what caused it." data-group="Microsoft / Outlook"><strong>5.7.606</strong><span class="p">Microsoft / Outlook</span><span class="d">Your sending IP is on Outlook&#x27;s block list. Delist, then fix what caused it.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-dy-001/" data-terms="dy-001 dy-001 microsoft / outlook policy block fix_config the connecting address looks like consumer or dynamic space." data-group="Microsoft / Outlook"><strong>DY-001</strong><span class="p">Microsoft / Outlook</span><span class="d">The connecting address looks like consumer or dynamic space.</span><span class="act a-fix_config">fix config</span></a><a href="/smtp/microsoft-outlook-rp-001/" data-terms="rp-001 rp-001 microsoft / outlook rate limited throttle outlook is rate limiting your address because of its reputation, not because of a fixed cap." data-group="Microsoft / Outlook"><strong>RP-001</strong><span class="p">Microsoft / Outlook</span><span class="d">Outlook is rate limiting your address because of its reputation, not because of a fixed cap.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-rp-002/" data-terms="rp-002 rp-002 microsoft / outlook rate limited throttle the same rate limit as rp-001, applied to one connection rather than to the address." data-group="Microsoft / Outlook"><strong>RP-002</strong><span class="p">Microsoft / Outlook</span><span class="d">The same rate limit as RP-001, applied to one connection rather than to the address.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-rp-003/" data-terms="rp-003 rp-003 microsoft / outlook connection throttle too many connections open to outlook.com at once." data-group="Microsoft / Outlook"><strong>RP-003</strong><span class="p">Microsoft / Outlook</span><span class="d">Too many connections open to Outlook.com at once.</span><span class="act a-throttle">throttle</span></a><a href="/smtp/microsoft-outlook-s3140/" data-terms="s3140 s3140 microsoft / outlook reputation block pause microsoft&#x27;s internal reason code on a block. it points at ip reputation." data-group="Microsoft / Outlook"><strong>S3140</strong><span class="p">Microsoft / Outlook</span><span class="d">Microsoft&#x27;s internal reason code on a block. It points at IP reputation.</span><span class="act a-pause">pause</span></a><a href="/smtp/microsoft-outlook-sc-001/" data-terms="sc-001 sc-001 microsoft / outlook policy block review outlook refused the message on policy: content or the reputation of the address behind it." data-group="Microsoft / Outlook"><strong>SC-001</strong><span class="p">Microsoft / Outlook</span><span class="d">Outlook refused the message on policy: content or the reputation of the address behind it.</span><span class="act a-review">review</span></a><a href="/smtp/microsoft-outlook-sc-004/" data-terms="sc-004 sc-004 microsoft / outlook reputation block pause blocked because outlook recipients complained about mail from this address." data-group="Microsoft / Outlook"><strong>SC-004</strong><span class="p">Microsoft / Outlook</span><span class="d">Blocked because Outlook recipients complained about mail from this address.</span><span class="act a-pause">pause</span></a><a href="/smtp/yahoo-ts03/" data-terms="ts03 ts03 yahoo reputation block pause a 4xx that behaves like a block. retrying on schedule will not clear it." data-group="Yahoo"><strong>TS03</strong><span class="p">Yahoo</span><span class="d">A 4xx that behaves like a block. Retrying on schedule will not clear it.</span><span class="act a-pause">pause</span></a></div>
-    <p class="empty noresult hidden">Nothing matches that filter.</p>
-  </div>
-
-  <h2 class="r">Where these come from</h2>
-  <p>The reply codes are parsed from
-  <a  rel="noopener" href="https://www.rfc-editor.org/rfc/rfc5321.html#section-4.2.3" target="_blank">>RFC 5321 section
-  4.2.3</a>, the enhanced status codes from the
-  <a  rel="noopener" href="https://www.iana.org/assignments/smtp-enhanced-status-codes/" target="_blank">>IANA registry</a>,
-  and the Microsoft codes from
-  <a  rel="noopener" href="https://learn.microsoft.com/en-us/exchange/mail-flow-best-practices/non-delivery-reports-in-exchange-online/non-delivery-reports-in-exchange-online" target="_blank">>Microsoft's
-  own NDR reference</a>. Every entry names its source and links back to it.</p>
-  <p>What none of those registries carry is what to <em>do</em> about a code, which is
-  the only reason anybody looks one up. So every entry also carries an action. Where I
-  have worked the failure myself, the action is what actually cleared it. Where it
-  follows from the code's class and subject, the entry is marked as derived, so you can
-  tell a safe default from a tested one.</p>
-</div>
+<h1>Microsoft 550 SC-004: blocked on complaints</h1>
+<p><span class="badge">Microsoft / Outlook</span><span class="badge">reputation_block</span><span class="badge">action: pause</span></p>
+<p class="lede">550 SC-004 means Microsoft has placed a block on your address after receiving complaints about mail from it. Unlike SC-001, this one names its cause, and Microsoft&#x27;s own remedy is to enrol in the Junk Email Reporting Program.</p>
+<div class="callout"><p>Microsoft publishes no complaint threshold, so there is no figure to stay under. The colour bands in SNDS do not help either: they report how much of your mail the filter classified as spam, not how often it was reported, which is the fact most often repeated wrongly about this.</p></div>
+<h2 class="r">What it looks like in the log</h2>
+<pre><code>550 SC-004 Mail rejected by Outlook.com for policy reasons</code></pre>
+<h2 class="r">Why it happens</h2>
+<ul><li>Recipients marking the mail as junk at a rate Microsoft acts on.</li>
+<li>A list segment that was never engaged, or addresses acquired rather than collected.</li></ul>
+<h2 class="r">What to do</h2>
+<ul><li>Stop sending to Microsoft domains from this address until the cause is removed. Continuing deepens the block.</li>
+<li>Enrol in JMRP, which is what Microsoft names in the refusal, so complaints arrive as feedback rather than only as a block.</li>
+<li>Suppress everyone who complained, then cut to recipients who opened something recently before resuming.</li>
+<li>Submit a delisting request only after the cause is fixed.</li></ul>
+<h2 class="r">Related</h2><p><a href="/smtp/microsoft-outlook-sc-001/">SC-001</a> &middot; <a href="/smtp/microsoft-outlook-5-7-606/">5.7.606</a> &middot; <a href="/smtp/spamhaus/">spamhaus</a></p>
+<div class="toolcue r"><span class="cue" aria-hidden="true">&rarr;</span><p><strong>Blocklist check</strong> checks whether the address is listed elsewhere as well, since the complaints behind this rarely stop at one receiver. <a href="/blocklist/">Open blocklist check</a></p></div>
+<p class="meta">Classified as <code>reputation_block</code>, action
+<code>pause</code>. Paste a response into the
+<a href="/bounce/">bounce classifier</a> to check one against the same ruleset.</p>
 
 </main>
 <footer>
   <div class="cols">
     <div>
       <h2>Tools</h2>
-            <a href="../check/">Domain check</a>
-      <a href="../bounce/">Bounce classifier</a>
-      <a href="../warmup/">Warm-up planner</a>
-      <a href="../blocklist/">Blocklist check</a>
-      <a href="../dmarc/">DMARC report reader</a>
-      <a href="../headers/">Header analyser</a>
-      <a href="../spf/">SPF lookup counter</a>
-      <a href="../tools/">All tools</a>
+            <a href="../../check/">Domain check</a>
+      <a href="../../bounce/">Bounce classifier</a>
+      <a href="../../warmup/">Warm-up planner</a>
+      <a href="../../blocklist/">Blocklist check</a>
+      <a href="../../dmarc/">DMARC report reader</a>
+      <a href="../../headers/">Header analyser</a>
+      <a href="../../spf/">SPF lookup counter</a>
+      <a href="../../tools/">All tools</a>
     </div>
     <div>
       <h2>SMTP responses</h2>
-      <a href="../smtp/">All responses</a>
-      <a href="../smtp/session/">Anatomy of a session</a>
+      <a href="../../smtp/">All responses</a>
+      <a href="../../smtp/session/">Anatomy of a session</a>
     </div>
     <div>
       <h2>Research</h2>
-      <a href="../research/">State of email authentication</a>
+      <a href="../../research/">State of email authentication</a>
       <a href="https://rastu.tech/scan-100000.jsonl.gz">Raw dataset</a>
     </div>
     <div>
@@ -1221,7 +1190,7 @@ Microsoft's own, which are mostly outside both.</p>
       <a  rel="noopener" href="https://orcid.org/0009-0002-0526-3005" target="_blank">>ORCID</a>
     </div>
   </div>
-  <p class="by">Built and maintained by <a href="../about/">Rastu Singh</a>,
+  <p class="by">Built and maintained by <a href="../../about/">Rastu Singh</a>,
      Infrastructure Engineer, Tallinn.
      Everything here runs in your browser.</p>
 </footer>
@@ -1419,7 +1388,6 @@ Microsoft's own, which are mostly outside both.</p>
 })();
 </script>
 
-<script type="module" src="/js/filter.js"></script>
-<script type="module" src="/js/lookup-ui.js"></script>
+
 </body>
 </html>
