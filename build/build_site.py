@@ -578,6 +578,31 @@ table.cost td:last-child{color:var(--ink-3);font-size:var(--t2)}
    anchors it, the input example says what you feed it, and the call to action
    is shaped like a button rather than a link. */
 .bento.tools{grid-template-columns:repeat(auto-fit,minmax(20rem,1fr))}
+/* The home page is a directory, not a listing.
+ *
+ * It rendered the same cards as /tools/ two abreast, so two of seven tools were
+ * fully visible and the seventh was 693px below the fold. Somebody who never
+ * scrolled never learned the other five existed, which is the opposite of what
+ * the grid is for.
+ *
+ * A 20rem minimum column in a 981px container wants three columns at 960px plus
+ * 26px of gaps, which is 986px, so it missed three by five pixels and fell back
+ * to two. Fixed at three rather than left to arithmetic that close. The blurb is
+ * dropped here and kept on /tools/: the question each tool answers is what a
+ * reader scans, and the paragraph underneath is what they read once one of the
+ * questions is theirs. */
+.bento.tools.compact{grid-template-columns:repeat(4,1fr);gap:.7rem}
+.bento.tools.compact .card{padding:1.05rem 1.1rem .95rem}
+.bento.tools.compact .card h3{font-size:1.02rem;margin:.55rem 0 .3rem}
+.bento.tools.compact .card .q{font-size:.885rem;line-height:1.42}
+.bento.tools.compact .card .takes{margin-top:.7rem;font-size:.76rem}
+/* auto, not a fixed margin: the card is a column and this is what pushes the
+   link to the bottom of it. A fixed margin overrode that and left the links at
+   different heights wherever a question ran to two lines instead of three. */
+.bento.tools.compact .card .go{margin-top:auto;padding-top:.85rem;font-size:.86rem}
+@media(max-width:76rem){.bento.tools.compact{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:56rem){.bento.tools.compact{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:34rem){.bento.tools.compact{grid-template-columns:1fr}}
 .bento.tools .card{display:flex;flex-direction:column;padding:1.35rem 1.4rem 1.25rem}
 @media(min-width:56rem){.bento.tools .card{grid-column:span 1}}
 
@@ -1953,7 +1978,7 @@ run();
     open(os.path.join(OUT, "sift.js"), "w", encoding="utf8").write(js)
 
 
-def tool_card(t, i=0):
+def tool_card(t, i=0, compact=False):
     """A card that looks like something you operate.
 
     Icon, the question it answers, an example of what you feed it, and a button.
@@ -1969,10 +1994,15 @@ def tool_card(t, i=0):
         f'<span class="tag">{e(t["tag"])}</span></div>'
         f'<h3>{e(t["name"])}</h3>'
         f'<p class="q">{e(t["q"])}</p>'
-        f'<p>{e(t["blurb"])}</p>'
-        + (f'<p class="takes"><span>takes</span><code>{e(t["takes"])}</code></p>'
-           if t.get("takes") else "")
-        + f'<span class="go">Open {e(t["name"])}</span></a>')
+        # The home page asks what each tool answers; /tools/ answers what it takes
+        # and what it does. At a quarter of the width the example truncates to
+        # "550 5.7.1 Service..." and the full label wraps its arrow onto a second
+        # line, so both are left to the listing that has room for them.
+        + ("" if compact else
+           f'<p>{e(t["blurb"])}</p>'
+           + (f'<p class="takes"><span>takes</span><code>{e(t["takes"])}</code></p>'
+              if t.get("takes") else ""))
+        + f'<span class="go">Open{"" if compact else " " + e(t["name"])}</span></a>')
 
 
 def tool_ld(tool, extra=None):
@@ -2824,7 +2854,7 @@ def build_home():
     tool on the page back to the same #person node. The footprint is larger than
     the old personal homepage, not smaller.
     """
-    cards = "".join(tool_card(t, i) for i, t in enumerate(TOOLS))
+    cards = "".join(tool_card(t, i, compact=True) for i, t in enumerate(TOOLS))
     session = json.dumps([{"k": k, "t": t} for k, t in SMTP_SESSION], ensure_ascii=False)
 
     # The responses people actually arrive on, as a way in to the reference.
@@ -2858,7 +2888,7 @@ def build_home():
 <p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
 or find the mechanism that quietly switched off an SPF record.</p>
 
-<div class="bento tools">{cards}</div>
+<div class="bento tools compact">{cards}</div>
 
 <div class="sechead r">
   <h2>One message, all the way through</h2>
