@@ -1440,7 +1440,7 @@ FAVICON_LINKS = "\n".join(
 
 
 def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
-         scripts=(), modules=(), nav_key=None, crumbs=()):
+         scripts=(), modules=(), nav_key=None, crumbs=(), noindex=False):
     """Every page carries the Person node, not just the home page.
 
     Pages all over the site point their author and publisher at {SITE}/#person by
@@ -1505,7 +1505,8 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>{e(title)}</title>
-<meta name="description" content="{e(desc)}">
+<meta name="description" content="{e(desc)}">{'''
+<meta name="robots" content="noindex,follow">''' if noindex else ''}
 <meta name="author" content="{e(PERSON['name'])}">
 <link rel="canonical" href="{e(canonical)}">
 <meta property="og:title" content="{e(title)}">
@@ -2049,6 +2050,48 @@ its own record, and collapse two ESPs into one.</p>
         body, "spf/index.html", extra_ld=tool_ld(t), wide=True,
         nav_key="Deliverability tools", crumbs=(("Deliverability tools", "tools/"), ("SPF lookup counter", None)),
         modules=("/js/spf.js",))
+
+
+def build_404():
+    """The page Cloudflare serves for a path that matched nothing.
+
+    wrangler.jsonc has declared not_found_handling: "404-page" since the site
+    moved to Workers, but no 404.html was ever built, so an unknown path
+    returned a 404 with an empty body: a blank white page. Stale links and old
+    search results both land here, and a blank page tells somebody nothing about
+    whether the site is broken or the address is simply wrong.
+    """
+    body = """
+<h1>That page is not here</h1>
+<p class="lede">The address does not match anything on this site. It may have moved, or
+the link that brought you here may be out of date.</p>
+
+<div class="steps r">
+  <div class="step">
+    <h3>Tools</h3>
+    <p>Check a domain's authentication, read a DMARC report, analyse a message's
+    headers, plan a warm-up, or look up a blocklist.
+    <a href="/tools/">Open the tools</a>.</p>
+  </div>
+  <div class="step">
+    <h3>SMTP responses</h3>
+    <p>Paste a bounce or type a code to get the category and the action it needs.
+    <a href="/smtp/">Look up a response</a>.</p>
+  </div>
+  <div class="step">
+    <h3>RFC decoded</h3>
+    <p>Every current email RFC, what it solves, and the sentences in it that bind an
+    implementation. <a href="/rfc/">Browse the RFCs</a>.</p>
+  </div>
+</div>
+
+<p class="hint-text">If you followed a link from somewhere on this site, that is a
+mistake worth knowing about.</p>
+"""
+    return page(
+        "Page not found",
+        "That address does not match anything on rastu.tech.",
+        body, "404.html", nav_key=None, noindex=True)
 
 
 def build_warmup():
@@ -4133,6 +4176,10 @@ def main():
     os.makedirs(OUT, exist_ok=True)
 
     build_sift()
+    # Built, then deliberately dropped from `urls`: the sitemap must not list a
+    # page that answers 404, and the page itself carries noindex.
+    build_404()
+
     urls = [build_home(), build_tools(), build_about(),
             build_check(), build_bounce(), build_dmarc(), build_spf(),
             build_blocklist(),
