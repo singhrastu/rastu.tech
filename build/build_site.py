@@ -17,6 +17,8 @@ Design constraints, all of them deliberate:
 * No JavaScript, no build toolchain, no external requests. Fast, crawlable, and
   it will still work untouched in five years.
 """
+import datetime
+import hashlib
 import html
 import json
 import os
@@ -4669,11 +4671,47 @@ def main():
     open(os.path.join(OUT, INDEXNOW_KEY + ".txt"), "w").write(INDEXNOW_KEY)
 
     # sitemap + robots
+    #
+    # lastmod is dated from the content, not from the build. Stamping every URL
+    # with today on every deploy makes the field noise, and a crawler that has
+    # been told a hundred pages changed when one did learns to ignore the field
+    # entirely. So each page's rendered text is hashed, the hash and the date it
+    # last changed are kept alongside the site, and the date only moves when the
+    # text actually does. The RFC refresh is the case this is for: it runs
+    # weekly and usually changes nothing, and the sitemap should say so.
+    stamp_file = os.path.join(HERE, "lastmod.json")
+    try:
+        stamps = json.load(open(stamp_file, encoding="utf8"))
+    except Exception:
+        stamps = {}
+    today = datetime.date.today().isoformat()
+    fresh = {}
+
     sm = ['<?xml version="1.0" encoding="UTF-8"?>',
           '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for u in urls:
-        sm.append(f"  <url><loc>{e(u)}</loc></url>")
+        rel = u[len(SITE):].lstrip("/") or "index.html"
+        f = os.path.join(OUT, rel if rel.endswith(".html") else rel + "index.html")
+        try:
+            body = open(f, encoding="utf8").read()
+            text = re.sub(r"(?is)<(script|style)\b.*?</\1>", " ", body)
+            text = re.sub(r"(?s)<[^>]+>", " ", text)
+            digest = hashlib.sha256(
+                " ".join(text.split()).encode("utf8")).hexdigest()[:16]
+        except OSError:
+            digest = None
+
+        was = stamps.get(u)
+        if digest and was and was.get("hash") == digest:
+            when = was["date"]
+        else:
+            when = today
+        if digest:
+            fresh[u] = {"hash": digest, "date": when}
+        sm.append(f"  <url><loc>{e(u)}</loc><lastmod>{when}</lastmod></url>")
     sm.append("</urlset>")
+    json.dump(fresh, open(stamp_file, "w", encoding="utf8"),
+              indent=1, sort_keys=True)
     open(os.path.join(OUT, "sitemap.xml"), "w").write("\n".join(sm))
     open(os.path.join(OUT, "robots.txt"), "w").write(
         f"User-agent: *\nAllow: /\n\nSitemap: {SITE}/sitemap.xml\n")
