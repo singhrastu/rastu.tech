@@ -1552,13 +1552,37 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
         "name": "rastu.tech", "publisher": {"@id": f"{SITE}/#person"},
         "inLanguage": "en",
     }]
+    canonical = SITE + ("/" if path == "index.html"
+                        else "/" + path.replace("index.html", ""))
     if crumbs:
+        # Every crumb carries an item.
+        #
+        # Home's href is the empty string, meaning the site root, and the test
+        # here used to be a plain truthiness check. An empty string is falsy, so
+        # Home was treated the same as the final crumb, which deliberately has no
+        # href because it is the page you are already on. Home therefore shipped
+        # without an item on all 121 pages that have a breadcrumb, and Search
+        # Console reports that as a critical error: item is only optional on the
+        # last entry, never on the first.
+        #
+        # None now means the current page and resolves to the canonical URL, so
+        # every entry has one and the distinction no longer rests on whether a
+        # string happens to be empty.
+        # Callers pass an href either way, "tools/" and "/rfc/" both appear, and
+        # concatenating the second onto a site root that already ends in a slash
+        # produced https://rastu.tech//rfc/, a URL that is not this site's.
+        # Normalised here so a caller cannot get it wrong.
+        def crumb_url(href):
+            if href is None:
+                return canonical
+            return SITE + "/" + href.lstrip("/")
+
         trail = [("Home", "")] + list(crumbs)
         graph.append({
             "@type": "BreadcrumbList",
             "itemListElement": [
-                dict({"@type": "ListItem", "position": i + 1, "name": label},
-                     **({"item": SITE + "/" + href} if href else {}))
+                {"@type": "ListItem", "position": i + 1, "name": label,
+                 "item": crumb_url(href)}
                 for i, (label, href) in enumerate(trail)],
         })
     if extra_ld:
@@ -1573,7 +1597,6 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
           + json.dumps({"@context": "https://schema.org", "@graph": graph},
                        ensure_ascii=False)
           + "</script>")
-    canonical = SITE + ("/" if path == "index.html" else "/" + path.replace("index.html", ""))
     depth = path.count("/")
     up = "../" * depth
 
@@ -4086,6 +4109,106 @@ def write_headers():
           f"for scripts)")
 
 
+def check_structured_data():
+    """Fail the build on structured data Google would reject.
+
+    Search Console reported "Missing field item (in itemListElement)" on three
+    pages. It was on all 121 that carry a breadcrumb; Google had simply not
+    recrawled the rest yet, and the count was climbing daily. Nothing in the
+    build had any opinion about structured data, so a JSON-LD mistake reached
+    production, sat there through every deploy, and was reported back weeks later
+    by a third party.
+
+    This checks what that class of error looks like rather than the single field
+    that was wrong, so the next one is caught before it ships instead of after
+    Google finds it.
+    """
+    pages = 0
+    bad = []
+
+    built = set()
+    for root, _, files in os.walk(OUT):
+        for n in files:
+            if n.endswith(".html"):
+                rel = os.path.relpath(os.path.join(root, n), OUT)
+                built.add("/" + rel.replace("index.html", ""))
+                built.add("/" + rel)
+
+    for root, _, files in os.walk(OUT):
+        for n in sorted(files):
+            if not n.endswith(".html"):
+                continue
+            f = os.path.join(root, n)
+            rel = "/" + os.path.relpath(f, OUT)
+            body = open(f, encoding="utf8").read()
+            blocks = re.findall(
+                r'<script type="application/ld\+json">(.*?)</script>', body, re.S)
+            if not blocks:
+                continue
+            pages += 1
+
+            for raw in blocks:
+                try:
+                    doc = json.loads(raw)
+                except Exception as exc:
+                    bad.append(f"{rel}: JSON-LD does not parse -> {exc}")
+                    continue
+
+                nodes = doc.get("@graph", [doc]) if isinstance(doc, dict) else doc
+                nodes = [x for x in nodes if isinstance(x, dict)]
+                ids = {x["@id"] for x in nodes if isinstance(x.get("@id"), str)}
+
+                for node in nodes:
+                    t = node.get("@type")
+                    if not t:
+                        bad.append(f"{rel}: a node has no @type")
+                        continue
+
+                    # Every @id pointed at inside a document has to exist in it,
+                    # or a crawler is handed a reference to nothing.
+                    for key, val in node.items():
+                        refs = val if isinstance(val, list) else [val]
+                        for r in refs:
+                            if (isinstance(r, dict) and set(r) == {"@id"}
+                                    and r["@id"].startswith(SITE)
+                                    and r["@id"] not in ids):
+                                bad.append(f"{rel}: {t}.{key} points at "
+                                           f"{r['@id']}, which is not in the graph")
+
+                    if t != "BreadcrumbList":
+                        continue
+
+                    els = node.get("itemListElement")
+                    if not isinstance(els, list) or not els:
+                        bad.append(f"{rel}: BreadcrumbList has no itemListElement")
+                        continue
+
+                    for i, el in enumerate(els):
+                        where = f"{rel}: breadcrumb {i + 1}"
+                        if el.get("@type") != "ListItem":
+                            bad.append(f"{where} is not a ListItem")
+                        if el.get("position") != i + 1:
+                            bad.append(f"{where} has position "
+                                       f"{el.get('position')!r}, expected {i + 1}")
+                        if not el.get("name"):
+                            bad.append(f"{where} has no name")
+                        # The field Search Console reported. Optional on the last
+                        # entry by the specification, required everywhere else,
+                        # and supplied everywhere here so the rule is one rule.
+                        item = el.get("item")
+                        if not item:
+                            bad.append(f"{where} ({el.get('name')!r}) has no item")
+                        elif not isinstance(item, str) or not item.startswith(SITE):
+                            bad.append(f"{where} has a non-absolute item -> {item!r}")
+                        elif item[len(SITE):] not in built:
+                            bad.append(f"{where} points at {item}, "
+                                       f"which is not a page this build produced")
+
+    if bad:
+        raise SystemExit("structured data check failed:\n  " + "\n  ".join(bad[:25]))
+    print(f"  structured data ok ({pages} pages, every breadcrumb complete)")
+
+
 def check_voice():
     """Fail the build on anything that reads as written by a machine.
 
@@ -4557,6 +4680,7 @@ def main():
 
     check_js()
     check_copy()
+    check_structured_data()
     check_voice()
     check_nav_stability()
     check_html()
