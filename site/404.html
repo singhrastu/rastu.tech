@@ -1194,6 +1194,28 @@ mistake worth knowing about.</p>
       });
     },{rootMargin:'0px 0px -6% 0px',threshold:.06});
     targets.forEach(function(n){io.observe(n);});
+
+    /* Content that is invisible until a script reveals it must never depend on
+       one callback arriving. A tab opened in the background does not deliver an
+       intersection callback at all: open this site with a middle click, come
+       back to it a minute later, and every revealed element is still at zero
+       opacity. That is a blank page with nothing to explain it.
+
+       So the same decision is also made directly, on becoming visible and once
+       shortly after load. Only what is actually on screen is revealed, which is
+       what the observer would have done, so everything further down still
+       arrives on scroll. */
+    var sweep=function(){
+      targets.forEach(function(n){
+        if(n.classList.contains('reveal')) return;
+        var r=n.getBoundingClientRect();
+        if(r.top < innerHeight*0.94 && r.bottom > 0){
+          n.classList.add('reveal'); io.unobserve(n); countUp(n);
+        }
+      });
+    };
+    addEventListener('visibilitychange', function(){ if(!document.hidden) sweep(); });
+    setTimeout(sweep, 1200);
   }
 
   function countUp(root){
