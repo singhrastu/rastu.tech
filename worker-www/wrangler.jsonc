@@ -1,0 +1,9 @@
+{
+  // One job: answer www and point it at the apex. No assets, so it always runs.
+  "name": "rastu-tech-www",
+  "main": "./index.js",
+  "compatibility_date": "2026-09-15",
+  "routes": [
+    { "pattern": "www.rastu.tech", "custom_domain": true }
+  ]
+}
