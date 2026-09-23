@@ -2964,7 +2964,10 @@ def build_home():
     body = f"""
 <h1>Email infrastructure and deliverability tools</h1>
 <p class="lede">Work out what a bounce is telling you, audit a domain's authentication,
-or find the mechanism that quietly switched off an SPF record.</p>
+or find the mechanism that quietly switched off an SPF record. Seven tools, built and
+maintained by <a href="/about/">Rastu Singh</a>, an infrastructure engineer working on
+high-volume email. They run in your browser: nothing you paste is sent anywhere, and
+there is no account to make.</p>
 
 <div class="bento tools compact">{cards}</div>
 
@@ -3004,7 +3007,7 @@ or find the mechanism that quietly switched off an SPF record.</p>
 </div>
 """
     return page(
-        "Email infrastructure and deliverability tools: SPF, DKIM, DMARC, blocklists",
+        "Email infrastructure and deliverability tools by Rastu Singh",
         "Browser-based tools for email operations: classify an SMTP bounce, audit a "
         "domain's SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, "
         "nothing uploaded. Plus an SMTP response reference and original research.",
