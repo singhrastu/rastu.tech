@@ -1559,7 +1559,16 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
     """
     graph = [person_ld(), {
         "@type": "WebSite", "@id": f"{SITE}/#website", "url": SITE + "/",
-        "name": "rastu.tech", "publisher": {"@id": f"{SITE}/#person"},
+        "name": "rastu.tech",
+        # An unrelated company registered this name years ago and owns it in
+        # Google's knowledge graph, so the site has to say what it is rather
+        # than leave the domain to speak for itself.
+        "alternateName": ["rastu tech", "Rastu Singh"],
+        "description": "Free browser tools for email infrastructure and "
+                       "deliverability, with a reference covering SMTP "
+                       "responses and the current email RFCs.",
+        "publisher": {"@id": f"{SITE}/#person"},
+        "author": {"@id": f"{SITE}/#person"},
         "inLanguage": "en",
     }]
     canonical = SITE + ("/" if path == "index.html"
@@ -3040,10 +3049,11 @@ there is no account to make.</p>
 </div>
 """
     return page(
-        "Email infrastructure and deliverability tools by Rastu Singh",
-        "Browser-based tools for email operations: classify an SMTP bounce, audit a "
-        "domain's SPF, DKIM, DMARC and MTA-STS, and count SPF DNS lookups. No signup, "
-        "nothing uploaded. Plus an SMTP response reference and original research.",
+        "rastu.tech: email infrastructure and deliverability tools by Rastu Singh",
+        "rastu.tech is a set of free browser tools for email infrastructure and "
+        "deliverability, built by Rastu Singh: classify an SMTP bounce, audit a "
+        "domain's SPF, DKIM, DMARC and MTA-STS, plan a warm-up, check a blocklist. "
+        "No signup, nothing uploaded.",
         body, "index.html", extra_ld=ld, is_home=True, wide=True)
 
 
