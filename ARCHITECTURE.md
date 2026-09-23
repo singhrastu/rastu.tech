@@ -13,7 +13,7 @@ read; somebody who has never deployed anything should still follow what is going
 | Server code | 229 lines, three endpoints |
 | Dependencies | none, in either Python or JavaScript |
 | Hosting cost | nothing |
-| Deploy time | 30 to 50 seconds from `git push` |
+| Deploy time | 30 to 50 seconds, run by hand |
 
 ---
 
@@ -362,9 +362,18 @@ ingest_logs.py          ------>  reference pages         from real bounce logs
 
                     build_site.py
                           |
-                    site/  266 files
-                    127 pages, 21 modules, _headers, sitemap.xml
+                    site/  272 files
+                    133 pages, 21 modules, _headers, sitemap.xml
 ```
+
+Publishing is a separate, deliberate step: `npx wrangler deploy` from the repository
+root. The Git integration that would rebuild on a push is **not connected**, and the
+service reports `last_deployed_from: wrangler` for every version it has. A commit on
+GitHub therefore does not reach the site on its own. Connecting it is a dashboard
+action under Workers and Pages; until then, a deploy has to be run.
+
+Two Workers are deployed from here: `rastu-tech`, which serves the site and the three
+API endpoints, and `rastu-tech-www`, which does nothing but redirect www to the apex.
 
 The generators run rarely and their output is committed. `build_site.py` runs on every
 change and is the only thing that has to pass before a deploy.
@@ -452,7 +461,7 @@ would cost money and complexity out of proportion to what this is.
 | Rate limiter | 12/min per IP | ~17,280/day is one visitor's theoretical ceiling |
 | Spamhaus DQS | 100,000 queries/day | one query per check, cached |
 | Turnstile | unlimited | one widget |
-| Workers Builds | 3,000 min/month | roughly one minute per deploy |
+| Workers Builds | 3,000 min/month | not connected; deploys are manual |
 
 **The free plan does not auto-upgrade.** If the Worker exhausted its allowance,
 Cloudflare stops serving it rather than billing. Pages keep working because pages do
@@ -468,7 +477,7 @@ the narrow one.
 | anycast | one network address shared by machines worldwide, each visitor routed to the nearest |
 | binding | a resource Cloudflare hands a Worker at startup: file store, rate limiter, secret |
 | compatibility date | a pinned runtime version, so platform changes cannot silently alter behaviour |
-| continuous deployment | publishing triggered by pushing a change rather than by a manual step |
+| continuous deployment | publishing triggered by pushing a change rather than by a manual step. Not in use here: see section 7 |
 | CORS | browser rules deciding which other sites may call an endpoint |
 | CSP | Content Security Policy: a list, sent with every page, of what that page may load |
 | dependency injection | passing a capability in as an argument instead of importing it, so tests can substitute a fake |
