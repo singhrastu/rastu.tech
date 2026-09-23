@@ -8,527 +8,527 @@
   "hash": "a641ac5cfe38086a"
  },
  "https://rastu.tech/blocklist/": {
-  "date": "2026-09-20",
-  "hash": "3e67ebb8b38fb3ad"
+  "date": "2026-09-23",
+  "hash": "2d38d2e1fc2bc9a3"
  },
  "https://rastu.tech/bounce/": {
-  "date": "2026-09-20",
-  "hash": "0b8b28bd15354b70"
+  "date": "2026-09-23",
+  "hash": "1843c0f808c0743f"
  },
  "https://rastu.tech/check/": {
-  "date": "2026-09-20",
-  "hash": "ad770496585078bf"
+  "date": "2026-09-23",
+  "hash": "41d8141efeeb4c28"
  },
  "https://rastu.tech/dmarc/": {
-  "date": "2026-09-20",
-  "hash": "bf95ec8534fd0159"
+  "date": "2026-09-23",
+  "hash": "aa915add93a1c376"
  },
  "https://rastu.tech/headers/": {
-  "date": "2026-09-20",
-  "hash": "bd3b113682f1af4c"
+  "date": "2026-09-23",
+  "hash": "83a9d5cee3e754a8"
  },
  "https://rastu.tech/research/": {
-  "date": "2026-09-20",
-  "hash": "7572f0b14310f6a5"
+  "date": "2026-09-23",
+  "hash": "4d73c11b291dac5f"
  },
  "https://rastu.tech/rfc/": {
-  "date": "2026-09-20",
-  "hash": "df3ee1ea76337f96"
+  "date": "2026-09-23",
+  "hash": "9b96fae557265824"
  },
  "https://rastu.tech/rfc/1123/": {
-  "date": "2026-09-20",
-  "hash": "98576016ca8c8a6a"
+  "date": "2026-09-23",
+  "hash": "8d5e732913482adf"
  },
  "https://rastu.tech/rfc/1870/": {
-  "date": "2026-09-20",
-  "hash": "bbc668904eaf4d8e"
+  "date": "2026-09-23",
+  "hash": "e47076660de48637"
  },
  "https://rastu.tech/rfc/1939/": {
-  "date": "2026-09-20",
-  "hash": "7aba308681af49c6"
+  "date": "2026-09-23",
+  "hash": "231dea07cfa4d38f"
  },
  "https://rastu.tech/rfc/1957/": {
-  "date": "2026-09-20",
-  "hash": "6cb121e44949820c"
+  "date": "2026-09-23",
+  "hash": "d765aa8db00da87b"
  },
  "https://rastu.tech/rfc/2034/": {
-  "date": "2026-09-20",
-  "hash": "a3b3354c01c2554c"
+  "date": "2026-09-23",
+  "hash": "2bf6b27efde66419"
  },
  "https://rastu.tech/rfc/2045/": {
-  "date": "2026-09-20",
-  "hash": "0227fa5f05b5e4f3"
+  "date": "2026-09-23",
+  "hash": "cdbc9ecc5aef6cd6"
  },
  "https://rastu.tech/rfc/2046/": {
-  "date": "2026-09-20",
-  "hash": "151521204fc51655"
+  "date": "2026-09-23",
+  "hash": "a2468a6b0732092b"
  },
  "https://rastu.tech/rfc/2047/": {
-  "date": "2026-09-20",
-  "hash": "3149651863d7cb63"
+  "date": "2026-09-23",
+  "hash": "f92fcb019f51a43a"
  },
  "https://rastu.tech/rfc/2049/": {
-  "date": "2026-09-20",
-  "hash": "f42dede7471b4252"
+  "date": "2026-09-23",
+  "hash": "fa826af721e805d5"
  },
  "https://rastu.tech/rfc/2142/": {
-  "date": "2026-09-20",
-  "hash": "a15f4ca632fe866d"
+  "date": "2026-09-23",
+  "hash": "f8c059a672382411"
  },
  "https://rastu.tech/rfc/2181/": {
-  "date": "2026-09-20",
-  "hash": "c39a56959d67f824"
+  "date": "2026-09-23",
+  "hash": "a40a60829e7befdb"
  },
  "https://rastu.tech/rfc/2183/": {
-  "date": "2026-09-20",
-  "hash": "2ce2731ca717b948"
+  "date": "2026-09-23",
+  "hash": "6ccae2268738a887"
  },
  "https://rastu.tech/rfc/2231/": {
-  "date": "2026-09-20",
-  "hash": "d2a56355559149c4"
+  "date": "2026-09-23",
+  "hash": "e1a5a4f5ffafd31f"
  },
  "https://rastu.tech/rfc/2369/": {
-  "date": "2026-09-20",
-  "hash": "da51d42d79179581"
+  "date": "2026-09-23",
+  "hash": "6fc65bffb6713a49"
  },
  "https://rastu.tech/rfc/2387/": {
-  "date": "2026-09-20",
-  "hash": "1d10371730cb3356"
+  "date": "2026-09-23",
+  "hash": "9c6abc0a5052fb9f"
  },
  "https://rastu.tech/rfc/2392/": {
-  "date": "2026-09-20",
-  "hash": "e360cc496511ce63"
+  "date": "2026-09-23",
+  "hash": "5f18b8e307184c76"
  },
  "https://rastu.tech/rfc/2449/": {
-  "date": "2026-09-20",
-  "hash": "e57a1367c263068d"
+  "date": "2026-09-23",
+  "hash": "429946b97e75d8ba"
  },
  "https://rastu.tech/rfc/2557/": {
-  "date": "2026-09-20",
-  "hash": "03a1badd1c906d2c"
+  "date": "2026-09-23",
+  "hash": "745474099a1f7442"
  },
  "https://rastu.tech/rfc/2919/": {
-  "date": "2026-09-20",
-  "hash": "035092f216a01eb4"
+  "date": "2026-09-23",
+  "hash": "df6452ce3335d253"
  },
  "https://rastu.tech/rfc/2920/": {
-  "date": "2026-09-20",
-  "hash": "80af606ec8e64297"
+  "date": "2026-09-23",
+  "hash": "66ba9b77ecb6aa0d"
  },
  "https://rastu.tech/rfc/3030/": {
-  "date": "2026-09-20",
-  "hash": "c14a00e3d0cc6636"
+  "date": "2026-09-23",
+  "hash": "9d793efcde49c137"
  },
  "https://rastu.tech/rfc/3207/": {
-  "date": "2026-09-20",
-  "hash": "4527718eb5f405e2"
+  "date": "2026-09-23",
+  "hash": "2bae7390af00c41e"
  },
  "https://rastu.tech/rfc/3461/": {
-  "date": "2026-09-20",
-  "hash": "02d957a21beaa76a"
+  "date": "2026-09-23",
+  "hash": "ebe96918644c6044"
  },
  "https://rastu.tech/rfc/3463/": {
-  "date": "2026-09-20",
-  "hash": "f1894e50f1934112"
+  "date": "2026-09-23",
+  "hash": "cd1b582d4e9f453a"
  },
  "https://rastu.tech/rfc/3464/": {
-  "date": "2026-09-20",
-  "hash": "fa76fa0f7cf7580c"
+  "date": "2026-09-23",
+  "hash": "9530b0978ee4a909"
  },
  "https://rastu.tech/rfc/3676/": {
-  "date": "2026-09-20",
-  "hash": "a32f4cc5f3e3fd9f"
+  "date": "2026-09-23",
+  "hash": "aaf3bc3d4f264e53"
  },
  "https://rastu.tech/rfc/3885/": {
-  "date": "2026-09-20",
-  "hash": "d9c10549eaa8fa50"
+  "date": "2026-09-23",
+  "hash": "94c629e273cc8b00"
  },
  "https://rastu.tech/rfc/3886/": {
-  "date": "2026-09-20",
-  "hash": "c1e91b38b7c3cdf0"
+  "date": "2026-09-23",
+  "hash": "a1bdb1c5622a9cfd"
  },
  "https://rastu.tech/rfc/4289/": {
-  "date": "2026-09-20",
-  "hash": "033b30f5f46d3245"
+  "date": "2026-09-23",
+  "hash": "58be3074a2996589"
  },
  "https://rastu.tech/rfc/4468/": {
-  "date": "2026-09-20",
-  "hash": "fe44afc50e5f37ca"
+  "date": "2026-09-23",
+  "hash": "3588733569ebd9f3"
  },
  "https://rastu.tech/rfc/4865/": {
-  "date": "2026-09-20",
-  "hash": "aed4c8886fde3fea"
+  "date": "2026-09-23",
+  "hash": "130c82cdba690d27"
  },
  "https://rastu.tech/rfc/4954/": {
-  "date": "2026-09-20",
-  "hash": "2c767549c6cabd6c"
+  "date": "2026-09-23",
+  "hash": "f716c5f559b588ec"
  },
  "https://rastu.tech/rfc/5068/": {
-  "date": "2026-09-20",
-  "hash": "f4ee0a5a55409855"
+  "date": "2026-09-23",
+  "hash": "f7c0a5dc8e39eacf"
  },
  "https://rastu.tech/rfc/5147/": {
-  "date": "2026-09-20",
-  "hash": "d6732bc0184a1022"
+  "date": "2026-09-23",
+  "hash": "7b91147db94c4a4d"
  },
  "https://rastu.tech/rfc/5248/": {
-  "date": "2026-09-20",
-  "hash": "57e3e9cf24a9b7a8"
+  "date": "2026-09-23",
+  "hash": "d6756ba8736c5363"
  },
  "https://rastu.tech/rfc/5321/": {
-  "date": "2026-09-20",
-  "hash": "e83cd7a907cc14de"
+  "date": "2026-09-23",
+  "hash": "b277420330caed13"
  },
  "https://rastu.tech/rfc/5322/": {
-  "date": "2026-09-20",
-  "hash": "f2cfda15e0295041"
+  "date": "2026-09-23",
+  "hash": "3c82ffb121db189a"
  },
  "https://rastu.tech/rfc/5536/": {
-  "date": "2026-09-20",
-  "hash": "32aab81e88e6ff53"
+  "date": "2026-09-23",
+  "hash": "06cf642645a2a5a3"
  },
  "https://rastu.tech/rfc/5537/": {
-  "date": "2026-09-20",
-  "hash": "7ce1e4b17a7c41c9"
+  "date": "2026-09-23",
+  "hash": "f7fc663ce54b1f93"
  },
  "https://rastu.tech/rfc/5598/": {
-  "date": "2026-09-20",
-  "hash": "e0077d43575760d5"
+  "date": "2026-09-23",
+  "hash": "eeaf35f65b71f7fc"
  },
  "https://rastu.tech/rfc/5782/": {
-  "date": "2026-09-20",
-  "hash": "5afe7e81a47378fd"
+  "date": "2026-09-23",
+  "hash": "db66406670507836"
  },
  "https://rastu.tech/rfc/5863/": {
-  "date": "2026-09-20",
-  "hash": "a7ff56dd9f16c6ae"
+  "date": "2026-09-23",
+  "hash": "2b6b5bf64b8e5514"
  },
  "https://rastu.tech/rfc/5965/": {
-  "date": "2026-09-20",
-  "hash": "3259af2c01ba90ad"
+  "date": "2026-09-23",
+  "hash": "95dab5ae3174d0d9"
  },
  "https://rastu.tech/rfc/6008/": {
-  "date": "2026-09-20",
-  "hash": "bcaa21713dc5da25"
+  "date": "2026-09-23",
+  "hash": "7bba1417830a1338"
  },
  "https://rastu.tech/rfc/6152/": {
-  "date": "2026-09-20",
-  "hash": "8d2ffed988c962ca"
+  "date": "2026-09-23",
+  "hash": "1e98b9c871a0b674"
  },
  "https://rastu.tech/rfc/6186/": {
-  "date": "2026-09-20",
-  "hash": "07a5af292fe128f1"
+  "date": "2026-09-23",
+  "hash": "6a814ed585bb751a"
  },
  "https://rastu.tech/rfc/6376/": {
-  "date": "2026-09-20",
-  "hash": "666462eeb7a9a3a6"
+  "date": "2026-09-23",
+  "hash": "e62fddc6093b88c4"
  },
  "https://rastu.tech/rfc/6377/": {
-  "date": "2026-09-20",
-  "hash": "374501f1bdb25087"
+  "date": "2026-09-23",
+  "hash": "e65fe177b3a67452"
  },
  "https://rastu.tech/rfc/6409/": {
-  "date": "2026-09-20",
-  "hash": "961a47bb0d018ac6"
+  "date": "2026-09-23",
+  "hash": "0ed203d4daf37908"
  },
  "https://rastu.tech/rfc/6449/": {
-  "date": "2026-09-20",
-  "hash": "ec209bbeac669b56"
+  "date": "2026-09-23",
+  "hash": "af4a1aaf0019e706"
  },
  "https://rastu.tech/rfc/6471/": {
-  "date": "2026-09-20",
-  "hash": "4faf25c49662f902"
+  "date": "2026-09-23",
+  "hash": "8836fff34725ed09"
  },
  "https://rastu.tech/rfc/6522/": {
-  "date": "2026-09-20",
-  "hash": "c3f131b4036c2060"
+  "date": "2026-09-23",
+  "hash": "6bc1cc2b827501c7"
  },
  "https://rastu.tech/rfc/6530/": {
-  "date": "2026-09-20",
-  "hash": "18173b6b462496ab"
+  "date": "2026-09-23",
+  "hash": "6f79315e02019b8a"
  },
  "https://rastu.tech/rfc/6531/": {
-  "date": "2026-09-20",
-  "hash": "2ef0fe72afbea5e2"
+  "date": "2026-09-23",
+  "hash": "66c713de6601ff35"
  },
  "https://rastu.tech/rfc/6532/": {
-  "date": "2026-09-20",
-  "hash": "2bc649fddb1991c3"
+  "date": "2026-09-23",
+  "hash": "c3905496fc340fa2"
  },
  "https://rastu.tech/rfc/6533/": {
-  "date": "2026-09-20",
-  "hash": "fa60458505f0df90"
+  "date": "2026-09-23",
+  "hash": "5afc2609f9268da2"
  },
  "https://rastu.tech/rfc/6541/": {
-  "date": "2026-09-20",
-  "hash": "825defc632900508"
+  "date": "2026-09-23",
+  "hash": "defbb80b60028fc5"
  },
  "https://rastu.tech/rfc/6591/": {
-  "date": "2026-09-20",
-  "hash": "08d042e7a5a880e1"
+  "date": "2026-09-23",
+  "hash": "59858d5ba69543fb"
  },
  "https://rastu.tech/rfc/6647/": {
-  "date": "2026-09-20",
-  "hash": "de640497730c539d"
+  "date": "2026-09-23",
+  "hash": "281bfa5cf0d9a87d"
  },
  "https://rastu.tech/rfc/6650/": {
-  "date": "2026-09-20",
-  "hash": "e3bfdb242b218c81"
+  "date": "2026-09-23",
+  "hash": "70509aca91dd0717"
  },
  "https://rastu.tech/rfc/6657/": {
-  "date": "2026-09-20",
-  "hash": "e1c81d2fd8da9b0c"
+  "date": "2026-09-23",
+  "hash": "ee8b9e26b3f859c0"
  },
  "https://rastu.tech/rfc/6692/": {
-  "date": "2026-09-20",
-  "hash": "f9ae030afebe4307"
+  "date": "2026-09-23",
+  "hash": "e75bacdcffade938"
  },
  "https://rastu.tech/rfc/6710/": {
-  "date": "2026-09-20",
-  "hash": "4c0d02822f414fd1"
+  "date": "2026-09-23",
+  "hash": "042009c61bd02564"
  },
  "https://rastu.tech/rfc/6838/": {
-  "date": "2026-09-20",
-  "hash": "2f564028b6ffb36e"
+  "date": "2026-09-23",
+  "hash": "96af8c2d229084da"
  },
  "https://rastu.tech/rfc/6854/": {
-  "date": "2026-09-20",
-  "hash": "7595c3457036a2c5"
+  "date": "2026-09-23",
+  "hash": "bc3045dfc17a1b35"
  },
  "https://rastu.tech/rfc/6856/": {
-  "date": "2026-09-20",
-  "hash": "2a56766c85c6cf4e"
+  "date": "2026-09-23",
+  "hash": "9b62901f05a2f11c"
  },
  "https://rastu.tech/rfc/6857/": {
-  "date": "2026-09-20",
-  "hash": "cb71288a9cd596c6"
+  "date": "2026-09-23",
+  "hash": "45899c75598d54af"
  },
  "https://rastu.tech/rfc/6858/": {
-  "date": "2026-09-20",
-  "hash": "b89d4707e7b8c327"
+  "date": "2026-09-23",
+  "hash": "7c1330145a0e0af4"
  },
  "https://rastu.tech/rfc/7208/": {
-  "date": "2026-09-20",
-  "hash": "dae8b04bba9b2b0b"
+  "date": "2026-09-23",
+  "hash": "391cb69a9290bcc1"
  },
  "https://rastu.tech/rfc/7372/": {
-  "date": "2026-09-20",
-  "hash": "b76a81a0c8c566ff"
+  "date": "2026-09-23",
+  "hash": "dc72dbb2a2fd9f77"
  },
  "https://rastu.tech/rfc/7504/": {
-  "date": "2026-09-20",
-  "hash": "0db386b410a89908"
+  "date": "2026-09-23",
+  "hash": "c86a014a7aea7b8e"
  },
  "https://rastu.tech/rfc/7505/": {
-  "date": "2026-09-20",
-  "hash": "d7ebe206f7cb559c"
+  "date": "2026-09-23",
+  "hash": "852584c1b1ebc111"
  },
  "https://rastu.tech/rfc/7672/": {
-  "date": "2026-09-20",
-  "hash": "b3562afb93901e3e"
+  "date": "2026-09-23",
+  "hash": "8e7c34f81633db73"
  },
  "https://rastu.tech/rfc/7766/": {
-  "date": "2026-09-20",
-  "hash": "3de35fb079796883"
+  "date": "2026-09-23",
+  "hash": "ea97a82ddf2a209d"
  },
  "https://rastu.tech/rfc/7817/": {
-  "date": "2026-09-20",
-  "hash": "09bd7b4af23273d5"
+  "date": "2026-09-23",
+  "hash": "d5fdde37d52d5af9"
  },
  "https://rastu.tech/rfc/7960/": {
-  "date": "2026-09-20",
-  "hash": "97c90a9ade9f2ad6"
+  "date": "2026-09-23",
+  "hash": "4a03e457e6a1f9da"
  },
  "https://rastu.tech/rfc/8058/": {
-  "date": "2026-09-20",
-  "hash": "23029b5a4833dd2a"
+  "date": "2026-09-23",
+  "hash": "0a5c65d4cf930d7a"
  },
  "https://rastu.tech/rfc/8098/": {
-  "date": "2026-09-20",
-  "hash": "d9380d072f63aefa"
+  "date": "2026-09-23",
+  "hash": "b688eaec7582d79d"
  },
  "https://rastu.tech/rfc/8301/": {
-  "date": "2026-09-20",
-  "hash": "63c8bed530c48606"
+  "date": "2026-09-23",
+  "hash": "9bdb2d6d1ffda489"
  },
  "https://rastu.tech/rfc/8314/": {
-  "date": "2026-09-20",
-  "hash": "4945fa88afe91b2a"
+  "date": "2026-09-23",
+  "hash": "bbb49013649e017c"
  },
  "https://rastu.tech/rfc/8315/": {
-  "date": "2026-09-20",
-  "hash": "dc441e5b9c0f795a"
+  "date": "2026-09-23",
+  "hash": "147feb20207e024b"
  },
  "https://rastu.tech/rfc/8437/": {
-  "date": "2026-09-20",
-  "hash": "4514f2161eb40524"
+  "date": "2026-09-23",
+  "hash": "6c46cca5a8fb7228"
  },
  "https://rastu.tech/rfc/8460/": {
-  "date": "2026-09-20",
-  "hash": "703059492a8df1fe"
+  "date": "2026-09-23",
+  "hash": "102339570fdfb18f"
  },
  "https://rastu.tech/rfc/8461/": {
-  "date": "2026-09-20",
-  "hash": "c5f86f71d6033571"
+  "date": "2026-09-23",
+  "hash": "ff1fb2e2c070b44d"
  },
  "https://rastu.tech/rfc/8463/": {
-  "date": "2026-09-20",
-  "hash": "216484a01b427b49"
+  "date": "2026-09-23",
+  "hash": "c2ac91475a163287"
  },
  "https://rastu.tech/rfc/8553/": {
-  "date": "2026-09-20",
-  "hash": "9b17c77007380c94"
+  "date": "2026-09-23",
+  "hash": "283112c1aedf9710"
  },
  "https://rastu.tech/rfc/8601/": {
-  "date": "2026-09-20",
-  "hash": "6c2b5490df657b29"
+  "date": "2026-09-23",
+  "hash": "0e54accf4c15f9ae"
  },
  "https://rastu.tech/rfc/8616/": {
-  "date": "2026-09-20",
-  "hash": "ef3019bef90e3d44"
+  "date": "2026-09-23",
+  "hash": "caa47ee7b5f02c64"
  },
  "https://rastu.tech/rfc/8617/": {
-  "date": "2026-09-20",
-  "hash": "6411a0280de5364f"
+  "date": "2026-09-23",
+  "hash": "39d4706cf0fa7cd0"
  },
  "https://rastu.tech/rfc/8689/": {
-  "date": "2026-09-20",
-  "hash": "582ae0575fdc4e6e"
+  "date": "2026-09-23",
+  "hash": "4b1ce94d64299036"
  },
  "https://rastu.tech/rfc/8997/": {
-  "date": "2026-09-20",
-  "hash": "7f550515c941862a"
+  "date": "2026-09-23",
+  "hash": "7e6c13b79b9ad5d1"
  },
  "https://rastu.tech/rfc/9051/": {
-  "date": "2026-09-20",
-  "hash": "1e86f10bdb9c91dd"
+  "date": "2026-09-23",
+  "hash": "e15592876a15a35f"
  },
  "https://rastu.tech/rfc/9057/": {
-  "date": "2026-09-20",
-  "hash": "d8e89fe3e542553f"
+  "date": "2026-09-23",
+  "hash": "af313aaaf397ca3a"
  },
  "https://rastu.tech/rfc/9210/": {
-  "date": "2026-09-20",
-  "hash": "e8925396fa9d938d"
+  "date": "2026-09-23",
+  "hash": "07845c91ff66b6a8"
  },
  "https://rastu.tech/rfc/9694/": {
-  "date": "2026-09-20",
-  "hash": "f64f2de39ac4850c"
+  "date": "2026-09-23",
+  "hash": "30564c01280d8d7e"
  },
  "https://rastu.tech/rfc/9755/": {
-  "date": "2026-09-20",
-  "hash": "79b48030dfce3a2b"
+  "date": "2026-09-23",
+  "hash": "5859a1992e13855d"
  },
  "https://rastu.tech/rfc/9989/": {
-  "date": "2026-09-20",
-  "hash": "e45753aa16c62a79"
+  "date": "2026-09-23",
+  "hash": "2f5ac3d8357b0357"
  },
  "https://rastu.tech/rfc/9990/": {
-  "date": "2026-09-20",
-  "hash": "df7f6f3bdfdb612a"
+  "date": "2026-09-23",
+  "hash": "5325e3c40df4a906"
  },
  "https://rastu.tech/rfc/9991/": {
-  "date": "2026-09-20",
-  "hash": "a07f4c56e95f5d4e"
+  "date": "2026-09-23",
+  "hash": "629a08d10df70d1c"
  },
  "https://rastu.tech/smtp/": {
-  "date": "2026-09-20",
-  "hash": "82da15eb8e389c04"
+  "date": "2026-09-23",
+  "hash": "64d8f1544ad3b388"
  },
  "https://rastu.tech/smtp/4-2-2/": {
-  "date": "2026-09-20",
-  "hash": "3056c4649821001a"
+  "date": "2026-09-23",
+  "hash": "11b83f1cd7be674b"
  },
  "https://rastu.tech/smtp/4-4-1/": {
-  "date": "2026-09-20",
-  "hash": "fdd1166fe183b7e7"
+  "date": "2026-09-23",
+  "hash": "4fc10c922ae886f3"
  },
  "https://rastu.tech/smtp/5-1-1/": {
-  "date": "2026-09-20",
-  "hash": "47936068f229733c"
+  "date": "2026-09-23",
+  "hash": "6212f38bab7a79be"
  },
  "https://rastu.tech/smtp/5-2-1/": {
-  "date": "2026-09-20",
-  "hash": "d7cb00f94bd13371"
+  "date": "2026-09-23",
+  "hash": "f2b13a2ae078323c"
  },
  "https://rastu.tech/smtp/5-7-1/": {
-  "date": "2026-09-20",
-  "hash": "7029a39d47d116cc"
+  "date": "2026-09-23",
+  "hash": "7c87d393e1e60be3"
  },
  "https://rastu.tech/smtp/gmail-4-7-28/": {
-  "date": "2026-09-20",
-  "hash": "41353e59783f1554"
+  "date": "2026-09-23",
+  "hash": "e2e44c77d9fd052a"
  },
  "https://rastu.tech/smtp/gmail-5-7-1/": {
-  "date": "2026-09-20",
-  "hash": "f14b00a8009c2bc9"
+  "date": "2026-09-23",
+  "hash": "bf7fb53df3c6b588"
  },
  "https://rastu.tech/smtp/gmail-5-7-26/": {
-  "date": "2026-09-20",
-  "hash": "5338a88410394acf"
+  "date": "2026-09-23",
+  "hash": "9f7a6e4e1125db4c"
  },
  "https://rastu.tech/smtp/microsoft-outlook-4-7-500/": {
-  "date": "2026-09-20",
-  "hash": "3c25aa158b1415f5"
+  "date": "2026-09-23",
+  "hash": "a602d09b29cdbb98"
  },
  "https://rastu.tech/smtp/microsoft-outlook-5-7-606/": {
-  "date": "2026-09-20",
-  "hash": "aab56be1ff056756"
+  "date": "2026-09-23",
+  "hash": "90817dc1ed1bf737"
  },
  "https://rastu.tech/smtp/microsoft-outlook-dy-001/": {
-  "date": "2026-09-20",
-  "hash": "dc3aced8e2b9b47e"
+  "date": "2026-09-23",
+  "hash": "1a9581e92a2a4e6a"
  },
  "https://rastu.tech/smtp/microsoft-outlook-rp-001/": {
-  "date": "2026-09-20",
-  "hash": "f80e91258a66a12e"
+  "date": "2026-09-23",
+  "hash": "bb54d7727b0c36ef"
  },
  "https://rastu.tech/smtp/microsoft-outlook-rp-002/": {
-  "date": "2026-09-20",
-  "hash": "69e069a627d92637"
+  "date": "2026-09-23",
+  "hash": "ff2cd8b0ab9f9a31"
  },
  "https://rastu.tech/smtp/microsoft-outlook-rp-003/": {
-  "date": "2026-09-20",
-  "hash": "9c93f78e611fd65e"
+  "date": "2026-09-23",
+  "hash": "bcf7a89d3b960c76"
  },
  "https://rastu.tech/smtp/microsoft-outlook-s3140/": {
-  "date": "2026-09-20",
-  "hash": "1102fc174332a057"
+  "date": "2026-09-23",
+  "hash": "95e04b58daa7ab8f"
  },
  "https://rastu.tech/smtp/microsoft-outlook-sc-001/": {
-  "date": "2026-09-20",
-  "hash": "55c0ec2797514d5f"
+  "date": "2026-09-23",
+  "hash": "40e4e0a3b8f61e40"
  },
  "https://rastu.tech/smtp/microsoft-outlook-sc-004/": {
-  "date": "2026-09-20",
-  "hash": "3aa39c0ee53bd52b"
+  "date": "2026-09-23",
+  "hash": "1bd77b2f183552d1"
  },
  "https://rastu.tech/smtp/session/": {
-  "date": "2026-09-20",
-  "hash": "07fd0cd7d2a65ae9"
+  "date": "2026-09-23",
+  "hash": "3fd68297616b1321"
  },
  "https://rastu.tech/smtp/spamhaus/": {
-  "date": "2026-09-20",
-  "hash": "5a817d657e870e20"
+  "date": "2026-09-23",
+  "hash": "855c917a5ff6126b"
  },
  "https://rastu.tech/smtp/tls-handshake/": {
-  "date": "2026-09-20",
-  "hash": "832342a76db9925b"
+  "date": "2026-09-23",
+  "hash": "e456892f27f1293d"
  },
  "https://rastu.tech/smtp/yahoo-ts03/": {
-  "date": "2026-09-20",
-  "hash": "31b8658c91fcd397"
+  "date": "2026-09-23",
+  "hash": "a895199a71c6534e"
  },
  "https://rastu.tech/spf/": {
-  "date": "2026-09-20",
-  "hash": "400e0ea3f3b1dd32"
+  "date": "2026-09-23",
+  "hash": "5b6ddc63c7d57e61"
  },
  "https://rastu.tech/tools/": {
-  "date": "2026-09-20",
-  "hash": "d663dabf2d336f90"
+  "date": "2026-09-23",
+  "hash": "5cfd8dbc99dee2c8"
  },
  "https://rastu.tech/warmup/": {
-  "date": "2026-09-20",
-  "hash": "76e81fb77fb81c1a"
+  "date": "2026-09-23",
+  "hash": "2f4520b787dc9c3b"
  }
 }

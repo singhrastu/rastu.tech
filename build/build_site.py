@@ -207,6 +207,14 @@ pre code{background:none;padding:0}
 /* An action, not a note. .callout carries caveats about the document and wears a
    left accent bar; this wears a full border and an arrow, so the two do not read
    as the same kind of thing when they sit a paragraph apart. */
+/* Attribution at the end of the content, set quietly. It is a byline, not a
+   call to action, so it takes the muted ink and a hairline above rather than a
+   box. */
+.byline{margin:3rem 0 0;padding-top:1.1rem;border-top:1px solid var(--line);
+  font-size:.9rem;color:var(--ink-3)}
+.byline a{color:var(--ink-2);text-decoration-color:var(--line)}
+.byline a:hover{color:var(--accent)}
+
 .toolcue{display:flex;gap:.8rem;align-items:baseline;margin:1.6rem 0;
   padding:.9rem 1.15rem;border:1px solid var(--line);border-radius:var(--radius);
   background:var(--surface);font-size:.95rem;color:var(--ink-2);
@@ -1618,6 +1626,21 @@ def page(title, desc, body, path, extra_ld=None, is_home=False, wide=False,
             parts.append("<span>/</span>")
             parts.append(f'<a href="{up}{href}">{e(label)}</a>' if href else e(label))
         crumb_html = '<nav class="crumb" aria-label="Breadcrumb">' + "".join(parts) + "</nav>"
+
+    # Who wrote this, at the end of the content rather than buried in a footer
+    # column. On a reference page the name sat in the last twelve words of the
+    # document, below four columns of links, which is not attribution anybody
+    # reads and not a signal worth much either.
+    #
+    # The home page and /about/ are skipped because they carry the name in their
+    # own copy, and repeating it there would read as keyword stuffing rather than
+    # as a byline.
+    byline = ""
+    if path not in ("index.html", "about/index.html", "404.html"):
+        byline = (
+            '<p class="byline r">Written and maintained by '
+            f'<a href="{up}about/">Rastu Singh</a>, an infrastructure engineer '
+            'working on high-volume email in Tallinn.</p>')
     doc = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -1685,6 +1708,7 @@ addEventListener("DOMContentLoaded",function(){{
 {crumb_html}
 <main id="main">
 {body}
+{byline}
 </main>
 <footer>
   <div class="cols">
