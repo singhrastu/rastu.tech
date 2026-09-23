@@ -1750,21 +1750,31 @@ addEventListener("DOMContentLoaded",function(){{
     def open_offsite_in_a_new_tab(html_src):
         """Send links that leave the site to a new tab, and keep this one.
 
-        A reader following the RFC Editor link from a summary wants the source
+        A reader following a standards link from a summary wants the source
         alongside what they were reading, not instead of it, and somebody who
         clicks through to LinkedIn from the footer has not asked to be finished
-        with the site. Applied here rather than at 906 call sites so a new link
+        with the site. Applied here rather than at 800 call sites so a new link
         gets the behaviour without anybody remembering.
 
-        Three things this has to be careful about: absolute links back to this
-        site are not offsite and must be left alone; an anchor that already
-        declares a rel keeps it, with noopener added rather than substituted;
-        and noopener is not decoration, it stops the opened page reaching back
-        through window.opener to the tab it came from.
+        The whole opening tag is matched, closing bracket included, and rebuilt.
+        The first version of this matched only as far as the href and then wrote
+        its own bracket, so the original one survived as text: every page in the
+        footer read ">GitHub". Rebuilding the tag from its full attribute string
+        is the only version of this that cannot leave a fragment behind.
+
+        Three things it is careful about: absolute links back to this site are
+        not offsite and are left alone; an anchor that already declares a rel
+        keeps it, with noopener added rather than substituted; and noopener is
+        not decoration, it stops the opened page reaching back through
+        window.opener into the tab it came from.
         """
         def fix(m):
-            attrs, href = m.group(1), m.group(2)
-            if href.startswith(SITE) or "//rastu.tech" in href:
+            attrs = m.group(1)
+            href = re.search(r'href="(https?://[^"]+)"', attrs)
+            if not href:
+                return m.group(0)
+            url = href.group(1)
+            if url.startswith(SITE) or "//rastu.tech" in url:
                 return m.group(0)
             if "target=" in attrs:
                 return m.group(0)
@@ -1775,11 +1785,10 @@ addEventListener("DOMContentLoaded",function(){{
                     vals.append("noopener")
                 attrs = attrs.replace(rel.group(0), 'rel="%s"' % " ".join(vals))
             else:
-                attrs += ' rel="noopener"'
-            return '<a%s href="%s" target="_blank">' % (attrs, href)
+                attrs = attrs.rstrip() + ' rel="noopener"'
+            return '<a%s target="_blank">' % attrs
 
-        return re.sub(r'<a((?:(?!href=)[^>])*)href="(https?://[^"]+)"',
-                      fix, html_src)
+        return re.sub(r'<a\b([^>]*)>', fix, html_src)
 
     def wrap_tables(html_src):
         out, at = [], 0
@@ -4328,6 +4337,18 @@ def check_voice():
             # /rfc/ pages are exempt: naming a test address is the subject matter
             # there, not an implementation detail leaking out. Source comments are
             # stripped first, since they are developer rationale and never rendered.
+            # A tag that was rewritten badly leaves its fragments in the
+            # text: a stray bracket, or an attribute rendered as words. That is
+            # what happened when the new-tab rewrite wrote its own closing
+            # bracket without consuming the original, and ">GitHub" shipped in
+            # the footer of all 134 pages. Nothing else in the build looks at
+            # what follows a tag, so nothing caught it.
+            for m in re.finditer(r'<(a|p|div|span|li|td)\b[^>]*>\s*(>|[a-z-]+=")',
+                                 body):
+                bad.append(f"{rel}: a tag was rewritten badly and left a "
+                           f"fragment in the text -> {m.group(0)[:60]!r}")
+                break
+
             # A link that stays on the site keeps the tab. Only offsite links
             # get a new one, and a tool opening in a new tab every time somebody
             # clicked a card would leave a trail of them behind.
