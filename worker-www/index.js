@@ -14,6 +14,10 @@
  */
 export default {
   fetch(request) {
+    // Scheme and host are both corrected in one hop. Turning on Always Use
+    // HTTPS at the zone made http://www take two: once to https on www, then
+    // again to the apex. Each hop loses a little of what a redirect passes on,
+    // and the crawler has to make two requests to learn one thing.
     const url = new URL(request.url);
     url.hostname = "rastu.tech";
     url.protocol = "https:";
