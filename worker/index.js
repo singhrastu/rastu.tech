@@ -224,6 +224,102 @@ export default {
       return json(normalise(await get(parsed.toString(), { bodyWanted: false })));  // status only
     }
 
+    /* Private single-address email verification, for the operator only.
+     *
+     * Unlike the other endpoints this one triggers a live SMTP probe from a
+     * reputation-bearing IP, so it is gated three ways before it will proxy:
+     * a per-address rate limit, a shared passphrase, and a Turnstile challenge.
+     * The origin it reaches (a Cloudflare Tunnel hostname) and the API key it
+     * sends are both Worker secrets — neither the origin IP nor the key is ever
+     * in the page. The page is served from an unguessable path and marked
+     * noindex; this check is the real gate, the path is only defence in depth. */
+    if (url.pathname === '/api/verify') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405);
+
+      if (env.VERIFY_LIMIT) {
+        const who = request.headers.get('cf-connecting-ip') || 'unknown';
+        const { success } = await env.VERIFY_LIMIT.limit({ key: who });
+        if (!success) return json({ error: 'rate limited',
+          reason: 'Too many checks from this address in the last minute.' }, 429);
+      }
+
+      let inBody;
+      try { inBody = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+
+      // Passphrase gate. Constant work regardless of match; a miss is a plain 401.
+      if (!env.MAILSIFT_PASSPHRASE || inBody.passphrase !== env.MAILSIFT_PASSPHRASE) {
+        return json({ error: 'unauthorized' }, 401);
+      }
+
+      // Turnstile, when configured (it is). One check spends one token, so there
+      // is no replay to guard against here.
+      if (env.TURNSTILE_SECRET) {
+        const token = inBody.t || '';
+        if (!token) return json({ error: 'challenge required' }, 403);
+        const fd = new FormData();
+        fd.append('secret', env.TURNSTILE_SECRET);
+        fd.append('response', token);
+        const ip = request.headers.get('cf-connecting-ip');
+        if (ip) fd.append('remoteip', ip);
+        let ok = false;
+        try {
+          const v = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            { method: 'POST', body: fd });
+          ok = v.ok && ((await v.json()).success === true);
+        } catch { ok = false; }
+        if (!ok) return json({ error: 'challenge failed',
+          reason: 'Reload the page and try again.' }, 403);
+      }
+
+      const email = (inBody.email || '').trim();
+      if (!email || email.length > 254 || !email.includes('@')) {
+        return json({ error: 'bad email' }, 400);
+      }
+      if (!env.MAILSIFT_ORIGIN || !env.MAILSIFT_API_KEY) {
+        return json({ error: 'verifier not configured' }, 503);
+      }
+
+      // Proxy to the tunnel origin. The origin hostname and key stay server-side.
+      const ctl = new AbortController();
+      const t = setTimeout(() => ctl.abort(), 50000);
+      try {
+        const r = await fetch(env.MAILSIFT_ORIGIN + '/v1/check', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-api-key': env.MAILSIFT_API_KEY },
+          body: JSON.stringify({ email }),
+          signal: ctl.signal,
+        });
+        const data = await r.json();
+        return json(data, r.status, 0);
+      } catch {
+        return json({ error: 'verifier unreachable' }, 502);
+      } finally {
+        clearTimeout(t);
+      }
+    }
+
+    // Read-only warmup/reputation status for the operator dashboard. Same
+    // passphrase gate as /api/verify; no Turnstile since it sends nothing.
+    if (url.pathname === '/api/warmup') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405);
+      let inBody;
+      try { inBody = await request.json(); } catch { return json({ error: 'bad json' }, 400); }
+      if (!env.MAILSIFT_PASSPHRASE || inBody.passphrase !== env.MAILSIFT_PASSPHRASE) {
+        return json({ error: 'unauthorized' }, 401);
+      }
+      if (!env.MAILSIFT_ORIGIN || !env.MAILSIFT_API_KEY) {
+        return json({ error: 'verifier not configured' }, 503);
+      }
+      try {
+        const r = await fetch(env.MAILSIFT_ORIGIN + '/v1/warmup', {
+          headers: { 'x-api-key': env.MAILSIFT_API_KEY },
+        });
+        return json(await r.json(), r.status, 0);
+      } catch {
+        return json({ error: 'verifier unreachable' }, 502);
+      }
+    }
+
     return env.ASSETS.fetch(request);
   },
 };

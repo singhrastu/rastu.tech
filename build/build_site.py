@@ -4462,12 +4462,27 @@ def check_html():
     """
     nested = re.compile(r"<a\b[^>]*>(?:(?!</a>).)*?<a\b", re.S)
     button = re.compile(r"<button\b[^>]*>(?:(?!</button>).)*?<(?:a|button)\b", re.S)
+    # Private operator pages (copied from private/) are self-contained: their own
+    # <style> defines their classes, they are not part of the site design system,
+    # and the class/icon checks below assume that system. Skip them.
+    priv_dirs = set()
+    _priv = os.path.join(ROOT, "private")
+    if os.path.isdir(_priv):
+        priv_dirs = {d for d in os.listdir(_priv)
+                     if os.path.isdir(os.path.join(_priv, d))}
+
+    def _is_private(path):
+        top = os.path.relpath(path, OUT).split(os.sep)[0]
+        return top in priv_dirs
+
     bad = []
     for root, _, files in os.walk(OUT):
         for n in files:
             if not n.endswith(".html"):
                 continue
             f = os.path.join(root, n)
+            if _is_private(f):
+                continue
             rel = "/" + os.path.relpath(f, OUT)
             body = open(f, encoding="utf8").read()
             if nested.search(body):
@@ -4500,6 +4515,8 @@ def check_html():
             if not n.endswith(".html"):
                 continue
             f = os.path.join(root, n)
+            if _is_private(f):
+                continue
             html_only = re.sub(r"<script[^>]*>.*?</script>", " ",
                                open(f, encoding="utf8").read(), flags=re.S | re.I)
             # Scripts build class attributes by concatenation, so scanning them
@@ -4513,6 +4530,8 @@ def check_html():
     for root2, _, files2 in os.walk(OUT):
         for n2 in files2:
             if not n2.endswith(".html"):
+                continue
+            if _is_private(os.path.join(root2, n2)):
                 continue
             body2 = open(os.path.join(root2, n2), encoding="utf8").read()
             for m2 in re.finditer(r'<link[^>]*rel="[^"]*icon[^"]*"[^>]*>', body2, re.I):
@@ -4696,6 +4715,17 @@ def main():
                  "rfc.js", "rfc-ui.js", "headers-live.js", "bl.js", "bl-ui.js",
                  "warmup.js", "warmup-ui.js", "warmup-pdf.js"):
         shutil.copy2(os.path.join(HERE, "js", name), os.path.join(jsdir, name))
+
+    # Private operator pages, copied verbatim from private/ and deliberately
+    # never added to `urls`, so they are served but never listed in the sitemap
+    # or discoverable from any link. Each page carries its own noindex and is
+    # gated by a passphrase + Turnstile at /api/verify.
+    priv = os.path.join(ROOT, "private")
+    if os.path.isdir(priv):
+        for name in sorted(os.listdir(priv)):
+            src = os.path.join(priv, name)
+            if os.path.isdir(src):
+                shutil.copytree(src, os.path.join(OUT, name), dirs_exist_ok=True)
 
     # The response registry, fetched by the lookup rather than inlined: it is
     # 24 KB gzipped and caches independently of the page.

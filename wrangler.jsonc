@@ -14,8 +14,17 @@
       "name": "DNSBL_LIMIT",
       "namespace_id": "1001",
       "simple": { "limit": 12, "period": 60 }
+    },
+    {
+      // Private email verifier: each check drives a live SMTP probe from a
+      // reputation-bearing IP, so it is rationed harder than the DNS lookups.
+      "name": "VERIFY_LIMIT",
+      "namespace_id": "1002",
+      "simple": { "limit": 8, "period": 60 }
     }
   ],
+  // Fails the deploy if the gitignored private pages are absent (see the script).
+  "build": { "command": "python3 build/check_private.py" },
   "assets": {
     "directory": "./site/",
     "binding": "ASSETS",

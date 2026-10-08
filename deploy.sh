@@ -24,6 +24,14 @@ for i in $(seq 1 24); do
   got=$(curl -s -H 'Cache-Control: no-cache' https://rastu.tech/ | grep -oE "<title>[^<]*" | head -1)
   if [ "$got" = "$want" ]; then
     echo "    live after $((i * 5))s"
+    # The private pages are not in the title check; prove they made it too.
+    for d in private/*/; do
+      code=$(curl -s -o /dev/null -w '%{http_code}' "https://rastu.tech/$(basename "$d")/")
+      [ "$code" = 200 ] || { echo "    a private page answers $code, not 200"; exit 1; }
+    done
+    code=$(curl -s -o /dev/null -w '%{http_code}' -X POST -d '{}' https://rastu.tech/api/verify)
+    [ "$code" = 401 ] || { echo "    /api/verify answers $code, not 401"; exit 1; }
+    echo "    private pages and /api/verify live"
     exit 0
   fi
   sleep 5

@@ -16,3 +16,4 @@ testdata/
 
 # local tooling venv
 .venv-seo/
+verify-*
